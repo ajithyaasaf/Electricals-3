@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SearchBar } from "@/components/common/search-bar";
+import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { Zap, User, Heart, ShoppingCart, Menu, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -17,6 +18,7 @@ export function Header() {
   const { isAuthenticated, user } = useAuth();
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
   const isMobile = useIsMobile();
 
   // Get cart count
@@ -161,17 +163,18 @@ export function Header() {
             )}
 
             {/* Cart */}
-            <Link href="/cart">
-              <Button className="flex items-center space-x-2 bg-electric-blue-600 text-white hover:bg-electric-blue-700 relative">
-                <ShoppingCart className="h-5 w-5" />
-                <span className="text-sm font-medium hidden sm:block">Cart</span>
-                {cartCount > 0 && (
-                  <Badge className="absolute -top-2 -right-2 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center p-0">
-                    {cartCount}
-                  </Badge>
-                )}
-              </Button>
-            </Link>
+            <Button 
+              className="flex items-center space-x-2 bg-electric-blue-600 text-white hover:bg-electric-blue-700 relative"
+              onClick={() => setCartOpen(true)}
+            >
+              <ShoppingCart className="h-5 w-5" />
+              <span className="text-sm font-medium hidden sm:block">Cart</span>
+              {cartCount > 0 && (
+                <Badge className="absolute -top-2 -right-2 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center p-0">
+                  {cartCount}
+                </Badge>
+              )}
+            </Button>
           </div>
         </div>
 
@@ -197,6 +200,9 @@ export function Header() {
           </nav>
         )}
       </div>
+
+      {/* Cart Sidebar */}
+      <CartSidebar open={cartOpen} onOpenChange={setCartOpen} />
     </header>
   );
 }

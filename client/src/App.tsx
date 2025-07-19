@@ -11,7 +11,7 @@ import Products from "@/pages/products";
 import ProductDetail from "@/pages/product-detail";
 import Services from "@/pages/services";
 import ServiceDetail from "@/pages/service-detail";
-import Cart from "@/pages/cart";
+
 import Checkout from "@/pages/checkout";
 import Account from "@/pages/account";
 import Admin from "@/pages/admin";
@@ -36,7 +36,7 @@ function Router() {
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/services" component={Services} />
           <Route path="/services/:slug" component={ServiceDetail} />
-          <Route path="/cart" component={Cart} />
+
           <Route path="/checkout" component={Checkout} />
           <Route path="/account" component={Account} />
           <Route path="/admin" component={Admin} />
