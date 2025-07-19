@@ -4,12 +4,12 @@ import { MapPin } from "lucide-react";
 
 export function HeroSection() {
   return (
-    <section className="relative min-h-[500px] bg-white">
-      <div className="max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 h-full">
+    <section className="relative min-h-[500px] bg-white py-8">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
           
           {/* Left Main Content - Store Image with Overlay */}
-          <div className="lg:col-span-2 relative min-h-[500px]">
+          <div className="lg:col-span-2 relative min-h-[450px] rounded-lg overflow-hidden">
             {/* Background Image */}
             <div 
               className="absolute inset-0 bg-cover bg-center"
@@ -81,10 +81,10 @@ export function HeroSection() {
           </div>
           
           {/* Right Content - Product Cards */}
-          <div className="lg:col-span-1 flex flex-col">
+          <div className="lg:col-span-1 flex flex-col gap-4">
             
             {/* Top Card - Tropical Tile Collection */}
-            <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white p-6 flex-1 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-slate-800 to-slate-900 text-white p-6 flex-1 relative overflow-hidden rounded-lg">
               {/* Background Pattern */}
               <div 
                 className="absolute right-0 top-0 w-full h-full bg-cover bg-center opacity-30"
@@ -114,7 +114,7 @@ export function HeroSection() {
             </div>
             
             {/* Bottom Card - Material Samples */}
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 flex-1 relative overflow-hidden">
+            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-6 flex-1 relative overflow-hidden rounded-lg">
               {/* Background Texture */}
               <div 
                 className="absolute right-0 top-0 w-full h-full bg-cover bg-center opacity-40"
