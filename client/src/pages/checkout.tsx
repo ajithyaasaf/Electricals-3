@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { ArrowLeft, CreditCard, Truck, Lock } from "lucide-react";
+import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle } from "lucide-react";
 
 interface CheckoutFormData {
   shippingAddress: {
@@ -70,6 +70,48 @@ export default function Checkout() {
   });
 
   const [currentStep, setCurrentStep] = useState(1);
+  const [orderComplete, setOrderComplete] = useState(false);
+
+  // Fetch cart items
+  const { data: cartItems = [], isLoading: cartLoading } = useQuery({
+    queryKey: ["/api/cart"],
+    enabled: isAuthenticated,
+  });
+
+  // Create order mutation
+  const createOrderMutation = useMutation({
+    mutationFn: async (orderData: any) => {
+      const response = await apiRequest("POST", "/api/orders", orderData);
+      return response.json();
+    },
+    onSuccess: (order) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+      toast({
+        title: "Order placed successfully!",
+        description: `Your order #${order.orderNumber} has been confirmed.`,
+      });
+      setOrderComplete(true);
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to place order. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -85,64 +127,9 @@ export default function Checkout() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  // Fetch cart items
-  const { data: cartItems = [], isLoading: cartLoading } = useQuery({
-    queryKey: ["/api/cart"],
-    enabled: isAuthenticated,
-  });
-
-  const placeOrderMutation = useMutation({
-    mutationFn: async () => {
-      const orderData = {
-        shippingAddress: formData.shippingAddress,
-        billingAddress: formData.sameAsShipping ? formData.shippingAddress : formData.billingAddress,
-        paymentMethod: formData.paymentMethod,
-        totalAmount: total.toFixed(2),
-        items: cartItems.map((item: any) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.product.price,
-        })),
-      };
-
-      const response = await apiRequest("POST", "/api/orders", orderData);
-      return response.json();
-    },
-    onSuccess: (order) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      
-      toast({
-        title: "Order placed successfully!",
-        description: `Your order #${order.orderNumber} has been confirmed.`,
-      });
-      
-      // Redirect to account page to view order
-      window.location.href = "/account?tab=orders";
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Please sign in",
-          description: "You need to sign in to place an order.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 1000);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to place order. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
   if (authLoading || !isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <Skeleton className="w-full h-96" />
@@ -154,12 +141,12 @@ export default function Checkout() {
   // Redirect if cart is empty
   if (!cartLoading && cartItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Cart is Empty</h1>
-          <p className="text-gray-600 mb-6">Add some items to your cart before proceeding to checkout.</p>
-          <Button asChild>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Cart is Empty</h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">Add some items to your cart before proceeding to checkout.</p>
+          <Button asChild className="bg-copper-600 hover:bg-copper-700">
             <Link href="/products">Browse Products</Link>
           </Button>
         </div>
@@ -197,10 +184,10 @@ export default function Checkout() {
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1: // Shipping
-        const shipping = formData.shippingAddress;
-        return !!(shipping.firstName && shipping.lastName && shipping.email && 
-                 shipping.phone && shipping.street && shipping.city && 
-                 shipping.state && shipping.zipCode);
+        const shippingAddr = formData.shippingAddress;
+        return !!(shippingAddr.firstName && shippingAddr.lastName && shippingAddr.email && 
+                 shippingAddr.phone && shippingAddr.street && shippingAddr.city && 
+                 shippingAddr.state && shippingAddr.zipCode);
       case 2: // Payment
         return !!formData.paymentMethod;
       default:
@@ -222,65 +209,89 @@ export default function Checkout() {
 
   const handlePlaceOrder = () => {
     if (validateStep(1) && validateStep(2)) {
-      placeOrderMutation.mutate();
+      const orderData = {
+        total: total.toFixed(2),
+        subtotal: subtotal.toFixed(2),
+        tax: tax.toFixed(2),
+        shippingCost: shipping.toFixed(2),
+        shippingAddress: formData.shippingAddress,
+        billingAddress: formData.sameAsShipping ? formData.shippingAddress : formData.billingAddress,
+        paymentMethod: formData.paymentMethod,
+        status: "pending",
+        items: cartItems.map((item: any) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: parseFloat(item.product?.price || "0"),
+        })),
+      };
+      
+      createOrderMutation.mutate(orderData);
     } else {
       toast({
         title: "Incomplete information",
-        description: "Please complete all checkout steps.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
     }
   };
 
-  if (cartLoading) {
+  // Order success screen
+  if (orderComplete) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <Skeleton className="w-full h-96" />
+        <div className="max-w-4xl mx-auto px-4 py-16">
+          <div className="text-center">
+            <CheckCircle className="mx-auto h-16 w-16 text-green-600 mb-4" />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Order Confirmed!</h1>
+            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+              Thank you for your purchase. We'll send you a confirmation email shortly.
+            </p>
+            <div className="space-x-4">
+              <Button asChild className="bg-copper-600 hover:bg-copper-700">
+                <Link href="/account?tab=orders">View Orders</Link>
+              </Button>
+              <Button variant="outline" asChild>
+                <Link href="/products">Continue Shopping</Link>
+              </Button>
+            </div>
+          </div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-gray-600 mb-6">
-          <Link href="/" className="hover:text-gray-900">Home</Link>
-          {" / "}
-          <Link href="/cart" className="hover:text-gray-900">Cart</Link>
-          {" / "}
-          <span className="text-gray-900">Checkout</span>
-        </nav>
-
-        {/* Page Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
-          <Link href="/cart">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Cart
-            </Button>
-          </Link>
+        <div className="flex items-center mb-8">
+          <Button variant="ghost" asChild className="mr-4">
+            <Link href="/cart">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Checkout</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Checkout Form */}
+          {/* Main checkout form */}
           <div className="lg:col-span-2">
             <Tabs value={currentStep.toString()} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="1" disabled={currentStep < 1}>
-                  1. Shipping
+                  <Truck className="w-4 h-4 mr-2" />
+                  Shipping
                 </TabsTrigger>
                 <TabsTrigger value="2" disabled={currentStep < 2}>
-                  2. Payment
+                  <CreditCard className="w-4 h-4 mr-2" />
+                  Payment
                 </TabsTrigger>
                 <TabsTrigger value="3" disabled={currentStep < 3}>
-                  3. Review
+                  <Lock className="w-4 h-4 mr-2" />
+                  Review
                 </TabsTrigger>
               </TabsList>
 
@@ -288,10 +299,7 @@ export default function Checkout() {
               <TabsContent value="1" className="mt-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <Truck className="w-5 h-5 mr-2" />
-                      Shipping Information
-                    </CardTitle>
+                    <CardTitle>Shipping Information</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -371,7 +379,6 @@ export default function Checkout() {
                             <SelectItem value="NY">New York</SelectItem>
                             <SelectItem value="TX">Texas</SelectItem>
                             <SelectItem value="FL">Florida</SelectItem>
-                            {/* Add more states as needed */}
                           </SelectContent>
                         </Select>
                       </div>
@@ -399,13 +406,9 @@ export default function Checkout() {
               <TabsContent value="2" className="mt-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center">
-                      <CreditCard className="w-5 h-5 mr-2" />
-                      Payment Information
-                    </CardTitle>
+                    <CardTitle>Payment Information</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Payment Method Selection */}
                     <div>
                       <Label>Payment Method</Label>
                       <div className="mt-2 space-y-2">
@@ -425,20 +428,19 @@ export default function Checkout() {
                         <div className="flex items-center space-x-2">
                           <input
                             type="radio"
-                            id="paypal"
+                            id="razorpay"
                             name="paymentMethod"
-                            value="paypal"
-                            checked={formData.paymentMethod === "paypal"}
+                            value="razorpay"
+                            checked={formData.paymentMethod === "razorpay"}
                             onChange={(e) => updateRootField("paymentMethod", e.target.value)}
                           />
-                          <label htmlFor="paypal" className="text-sm font-medium">
-                            PayPal
+                          <label htmlFor="razorpay" className="text-sm font-medium">
+                            Razorpay (UPI, Cards, NetBanking)
                           </label>
                         </div>
                       </div>
                     </div>
 
-                    {/* Billing Address */}
                     <div>
                       <div className="flex items-center space-x-2 mb-4">
                         <Checkbox
@@ -448,36 +450,14 @@ export default function Checkout() {
                         />
                         <Label htmlFor="sameAsShipping">Billing address same as shipping</Label>
                       </div>
-
-                      {!formData.sameAsShipping && (
-                        <div className="space-y-4 p-4 border rounded-lg">
-                          <h3 className="font-medium">Billing Address</h3>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="billingFirstName">First Name *</Label>
-                              <Input
-                                id="billingFirstName"
-                                value={formData.billingAddress.firstName}
-                                onChange={(e) => updateFormData("billingAddress", "firstName", e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="billingLastName">Last Name *</Label>
-                              <Input
-                                id="billingLastName"
-                                value={formData.billingAddress.lastName}
-                                onChange={(e) => updateFormData("billingAddress", "lastName", e.target.value)}
-                              />
-                            </div>
-                          </div>
-                          {/* Add other billing address fields as needed */}
-                        </div>
-                      )}
                     </div>
 
                     <div className="flex justify-between">
-                      <Button variant="outline" onClick={() => setCurrentStep(1)}>
-                        Back to Shipping
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setCurrentStep(1)}
+                      >
+                        Back
                       </Button>
                       <Button onClick={handleNext} className="bg-copper-600 hover:bg-copper-700">
                         Review Order
@@ -494,59 +474,37 @@ export default function Checkout() {
                     <CardTitle>Review Your Order</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Order Items */}
                     <div>
-                      <h3 className="font-medium mb-4">Order Items</h3>
-                      <div className="space-y-4">
-                        {cartItems.map((item: any) => (
-                          <div key={item.id} className="flex items-center space-x-4 py-2 border-b">
-                            <img
-                              src={item.product.imageUrls?.[0] || ""}
-                              alt={item.product.name}
-                              className="w-16 h-16 object-cover rounded"
-                            />
-                            <div className="flex-1">
-                              <p className="font-medium">{item.product.name}</p>
-                              <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                            </div>
-                            <p className="font-medium">
-                              ${(parseFloat(item.product.price) * item.quantity).toFixed(2)}
-                            </p>
-                          </div>
-                        ))}
+                      <h3 className="font-medium mb-2">Shipping Address</h3>
+                      <div className="text-sm text-gray-600 dark:text-gray-300">
+                        <p>{formData.shippingAddress.firstName} {formData.shippingAddress.lastName}</p>
+                        <p>{formData.shippingAddress.street}</p>
+                        <p>{formData.shippingAddress.city}, {formData.shippingAddress.state} {formData.shippingAddress.zipCode}</p>
+                        <p>{formData.shippingAddress.phone}</p>
+                        <p>{formData.shippingAddress.email}</p>
                       </div>
                     </div>
 
-                    {/* Shipping & Billing Info */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h3 className="font-medium mb-2">Shipping Address</h3>
-                        <div className="text-sm text-gray-600">
-                          <p>{formData.shippingAddress.firstName} {formData.shippingAddress.lastName}</p>
-                          <p>{formData.shippingAddress.street}</p>
-                          <p>{formData.shippingAddress.city}, {formData.shippingAddress.state} {formData.shippingAddress.zipCode}</p>
-                          <p>{formData.shippingAddress.phone}</p>
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="font-medium mb-2">Payment Method</h3>
-                        <p className="text-sm text-gray-600 capitalize">
-                          {formData.paymentMethod.replace("-", " ")}
-                        </p>
-                      </div>
+                    <div>
+                      <h3 className="font-medium mb-2">Payment Method</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-300">
+                        {formData.paymentMethod === "credit-card" ? "Credit/Debit Card" : "Razorpay"}
+                      </p>
                     </div>
 
                     <div className="flex justify-between">
-                      <Button variant="outline" onClick={() => setCurrentStep(2)}>
-                        Back to Payment
-                      </Button>
-                      <Button
-                        onClick={handlePlaceOrder}
-                        disabled={placeOrderMutation.isPending}
-                        className="bg-electric-blue-600 hover:bg-electric-blue-700"
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setCurrentStep(2)}
                       >
-                        <Lock className="w-4 h-4 mr-2" />
-                        {placeOrderMutation.isPending ? "Processing..." : "Place Order"}
+                        Back
+                      </Button>
+                      <Button 
+                        onClick={handlePlaceOrder}
+                        disabled={createOrderMutation.isPending}
+                        className="bg-green-600 hover:bg-green-700"
+                      >
+                        {createOrderMutation.isPending ? "Processing..." : `Place Order ($${total.toFixed(2)})`}
                       </Button>
                     </div>
                   </CardContent>
@@ -557,52 +515,55 @@ export default function Checkout() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-24">
+            <Card className="sticky top-8">
               <CardHeader>
                 <CardTitle>Order Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
-                </div>
-                
-                <div className="flex justify-between text-gray-600">
-                  <span>Shipping</span>
-                  <span>
-                    {shipping === 0 ? (
-                      <span className="text-green-600 font-medium">FREE</span>
-                    ) : (
-                      `$${shipping.toFixed(2)}`
-                    )}
-                  </span>
-                </div>
-                
-                <div className="flex justify-between text-gray-600">
-                  <span>Tax</span>
-                  <span>${tax.toFixed(2)}</span>
+                <div className="space-y-2">
+                  {cartItems.map((item: any) => (
+                    <div key={item.id} className="flex justify-between text-sm">
+                      <span>{item.product?.name} × {item.quantity}</span>
+                      <span>${(parseFloat(item.product?.price || "0") * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
                 </div>
                 
                 <Separator />
                 
-                <div className="flex justify-between text-lg font-semibold">
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Shipping</span>
+                    <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Tax</span>
+                    <span>${tax.toFixed(2)}</span>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="flex justify-between font-medium">
                   <span>Total</span>
                   <span>${total.toFixed(2)}</span>
                 </div>
-
-                {/* Security Notice */}
-                <div className="mt-6 p-3 bg-green-50 rounded-lg text-center">
-                  <Lock className="w-5 h-5 mx-auto text-green-600 mb-2" />
-                  <p className="text-sm text-green-800">
-                    Your payment information is secure and encrypted
-                  </p>
-                </div>
+                
+                {subtotal < 100 && (
+                  <div className="text-xs text-gray-500 mt-2">
+                    Add ${(100 - subtotal).toFixed(2)} more for free shipping!
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
-
+      
       <Footer />
     </div>
   );

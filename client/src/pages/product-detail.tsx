@@ -13,8 +13,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Star, Heart, ShoppingCart, Minus, Plus, Shield, Truck, RotateCcw } from "lucide-react";
+import { Star, Heart, ShoppingCart, Minus, Plus, Shield, Truck, RotateCcw, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
+import { ReviewList } from "@/components/reviews/review-list";
+import { ReviewForm } from "@/components/reviews/review-form";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();

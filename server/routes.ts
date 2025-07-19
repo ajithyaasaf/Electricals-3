@@ -246,6 +246,214 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
+      // Admin can see all orders, regular users only their own
+      const orders = await storage.getOrders(user?.isAdmin ? undefined : userId);
+      res.json(orders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/orders/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const { id } = req.params;
+      const order = await storage.getOrderById(parseInt(id));
+      
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      
+      res.json(order);
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  app.post("/api/orders", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const orderData = insertOrderSchema.parse({
+        ...req.body,
+        userId,
+        orderNumber: `CB-${Date.now()}`, // Generate order number
+      });
+      
+      const order = await storage.createOrder(orderData);
+      
+      // Clear cart after order creation
+      await storage.clearCart(userId);
+      
+      res.json(order);
+    } catch (error) {
+      console.error("Error creating order:", error);
+      res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  app.put("/api/orders/:id/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      const order = await storage.updateOrderStatus(parseInt(id), status);
+      res.json(order);
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
+    }
+  });
+
+  // Service booking routes
+  app.get("/api/bookings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      // Admin can see all bookings, regular users only their own
+      const bookings = await storage.getServiceBookings(user?.isAdmin ? undefined : userId);
+      res.json(bookings);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+      res.status(500).json({ message: "Failed to fetch bookings" });
+    }
+  });
+
+  app.post("/api/bookings", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const bookingData = insertServiceBookingSchema.parse({
+        ...req.body,
+        userId,
+      });
+      
+      const booking = await storage.createServiceBooking(bookingData);
+      res.json(booking);
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      res.status(500).json({ message: "Failed to create booking" });
+    }
+  });
+
+  app.put("/api/bookings/:id/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      const booking = await storage.updateServiceBookingStatus(parseInt(id), status);
+      res.json(booking);
+    } catch (error) {
+      console.error("Error updating booking status:", error);
+      res.status(500).json({ message: "Failed to update booking status" });
+    }
+  });
+
+  // Review routes
+  app.get("/api/reviews", async (req, res) => {
+    try {
+      const { productId, serviceId } = req.query;
+      const reviews = await storage.getReviews(
+        productId ? parseInt(productId as string) : undefined,
+        serviceId ? parseInt(serviceId as string) : undefined
+      );
+      res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+
+  app.post("/api/reviews", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const reviewData = insertReviewSchema.parse({
+        ...req.body,
+        userId,
+      });
+      
+      const review = await storage.createReview(reviewData);
+      res.json(review);
+    } catch (error) {
+      console.error("Error creating review:", error);
+      res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+
+  // Wishlist routes
+  app.get("/api/wishlist", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const wishlist = await storage.getWishlist(userId);
+      res.json(wishlist);
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+      res.status(500).json({ message: "Failed to fetch wishlist" });
+    }
+  });
+
+  app.post("/api/wishlist", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const wishlistData = insertWishlistSchema.parse({
+        ...req.body,
+        userId,
+      });
+      
+      const wishlistItem = await storage.addToWishlist(wishlistData);
+      res.json(wishlistItem);
+    } catch (error) {
+      console.error("Error adding to wishlist:", error);
+      res.status(500).json({ message: "Failed to add to wishlist" });
+    }
+  });
+
+  app.delete("/api/wishlist/:productId", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { productId } = req.params;
+      
+      await storage.removeFromWishlist(userId, parseInt(productId));
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error removing from wishlist:", error);
+      res.status(500).json({ message: "Failed to remove from wishlist" });
+    }
+  });
+
+  // Placeholder image route for development
+  app.get("/api/placeholder/:width/:height", (req, res) => {
+    const { width, height } = req.params;
+    const svg = `
+      <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100%" height="100%" fill="#f0f0f0"/>
+        <text x="50%" y="50%" text-anchor="middle" dy="0.3em" fill="#999" font-family="Arial, sans-serif" font-size="14">${width}×${height}</text>
+      </svg>
+    `;
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.send(svg);
+  });
+
+  // Order routes
+  app.get("/api/orders", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
       // Admin can see all orders, users can only see their own
       const orders = await storage.getOrders(user?.isAdmin ? undefined : userId);
       res.json(orders);
