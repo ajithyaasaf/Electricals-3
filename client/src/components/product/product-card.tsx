@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Link } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { LazyImage } from "@/components/ui/lazy-image";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
@@ -15,7 +16,7 @@ interface ProductCardProps {
   showCategory?: boolean;
 }
 
-export function ProductCard({ product, showCategory = false }: ProductCardProps) {
+export const ProductCard = memo(function ProductCard({ product, showCategory = false }: ProductCardProps) {
   const { isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -135,10 +136,11 @@ export function ProductCard({ product, showCategory = false }: ProductCardProps)
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 group">
       <Link href={`/products/${product.slug}`}>
         <div className="relative overflow-hidden rounded-t-lg">
-          <img
+          <LazyImage
             src={imageUrl}
             alt={product.name}
             className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+            fallback="/api/placeholder/400/300"
           />
           
           {/* Badges */}
@@ -222,4 +224,4 @@ export function ProductCard({ product, showCategory = false }: ProductCardProps)
       </Link>
     </div>
   );
-}
+});

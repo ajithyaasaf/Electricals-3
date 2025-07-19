@@ -142,3 +142,22 @@ The application uses a comprehensive schema with the following main entities:
 - **Build**: Separate client/server build processes with shared schema
 
 The application is designed for easy deployment on Replit with automatic environment setup and integrated authentication, while maintaining the flexibility to deploy on other platforms with minimal configuration changes.
+
+## Recent Performance Improvements - July 19, 2025
+
+### Site Speed Optimizations Implemented
+- **Query Client Optimization**: Updated TanStack Query cache settings with 5-minute stale time and 10-minute garbage collection
+- **Lazy Loading Images**: Created LazyImage component with intersection observer for efficient image loading
+- **Debounced Search**: Implemented 300ms search debouncing to reduce API calls in products page
+- **Skeleton Loading**: Added optimized skeleton components for better perceived performance
+- **Memoization**: Added React.memo to ProductCard component to prevent unnecessary re-renders
+- **Error Boundaries**: Implemented error boundary for graceful error handling
+- **Performance Monitoring**: Added Web Vitals tracking and resource preloading
+- **CSS Optimizations**: Added critical CSS and performance-focused styles
+- **Session Configuration**: Fixed session secret configuration for development environment
+
+### Component Architecture Improvements
+- **Performance Utilities**: Created comprehensive performance library with caching, optimization functions
+- **Loading States**: Unified skeleton loading across all pages with ProductGridSkeleton and HeroSkeleton
+- **Search Optimization**: Replaced basic input with optimized SearchInput component with debouncing
+- **Image Optimization**: Added automatic image URL optimization for Unsplash images with proper sizing

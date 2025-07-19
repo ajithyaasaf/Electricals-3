@@ -1,20 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useSearch } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { ProductGrid } from "@/components/product/product-grid";
+import { ProductGridSkeleton } from "@/components/common/skeleton-loader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Filter, X } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useDebounce } from "@/hooks/use-debounce";
+import { SearchInput } from "@/components/common/search-input";
 
 export default function Products() {
   const searchParams = useSearch();
@@ -37,6 +39,9 @@ export default function Products() {
     sortBy: "newest" as "name" | "price" | "rating" | "newest",
     sortOrder: "desc" as "asc" | "desc"
   });
+
+  // Debounce search to reduce API calls
+  const debouncedSearch = useDebounce(filters.search, 300);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -47,13 +52,17 @@ export default function Products() {
     queryKey: ["/api/categories"],
   });
 
+  // Memoize query parameters to prevent unnecessary re-renders
+  const queryParams = useMemo(() => ({
+    ...filters,
+    search: debouncedSearch, // Use debounced search
+    limit: itemsPerPage,
+    offset: (currentPage - 1) * itemsPerPage
+  }), [filters, debouncedSearch, currentPage, itemsPerPage]);
+
   // Fetch products
   const { data: productsData, isLoading } = useQuery({
-    queryKey: ["/api/products", {
-      ...filters,
-      limit: itemsPerPage,
-      offset: (currentPage - 1) * itemsPerPage
-    }],
+    queryKey: ["/api/products", queryParams],
   });
 
   // Update URL when filters change
@@ -221,10 +230,10 @@ export default function Products() {
 
                 {/* Search */}
                 <div className="flex-1 max-w-md">
-                  <Input
+                  <SearchInput
                     placeholder="Search products..."
                     value={filters.search}
-                    onChange={(e) => updateFilter("search", e.target.value)}
+                    onChange={(value) => updateFilter("search", value)}
                   />
                 </div>
 
@@ -297,16 +306,7 @@ export default function Products() {
 
             {/* Products Grid */}
             {isLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className="bg-white rounded-lg p-4">
-                    <Skeleton className="w-full h-48 mb-4" />
-                    <Skeleton className="w-3/4 h-4 mb-2" />
-                    <Skeleton className="w-1/2 h-4 mb-4" />
-                    <Skeleton className="w-full h-10" />
-                  </div>
-                ))}
-              </div>
+              <ProductGridSkeleton count={12} />
             ) : (
               <ProductGrid products={productsData?.products || []} showCategory />
             )}

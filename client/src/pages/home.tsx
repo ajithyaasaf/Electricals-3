@@ -5,11 +5,13 @@ import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/common/hero-section";
 import { Testimonials } from "@/components/common/testimonials";
 import { ProductGrid } from "@/components/product/product-grid";
+import { ProductGridSkeleton, HeroSkeleton } from "@/components/common/skeleton-loader";
 import { ServiceCard } from "@/components/service/service-card";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { LazyImage } from "@/components/ui/lazy-image";
 import { Zap, Wrench, ClipboardCheck, Tag, Clock, Shield, Phone } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
+import { getOptimizedImageUrl } from "@/lib/performance";
 
 export default function Home() {
   // Fetch featured products
@@ -26,37 +28,37 @@ export default function Home() {
     {
       name: "Circuit Breakers",
       slug: "circuit-breakers",
-      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
       color: "from-copper-100 to-copper-200"
     },
     {
       name: "Wiring & Cables", 
       slug: "wiring-cables",
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
       color: "from-electric-blue-100 to-electric-blue-200"
     },
     {
       name: "Electrical Tools",
       slug: "electrical-tools", 
-      image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
       color: "from-orange-100 to-orange-200"
     },
     {
       name: "Panels & Boxes",
       slug: "panels-boxes",
-      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100", 
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100), 
       color: "from-gray-100 to-gray-200"
     },
     {
       name: "Outlets & Switches",
       slug: "outlets-switches",
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
       color: "from-green-100 to-green-200"
     },
     {
       name: "Professional Services",
       slug: "services",
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
       color: "from-purple-100 to-purple-200"
     }
   ];
@@ -80,10 +82,11 @@ export default function Home() {
                 className="text-center group cursor-pointer"
               >
                 <div className={`w-20 h-20 mx-auto mb-3 bg-gradient-to-r ${category.color} rounded-full flex items-center justify-center group-hover:shadow-md transition-all duration-300`}>
-                  <img
+                  <LazyImage
                     src={category.image}
                     alt={category.name}
                     className="w-12 h-12 rounded-full object-cover"
+                    fallback="/api/placeholder/48/48"
                   />
                 </div>
                 <p className="text-sm font-medium text-gray-900 group-hover:text-copper-600 transition-colors">
@@ -106,16 +109,7 @@ export default function Home() {
           </div>
           
           {productsLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
-                <div key={i} className="bg-white rounded-lg p-4">
-                  <Skeleton className="w-full h-48 mb-4" />
-                  <Skeleton className="w-3/4 h-4 mb-2" />
-                  <Skeleton className="w-1/2 h-4 mb-4" />
-                  <Skeleton className="w-full h-10" />
-                </div>
-              ))}
-            </div>
+            <ProductGridSkeleton count={8} />
           ) : (
             <ProductGrid products={productsData?.products || []} />
           )}
