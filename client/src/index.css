@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(20, 60%, 35%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(207, 90%, 54%);
+  --accent-foreground: hsl(211, 100%, 99%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+  
+  /* CopperBear brand colors */
+  --copper-50: hsl(24, 56%, 97%);
+  --copper-100: hsl(25, 55%, 94%);
+  --copper-200: hsl(24, 54%, 87%);
+  --copper-300: hsl(24, 52%, 75%);
+  --copper-400: hsl(24, 49%, 58%);
+  --copper-500: hsl(20, 60%, 35%);
+  --copper-600: hsl(20, 65%, 30%);
+  --copper-700: hsl(20, 70%, 25%);
+  --copper-800: hsl(20, 75%, 20%);
+  --copper-900: hsl(20, 80%, 15%);
+  
+  /* Electric blue accents */
+  --electric-blue-50: hsl(210, 100%, 97%);
+  --electric-blue-100: hsl(210, 100%, 94%);
+  --electric-blue-200: hsl(210, 100%, 87%);
+  --electric-blue-300: hsl(210, 100%, 78%);
+  --electric-blue-400: hsl(210, 100%, 68%);
+  --electric-blue-500: hsl(207, 90%, 54%);
+  --electric-blue-600: hsl(210, 90%, 48%);
+  --electric-blue-700: hsl(213, 90%, 42%);
+  --electric-blue-800: hsl(216, 90%, 36%);
+  --electric-blue-900: hsl(219, 90%, 30%);
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(20, 60%, 35%);
+  --primary-foreground: hsl(0, 0%, 98%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(207, 90%, 54%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-copper-50 { color: var(--copper-50); }
+  .text-copper-100 { color: var(--copper-100); }
+  .text-copper-200 { color: var(--copper-200); }
+  .text-copper-300 { color: var(--copper-300); }
+  .text-copper-400 { color: var(--copper-400); }
+  .text-copper-500 { color: var(--copper-500); }
+  .text-copper-600 { color: var(--copper-600); }
+  .text-copper-700 { color: var(--copper-700); }
+  .text-copper-800 { color: var(--copper-800); }
+  .text-copper-900 { color: var(--copper-900); }
+  
+  .bg-copper-50 { background-color: var(--copper-50); }
+  .bg-copper-100 { background-color: var(--copper-100); }
+  .bg-copper-200 { background-color: var(--copper-200); }
+  .bg-copper-300 { background-color: var(--copper-300); }
+  .bg-copper-400 { background-color: var(--copper-400); }
+  .bg-copper-500 { background-color: var(--copper-500); }
+  .bg-copper-600 { background-color: var(--copper-600); }
+  .bg-copper-700 { background-color: var(--copper-700); }
+  .bg-copper-800 { background-color: var(--copper-800); }
+  .bg-copper-900 { background-color: var(--copper-900); }
+  
+  .text-electric-blue-50 { color: var(--electric-blue-50); }
+  .text-electric-blue-100 { color: var(--electric-blue-100); }
+  .text-electric-blue-200 { color: var(--electric-blue-200); }
+  .text-electric-blue-300 { color: var(--electric-blue-300); }
+  .text-electric-blue-400 { color: var(--electric-blue-400); }
+  .text-electric-blue-500 { color: var(--electric-blue-500); }
+  .text-electric-blue-600 { color: var(--electric-blue-600); }
+  .text-electric-blue-700 { color: var(--electric-blue-700); }
+  .text-electric-blue-800 { color: var(--electric-blue-800); }
+  .text-electric-blue-900 { color: var(--electric-blue-900); }
+  
+  .bg-electric-blue-50 { background-color: var(--electric-blue-50); }
+  .bg-electric-blue-100 { background-color: var(--electric-blue-100); }
+  .bg-electric-blue-200 { background-color: var(--electric-blue-200); }
+  .bg-electric-blue-300 { background-color: var(--electric-blue-300); }
+  .bg-electric-blue-400 { background-color: var(--electric-blue-400); }
+  .bg-electric-blue-500 { background-color: var(--electric-blue-500); }
+  .bg-electric-blue-600 { background-color: var(--electric-blue-600); }
+  .bg-electric-blue-700 { background-color: var(--electric-blue-700); }
+  .bg-electric-blue-800 { background-color: var(--electric-blue-800); }
+  .bg-electric-blue-900 { background-color: var(--electric-blue-900); }
+  
+  .border-copper-50 { border-color: var(--copper-50); }
+  .border-copper-100 { border-color: var(--copper-100); }
+  .border-copper-200 { border-color: var(--copper-200); }
+  .border-copper-300 { border-color: var(--copper-300); }
+  .border-copper-400 { border-color: var(--copper-400); }
+  .border-copper-500 { border-color: var(--copper-500); }
+  .border-copper-600 { border-color: var(--copper-600); }
+  .border-copper-700 { border-color: var(--copper-700); }
+  .border-copper-800 { border-color: var(--copper-800); }
+  .border-copper-900 { border-color: var(--copper-900); }
+  
+  .border-electric-blue-50 { border-color: var(--electric-blue-50); }
+  .border-electric-blue-100 { border-color: var(--electric-blue-100); }
+  .border-electric-blue-200 { border-color: var(--electric-blue-200); }
+  .border-electric-blue-300 { border-color: var(--electric-blue-300); }
+  .border-electric-blue-400 { border-color: var(--electric-blue-400); }
+  .border-electric-blue-500 { border-color: var(--electric-blue-500); }
+  .border-electric-blue-600 { border-color: var(--electric-blue-600); }
+  .border-electric-blue-700 { border-color: var(--electric-blue-700); }
+  .border-electric-blue-800 { border-color: var(--electric-blue-800); }
+  .border-electric-blue-900 { border-color: var(--electric-blue-900); }
+  
+  .hover\:bg-copper-700:hover { background-color: var(--copper-700); }
+  .hover\:bg-electric-blue-700:hover { background-color: var(--electric-blue-700); }
+  .hover\:text-copper-600:hover { color: var(--copper-600); }
+  .hover\:text-electric-blue-600:hover { color: var(--electric-blue-600); }
+}
