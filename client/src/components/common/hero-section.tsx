@@ -21,61 +21,84 @@ export function HeroSection() {
               <div className="absolute inset-0 bg-black bg-opacity-40"></div>
             </div>
             
-            {/* Store Front Mockup */}
-            <div className="relative z-10 h-full flex items-center justify-center">
-              <div className="text-center max-w-2xl mx-auto px-8">
-                {/* Store Sign */}
-                <div className="bg-gray-800 px-8 py-4 rounded-lg mb-8 inline-block border-4 border-yellow-400">
-                  <div className="flex items-center justify-center space-x-4">
-                    <div className="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center">
-                      <span className="text-black font-bold text-xl">C</span>
+            {/* Store Front Content */}
+            <div className="relative z-10 h-full flex items-center">
+              <div className="w-full px-8 py-12">
+                
+                {/* Store Sign - Top Center */}
+                <div className="text-center mb-8">
+                  <div className="bg-gray-700 backdrop-blur-sm bg-opacity-90 px-6 py-3 rounded-xl inline-block shadow-2xl border border-yellow-400">
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
+                        <span className="text-black font-bold text-lg">C</span>
+                      </div>
+                      <div className="text-yellow-400 text-2xl lg:text-3xl font-bold tracking-wide">
+                        COPPERBEAR ELECTRICAL
+                      </div>
                     </div>
-                    <div className="text-yellow-400 text-3xl lg:text-4xl font-bold tracking-wider">
-                      COPPERBEAR ELECTRICAL
+                    <div className="text-gray-200 text-xs mt-1 tracking-widest">
+                      EVERY WIRE, EVERY HOME
                     </div>
                   </div>
-                  <div className="text-white text-sm mt-2 tracking-widest">
-                    EVERY WIRE, EVERY HOME
+                </div>
+                
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                  
+                  {/* Left Side - Main Content */}
+                  <div className="lg:col-span-2 text-left">
+                    {/* Main Headline */}
+                    <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 leading-tight">
+                      America's <span className="text-yellow-400">Biggest</span>
+                      <br />
+                      <span className="text-white">Electrical Megastore</span>
+                    </h1>
+                    
+                    {/* Location */}
+                    <div className="flex items-center text-gray-200 text-lg mb-8">
+                      <MapPin className="w-5 h-5 mr-2 text-yellow-400" />
+                      Now in Los Angeles & San Francisco, California.
+                    </div>
+                    
+                    {/* CTA Button */}
+                    <Button 
+                      asChild 
+                      size="lg" 
+                      className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                    >
+                      <Link href="/products">Book Your Visit Now</Link>
+                    </Button>
                   </div>
-                </div>
-                
-                {/* Product Categories */}
-                <div className="bg-yellow-400 text-black px-6 py-4 rounded-lg mb-8 text-left inline-block">
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-1 text-sm font-semibold">
-                    <div>FLOOR & WALL DECOR</div>
-                    <div>TILES</div>
-                    <div>LAMINATES</div>
-                    <div>PLYWOOD</div>
-                    <div>WOODEN FLOORING</div>
-                    <div>LOUVERS</div>
-                    <div>WALLPAPER</div>
-                    <div>WALL PANELS</div>
-                    <div></div>
-                    <div>QUARTZ</div>
+                  
+                  {/* Right Side - Product Categories */}
+                  <div className="lg:col-span-1">
+                    <div className="bg-yellow-400 bg-opacity-95 text-black p-6 rounded-xl shadow-xl">
+                      <h3 className="font-bold text-lg mb-4 text-center">ELECTRICAL PRODUCTS</h3>
+                      <div className="space-y-3 text-sm font-semibold">
+                        <div className="flex justify-between">
+                          <span>CIRCUIT BREAKERS</span>
+                          <span>WIRING & CABLES</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>OUTLETS</span>
+                          <span>SWITCHES</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>ELECTRICAL PANELS</span>
+                          <span>CONDUITS</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>LIGHTING</span>
+                          <span>TOOLS</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>SAFETY EQUIPMENT</span>
+                          <span>METERS</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+                  
                 </div>
-                
-                {/* Main Headline */}
-                <h1 className="text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight">
-                  America's <span className="text-yellow-400">Biggest</span>
-                  <br />
-                  Electrical Megastore
-                </h1>
-                
-                {/* Location */}
-                <div className="flex items-center justify-center text-white text-lg mb-8">
-                  <MapPin className="w-5 h-5 mr-2 text-yellow-400" />
-                  Now in Los Angeles & San Francisco, California.
-                </div>
-                
-                {/* CTA Button */}
-                <Button 
-                  asChild 
-                  size="lg" 
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-4 text-lg rounded-full shadow-lg hover:shadow-xl transition-all duration-300"
-                >
-                  <Link href="/products">Book Your Visit Now</Link>
-                </Button>
               </div>
             </div>
           </div>
