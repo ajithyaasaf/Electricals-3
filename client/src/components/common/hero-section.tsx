@@ -42,62 +42,29 @@ export function HeroSection() {
                   </div>
                 </div>
                 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                {/* Main Content - Centered */}
+                <div className="text-left max-w-4xl">
+                  {/* Main Headline */}
+                  <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 leading-tight">
+                    America's <span className="text-yellow-400">Biggest</span>
+                    <br />
+                    <span className="text-white">Electrical Megastore</span>
+                  </h1>
                   
-                  {/* Left Side - Main Content */}
-                  <div className="lg:col-span-2 text-left">
-                    {/* Main Headline */}
-                    <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 leading-tight">
-                      America's <span className="text-yellow-400">Biggest</span>
-                      <br />
-                      <span className="text-white">Electrical Megastore</span>
-                    </h1>
-                    
-                    {/* Location */}
-                    <div className="flex items-center text-gray-200 text-lg mb-8">
-                      <MapPin className="w-5 h-5 mr-2 text-yellow-400" />
-                      Now in Los Angeles & San Francisco, California.
-                    </div>
-                    
-                    {/* CTA Button */}
-                    <Button 
-                      asChild 
-                      size="lg" 
-                      className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                    >
-                      <Link href="/products">Book Your Visit Now</Link>
-                    </Button>
+                  {/* Location */}
+                  <div className="flex items-center text-gray-200 text-lg mb-8">
+                    <MapPin className="w-5 h-5 mr-2 text-yellow-400" />
+                    Now in Los Angeles & San Francisco, California.
                   </div>
                   
-                  {/* Right Side - Product Categories */}
-                  <div className="lg:col-span-1">
-                    <div className="bg-yellow-400 bg-opacity-95 text-black p-6 rounded-xl shadow-xl">
-                      <h3 className="font-bold text-lg mb-4 text-center">ELECTRICAL PRODUCTS</h3>
-                      <div className="space-y-3 text-sm font-semibold">
-                        <div className="flex justify-between">
-                          <span>CIRCUIT BREAKERS</span>
-                          <span>WIRING & CABLES</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>OUTLETS</span>
-                          <span>SWITCHES</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>ELECTRICAL PANELS</span>
-                          <span>CONDUITS</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>LIGHTING</span>
-                          <span>TOOLS</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>SAFETY EQUIPMENT</span>
-                          <span>METERS</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
+                  {/* CTA Button */}
+                  <Button 
+                    asChild 
+                    size="lg" 
+                    className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
+                  >
+                    <Link href="/products">Book Your Visit Now</Link>
+                  </Button>
                 </div>
               </div>
             </div>
