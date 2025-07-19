@@ -1,0 +1,99 @@
+Prompt for Replit AI Agent:
+
+Title:
+Production-Ready Amazon Clone for CopperBear: Electricals E-Commerce & Service Booking Platform
+
+Instructions:
+
+Build a deployable, full-stack web application for CopperBear—a business specializing in selling electrical products and providing electrical services. The goal is to exactly replicate Amazon.com’s user interface, user experience, structure, and all relevant features, but branded and tailored for CopperBear’s catalog and services.
+
+Requirements:
+
+UI/UX & Features
+
+Recreate Amazon’s entire interface, layout, sections, and user flows:
+
+Homepage, search, navigation bar, category/departments, product detail pages, shopping cart, user reviews, product Q&A, account and order management, order tracking, returns, wishlists, checkout, payment, footer, header, etc.
+
+Match Amazon’s UX and visual polish: pixel-perfect layout, responsive design (desktop, tablet, mobile), typographic rules, spacing, icons, and accessibility (WCAG 2.1 AA).
+
+Reproduce Amazon’s behaviors: carousels, hover states, filtering, sorting, pagination, pop-up modals, authentication, search autocomplete, recommendations, and more.
+
+CopperBear Customization
+
+Replace Amazon’s catalog/content with electrical products and services:
+
+Example products: circuit breakers, wires, tools, panels, sockets, etc.
+
+Example services: electrical installation, regular repair, maintenance, consulting.
+
+Remove any Amazon categories irrelevant to electricals (e.g., books, unrelated consumer electronics).
+
+Rebrand all UI, copy, and imagery for CopperBear:
+
+Use CopperBear logo, a suitable color palette, and reference CopperBear products/services throughout.
+
+No references to “emergency” services—describe only regular installation, repair, consulting, and other general electrical services.
+
+Use open-source images/icons or original placeholders (do not use Amazon’s copyrighted assets).
+
+Backend & Admin
+
+Fully functional backend:
+
+User authentication, accounts, orders, product/service inventory, booking of services, reviews, payment logic (can be dummy for now), and secure APIs.
+
+Admin panel
+
+CRUD for products, services, orders, and users.
+
+Simple dashboard with key analytics (orders, inventory, bookings).
+
+Technical Stack
+
+Use a modern JavaScript or TypeScript stack:
+
+Example: Next.js or React frontend, Express or Fastify backend, MongoDB or PostgreSQL database.
+
+Modular, maintainable, and secure code.
+
+Include complete sample/mock data seeding for products, services, and users.
+
+Provide clear documentation and deployment instructions (in README.md).
+
+Seed scripts or endpoints to populate the platform with demo CopperBear-relevant data.
+
+Other Requirements
+
+100% responsive and mobile-first.
+
+All content must be accessible in English (add localization hooks if possible).
+
+Every feature relevant to an Amazon-like site for electricals must be present (excluding non-electrical relevant features).
+
+Code must be clean, well-commented, and structured.
+
+No mention or implementation of "emergency" services.
+
+Section Checklist (All Must Be Included, Amazon Style):
+
+Homepage: hero sections, featured products, services, deals/recommendations
+
+Departments: browse all electrical products/services
+
+Product Listings: filtering, sorting, cart-badge, add/remove
+
+Product Detail: images, specs, reviews, recommendations
+
+Cart & Checkout: address, order summary, payments
+
+Account: registration/login, profile, order & return history, wishlist
+
+Services: listing, detail, scheduling/bookings for installations, repairs, consulting
+
+Admin Panel: manage products, services, orders, and users
+
+Footer/Header: all legal, help, info, and contact links
+
+Summary:
+Deliver a full-stack Amazon clone for CopperBear focused on electricals, with precise adherence to Amazon’s user experience and features, rebranded completely,
