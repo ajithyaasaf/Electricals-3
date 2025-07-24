@@ -9,6 +9,7 @@ import { ProductGridSkeleton, HeroSkeleton } from "@/components/common/skeleton-
 import { ServiceCard } from "@/components/service/service-card";
 import { Button } from "@/components/ui/button";
 import { LazyImage } from "@/components/ui/lazy-image";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Zap, Wrench, ClipboardCheck, Tag, Clock, Shield, Phone } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { getOptimizedImageUrl } from "@/lib/performance";
