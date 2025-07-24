@@ -10,7 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SearchBar } from "@/components/common/search-bar";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
-import { Zap, User, Heart, ShoppingCart, Menu, X } from "lucide-react";
+import { Zap, User, Heart, ShoppingCart, Menu, X, ChevronRight, ChevronDown } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -19,6 +19,7 @@ export function Header() {
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const isMobile = useIsMobile();
 
   // Get cart count
@@ -27,9 +28,86 @@ export function Header() {
     enabled: isAuthenticated,
   });
 
-  const cartCount = cartItems.length;
+  const cartCount = Array.isArray(cartItems) ? cartItems.length : 0;
 
-  const navigation = [
+  // Amazon-style hierarchical navigation for electrical products
+  const mobileNavigation = [
+    {
+      title: "Account & Services",
+      items: [
+        { name: "Your Account", href: "/account" },
+        { name: "Order History", href: "/account/orders" },
+        { name: "Wish Lists", href: "/account/wishlist" },
+        { name: "Help & Support", href: "/help" },
+      ]
+    },
+    {
+      title: "Electrical Components",
+      expandable: true,
+      items: [
+        { name: "Circuit Breakers & Panels", href: "/products?category=circuit-breakers" },
+        { name: "Switches & Outlets", href: "/products?category=switches-outlets" },
+        { name: "Wiring & Conduits", href: "/products?category=wiring-cables" },
+        { name: "Transformers & Motors", href: "/products?category=transformers-motors" },
+        { name: "Electrical Meters", href: "/products?category=electrical-meters" },
+        { name: "Fuses & Protection", href: "/products?category=fuses-protection" },
+      ]
+    },
+    {
+      title: "Tools & Equipment",
+      expandable: true,
+      items: [
+        { name: "Hand Tools", href: "/products?category=hand-tools" },
+        { name: "Power Tools", href: "/products?category=power-tools" },
+        { name: "Testing Equipment", href: "/products?category=testing-equipment" },
+        { name: "Safety Gear", href: "/products?category=safety-gear" },
+        { name: "Tool Storage", href: "/products?category=tool-storage" },
+      ]
+    },
+    {
+      title: "Lighting Solutions",
+      expandable: true,
+      items: [
+        { name: "LED Fixtures", href: "/products?category=led-fixtures" },
+        { name: "Commercial Lighting", href: "/products?category=commercial-lighting" },
+        { name: "Outdoor Lighting", href: "/products?category=outdoor-lighting" },
+        { name: "Smart Lighting", href: "/products?category=smart-lighting" },
+        { name: "Emergency Lighting", href: "/products?category=emergency-lighting" },
+      ]
+    },
+    {
+      title: "Installation Services",
+      expandable: true,
+      items: [
+        { name: "Residential Wiring", href: "/services?category=residential-wiring" },
+        { name: "Commercial Projects", href: "/services?category=commercial-projects" },
+        { name: "Emergency Repairs", href: "/services?category=emergency-repairs" },
+        { name: "Inspections & Consulting", href: "/services?category=inspections-consulting" },
+        { name: "Code Compliance", href: "/services?category=code-compliance" },
+      ]
+    },
+    {
+      title: "Shop by Project",
+      expandable: true,
+      items: [
+        { name: "New Construction", href: "/products?project=new-construction" },
+        { name: "Home Renovation", href: "/products?project=renovation" },
+        { name: "Maintenance & Repair", href: "/products?project=maintenance" },
+        { name: "Industrial Applications", href: "/products?project=industrial" },
+      ]
+    },
+    {
+      title: "Special Offers",
+      items: [
+        { name: "Today's Deals", href: "/products?featured=true" },
+        { name: "Bulk Pricing", href: "/products?bulk=true" },
+        { name: "Contractor Discounts", href: "/contractor-program" },
+        { name: "Clearance Items", href: "/products?clearance=true" },
+      ]
+    }
+  ];
+
+  const desktopNavigation = [
     { name: "All Departments", href: "/products" },
     { name: "Circuit Breakers", href: "/products?category=circuit-breakers" },
     { name: "Wiring & Cables", href: "/products?category=wiring-cables" },
@@ -39,6 +117,13 @@ export function Header() {
     { name: "Professional Consulting", href: "/services?category=electrical-consulting" },
     { name: "Today's Deals", href: "/products?featured=true" },
   ];
+
+  const toggleSection = (sectionTitle: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionTitle]: !prev[sectionTitle]
+    }));
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -78,34 +163,76 @@ export function Header() {
                     <Menu className="h-6 w-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-80">
-                  <div className="flex items-center justify-between mb-6">
+                <SheetContent side="left" className="w-80 p-0">
+                  {/* Header */}
+                  <div className="bg-gray-800 text-white p-4">
                     <div className="flex items-center space-x-2">
-                      <div className="w-8 h-8 bg-gradient-to-r from-copper-500 to-copper-600 rounded-lg flex items-center justify-center">
-                        <Zap className="text-white text-sm" />
-                      </div>
-                      <span className="text-lg font-bold text-copper-700">CopperBear</span>
+                      <User className="h-6 w-6" />
+                      <span className="text-lg font-semibold">
+                        {isAuthenticated ? `Hello, ${(user as any)?.email?.split('@')[0] || 'User'}` : 'Hello, sign in'}
+                      </span>
                     </div>
                   </div>
                   
                   {/* Mobile Search */}
-                  <div className="mb-6">
+                  <div className="p-4 border-b border-gray-200">
                     <SearchBar />
                   </div>
 
-                  {/* Mobile Navigation */}
-                  <nav className="space-y-2">
-                    {navigation.map((item) => (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className="block px-4 py-2 text-sm text-gray-700 hover:text-copper-600 hover:bg-gray-50 rounded-md transition-colors"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {item.name}
-                      </Link>
+                  {/* Amazon-style Navigation */}
+                  <div className="flex-1 overflow-y-auto">
+                    {mobileNavigation.map((section) => (
+                      <div key={section.title} className="border-b border-gray-200">
+                        {section.expandable ? (
+                          <>
+                            <button
+                              onClick={() => toggleSection(section.title)}
+                              className="w-full flex items-center justify-between p-4 text-left font-semibold text-gray-900 hover:bg-gray-50 transition-colors"
+                            >
+                              <span>{section.title}</span>
+                              {expandedSections[section.title] ? (
+                                <ChevronDown className="h-5 w-5 text-gray-500" />
+                              ) : (
+                                <ChevronRight className="h-5 w-5 text-gray-500" />
+                              )}
+                            </button>
+                            {expandedSections[section.title] && (
+                              <div className="bg-gray-50">
+                                {section.items.map((item) => (
+                                  <Link
+                                    key={item.name}
+                                    href={item.href}
+                                    className="block px-6 py-3 text-sm text-gray-700 hover:text-copper-600 hover:bg-white transition-colors border-b border-gray-200 last:border-b-0"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                  >
+                                    {item.name}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div className="p-4 font-semibold text-gray-900 bg-gray-100">
+                              {section.title}
+                            </div>
+                            <div>
+                              {section.items.map((item) => (
+                                <Link
+                                  key={item.name}
+                                  href={item.href}
+                                  className="block px-6 py-3 text-sm text-gray-700 hover:text-copper-600 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-b-0"
+                                  onClick={() => setMobileMenuOpen(false)}
+                                >
+                                  {item.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </>
+                        )}
+                      </div>
                     ))}
-                  </nav>
+                  </div>
                 </SheetContent>
               </Sheet>
             )}
@@ -129,7 +256,7 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/account?tab=bookings">Service Bookings</Link>
                   </DropdownMenuItem>
-                  {user?.isAdmin && (
+                  {(user as any)?.isAdmin && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
@@ -182,7 +309,7 @@ export function Header() {
         {!isMobile && (
           <nav className="border-t border-gray-200 py-3">
             <ul className="flex items-center space-x-8 text-sm overflow-x-auto">
-              {navigation.map((item) => (
+              {desktopNavigation.map((item) => (
                 <li key={item.name}>
                   <Link
                     href={item.href}
