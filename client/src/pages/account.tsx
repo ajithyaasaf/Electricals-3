@@ -12,7 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { signInWithGoogle } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { 
@@ -34,7 +35,7 @@ import { ORDER_STATUSES, BOOKING_STATUSES } from "@/lib/constants";
 import type { OrderWithItems, BookingWithService } from "@/lib/types";
 
 export default function Account() {
-  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const { isAuthenticated, loading: authLoading, user } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const searchParams = useSearch();

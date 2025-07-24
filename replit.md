@@ -33,10 +33,10 @@ Preferred communication style: Simple, everyday language.
 - **Connection**: Neon serverless with WebSocket support
 
 ### Authentication & Authorization
-- **Provider**: Replit Auth with OpenID Connect
-- **Session Storage**: PostgreSQL-backed sessions
-- **User Roles**: Admin and regular user permissions
-- **Security**: HTTP-only cookies, secure session management
+- **Provider**: Firebase Authentication with Google Sign-In
+- **Session Management**: Firebase Auth tokens with automatic refresh
+- **User Roles**: Admin permissions based on email (admin@copperbear.com)
+- **Security**: Firebase secure authentication with redirect flow
 
 ## Key Components
 
@@ -72,10 +72,10 @@ The application uses a comprehensive schema with the following main entities:
 ## Data Flow
 
 ### Authentication Flow
-1. User initiates login via Replit Auth
-2. OpenID Connect handles authentication
-3. User session stored in PostgreSQL
-4. Frontend receives user data and permissions
+1. User initiates login via Firebase Google Sign-In
+2. Firebase handles OAuth redirect flow
+3. User state managed in Firebase Auth
+4. Frontend receives authenticated user data with Firebase tokens
 
 ### E-Commerce Flow
 1. Product browsing with category/search filtering
@@ -144,6 +144,15 @@ The application uses a comprehensive schema with the following main entities:
 The application is designed for easy deployment on Replit with automatic environment setup and integrated authentication, while maintaining the flexibility to deploy on other platforms with minimal configuration changes.
 
 ## Recent Changes - July 24, 2025
+
+### Firebase Authentication Integration
+- **Complete Migration**: Replaced Replit Auth with Firebase Authentication system
+- **Google Sign-In**: Implemented Google OAuth authentication with Firebase redirect flow
+- **User State Management**: Created useFirebaseAuth hook for consistent authentication state
+- **Admin Role Management**: Updated admin access to use Firebase user email verification (admin@copperbear.com)
+- **Authentication Components**: Built FirebaseRedirectHandler for post-authentication flow handling
+- **Toast Notifications**: Added user feedback for sign-in/sign-out operations with proper error handling
+- **Cross-Platform**: Fully functional authentication across all pages and components
 
 ### Amazon-Style Mobile Navigation Implementation
 - **Mobile UX Redesign**: Implemented Amazon-style hierarchical mobile navigation for electrical products

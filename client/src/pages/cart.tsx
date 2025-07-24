@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { signInWithGoogle } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { ShoppingCart, ArrowLeft, CreditCard } from "lucide-react";
 import { useEffect } from "react";
 
 export default function Cart() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -26,7 +27,7 @@ export default function Cart() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        signInWithGoogle();
       }, 1000);
     }
   }, [isAuthenticated, authLoading, toast]);

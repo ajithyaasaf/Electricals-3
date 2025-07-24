@@ -13,7 +13,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { signInWithGoogle } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle } from "lucide-react";
@@ -42,7 +43,7 @@ interface CheckoutFormData {
 }
 
 export default function Checkout() {
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

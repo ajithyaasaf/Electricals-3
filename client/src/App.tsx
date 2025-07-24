@@ -5,7 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { PerformanceMonitor } from "@/components/layout/performance-monitor";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { FirebaseRedirectHandler } from "@/components/auth/firebase-redirect-handler";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -19,11 +20,11 @@ import Account from "@/pages/account";
 import Admin from "@/pages/admin";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, loading } = useFirebaseAuth();
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      {loading || !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
           <Route path="/products" component={Products} />
@@ -54,6 +55,7 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          <FirebaseRedirectHandler />
           <PerformanceMonitor />
           <Toaster />
           <Router />

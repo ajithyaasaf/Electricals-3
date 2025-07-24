@@ -15,7 +15,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { signInWithGoogle } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useForm } from "react-hook-form";
@@ -78,7 +79,7 @@ type ServiceFormData = z.infer<typeof serviceSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
 
 export default function Admin() {
-  const { isAuthenticated, isLoading: authLoading, user } = useAuth();
+  const { isAuthenticated, loading: authLoading, user } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -89,7 +90,7 @@ export default function Admin() {
 
   // Redirect if not authenticated or not admin
   useEffect(() => {
-    if (!authLoading && (!isAuthenticated || !user?.isAdmin)) {
+    if (!authLoading && (!isAuthenticated || user?.email !== 'admin@copperbear.com')) {
       toast({
         title: "Access denied",
         description: "You don't have permission to access this page.",
@@ -104,27 +105,27 @@ export default function Admin() {
   // Fetch data
   const { data: products = { products: [], total: 0 }, isLoading: productsLoading } = useQuery({
     queryKey: ["/api/products", { limit: 100 }],
-    enabled: isAuthenticated && user?.isAdmin,
+    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
   });
 
   const { data: services = { services: [], total: 0 }, isLoading: servicesLoading } = useQuery({
     queryKey: ["/api/services", { limit: 100 }],
-    enabled: isAuthenticated && user?.isAdmin,
+    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
   });
 
   const { data: categories = [], isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: isAuthenticated && user?.isAdmin,
+    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
   });
 
   const { data: orders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
-    enabled: isAuthenticated && user?.isAdmin,
+    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
   });
 
   const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
     queryKey: ["/api/bookings"],
-    enabled: isAuthenticated && user?.isAdmin,
+    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
   });
 
   // Forms

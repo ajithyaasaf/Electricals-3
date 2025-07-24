@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,9 +13,11 @@ import { CartSidebar } from "@/components/cart/cart-sidebar";
 import { Zap, User, Heart, ShoppingCart, Menu, X, ChevronRight, ChevronDown } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { signInWithGoogle, signOutUser } from "@/lib/firebase";
+import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, loading } = useFirebaseAuth();
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -118,11 +120,41 @@ export function Header() {
     { name: "Today's Deals", href: "/products?featured=true" },
   ];
 
+  const { toast } = useToast();
+
   const toggleSection = (sectionTitle: string) => {
     setExpandedSections(prev => ({
       ...prev,
       [sectionTitle]: !prev[sectionTitle]
     }));
+  };
+
+  const handleSignIn = () => {
+    try {
+      signInWithGoogle();
+    } catch (error) {
+      toast({
+        title: "Sign-in Error",
+        description: "Failed to initiate sign-in. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+    } catch (error) {
+      toast({
+        title: "Sign-out Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -174,7 +206,7 @@ export function Header() {
                     <div className="flex items-center space-x-2">
                       <User className="h-6 w-6 flex-shrink-0" />
                       <span className="text-base sm:text-lg font-semibold truncate">
-                        {isAuthenticated ? `Hello, ${(user as any)?.email?.split('@')[0] || 'User'}` : 'Hello, sign in'}
+                        {isAuthenticated ? `Hello, ${user?.displayName || user?.email?.split('@')[0] || 'User'}` : 'Hello, sign in'}
                       </span>
                     </div>
                   </div>
@@ -259,7 +291,7 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/account?tab=bookings">Service Bookings</Link>
                   </DropdownMenuItem>
-                  {(user as any)?.isAdmin && (
+                  {user?.email === 'admin@copperbear.com' && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
@@ -268,7 +300,7 @@ export function Header() {
                     </>
                   )}
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => window.location.href = "/api/logout"}>
+                  <DropdownMenuItem onClick={handleSignOut}>
                     Sign Out
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -277,7 +309,8 @@ export function Header() {
               <Button 
                 variant="ghost" 
                 className="flex flex-col items-center text-gray-700 hover:text-copper-600"
-                onClick={() => window.location.href = "/api/login"}
+                onClick={handleSignIn}
+                disabled={loading}
               >
                 <User className="h-5 w-5" />
                 <span className="text-xs mt-1 hidden sm:block">Sign In</span>
