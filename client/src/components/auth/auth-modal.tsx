@@ -168,58 +168,58 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] p-0 gap-0 bg-white">
+      <DialogContent className="w-full max-w-md mx-auto p-0 gap-0 bg-white max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="sr-only">
           <DialogTitle>Authentication</DialogTitle>
           <DialogDescription>Sign in or create an account to continue</DialogDescription>
         </DialogHeader>
         
         {/* Header */}
-        <div className="px-8 py-6 border-b bg-gradient-to-r from-copper-50 to-copper-100">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-copper-600 to-copper-700 rounded-xl flex items-center justify-center shadow-lg">
-              <Zap className="w-6 h-6 text-white" />
+        <div className="px-4 sm:px-6 py-4 border-b bg-gradient-to-r from-copper-50 to-copper-100 flex-shrink-0">
+          <div className="flex items-center justify-center gap-2 mb-3">
+            <div className="w-8 h-8 bg-gradient-to-r from-copper-600 to-copper-700 rounded-lg flex items-center justify-center shadow-lg">
+              <Zap className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-copper-800">CopperBear</h1>
-              <p className="text-sm text-copper-600">Electrical Solutions</p>
+              <h1 className="text-xl font-bold text-copper-800">CopperBear</h1>
+              <p className="text-xs text-copper-600">Electrical Solutions</p>
             </div>
           </div>
           <div className="text-center">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-base font-semibold text-gray-900">
               {activeTab === "signin" && "Welcome back"}
               {activeTab === "signup" && "Create your account"}
               {activeTab === "reset" && "Reset your password"}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">
-              {activeTab === "signin" && "Sign in to access your account and continue shopping"}
-              {activeTab === "signup" && "Join thousands of professionals who trust CopperBear"}
-              {activeTab === "reset" && "Enter your email to receive password reset instructions"}
+            <p className="text-xs text-gray-600 mt-1">
+              {activeTab === "signin" && "Sign in to continue shopping"}
+              {activeTab === "signup" && "Join CopperBear professionals"}
+              {activeTab === "reset" && "Enter your email for reset"}
             </p>
           </div>
         </div>
 
-        <div className="px-8 py-6">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
           {activeTab !== "reset" ? (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "signin" | "signup")}>
               <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
                 <TabsTrigger 
                   value="signin" 
-                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
                 >
                   Sign In
                 </TabsTrigger>
                 <TabsTrigger 
                   value="signup"
-                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium text-sm"
                 >
                   Create Account
                 </TabsTrigger>
               </TabsList>
 
-            <TabsContent value="signin" className="space-y-6 mt-6">
-              <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-5">
+            <TabsContent value="signin" className="space-y-4 mt-4">
+              <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email" className="text-sm font-medium text-gray-700">
                     Email address
@@ -230,7 +230,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="signin-email"
                       type="email"
                       placeholder="you@example.com"
-                      className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signInForm.register("email")}
                     />
                   </div>
@@ -254,7 +254,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="signin-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-10 pr-12 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 pr-12 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signInForm.register("password")}
                     />
                     <Button
@@ -300,7 +300,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-gradient-to-r from-copper-600 to-copper-700 hover:from-copper-700 hover:to-copper-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200" 
+                  className="w-full h-10 bg-gradient-to-r from-copper-600 to-copper-700 hover:from-copper-700 hover:to-copper-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200" 
                   disabled={loading}
                 >
                   {loading ? (
@@ -315,8 +315,8 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="space-y-6 mt-6">
-              <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-5">
+            <TabsContent value="signup" className="space-y-4 mt-4">
+              <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">First Name</Label>
@@ -325,7 +325,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       <Input
                         id="firstName"
                         placeholder="First name"
-                        className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                        className="pl-10 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                         {...signUpForm.register("firstName")}
                       />
                     </div>
@@ -343,7 +343,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     <Input
                       id="lastName"
                       placeholder="Last name"
-                      className="h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signUpForm.register("lastName")}
                     />
                     {signUpForm.formState.errors.lastName && (
@@ -365,7 +365,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="signup-email"
                       type="email"
                       placeholder="you@example.com"
-                      className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signUpForm.register("email")}
                     />
                   </div>
@@ -387,7 +387,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="signup-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      className="pl-10 pr-12 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 pr-12 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signUpForm.register("password")}
                     />
                     <Button
@@ -418,7 +418,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       placeholder="Confirm your password"
-                      className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signUpForm.register("confirmPassword")}
                     />
                   </div>
@@ -434,7 +434,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
                 <Button 
                   type="submit" 
-                  className="w-full h-12 bg-gradient-to-r from-copper-600 to-copper-700 hover:from-copper-700 hover:to-copper-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200" 
+                  className="w-full h-10 bg-gradient-to-r from-copper-600 to-copper-700 hover:from-copper-700 hover:to-copper-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200" 
                   disabled={loading}
                 >
                   {loading ? (
@@ -449,7 +449,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </form>
             </TabsContent>
 
-            <div className="relative my-6">
+            <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">
                 <Separator className="w-full border-gray-200" />
               </div>
@@ -461,7 +461,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
             <Button
               type="button"
               variant="outline"
-              className="w-full h-12 border-gray-300 hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200"
+              className="w-full h-10 border-gray-300 hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200"
               onClick={handleGoogleSignIn}
               disabled={loading}
             >
@@ -469,19 +469,19 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               Continue with Google
             </Button>
 
-            <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-copper-600 mt-0.5 flex-shrink-0" />
-                <div className="text-sm text-gray-600">
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg border">
+              <div className="flex items-start gap-2">
+                <Shield className="w-4 h-4 text-copper-600 mt-0.5 flex-shrink-0" />
+                <div className="text-xs text-gray-600">
                   <p className="font-medium text-gray-900 mb-1">Your data is secure</p>
-                  <p>We use industry-standard encryption to protect your personal information and never share it with third parties.</p>
+                  <p>Industry-standard encryption protects your information.</p>
                 </div>
               </div>
             </div>
             </Tabs>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
               <Button
                 type="button"
@@ -495,10 +495,10 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               <span className="text-sm text-gray-600">Back to sign in</span>
             </div>
             
-            <div className="text-center mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Reset your password</h3>
+            <div className="text-center mb-4">
+              <h3 className="text-base font-semibold text-gray-900 mb-2">Reset your password</h3>
               <p className="text-sm text-gray-600">
-                Enter your email address and we'll send you a secure link to reset your password.
+                Enter your email for a reset link.
               </p>
             </div>
             
@@ -555,11 +555,11 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
         </div>
         
         {/* Footer */}
-        <div className="px-8 py-4 border-t bg-gray-50 text-center">
+        <div className="px-4 sm:px-6 py-3 border-t bg-gray-50 text-center flex-shrink-0">
           <p className="text-xs text-gray-500">
             By continuing, you agree to CopperBear's{" "}
             <a href="/terms" className="text-copper-600 hover:text-copper-700 underline">
-              Terms of Service
+              Terms
             </a>{" "}
             and{" "}
             <a href="/privacy" className="text-copper-600 hover:text-copper-700 underline">
