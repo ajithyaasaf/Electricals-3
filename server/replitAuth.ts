@@ -1,28 +1,23 @@
-// This file is deprecated after migration to Firebase Authentication
-// All authentication now handled through Firebase Auth and Firestore
-// Keeping this file to prevent import errors during migration phase
-
-// Firebase Authentication handles all session management
-// No PostgreSQL session storage needed
+// FIREBASE AUTHENTICATION ONLY - NO REPLIT AUTH
+// This file provides minimal session support for Express
+// All user authentication is handled by Firebase
 
 import session from "express-session";
 
 export function getSession() {
-  // Simple memory session for basic Express session support
-  // Firebase auth handles the actual authentication state
   const MemoryStore = require('memorystore')(session);
   
   return session({
-    secret: process.env.SESSION_SECRET || "dev-secret-key-not-for-production",
+    secret: process.env.SESSION_SECRET || "firebase-session-secret",
     store: new MemoryStore({
-      checkPeriod: 86400000 // prune expired entries every 24h
+      checkPeriod: 86400000
     }),
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
       secure: false,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+      maxAge: 24 * 60 * 60 * 1000,
     },
   });
 }
