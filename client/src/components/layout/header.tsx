@@ -165,7 +165,7 @@ export function Header() {
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80 p-0">
                   {/* Header */}
-                  <div className="bg-gray-800 text-white p-4">
+                  <div className="bg-copper-700 text-white p-4">
                     <div className="flex items-center space-x-2">
                       <User className="h-6 w-6" />
                       <span className="text-lg font-semibold">
@@ -177,27 +177,27 @@ export function Header() {
                   {/* Amazon-style Navigation */}
                   <div className="flex-1 overflow-y-auto">
                     {mobileNavigation.map((section) => (
-                      <div key={section.title} className="border-b border-gray-200">
+                      <div key={section.title} className="border-b border-copper-200">
                         {section.expandable ? (
                           <>
                             <button
                               onClick={() => toggleSection(section.title)}
-                              className="w-full flex items-center justify-between p-4 text-left font-semibold text-gray-900 hover:bg-gray-50 transition-colors"
+                              className="w-full flex items-center justify-between p-4 text-left font-semibold text-copper-800 hover:bg-copper-50 transition-colors"
                             >
                               <span>{section.title}</span>
                               {expandedSections[section.title] ? (
-                                <ChevronDown className="h-5 w-5 text-gray-500" />
+                                <ChevronDown className="h-5 w-5 text-copper-600" />
                               ) : (
-                                <ChevronRight className="h-5 w-5 text-gray-500" />
+                                <ChevronRight className="h-5 w-5 text-copper-600" />
                               )}
                             </button>
                             {expandedSections[section.title] && (
-                              <div className="bg-gray-50">
+                              <div className="bg-copper-50">
                                 {section.items.map((item) => (
                                   <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="block px-6 py-3 text-sm text-gray-700 hover:text-copper-600 hover:bg-white transition-colors border-b border-gray-200 last:border-b-0"
+                                    className="block px-6 py-3 text-sm text-copper-700 hover:text-electric-blue-600 hover:bg-white transition-colors border-b border-copper-200 last:border-b-0"
                                     onClick={() => setMobileMenuOpen(false)}
                                   >
                                     {item.name}
@@ -208,7 +208,7 @@ export function Header() {
                           </>
                         ) : (
                           <>
-                            <div className="p-4 font-semibold text-gray-900 bg-gray-100">
+                            <div className="p-4 font-semibold text-copper-800 bg-copper-100">
                               {section.title}
                             </div>
                             <div>
@@ -216,7 +216,7 @@ export function Header() {
                                 <Link
                                   key={item.name}
                                   href={item.href}
-                                  className="block px-6 py-3 text-sm text-gray-700 hover:text-copper-600 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-b-0"
+                                  className="block px-6 py-3 text-sm text-copper-700 hover:text-electric-blue-600 hover:bg-copper-50 transition-colors border-b border-copper-200 last:border-b-0"
                                   onClick={() => setMobileMenuOpen(false)}
                                 >
                                   {item.name}
