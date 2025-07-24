@@ -27,10 +27,10 @@ Preferred communication style: Simple, everyday language.
 - **API Design**: RESTful API with consistent error handling
 
 ### Data Storage Solutions
-- **Primary Database**: PostgreSQL via Neon serverless
-- **ORM**: Drizzle ORM for type-safe database operations
-- **Schema Management**: Drizzle Kit for migrations
-- **Connection**: Neon serverless with WebSocket support
+- **Primary Database**: Firestore (Google Cloud NoSQL database)
+- **SDK**: Firebase SDK for client and server operations
+- **Schema Management**: TypeScript interfaces and Zod validation schemas
+- **Real-time**: Native Firestore real-time listeners for live data updates
 
 ### Authentication & Authorization
 - **Provider**: Firebase Authentication with Google Sign-In
@@ -144,6 +144,16 @@ The application uses a comprehensive schema with the following main entities:
 The application is designed for easy deployment on Replit with automatic environment setup and integrated authentication, while maintaining the flexibility to deploy on other platforms with minimal configuration changes.
 
 ## Recent Changes - July 24, 2025
+
+### Complete PostgreSQL to Firestore Migration
+- **Database Migration**: Successfully migrated from PostgreSQL/Drizzle ORM to Google Firestore NoSQL database
+- **Modern Architecture**: Implemented scalable NoSQL data structure with Firebase SDK integration
+- **Type Safety**: Created comprehensive TypeScript types and Zod validation schemas for all data models
+- **Service Layer**: Built robust Firestore service layer with generic CRUD operations and specialized query methods
+- **Authentication Integration**: Updated Firebase Authentication to work seamlessly with Firestore user management
+- **Real-time Capabilities**: Enabled Firestore's native real-time listeners for live data updates
+- **Performance Optimization**: Removed PostgreSQL dependencies and streamlined database operations
+- **Development Simplicity**: Eliminated complex database setup requirements for easier development workflow
 
 ### Firebase Authentication Integration
 - **Complete Migration**: Replaced Replit Auth with Firebase Authentication system

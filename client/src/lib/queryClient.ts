@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { auth } from '@/lib/firebase';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -7,14 +8,46 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Helper to get Firebase auth token
+async function getAuthHeaders(): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {};
+  
+  if (auth.currentUser) {
+    try {
+      // For development, we'll send user data as base64-encoded string
+      // In production, you would send the Firebase ID token
+      const userData = {
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email,
+        displayName: auth.currentUser.displayName,
+        photoURL: auth.currentUser.photoURL,
+        emailVerified: auth.currentUser.emailVerified,
+      };
+      
+      const userToken = Buffer.from(JSON.stringify(userData)).toString('base64');
+      headers.Authorization = `Bearer ${userToken}`;
+    } catch (error) {
+      console.error('Error getting auth token:', error);
+    }
+  }
+  
+  return headers;
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  const authHeaders = await getAuthHeaders();
+  const headers = {
+    ...(data ? { "Content-Type": "application/json" } : {}),
+    ...authHeaders,
+  };
+
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -47,8 +80,10 @@ export const getQueryFn: <T>(options: {
       }
     }
 
+    const authHeaders = await getAuthHeaders();
     const res = await fetch(url, {
       credentials: "include",
+      headers: authHeaders,
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {

@@ -1,453 +1,384 @@
+// Firestore-based storage implementation
+// Migrated from PostgreSQL to provide modern NoSQL capabilities
+
 import {
-  users,
-  categories,
-  products,
-  services,
-  cartItems,
-  orders,
-  orderItems,
-  serviceBookings,
-  reviews,
-  wishlists,
-  type User,
-  type UpsertUser,
-  type Category,
-  type InsertCategory,
-  type Product,
-  type InsertProduct,
-  type Service,
-  type InsertService,
-  type CartItem,
-  type InsertCartItem,
-  type Order,
-  type InsertOrder,
-  type OrderItem,
-  type InsertOrderItem,
-  type ServiceBooking,
-  type InsertServiceBooking,
-  type Review,
-  type InsertReview,
-  type Wishlist,
-  type InsertWishlist,
-} from "@shared/schema";
-import { db } from "./db";
-import { eq, desc, asc, and, or, like, sql, count } from "drizzle-orm";
+  userService,
+  categoryService,
+  productService,
+  serviceService,
+  cartService,
+  orderService,
+  orderItemService,
+  serviceBookingService,
+  reviewService,
+  wishlistService,
+  ProductQueries,
+  CartQueries,
+  OrderQueries,
+  ReviewQueries,
+  WishlistQueries,
+} from './firestoreService';
+
+import type {
+  User, CreateUser,
+  Category, CreateCategory,
+  Product, CreateProduct,
+  Service, CreateService,
+  CartItem, CreateCartItem,
+  Order, CreateOrder,
+  OrderItem, CreateOrderItem,
+  ServiceBooking, CreateServiceBooking,
+  Review, CreateReview,
+  WishlistItem, CreateWishlistItem,
+} from '@shared/types';
 
 export interface IStorage {
-  // User operations (required for Replit Auth)
-  getUser(id: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  
-  // Category operations
-  getCategories(): Promise<Category[]>;
-  getCategoryBySlug(slug: string): Promise<Category | undefined>;
-  createCategory(category: InsertCategory): Promise<Category>;
-  updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category>;
-  deleteCategory(id: number): Promise<void>;
-  
-  // Product operations
-  getProducts(filters?: { categoryId?: number; search?: string; featured?: boolean; limit?: number; offset?: number }): Promise<{ products: Product[]; total: number }>;
-  getProductById(id: number): Promise<Product | undefined>;
-  getProductBySlug(slug: string): Promise<Product | undefined>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product>;
-  deleteProduct(id: number): Promise<void>;
-  
-  // Service operations
-  getServices(filters?: { categoryId?: number; search?: string; limit?: number; offset?: number }): Promise<{ services: Service[]; total: number }>;
-  getServiceById(id: number): Promise<Service | undefined>;
-  getServiceBySlug(slug: string): Promise<Service | undefined>;
-  createService(service: InsertService): Promise<Service>;
-  updateService(id: number, service: Partial<InsertService>): Promise<Service>;
-  deleteService(id: number): Promise<void>;
-  
-  // Cart operations
-  getCartItems(userId: string): Promise<CartItem[]>;
-  addToCart(cartItem: InsertCartItem): Promise<CartItem>;
-  updateCartItem(id: number, quantity: number): Promise<CartItem>;
-  removeFromCart(id: number): Promise<void>;
-  clearCart(userId: string): Promise<void>;
-  
-  // Order operations
-  getOrders(userId?: string): Promise<Order[]>;
-  getOrderById(id: number): Promise<Order | undefined>;
-  createOrder(order: InsertOrder): Promise<Order>;
-  updateOrderStatus(id: number, status: string): Promise<Order>;
-  
-  // Order item operations
-  getOrderItems(orderId: number): Promise<OrderItem[]>;
-  createOrderItem(orderItem: InsertOrderItem): Promise<OrderItem>;
-  
-  // Service booking operations
-  getServiceBookings(userId?: string): Promise<ServiceBooking[]>;
-  getServiceBookingById(id: number): Promise<ServiceBooking | undefined>;
-  createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking>;
-  updateServiceBookingStatus(id: number, status: string): Promise<ServiceBooking>;
-  
-  // Review operations
-  getReviews(productId?: number, serviceId?: number): Promise<Review[]>;
-  createReview(review: InsertReview): Promise<Review>;
-  
-  // Wishlist operations
-  getWishlist(userId: string): Promise<Wishlist[]>;
-  addToWishlist(wishlist: InsertWishlist): Promise<Wishlist>;
-  removeFromWishlist(userId: string, productId: number): Promise<void>;
-}
-
-export class DatabaseStorage implements IStorage {
   // User operations
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
+  createUser(data: CreateUser): Promise<string>;
+  getUserById(id: string): Promise<User | null>;
+  getUserByEmail(email: string): Promise<User | null>;
+  updateUser(id: string, data: Partial<CreateUser>): Promise<void>;
+  deleteUser(id: string): Promise<void>;
+
+  // Category operations
+  createCategory(data: CreateCategory): Promise<string>;
+  getCategoryById(id: string): Promise<Category | null>;
+  getAllCategories(): Promise<Category[]>;
+  getCategoryBySlug(slug: string): Promise<Category | null>;
+  updateCategory(id: string, data: Partial<CreateCategory>): Promise<void>;
+  deleteCategory(id: string): Promise<void>;
+
+  // Product operations
+  createProduct(data: CreateProduct): Promise<string>;
+  getProductById(id: string): Promise<Product | null>;
+  getAllProducts(): Promise<Product[]>;
+  getFeaturedProducts(): Promise<Product[]>;
+  getProductsByCategory(categoryId: string): Promise<Product[]>;
+  getProductBySlug(slug: string): Promise<Product | null>;
+  searchProducts(query: string): Promise<Product[]>;
+  updateProduct(id: string, data: Partial<CreateProduct>): Promise<void>;
+  deleteProduct(id: string): Promise<void>;
+
+  // Service operations
+  createService(data: CreateService): Promise<string>;
+  getServiceById(id: string): Promise<Service | null>;
+  getAllServices(): Promise<Service[]>;
+  getServicesByCategory(categoryId: string): Promise<Service[]>;
+  getServiceBySlug(slug: string): Promise<Service | null>;
+  updateService(id: string, data: Partial<CreateService>): Promise<void>;
+  deleteService(id: string): Promise<void>;
+
+  // Cart operations
+  createCartItem(data: CreateCartItem): Promise<string>;
+  getCartItemById(id: string): Promise<CartItem | null>;
+  getUserCartItems(userId: string): Promise<CartItem[]>;
+  updateCartItem(id: string, data: Partial<CreateCartItem>): Promise<void>;
+  deleteCartItem(id: string): Promise<void>;
+  addToCart(userId: string, productId?: string, serviceId?: string, quantity?: number): Promise<string>;
+
+  // Order operations
+  createOrder(data: CreateOrder): Promise<string>;
+  getOrderById(id: string): Promise<Order | null>;
+  getUserOrders(userId: string): Promise<Order[]>;
+  getAllOrders(): Promise<Order[]>;
+  updateOrder(id: string, data: Partial<CreateOrder>): Promise<void>;
+  deleteOrder(id: string): Promise<void>;
+
+  // Order Item operations
+  createOrderItem(data: CreateOrderItem): Promise<string>;
+  getOrderItemById(id: string): Promise<OrderItem | null>;
+  getOrderItems(orderId: string): Promise<OrderItem[]>;
+  updateOrderItem(id: string, data: Partial<CreateOrderItem>): Promise<void>;
+  deleteOrderItem(id: string): Promise<void>;
+
+  // Service Booking operations
+  createServiceBooking(data: CreateServiceBooking): Promise<string>;
+  getServiceBookingById(id: string): Promise<ServiceBooking | null>;
+  getUserServiceBookings(userId: string): Promise<ServiceBooking[]>;
+  getAllServiceBookings(): Promise<ServiceBooking[]>;
+  updateServiceBooking(id: string, data: Partial<CreateServiceBooking>): Promise<void>;
+  deleteServiceBooking(id: string): Promise<void>;
+
+  // Review operations
+  createReview(data: CreateReview): Promise<string>;
+  getReviewById(id: string): Promise<Review | null>;
+  getProductReviews(productId: string): Promise<Review[]>;
+  getServiceReviews(serviceId: string): Promise<Review[]>;
+  getUserReviews(userId: string): Promise<Review[]>;
+  updateReview(id: string, data: Partial<CreateReview>): Promise<void>;
+  deleteReview(id: string): Promise<void>;
+
+  // Wishlist operations
+  createWishlistItem(data: CreateWishlistItem): Promise<string>;
+  getWishlistItemById(id: string): Promise<WishlistItem | null>;
+  getUserWishlist(userId: string): Promise<WishlistItem[]>;
+  updateWishlistItem(id: string, data: Partial<CreateWishlistItem>): Promise<void>;
+  deleteWishlistItem(id: string): Promise<void>;
+}
+
+export class FirestoreStorage implements IStorage {
+  // User operations
+  async createUser(data: CreateUser): Promise<string> {
+    return userService.create(data);
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
+  async getUserById(id: string): Promise<User | null> {
+    return userService.getById(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | null> {
+    const users = await userService.findByField('email', email, 1);
+    return users[0] || null;
+  }
+
+  async updateUser(id: string, data: Partial<CreateUser>): Promise<void> {
+    return userService.update(id, data);
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    return userService.delete(id);
   }
 
   // Category operations
-  async getCategories(): Promise<Category[]> {
-    return await db.select().from(categories).orderBy(asc(categories.name));
+  async createCategory(data: CreateCategory): Promise<string> {
+    return categoryService.create(data);
   }
 
-  async getCategoryBySlug(slug: string): Promise<Category | undefined> {
-    const [category] = await db.select().from(categories).where(eq(categories.slug, slug));
-    return category;
+  async getCategoryById(id: string): Promise<Category | null> {
+    return categoryService.getById(id);
   }
 
-  async createCategory(category: InsertCategory): Promise<Category> {
-    const [newCategory] = await db.insert(categories).values(category).returning();
-    return newCategory;
+  async getAllCategories(): Promise<Category[]> {
+    return categoryService.getAll(100);
   }
 
-  async updateCategory(id: number, category: Partial<InsertCategory>): Promise<Category> {
-    const [updatedCategory] = await db
-      .update(categories)
-      .set({ ...category, updatedAt: new Date() })
-      .where(eq(categories.id, id))
-      .returning();
-    return updatedCategory;
+  async getCategoryBySlug(slug: string): Promise<Category | null> {
+    const categories = await categoryService.findByField('slug', slug, 1);
+    return categories[0] || null;
   }
 
-  async deleteCategory(id: number): Promise<void> {
-    await db.delete(categories).where(eq(categories.id, id));
+  async updateCategory(id: string, data: Partial<CreateCategory>): Promise<void> {
+    return categoryService.update(id, data);
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    return categoryService.delete(id);
   }
 
   // Product operations
-  async getProducts(filters?: { categoryId?: number; search?: string; featured?: boolean; limit?: number; offset?: number }): Promise<{ products: Product[]; total: number }> {
-    const conditions = [eq(products.isActive, true)];
-
-    if (filters?.categoryId) {
-      conditions.push(eq(products.categoryId, filters.categoryId));
-    }
-
-    if (filters?.search) {
-      conditions.push(
-        or(
-          like(products.name, `%${filters.search}%`),
-          like(products.description, `%${filters.search}%`)
-        )
-      );
-    }
-
-    if (filters?.featured) {
-      conditions.push(eq(products.isFeatured, true));
-    }
-
-    const whereCondition = conditions.length > 1 ? and(...conditions) : conditions[0];
-
-    let query = db.select().from(products).where(whereCondition);
-    const countQuery = db.select({ count: count() }).from(products).where(whereCondition);
-
-    query = query.orderBy(desc(products.createdAt));
-
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
-    }
-
-    if (filters?.offset) {
-      query = query.offset(filters.offset);
-    }
-
-    const [productsResult, totalResult] = await Promise.all([
-      query,
-      countQuery
-    ]);
-
-    return {
-      products: productsResult,
-      total: totalResult[0]?.count || 0
-    };
+  async createProduct(data: CreateProduct): Promise<string> {
+    return productService.create(data);
   }
 
-  async getProductById(id: number): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.id, id));
-    return product;
+  async getProductById(id: string): Promise<Product | null> {
+    return productService.getById(id);
   }
 
-  async getProductBySlug(slug: string): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.slug, slug));
-    return product;
+  async getAllProducts(): Promise<Product[]> {
+    return productService.getAll(100);
   }
 
-  async createProduct(product: InsertProduct): Promise<Product> {
-    const [newProduct] = await db.insert(products).values(product).returning();
-    return newProduct;
+  async getFeaturedProducts(): Promise<Product[]> {
+    return ProductQueries.getFeatured();
   }
 
-  async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product> {
-    const [updatedProduct] = await db
-      .update(products)
-      .set({ ...product, updatedAt: new Date() })
-      .where(eq(products.id, id))
-      .returning();
-    return updatedProduct;
+  async getProductsByCategory(categoryId: string): Promise<Product[]> {
+    return ProductQueries.getByCategory(categoryId);
   }
 
-  async deleteProduct(id: number): Promise<void> {
-    await db.delete(products).where(eq(products.id, id));
+  async getProductBySlug(slug: string): Promise<Product | null> {
+    const products = await productService.findByField('slug', slug, 1);
+    return products[0] || null;
+  }
+
+  async searchProducts(query: string): Promise<Product[]> {
+    return ProductQueries.search(query);
+  }
+
+  async updateProduct(id: string, data: Partial<CreateProduct>): Promise<void> {
+    return productService.update(id, data);
+  }
+
+  async deleteProduct(id: string): Promise<void> {
+    return productService.delete(id);
   }
 
   // Service operations
-  async getServices(filters?: { categoryId?: number; search?: string; limit?: number; offset?: number }): Promise<{ services: Service[]; total: number }> {
-    const conditions = [eq(services.isActive, true)];
-
-    if (filters?.categoryId) {
-      conditions.push(eq(services.categoryId, filters.categoryId));
-    }
-
-    if (filters?.search) {
-      conditions.push(
-        or(
-          like(services.name, `%${filters.search}%`),
-          like(services.description, `%${filters.search}%`)
-        )
-      );
-    }
-
-    const whereCondition = conditions.length > 1 ? and(...conditions) : conditions[0];
-
-    let query = db.select().from(services).where(whereCondition);
-    const countQuery = db.select({ count: count() }).from(services).where(whereCondition);
-
-    query = query.orderBy(desc(services.createdAt));
-
-    if (filters?.limit) {
-      query = query.limit(filters.limit);
-    }
-
-    if (filters?.offset) {
-      query = query.offset(filters.offset);
-    }
-
-    const [servicesResult, totalResult] = await Promise.all([
-      query,
-      countQuery
-    ]);
-
-    return {
-      services: servicesResult,
-      total: totalResult[0]?.count || 0
-    };
+  async createService(data: CreateService): Promise<string> {
+    return serviceService.create(data);
   }
 
-  async getServiceById(id: number): Promise<Service | undefined> {
-    const [service] = await db.select().from(services).where(eq(services.id, id));
-    return service;
+  async getServiceById(id: string): Promise<Service | null> {
+    return serviceService.getById(id);
   }
 
-  async getServiceBySlug(slug: string): Promise<Service | undefined> {
-    const [service] = await db.select().from(services).where(eq(services.slug, slug));
-    return service;
+  async getAllServices(): Promise<Service[]> {
+    return serviceService.getAll(100);
   }
 
-  async createService(service: InsertService): Promise<Service> {
-    const [newService] = await db.insert(services).values(service).returning();
-    return newService;
+  async getServicesByCategory(categoryId: string): Promise<Service[]> {
+    return serviceService.findByField('categoryId', categoryId);
   }
 
-  async updateService(id: number, service: Partial<InsertService>): Promise<Service> {
-    const [updatedService] = await db
-      .update(services)
-      .set({ ...service, updatedAt: new Date() })
-      .where(eq(services.id, id))
-      .returning();
-    return updatedService;
+  async getServiceBySlug(slug: string): Promise<Service | null> {
+    const services = await serviceService.findByField('slug', slug, 1);
+    return services[0] || null;
   }
 
-  async deleteService(id: number): Promise<void> {
-    await db.delete(services).where(eq(services.id, id));
+  async updateService(id: string, data: Partial<CreateService>): Promise<void> {
+    return serviceService.update(id, data);
+  }
+
+  async deleteService(id: string): Promise<void> {
+    return serviceService.delete(id);
   }
 
   // Cart operations
-  async getCartItems(userId: string): Promise<CartItem[]> {
-    return await db.select().from(cartItems).where(eq(cartItems.userId, userId));
+  async createCartItem(data: CreateCartItem): Promise<string> {
+    return cartService.create(data);
   }
 
-  async addToCart(cartItem: InsertCartItem): Promise<CartItem> {
-    // Check if item already exists in cart
-    const [existingItem] = await db
-      .select()
-      .from(cartItems)
-      .where(
-        and(
-          eq(cartItems.userId, cartItem.userId),
-          eq(cartItems.productId, cartItem.productId!)
-        )
-      );
-
-    if (existingItem) {
-      // Update quantity
-      const [updatedItem] = await db
-        .update(cartItems)
-        .set({ 
-          quantity: (existingItem.quantity || 0) + (cartItem.quantity || 1),
-          updatedAt: new Date()
-        })
-        .where(eq(cartItems.id, existingItem.id))
-        .returning();
-      return updatedItem;
-    } else {
-      // Add new item
-      const [newItem] = await db.insert(cartItems).values(cartItem).returning();
-      return newItem;
-    }
+  async getCartItemById(id: string): Promise<CartItem | null> {
+    return cartService.getById(id);
   }
 
-  async updateCartItem(id: number, quantity: number): Promise<CartItem> {
-    const [updatedItem] = await db
-      .update(cartItems)
-      .set({ quantity, updatedAt: new Date() })
-      .where(eq(cartItems.id, id))
-      .returning();
-    return updatedItem;
+  async getUserCartItems(userId: string): Promise<CartItem[]> {
+    return CartQueries.getUserCart(userId);
   }
 
-  async removeFromCart(id: number): Promise<void> {
-    await db.delete(cartItems).where(eq(cartItems.id, id));
+  async updateCartItem(id: string, data: Partial<CreateCartItem>): Promise<void> {
+    return cartService.update(id, data);
   }
 
-  async clearCart(userId: string): Promise<void> {
-    await db.delete(cartItems).where(eq(cartItems.userId, userId));
+  async deleteCartItem(id: string): Promise<void> {
+    return cartService.delete(id);
+  }
+
+  async addToCart(userId: string, productId?: string, serviceId?: string, quantity = 1): Promise<string> {
+    return CartQueries.addToCart(userId, productId, serviceId, quantity);
   }
 
   // Order operations
-  async getOrders(userId?: string): Promise<Order[]> {
-    let query = db.select().from(orders).orderBy(desc(orders.createdAt));
-    
-    if (userId) {
-      query = query.where(eq(orders.userId, userId));
-    }
-    
-    return await query;
+  async createOrder(data: CreateOrder): Promise<string> {
+    return orderService.create(data);
   }
 
-  async getOrderById(id: number): Promise<Order | undefined> {
-    const [order] = await db.select().from(orders).where(eq(orders.id, id));
-    return order;
+  async getOrderById(id: string): Promise<Order | null> {
+    return orderService.getById(id);
   }
 
-  async createOrder(order: InsertOrder): Promise<Order> {
-    const [newOrder] = await db.insert(orders).values(order).returning();
-    return newOrder;
+  async getUserOrders(userId: string): Promise<Order[]> {
+    return OrderQueries.getUserOrders(userId);
   }
 
-  async updateOrderStatus(id: number, status: string): Promise<Order> {
-    const [updatedOrder] = await db
-      .update(orders)
-      .set({ status, updatedAt: new Date() })
-      .where(eq(orders.id, id))
-      .returning();
-    return updatedOrder;
+  async getAllOrders(): Promise<Order[]> {
+    return orderService.getAll(200);
   }
 
-  // Order item operations
-  async getOrderItems(orderId: number): Promise<OrderItem[]> {
-    return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
+  async updateOrder(id: string, data: Partial<CreateOrder>): Promise<void> {
+    return orderService.update(id, data);
   }
 
-  async createOrderItem(orderItem: InsertOrderItem): Promise<OrderItem> {
-    const [newOrderItem] = await db.insert(orderItems).values(orderItem).returning();
-    return newOrderItem;
+  async deleteOrder(id: string): Promise<void> {
+    return orderService.delete(id);
   }
 
-  // Service booking operations
-  async getServiceBookings(userId?: string): Promise<ServiceBooking[]> {
-    let query = db.select().from(serviceBookings).orderBy(desc(serviceBookings.createdAt));
-    
-    if (userId) {
-      query = query.where(eq(serviceBookings.userId, userId));
-    }
-    
-    return await query;
+  // Order Item operations
+  async createOrderItem(data: CreateOrderItem): Promise<string> {
+    return orderItemService.create(data);
   }
 
-  async getServiceBookingById(id: number): Promise<ServiceBooking | undefined> {
-    const [booking] = await db.select().from(serviceBookings).where(eq(serviceBookings.id, id));
-    return booking;
+  async getOrderItemById(id: string): Promise<OrderItem | null> {
+    return orderItemService.getById(id);
   }
 
-  async createServiceBooking(booking: InsertServiceBooking): Promise<ServiceBooking> {
-    const [newBooking] = await db.insert(serviceBookings).values(booking).returning();
-    return newBooking;
+  async getOrderItems(orderId: string): Promise<OrderItem[]> {
+    return OrderQueries.getOrderItems(orderId);
   }
 
-  async updateServiceBookingStatus(id: number, status: string): Promise<ServiceBooking> {
-    const [updatedBooking] = await db
-      .update(serviceBookings)
-      .set({ status, updatedAt: new Date() })
-      .where(eq(serviceBookings.id, id))
-      .returning();
-    return updatedBooking;
+  async updateOrderItem(id: string, data: Partial<CreateOrderItem>): Promise<void> {
+    return orderItemService.update(id, data);
+  }
+
+  async deleteOrderItem(id: string): Promise<void> {
+    return orderItemService.delete(id);
+  }
+
+  // Service Booking operations
+  async createServiceBooking(data: CreateServiceBooking): Promise<string> {
+    return serviceBookingService.create(data);
+  }
+
+  async getServiceBookingById(id: string): Promise<ServiceBooking | null> {
+    return serviceBookingService.getById(id);
+  }
+
+  async getUserServiceBookings(userId: string): Promise<ServiceBooking[]> {
+    return serviceBookingService.findByField('userId', userId);
+  }
+
+  async getAllServiceBookings(): Promise<ServiceBooking[]> {
+    return serviceBookingService.getAll(200);
+  }
+
+  async updateServiceBooking(id: string, data: Partial<CreateServiceBooking>): Promise<void> {
+    return serviceBookingService.update(id, data);
+  }
+
+  async deleteServiceBooking(id: string): Promise<void> {
+    return serviceBookingService.delete(id);
   }
 
   // Review operations
-  async getReviews(productId?: number, serviceId?: number): Promise<Review[]> {
-    let query = db.select().from(reviews).orderBy(desc(reviews.createdAt));
-    
-    if (productId) {
-      query = query.where(eq(reviews.productId, productId));
-    } else if (serviceId) {
-      query = query.where(eq(reviews.serviceId, serviceId));
-    }
-    
-    return await query;
+  async createReview(data: CreateReview): Promise<string> {
+    return reviewService.create(data);
   }
 
-  async createReview(review: InsertReview): Promise<Review> {
-    const [newReview] = await db.insert(reviews).values(review).returning();
-    return newReview;
+  async getReviewById(id: string): Promise<Review | null> {
+    return reviewService.getById(id);
+  }
+
+  async getProductReviews(productId: string): Promise<Review[]> {
+    return ReviewQueries.getProductReviews(productId);
+  }
+
+  async getServiceReviews(serviceId: string): Promise<Review[]> {
+    return ReviewQueries.getServiceReviews(serviceId);
+  }
+
+  async getUserReviews(userId: string): Promise<Review[]> {
+    return reviewService.findByField('userId', userId);
+  }
+
+  async updateReview(id: string, data: Partial<CreateReview>): Promise<void> {
+    return reviewService.update(id, data);
+  }
+
+  async deleteReview(id: string): Promise<void> {
+    return reviewService.delete(id);
   }
 
   // Wishlist operations
-  async getWishlist(userId: string): Promise<Wishlist[]> {
-    return await db.select().from(wishlists).where(eq(wishlists.userId, userId));
+  async createWishlistItem(data: CreateWishlistItem): Promise<string> {
+    return wishlistService.create(data);
   }
 
-  async addToWishlist(wishlist: InsertWishlist): Promise<Wishlist> {
-    const [newWishlistItem] = await db.insert(wishlists).values(wishlist).returning();
-    return newWishlistItem;
+  async getWishlistItemById(id: string): Promise<WishlistItem | null> {
+    return wishlistService.getById(id);
   }
 
-  async removeFromWishlist(userId: string, productId: number): Promise<void> {
-    await db.delete(wishlists).where(
-      and(
-        eq(wishlists.userId, userId),
-        eq(wishlists.productId, productId)
-      )
-    );
+  async getUserWishlist(userId: string): Promise<WishlistItem[]> {
+    return WishlistQueries.getUserWishlist(userId);
+  }
+
+  async updateWishlistItem(id: string, data: Partial<CreateWishlistItem>): Promise<void> {
+    return wishlistService.update(id, data);
+  }
+
+  async deleteWishlistItem(id: string): Promise<void> {
+    return wishlistService.delete(id);
   }
 }
 
-export const storage = new DatabaseStorage();
+// Export the storage instance
+export const storage = new FirestoreStorage();
