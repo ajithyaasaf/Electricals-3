@@ -177,7 +177,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
         {/* Header */}
         <div className="px-4 sm:px-6 py-4 border-b bg-gradient-to-r from-copper-50 to-copper-100 flex-shrink-0">
           <div className="flex items-center justify-center gap-2 mb-3">
-            <div className="w-8 h-8 bg-gradient-to-r from-copper-600 to-copper-700 rounded-lg flex items-center justify-center shadow-lg">
+            <div className="w-8 h-8 from-copper-600 to-copper-700 rounded-lg flex items-center justify-center shadow-lg bg-[#160a04]">
               <Zap className="w-4 h-4 text-white" />
             </div>
             <div>
