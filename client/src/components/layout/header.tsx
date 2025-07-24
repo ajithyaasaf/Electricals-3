@@ -133,62 +133,68 @@ export function Header() {
       </div>
 
       {/* Main header */}
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center justify-between py-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between py-3 sm:py-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-10 h-10 bg-gradient-to-r from-copper-500 to-copper-600 rounded-lg flex items-center justify-center">
-              <Zap className="text-white text-lg" />
+          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-copper-500 to-copper-600 rounded-lg flex items-center justify-center">
+              <Zap className="text-white text-base sm:text-lg" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold text-copper-700">CopperBear</h1>
-              <p className="text-xs text-gray-600">Electrical Solutions</p>
+            <div className="min-w-0">
+              <h1 className="text-lg sm:text-2xl font-bold text-copper-700 truncate">CopperBear</h1>
+              <p className="text-xs text-gray-600 hidden sm:block">Electrical Solutions</p>
             </div>
           </Link>
 
           {/* Search Bar - Desktop */}
           {!isMobile && (
-            <div className="flex-1 max-w-2xl mx-8">
+            <div className="flex-1 max-w-2xl mx-4 lg:mx-8">
               <SearchBar />
             </div>
           )}
 
           {/* Account & Cart */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
             {/* Mobile Menu Toggle */}
             {isMobile && (
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                 <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                    <Menu className="h-6 w-6" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
+                    className="h-10 w-10 sm:h-11 sm:w-11 touch-manipulation"
+                    style={{ minHeight: '44px', minWidth: '44px' }} // iOS minimum touch target
+                  >
+                    <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="left" className="w-80 p-0">
+                <SheetContent side="left" className="w-full max-w-sm sm:max-w-md p-0 overflow-hidden">
                   {/* Header */}
-                  <div className="bg-copper-700 text-white p-4">
+                  <div className="bg-copper-700 text-white p-4 sm:p-6">
                     <div className="flex items-center space-x-2">
-                      <User className="h-6 w-6" />
-                      <span className="text-lg font-semibold">
+                      <User className="h-6 w-6 flex-shrink-0" />
+                      <span className="text-base sm:text-lg font-semibold truncate">
                         {isAuthenticated ? `Hello, ${(user as any)?.email?.split('@')[0] || 'User'}` : 'Hello, sign in'}
                       </span>
                     </div>
                   </div>
 
                   {/* Amazon-style Navigation */}
-                  <div className="flex-1 overflow-y-auto">
+                  <div className="flex-1 overflow-y-auto overscroll-contain">
                     {mobileNavigation.map((section) => (
                       <div key={section.title} className="border-b border-copper-200">
                         {section.expandable ? (
                           <>
                             <button
                               onClick={() => toggleSection(section.title)}
-                              className="w-full flex items-center justify-between p-4 text-left font-semibold text-copper-800 hover:bg-copper-50 transition-colors"
+                              className="w-full flex items-center justify-between p-4 sm:p-5 text-left font-semibold text-copper-800 hover:bg-copper-50 active:bg-copper-100 transition-colors touch-manipulation"
+                              style={{ minHeight: '44px' }} // iOS minimum touch target
                             >
-                              <span>{section.title}</span>
+                              <span className="text-sm sm:text-base truncate pr-2">{section.title}</span>
                               {expandedSections[section.title] ? (
-                                <ChevronDown className="h-5 w-5 text-copper-600" />
+                                <ChevronDown className="h-5 w-5 text-copper-600 flex-shrink-0" />
                               ) : (
-                                <ChevronRight className="h-5 w-5 text-copper-600" />
+                                <ChevronRight className="h-5 w-5 text-copper-600 flex-shrink-0" />
                               )}
                             </button>
                             {expandedSections[section.title] && (
@@ -197,10 +203,11 @@ export function Header() {
                                   <Link
                                     key={item.name}
                                     href={item.href}
-                                    className="block px-6 py-3 text-sm text-copper-700 hover:text-electric-blue-600 hover:bg-white transition-colors border-b border-copper-200 last:border-b-0"
+                                    className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-electric-blue-600 active:text-electric-blue-700 hover:bg-white active:bg-copper-25 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
+                                    style={{ minHeight: '44px' }} // iOS minimum touch target
                                     onClick={() => setMobileMenuOpen(false)}
                                   >
-                                    {item.name}
+                                    <span className="block truncate">{item.name}</span>
                                   </Link>
                                 ))}
                               </div>
@@ -208,18 +215,19 @@ export function Header() {
                           </>
                         ) : (
                           <>
-                            <div className="p-4 font-semibold text-copper-800 bg-copper-100">
-                              {section.title}
+                            <div className="p-4 sm:p-5 font-semibold text-copper-800 bg-copper-100">
+                              <span className="text-sm sm:text-base truncate">{section.title}</span>
                             </div>
                             <div>
                               {section.items.map((item) => (
                                 <Link
                                   key={item.name}
                                   href={item.href}
-                                  className="block px-6 py-3 text-sm text-copper-700 hover:text-electric-blue-600 hover:bg-copper-50 transition-colors border-b border-copper-200 last:border-b-0"
+                                  className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-electric-blue-600 active:text-electric-blue-700 hover:bg-copper-50 active:bg-copper-100 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
+                                  style={{ minHeight: '44px' }} // iOS minimum touch target
                                   onClick={() => setMobileMenuOpen(false)}
                                 >
-                                  {item.name}
+                                  <span className="block truncate">{item.name}</span>
                                 </Link>
                               ))}
                             </div>
@@ -286,14 +294,15 @@ export function Header() {
 
             {/* Cart */}
             <Button 
-              className="flex items-center space-x-2 bg-electric-blue-600 text-white hover:bg-electric-blue-700 relative"
+              className="flex items-center space-x-1 sm:space-x-2 bg-electric-blue-600 text-white hover:bg-electric-blue-700 active:bg-electric-blue-800 relative h-10 sm:h-11 px-3 sm:px-4 touch-manipulation"
+              style={{ minHeight: '44px' }} // iOS minimum touch target
               onClick={() => setCartOpen(true)}
             >
-              <ShoppingCart className="h-5 w-5" />
-              <span className="text-sm font-medium hidden sm:block">Cart</span>
+              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
+              <span className="text-xs sm:text-sm font-medium hidden xs:block">Cart</span>
               {cartCount > 0 && (
-                <Badge className="absolute -top-2 -right-2 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center p-0">
-                  {cartCount}
+                <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center p-0 min-w-[16px] sm:min-w-[20px]">
+                  <span className="text-[10px] sm:text-xs">{cartCount > 99 ? '99+' : cartCount}</span>
                 </Badge>
               )}
             </Button>
@@ -303,15 +312,15 @@ export function Header() {
         {/* Navigation Menu - Desktop */}
         {!isMobile && (
           <nav className="border-t border-gray-200 py-3">
-            <ul className="flex items-center space-x-8 text-sm overflow-x-auto">
+            <ul className="flex items-center space-x-4 lg:space-x-8 text-sm overflow-x-auto scrollbar-hide">
               {desktopNavigation.map((item) => (
-                <li key={item.name}>
+                <li key={item.name} className="flex-shrink-0">
                   <Link
                     href={item.href}
-                    className={`whitespace-nowrap transition-colors ${
+                    className={`whitespace-nowrap transition-colors px-2 py-1 rounded-md touch-manipulation ${
                       item.name === "Today's Deals"
-                        ? "text-copper-600 font-semibold"
-                        : "text-gray-700 hover:text-copper-600 font-medium"
+                        ? "text-copper-600 font-semibold bg-copper-50"
+                        : "text-gray-700 hover:text-copper-600 hover:bg-copper-25 font-medium"
                     }`}
                   >
                     {item.name}
