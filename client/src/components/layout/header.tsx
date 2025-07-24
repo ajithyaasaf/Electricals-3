@@ -10,10 +10,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SearchBar } from "@/components/common/search-bar";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
+import { AuthModal } from "@/components/auth/auth-modal";
 import { Zap, User, Heart, ShoppingCart, Menu, X, ChevronRight, ChevronDown } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { signInWithGoogle, signOutUser } from "@/lib/firebase";
+import { signOutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
@@ -21,8 +22,10 @@ export function Header() {
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const isMobile = useIsMobile();
+  const { toast } = useToast();
 
   // Get cart count
   const { data: cartItems = [] } = useQuery({
@@ -120,8 +123,6 @@ export function Header() {
     { name: "Today's Deals", href: "/products?featured=true" },
   ];
 
-  const { toast } = useToast();
-
   const toggleSection = (sectionTitle: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -129,24 +130,8 @@ export function Header() {
     }));
   };
 
-  const handleSignIn = async () => {
-    try {
-      await signInWithGoogle();
-    } catch (error: any) {
-      if (error.message === 'DOMAIN_NOT_AUTHORIZED' || error.code === 'auth/unauthorized-domain') {
-        toast({
-          title: "Setup Required",
-          description: "Please add this domain to Firebase authorized domains. Check the console for details.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Sign-in Error",
-          description: error.message || "Failed to initiate sign-in. Please try again.",
-          variant: "destructive",
-        });
-      }
-    }
+  const handleSignIn = () => {
+    setAuthOpen(true);
   };
 
   const handleSignOut = async () => {
@@ -375,6 +360,9 @@ export function Header() {
 
       {/* Cart Sidebar */}
       <CartSidebar open={cartOpen} onOpenChange={setCartOpen} />
+      
+      {/* Auth Modal */}
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
     </header>
   );
 }
