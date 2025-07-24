@@ -22,11 +22,19 @@ export function FirebaseRedirectHandler() {
         }
       } catch (error: any) {
         console.error('Firebase redirect error:', error);
-        toast({
-          title: "Sign-in Error",
-          description: error.message || "Failed to sign in. Please try again.",
-          variant: "destructive",
-        });
+        if (error.code === 'auth/unauthorized-domain') {
+          toast({
+            title: "Domain Authorization Required",
+            description: "Please add this domain to Firebase authorized domains in the console.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Sign-in Error",
+            description: error.message || "Failed to sign in. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     };
 

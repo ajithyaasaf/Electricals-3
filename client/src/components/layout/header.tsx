@@ -132,12 +132,20 @@ export function Header() {
   const handleSignIn = () => {
     try {
       signInWithGoogle();
-    } catch (error) {
-      toast({
-        title: "Sign-in Error",
-        description: "Failed to initiate sign-in. Please try again.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      if (error.code === 'auth/unauthorized-domain') {
+        toast({
+          title: "Domain Authorization Required",
+          description: "Please add this domain to Firebase authorized domains in the console.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Sign-in Error",
+          description: error.message || "Failed to initiate sign-in. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
