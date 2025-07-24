@@ -1,5 +1,5 @@
 // Firestore database connection and configuration
-// Migrated from PostgreSQL to Firestore for better scalability and modern NoSQL approach
+// Pure NoSQL implementation - All PostgreSQL dependencies removed
 
 export { db, auth } from '@shared/firestore';
 export * from './firestoreService';

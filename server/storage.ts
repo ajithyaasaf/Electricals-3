@@ -1,5 +1,5 @@
-// Firestore-based storage implementation
-// Migrated from PostgreSQL to provide modern NoSQL capabilities
+// Firestore-based storage implementation for CopperBear Electrical E-Commerce Platform  
+// Complete migration from PostgreSQL - All operations use Firestore NoSQL database
 
 import {
   userService,

@@ -1,4 +1,4 @@
 // Firestore-based schema for CopperBear Electrical E-Commerce Platform
-// All database operations now use Firestore instead of PostgreSQL
+// Complete NoSQL schema implementation - No PostgreSQL/Drizzle dependencies
 
 export * from './types';

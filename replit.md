@@ -22,8 +22,8 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js framework
 - **Language**: TypeScript with ES modules
-- **Authentication**: Replit Auth integration with OpenID Connect
-- **Session Management**: Express sessions with PostgreSQL storage
+- **Authentication**: Firebase Authentication with Google Sign-In
+- **Session Management**: Firebase Auth tokens with automatic refresh
 - **API Design**: RESTful API with consistent error handling
 
 ### Data Storage Solutions
@@ -99,12 +99,11 @@ The application uses a comprehensive schema with the following main entities:
 ## External Dependencies
 
 ### Core Dependencies
-- **@neondatabase/serverless**: PostgreSQL connection
-- **drizzle-orm**: Database ORM and query builder
+- **firebase**: Complete Firebase SDK for authentication and Firestore
 - **@tanstack/react-query**: Server state management
 - **wouter**: Client-side routing
 - **express**: Backend web framework
-- **passport**: Authentication middleware
+- **zod**: Schema validation for data types
 
 ### UI & Styling
 - **@radix-ui/***: Headless UI component primitives
@@ -123,25 +122,25 @@ The application uses a comprehensive schema with the following main entities:
 ### Development Environment
 - **Frontend**: Vite dev server with HMR
 - **Backend**: tsx with auto-reload
-- **Database**: Neon serverless PostgreSQL
+- **Database**: Firebase Firestore with real-time sync
 
 ### Build Process
 1. Frontend: Vite builds to `dist/public`
 2. Backend: esbuild bundles to `dist/index.js`
-3. Database: Drizzle migrations apply schema changes
+3. Database: Firestore schema managed through TypeScript types
 
 ### Production Deployment
 - **Static Assets**: Frontend build serves from `dist/public`
 - **API Server**: Node.js serves bundled Express application
-- **Database**: Neon PostgreSQL with connection pooling
-- **Environment**: Configuration via environment variables
+- **Database**: Firebase Firestore with automatic scaling
+- **Environment**: Configuration via Firebase environment variables
 
 ### Key Configuration
-- **Database**: `DATABASE_URL` for Neon connection
-- **Auth**: Replit Auth with `REPLIT_DOMAINS` and `SESSION_SECRET`
-- **Build**: Separate client/server build processes with shared schema
+- **Database**: Firebase Firestore with SDK authentication
+- **Auth**: Firebase Authentication with Google Sign-In
+- **Build**: Separate client/server build processes with shared Firestore schema
 
-The application is designed for easy deployment on Replit with automatic environment setup and integrated authentication, while maintaining the flexibility to deploy on other platforms with minimal configuration changes.
+The application is designed for easy deployment on Replit with automatic Firebase setup and Firebase Authentication, providing a modern serverless architecture that scales automatically without complex database configuration.
 
 ## Recent Changes - July 24, 2025
 

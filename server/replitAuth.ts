@@ -1,45 +1,28 @@
-import * as client from "openid-client";
-import { Strategy, type VerifyFunction } from "openid-client/passport";
+// This file is deprecated after migration to Firebase Authentication
+// All authentication now handled through Firebase Auth and Firestore
+// Keeping this file to prevent import errors during migration phase
 
-import passport from "passport";
+// Firebase Authentication handles all session management
+// No PostgreSQL session storage needed
+
 import session from "express-session";
-import type { Express, RequestHandler } from "express";
-import memoize from "memoizee";
-import connectPg from "connect-pg-simple";
-import { storage } from "./storage";
-
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
-
-const getOidcConfig = memoize(
-  async () => {
-    return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
-    );
-  },
-  { maxAge: 3600 * 1000 }
-);
 
 export function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
-  const pgStore = connectPg(session);
-  const sessionStore = new pgStore({
-    conString: process.env.DATABASE_URL,
-    createTableIfMissing: false,
-    ttl: sessionTtl,
-    tableName: "sessions",
-  });
+  // Simple memory session for basic Express session support
+  // Firebase auth handles the actual authentication state
+  const MemoryStore = require('memorystore')(session);
+  
   return session({
     secret: process.env.SESSION_SECRET || "dev-secret-key-not-for-production",
-    store: sessionStore,
+    store: new MemoryStore({
+      checkPeriod: 86400000 // prune expired entries every 24h
+    }),
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: false, // Set to false for development
-      maxAge: sessionTtl,
+      secure: false,
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
     },
   });
 }
