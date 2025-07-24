@@ -31,6 +31,7 @@ function Router() {
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/services" component={Services} />
           <Route path="/services/:slug" component={ServiceDetail} />
+          <Route path="/account" component={Account} />
         </>
       ) : (
         <>
@@ -39,7 +40,6 @@ function Router() {
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/services" component={Services} />
           <Route path="/services/:slug" component={ServiceDetail} />
-
           <Route path="/checkout" component={Checkout} />
           <Route path="/account" component={Account} />
           <Route path="/admin" component={Admin} />

@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { signInWithGoogle } from "@/lib/firebase";
+import { signInWithGoogle, signOutUser } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { 
@@ -62,7 +62,7 @@ export default function Account() {
         variant: "destructive",
       });
       setTimeout(() => {
-        window.location.href = "/api/login";
+        signInWithGoogle();
       }, 1000);
     }
   }, [isAuthenticated, authLoading, toast]);
@@ -71,12 +71,28 @@ export default function Account() {
   useEffect(() => {
     if (user) {
       setProfileData({
-        firstName: user.firstName || "",
-        lastName: user.lastName || "",
+        firstName: user.displayName?.split(' ')[0] || "",
+        lastName: user.displayName?.split(' ')[1] || "",
         email: user.email || "",
       });
     }
   }, [user]);
+
+  const handleSignOut = async () => {
+    try {
+      await signOutUser();
+      toast({
+        title: "Signed Out",
+        description: "You have been successfully signed out.",
+      });
+    } catch (error) {
+      toast({
+        title: "Sign-out Error",
+        description: "Failed to sign out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Fetch user orders
   const { data: orders = [], isLoading: ordersLoading } = useQuery({
@@ -249,7 +265,7 @@ export default function Account() {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold text-gray-900">
-                      {user?.firstName} {user?.lastName}
+                      {user?.displayName || 'User'}
                     </h3>
                     <p className="text-gray-600">{user?.email}</p>
                   </div>
@@ -321,9 +337,9 @@ export default function Account() {
                       </div>
                     ))}
                   </div>
-                ) : orders.length > 0 ? (
+                ) : (orders as any[]).length > 0 ? (
                   <div className="space-y-4">
-                    {orders.map((order: OrderWithItems) => (
+                    {(orders as any[]).map((order: OrderWithItems) => (
                       <div key={order.id} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-4">
                           <div>
@@ -400,9 +416,9 @@ export default function Account() {
                       </div>
                     ))}
                   </div>
-                ) : bookings.length > 0 ? (
+                ) : (bookings as any[]).length > 0 ? (
                   <div className="space-y-4">
-                    {bookings.map((booking: BookingWithService) => (
+                    {(bookings as any[]).map((booking: BookingWithService) => (
                       <div key={booking.id} className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-4">
                           <div>
@@ -483,9 +499,9 @@ export default function Account() {
                       </div>
                     ))}
                   </div>
-                ) : wishlist.length > 0 ? (
+                ) : (wishlist as any[]).length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {wishlist.map((item: any) => (
+                    {(wishlist as any[]).map((item: any) => (
                       <div key={item.id} className="border rounded-lg overflow-hidden">
                         <Link href={`/products/${item.product.slug || item.product.id}`}>
                           <img
@@ -543,7 +559,7 @@ export default function Account() {
                   <div className="space-y-4">
                     <Button 
                       variant="outline" 
-                      onClick={() => window.location.href = "/api/logout"}
+                      onClick={handleSignOut}
                       className="w-full sm:w-auto"
                     >
                       Sign Out
