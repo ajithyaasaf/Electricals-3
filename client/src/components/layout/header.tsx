@@ -173,11 +173,6 @@ export function Header() {
                       </span>
                     </div>
                   </div>
-                  
-                  {/* Mobile Search */}
-                  <div className="p-4 border-b border-gray-200">
-                    <SearchBar />
-                  </div>
 
                   {/* Amazon-style Navigation */}
                   <div className="flex-1 overflow-y-auto">
