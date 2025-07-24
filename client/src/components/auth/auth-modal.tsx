@@ -230,7 +230,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="signin-email"
                       type="email"
                       placeholder="you@example.com"
-                      className="pl-10 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 h-10 border-gray-200 focus:border-gray-300 focus:ring-0 focus:outline-none rounded-lg"
                       {...signInForm.register("email")}
                     />
                   </div>
@@ -254,7 +254,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="signin-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-10 pr-12 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 pr-12 h-10 border-gray-200 focus:border-gray-300 focus:ring-0 focus:outline-none rounded-lg"
                       {...signInForm.register("password")}
                     />
                     <Button
@@ -325,7 +325,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       <Input
                         id="firstName"
                         placeholder="First name"
-                        className="pl-10 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                        className="pl-10 h-10 border-gray-200 focus:border-gray-300 focus:ring-0 focus:outline-none rounded-lg"
                         {...signUpForm.register("firstName")}
                       />
                     </div>
@@ -343,7 +343,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     <Input
                       id="lastName"
                       placeholder="Last name"
-                      className="h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="h-10 border-gray-200 focus:border-gray-300 focus:ring-0 focus:outline-none rounded-lg"
                       {...signUpForm.register("lastName")}
                     />
                     {signUpForm.formState.errors.lastName && (
@@ -365,7 +365,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="signup-email"
                       type="email"
                       placeholder="you@example.com"
-                      className="pl-10 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 h-10 border-gray-200 focus:border-gray-300 focus:ring-0 focus:outline-none rounded-lg"
                       {...signUpForm.register("email")}
                     />
                   </div>
@@ -387,7 +387,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="signup-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      className="pl-10 pr-12 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 pr-12 h-10 border-gray-200 focus:border-gray-300 focus:ring-0 focus:outline-none rounded-lg"
                       {...signUpForm.register("password")}
                     />
                     <Button
@@ -418,7 +418,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       placeholder="Confirm your password"
-                      className="pl-10 h-10 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                      className="pl-10 h-10 border-gray-200 focus:border-gray-300 focus:ring-0 focus:outline-none rounded-lg"
                       {...signUpForm.register("confirmPassword")}
                     />
                   </div>
@@ -511,7 +511,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                     id="reset-email"
                     type="email"
                     placeholder="you@example.com"
-                    className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
+                    className="pl-10 h-10 border-gray-200 focus:border-gray-300 focus:ring-0 focus:outline-none rounded-lg"
                     {...resetForm.register("email")}
                   />
                 </div>

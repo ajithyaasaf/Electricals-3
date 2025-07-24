@@ -22,15 +22,16 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Focus visibility for accessibility */
+/* Focus visibility for accessibility - removed blue outline */
 *:focus {
-  outline: 2px solid hsl(207, 90%, 54%);
-  outline-offset: 2px;
+  outline: none;
 }
 
-/* Remove focus outline for mouse users */
-.js-focus-visible *:focus:not(.focus-visible) {
+/* Custom focus styles for inputs */
+input:focus {
   outline: none;
+  box-shadow: none;
+  border-color: #d1d5db;
 }
 
 :root {
