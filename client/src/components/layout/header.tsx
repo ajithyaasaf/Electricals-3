@@ -129,14 +129,14 @@ export function Header() {
     }));
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     try {
-      signInWithGoogle();
+      await signInWithGoogle();
     } catch (error: any) {
-      if (error.code === 'auth/unauthorized-domain') {
+      if (error.message === 'DOMAIN_NOT_AUTHORIZED' || error.code === 'auth/unauthorized-domain') {
         toast({
-          title: "Domain Authorization Required",
-          description: "Please add this domain to Firebase authorized domains in the console.",
+          title: "Setup Required",
+          description: "Please add this domain to Firebase authorized domains. Check the console for details.",
           variant: "destructive",
         });
       } else {

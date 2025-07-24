@@ -14,8 +14,16 @@ export const auth = getAuth(app);
 
 const provider = new GoogleAuthProvider();
 
-export const signInWithGoogle = () => {
-  signInWithRedirect(auth, provider);
+export const signInWithGoogle = async () => {
+  try {
+    await signInWithRedirect(auth, provider);
+  } catch (error: any) {
+    if (error.code === 'auth/unauthorized-domain') {
+      console.error('Domain authorization required. Please add this domain to Firebase authorized domains.');
+      throw new Error('DOMAIN_NOT_AUTHORIZED');
+    }
+    throw error;
+  }
 };
 
 export const signOutUser = () => {
