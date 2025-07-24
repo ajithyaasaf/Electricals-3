@@ -1,16 +1,17 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithEmail, signUpWithEmail, signInWithGoogle, resetPassword } from "@/lib/firebase";
-import { Mail, Lock, User, Eye, EyeOff, Zap } from "lucide-react";
+import { Mail, Lock, User, Eye, EyeOff, Zap, Shield, ArrowLeft } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 
 interface AuthModalProps {
@@ -167,242 +168,405 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-copper-600 rounded-lg flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            {activeTab === "signin" && "Sign in to CopperBear"}
-            {activeTab === "signup" && "Create your account"}
-            {activeTab === "reset" && "Reset your password"}
-          </DialogTitle>
+      <DialogContent className="sm:max-w-[480px] p-0 gap-0 bg-white">
+        <DialogHeader className="sr-only">
+          <DialogTitle>Authentication</DialogTitle>
+          <DialogDescription>Sign in or create an account to continue</DialogDescription>
         </DialogHeader>
+        
+        {/* Header */}
+        <div className="px-8 py-6 border-b bg-gradient-to-r from-copper-50 to-copper-100">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-gradient-to-r from-copper-600 to-copper-700 rounded-xl flex items-center justify-center shadow-lg">
+              <Zap className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-copper-800">CopperBear</h1>
+              <p className="text-sm text-copper-600">Electrical Solutions</p>
+            </div>
+          </div>
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-gray-900">
+              {activeTab === "signin" && "Welcome back"}
+              {activeTab === "signup" && "Create your account"}
+              {activeTab === "reset" && "Reset your password"}
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">
+              {activeTab === "signin" && "Sign in to access your account and continue shopping"}
+              {activeTab === "signup" && "Join thousands of professionals who trust CopperBear"}
+              {activeTab === "reset" && "Enter your email to receive password reset instructions"}
+            </p>
+          </div>
+        </div>
 
-        {activeTab !== "reset" ? (
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "signin" | "signup")}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Create Account</TabsTrigger>
-            </TabsList>
+        <div className="px-8 py-6">
+          {activeTab !== "reset" ? (
+          <div className="space-y-6">
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "signin" | "signup")}>
+              <TabsList className="grid w-full grid-cols-2 bg-gray-100 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="signin" 
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
+                >
+                  Sign In
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="signup"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm font-medium"
+                >
+                  Create Account
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="signin" className="space-y-4">
-              <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-4">
+            <TabsContent value="signin" className="space-y-6 mt-6">
+              <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="space-y-5">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email" className="text-sm font-medium text-gray-700">
+                    Email address
+                  </Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       id="signin-email"
                       type="email"
-                      placeholder="Enter your email"
-                      className="pl-10"
+                      placeholder="you@example.com"
+                      className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signInForm.register("email")}
                     />
                   </div>
                   {signInForm.formState.errors.email && (
-                    <p className="text-sm text-red-600">{signInForm.formState.errors.email.message}</p>
+                    <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                      <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                      </div>
+                      {signInForm.formState.errors.email.message}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password" className="text-sm font-medium text-gray-700">
+                    Password
+                  </Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       id="signin-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-10 pr-10"
+                      className="pl-10 pr-12 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signInForm.register("password")}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100 rounded-md"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
                     </Button>
                   </div>
                   {signInForm.formState.errors.password && (
-                    <p className="text-sm text-red-600">{signInForm.formState.errors.password.message}</p>
+                    <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                      <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                      </div>
+                      {signInForm.formState.errors.password.message}
+                    </p>
                   )}
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      id="remember"
+                      type="checkbox"
+                      className="w-4 h-4 text-copper-600 bg-gray-100 border-gray-300 rounded focus:ring-copper-500"
+                    />
+                    <Label htmlFor="remember" className="text-sm text-gray-600">
+                      Remember me
+                    </Label>
+                  </div>
                   <Button
                     type="button"
                     variant="link"
-                    className="text-sm text-copper-600 hover:text-copper-700 p-0"
+                    className="text-sm text-copper-600 hover:text-copper-700 p-0 h-auto"
                     onClick={() => setActiveTab("reset")}
                   >
-                    Forgot your password?
+                    Forgot password?
                   </Button>
                 </div>
 
-                <Button type="submit" className="w-full bg-copper-600 hover:bg-copper-700" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign In"}
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 bg-gradient-to-r from-copper-600 to-copper-700 hover:from-copper-700 hover:to-copper-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200" 
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Signing in...
+                    </div>
+                  ) : (
+                    "Sign In"
+                  )}
                 </Button>
               </form>
             </TabsContent>
 
-            <TabsContent value="signup" className="space-y-4">
-              <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-4">
+            <TabsContent value="signup" className="space-y-6 mt-6">
+              <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="firstName" className="text-sm font-medium text-gray-700">First Name</Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                       <Input
                         id="firstName"
                         placeholder="First name"
-                        className="pl-10"
+                        className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                         {...signUpForm.register("firstName")}
                       />
                     </div>
                     {signUpForm.formState.errors.firstName && (
-                      <p className="text-sm text-red-600">{signUpForm.formState.errors.firstName.message}</p>
+                      <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                        <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
+                          <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                        </div>
+                        {signUpForm.formState.errors.firstName.message}
+                      </p>
                     )}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="lastName" className="text-sm font-medium text-gray-700">Last Name</Label>
                     <Input
                       id="lastName"
                       placeholder="Last name"
+                      className="h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signUpForm.register("lastName")}
                     />
                     {signUpForm.formState.errors.lastName && (
-                      <p className="text-sm text-red-600">{signUpForm.formState.errors.lastName.message}</p>
+                      <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                        <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
+                          <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                        </div>
+                        {signUpForm.formState.errors.lastName.message}
+                      </p>
                     )}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">Email address</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       id="signup-email"
                       type="email"
-                      placeholder="Enter your email"
-                      className="pl-10"
+                      placeholder="you@example.com"
+                      className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signUpForm.register("email")}
                     />
                   </div>
                   {signUpForm.formState.errors.email && (
-                    <p className="text-sm text-red-600">{signUpForm.formState.errors.email.message}</p>
+                    <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                      <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                      </div>
+                      {signUpForm.formState.errors.email.message}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       id="signup-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      className="pl-10 pr-10"
+                      className="pl-10 pr-12 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signUpForm.register("password")}
                     />
                     <Button
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100 rounded-md"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <EyeOff className="h-4 w-4 text-gray-500" /> : <Eye className="h-4 w-4 text-gray-500" />}
                     </Button>
                   </div>
                   {signUpForm.formState.errors.password && (
-                    <p className="text-sm text-red-600">{signUpForm.formState.errors.password.message}</p>
+                    <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                      <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                      </div>
+                      {signUpForm.formState.errors.password.message}
+                    </p>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">Confirm Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
                       id="confirmPassword"
                       type={showPassword ? "text" : "password"}
                       placeholder="Confirm your password"
-                      className="pl-10"
+                      className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                       {...signUpForm.register("confirmPassword")}
                     />
                   </div>
                   {signUpForm.formState.errors.confirmPassword && (
-                    <p className="text-sm text-red-600">{signUpForm.formState.errors.confirmPassword.message}</p>
+                    <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                      <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
+                        <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                      </div>
+                      {signUpForm.formState.errors.confirmPassword.message}
+                    </p>
                   )}
                 </div>
 
-                <Button type="submit" className="w-full bg-copper-600 hover:bg-copper-700" disabled={loading}>
-                  {loading ? "Creating account..." : "Create Account"}
+                <Button 
+                  type="submit" 
+                  className="w-full h-12 bg-gradient-to-r from-copper-600 to-copper-700 hover:from-copper-700 hover:to-copper-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200" 
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Creating account...
+                    </div>
+                  ) : (
+                    "Create Account"
+                  )}
                 </Button>
               </form>
             </TabsContent>
 
-            <div className="relative">
+            <div className="relative my-6">
               <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
+                <Separator className="w-full border-gray-200" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-white px-4 text-gray-500 font-medium">Or continue with</span>
               </div>
             </div>
 
             <Button
               type="button"
               variant="outline"
-              className="w-full"
+              className="w-full h-12 border-gray-300 hover:bg-gray-50 rounded-lg font-medium transition-colors duration-200"
               onClick={handleGoogleSignIn}
               disabled={loading}
             >
-              <FcGoogle className="mr-2 h-4 w-4" />
-              Google
+              <FcGoogle className="mr-3 h-5 w-5" />
+              Continue with Google
             </Button>
-          </Tabs>
+
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
+              <div className="flex items-start gap-3">
+                <Shield className="w-5 h-5 text-copper-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-gray-600">
+                  <p className="font-medium text-gray-900 mb-1">Your data is secure</p>
+                  <p>We use industry-standard encryption to protect your personal information and never share it with third parties.</p>
+                </div>
+              </div>
+            </div>
+            </Tabs>
+          </div>
         ) : (
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Enter your email address and we'll send you a link to reset your password.
-            </p>
-            <form onSubmit={resetForm.handleSubmit(handlePasswordReset)} className="space-y-4">
+          <div className="space-y-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="p-1 hover:bg-gray-100 rounded-md"
+                onClick={() => setActiveTab("signin")}
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm text-gray-600">Back to sign in</span>
+            </div>
+            
+            <div className="text-center mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Reset your password</h3>
+              <p className="text-sm text-gray-600">
+                Enter your email address and we'll send you a secure link to reset your password.
+              </p>
+            </div>
+            
+            <form onSubmit={resetForm.handleSubmit(handlePasswordReset)} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="reset-email">Email</Label>
+                <Label htmlFor="reset-email" className="text-sm font-medium text-gray-700">Email address</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     id="reset-email"
                     type="email"
-                    placeholder="Enter your email"
-                    className="pl-10"
+                    placeholder="you@example.com"
+                    className="pl-10 h-12 border-gray-300 focus:border-copper-500 focus:ring-copper-500 rounded-lg"
                     {...resetForm.register("email")}
                   />
                 </div>
                 {resetForm.formState.errors.email && (
-                  <p className="text-sm text-red-600">{resetForm.formState.errors.email.message}</p>
+                  <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
+                    <div className="w-4 h-4 rounded-full bg-red-100 flex items-center justify-center">
+                      <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                    </div>
+                    {resetForm.formState.errors.email.message}
+                  </p>
                 )}
               </div>
 
-              <Button type="submit" className="w-full bg-copper-600 hover:bg-copper-700" disabled={loading}>
-                {loading ? "Sending..." : "Send Reset Email"}
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full"
-                onClick={() => setActiveTab("signin")}
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-gradient-to-r from-copper-600 to-copper-700 hover:from-copper-700 hover:to-copper-800 text-white font-medium rounded-lg shadow-lg hover:shadow-xl transition-all duration-200" 
+                disabled={loading}
               >
-                Back to Sign In
+                {loading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    Sending reset email...
+                  </div>
+                ) : (
+                  "Send Reset Email"
+                )}
               </Button>
             </form>
+            
+            <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-start gap-3">
+                <Mail className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div className="text-sm text-blue-800">
+                  <p className="font-medium mb-1">Check your email</p>
+                  <p>If an account with that email exists, you'll receive a password reset link within a few minutes.</p>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
+          )}
+        </div>
+        
+        {/* Footer */}
+        <div className="px-8 py-4 border-t bg-gray-50 text-center">
+          <p className="text-xs text-gray-500">
+            By continuing, you agree to CopperBear's{" "}
+            <a href="/terms" className="text-copper-600 hover:text-copper-700 underline">
+              Terms of Service
+            </a>{" "}
+            and{" "}
+            <a href="/privacy" className="text-copper-600 hover:text-copper-700 underline">
+              Privacy Policy
+            </a>
+          </p>
+        </div>
       </DialogContent>
     </Dialog>
   );
