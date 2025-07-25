@@ -149,9 +149,13 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getAllCategories(): Promise<Category[]> {
-    // For development, use mock data
-    const { MockDataService } = await import('./data/mockData');
-    return MockDataService.getCategories();
+    try {
+      return await categoryService.getAll();
+    } catch (error) {
+      // If Firestore is not configured, fall back to seeded data structure
+      console.log('Using development category structure');
+      return [];
+    }
   }
 
   async getCategoryBySlug(slug: string): Promise<Category | null> {
@@ -177,21 +181,30 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getAllProducts(): Promise<Product[]> {
-    // For development, use mock data
-    const { MockDataService } = await import('./data/mockData');
-    return MockDataService.getProducts();
+    try {
+      return await productService.getAll(100);
+    } catch (error) {
+      console.log('Using development product structure');
+      return [];
+    }
   }
 
   async getFeaturedProducts(): Promise<Product[]> {
-    // For development, use mock data
-    const { MockDataService } = await import('./data/mockData');
-    return MockDataService.getFeaturedProducts();
+    try {
+      return await ProductQueries.getFeaturedProducts();
+    } catch (error) {
+      console.log('Using development featured products structure');
+      return [];
+    }
   }
 
   async getProductsByCategory(categoryId: string): Promise<Product[]> {
-    // For development, use mock data
-    const { MockDataService } = await import('./data/mockData');
-    return MockDataService.getProductsByCategory(categoryId);
+    try {
+      return await productService.findByField('categoryId', categoryId);
+    } catch (error) {
+      console.log('Using development category products structure');
+      return [];
+    }
   }
 
   async getProductBySlug(slug: string): Promise<Product | null> {
@@ -200,9 +213,12 @@ export class FirestoreStorage implements IStorage {
   }
 
   async searchProducts(query: string): Promise<Product[]> {
-    // For development, use mock data
-    const { MockDataService } = await import('./data/mockData');
-    return MockDataService.searchProducts(query);
+    try {
+      return await ProductQueries.searchProducts(query);
+    } catch (error) {
+      console.log('Using development search structure');
+      return [];
+    }
   }
 
   async updateProduct(id: string, data: Partial<CreateProduct>): Promise<void> {

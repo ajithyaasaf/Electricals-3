@@ -212,6 +212,14 @@ export class ProductQueries {
       product.shortDescription?.toLowerCase().includes(lowerSearchTerm)
     );
   }
+
+  static async getFeaturedProducts(limitCount = 20): Promise<Product[]> {
+    return this.getFeatured(limitCount);
+  }
+
+  static async searchProducts(searchTerm: string, limitCount = 50): Promise<Product[]> {
+    return this.search(searchTerm, limitCount);
+  }
 }
 
 export class CartQueries {

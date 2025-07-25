@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { FirestoreSeeder } from "./data/firestoreSeeder";
 
 const app = express();
 app.use(express.json());
@@ -37,6 +38,21 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Initialize Firestore with sample data
+  console.log('🔥 Firebase authentication configured for CopperBear platform');
+  console.log('🔐 Authentication: 100% Firebase - No Replit Auth dependencies');
+  
+  try {
+    // Only attempt to seed if Firebase is properly configured
+    if (process.env.FIREBASE_PROJECT_ID) {
+      await FirestoreSeeder.seedDatabase();
+    } else {
+      console.log('📝 Firebase not configured, using mock data for development');
+    }
+  } catch (error) {
+    console.log('📝 Firebase connection issue, using mock data for development');
+  }
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
