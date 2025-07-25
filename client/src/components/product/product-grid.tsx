@@ -1,8 +1,9 @@
 import { ProductCard } from "./product-card";
 import type { ProductWithCategory } from "@/lib/types";
+import type { ProductItem } from "@/features/products/types";
 
 interface ProductGridProps {
-  products: ProductWithCategory[];
+  products: ProductWithCategory[] | ProductItem[];
   showCategory?: boolean;
 }
 

@@ -1,5 +1,4 @@
 import { useState, useEffect, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useLocation, useSearch } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -17,6 +16,8 @@ import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SearchInput } from "@/components/common/search-input";
+import { useProducts, useCategories } from "@/features/products/hooks/useProducts";
+import type { ProductFilters } from "@/features/products/types";
 
 export default function Products() {
   const searchParams = useSearch();
@@ -30,14 +31,14 @@ export default function Products() {
   const initialFeatured = urlParams.get("featured") === "true";
   
   // Filter state
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<ProductFilters>({
     categoryId: initialCategory ? CATEGORIES.find(c => c.slug === initialCategory)?.id : undefined,
     search: initialSearch,
     featured: initialFeatured,
     minPrice: 0,
     maxPrice: 100000,
-    sortBy: "newest" as "name" | "price" | "rating" | "newest",
-    sortOrder: "desc" as "asc" | "desc"
+    sortBy: "newest",
+    sortOrder: "desc"
   });
 
   // Debounce search to reduce API calls
@@ -47,10 +48,8 @@ export default function Products() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const itemsPerPage = 20;
 
-  // Fetch categories
-  const { data: categories = [] } = useQuery({
-    queryKey: ["/api/categories"],
-  });
+  // Fetch categories using custom hook
+  const { data: categories = [] } = useCategories();
 
   // Memoize query parameters to prevent unnecessary re-renders
   const queryParams = useMemo(() => ({
@@ -60,10 +59,8 @@ export default function Products() {
     offset: (currentPage - 1) * itemsPerPage
   }), [filters, debouncedSearch, currentPage, itemsPerPage]);
 
-  // Fetch products
-  const { data: productsData, isLoading } = useQuery({
-    queryKey: ["/api/products", queryParams],
-  });
+  // Fetch products using custom hook
+  const { data: productsData, isLoading } = useProducts(queryParams);
 
   // Update URL when filters change
   useEffect(() => {

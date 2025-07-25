@@ -149,7 +149,9 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getAllCategories(): Promise<Category[]> {
-    return categoryService.getAll(100);
+    // For development, use mock data
+    const { MockDataService } = await import('./data/mockData');
+    return MockDataService.getCategories();
   }
 
   async getCategoryBySlug(slug: string): Promise<Category | null> {
@@ -175,15 +177,21 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getAllProducts(): Promise<Product[]> {
-    return productService.getAll(100);
+    // For development, use mock data
+    const { MockDataService } = await import('./data/mockData');
+    return MockDataService.getProducts();
   }
 
   async getFeaturedProducts(): Promise<Product[]> {
-    return ProductQueries.getFeatured();
+    // For development, use mock data
+    const { MockDataService } = await import('./data/mockData');
+    return MockDataService.getFeaturedProducts();
   }
 
   async getProductsByCategory(categoryId: string): Promise<Product[]> {
-    return ProductQueries.getByCategory(categoryId);
+    // For development, use mock data
+    const { MockDataService } = await import('./data/mockData');
+    return MockDataService.getProductsByCategory(categoryId);
   }
 
   async getProductBySlug(slug: string): Promise<Product | null> {
@@ -192,7 +200,9 @@ export class FirestoreStorage implements IStorage {
   }
 
   async searchProducts(query: string): Promise<Product[]> {
-    return ProductQueries.search(query);
+    // For development, use mock data
+    const { MockDataService } = await import('./data/mockData');
+    return MockDataService.searchProducts(query);
   }
 
   async updateProduct(id: string, data: Partial<CreateProduct>): Promise<void> {

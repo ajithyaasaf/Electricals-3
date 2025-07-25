@@ -1,13 +1,6 @@
-export const CATEGORIES = [
-  { id: 1, name: "Circuit Breakers", slug: "circuit-breakers" },
-  { id: 2, name: "Wiring & Cables", slug: "wiring-cables" },
-  { id: 3, name: "Electrical Tools", slug: "electrical-tools" },
-  { id: 4, name: "Panels & Boxes", slug: "panels-boxes" },
-  { id: 5, name: "Outlets & Switches", slug: "outlets-switches" },
-  { id: 6, name: "Installation Services", slug: "installation-services" },
-  { id: 7, name: "Repair & Maintenance", slug: "repair-maintenance" },
-  { id: 8, name: "Electrical Consulting", slug: "electrical-consulting" },
-];
+import { ELECTRICAL_CATEGORIES } from '@shared/data/categories';
+
+export const CATEGORIES = ELECTRICAL_CATEGORIES;
 
 export const ORDER_STATUSES = {
   PENDING: "pending",
