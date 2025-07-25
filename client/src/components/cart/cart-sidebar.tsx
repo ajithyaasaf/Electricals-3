@@ -45,7 +45,8 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
       if (!response.ok) throw new Error("Failed to fetch guest cart");
       return response.json();
     },
-    enabled: !isAuthenticated && open && guestCart.length > 0,
+    enabled: !isAuthenticated && open,
+    retry: false,
   });
 
   // Use appropriate cart items based on authentication status
