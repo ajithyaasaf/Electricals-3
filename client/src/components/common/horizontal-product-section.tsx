@@ -76,7 +76,7 @@ export function HorizontalProductSection({
           <div className="flex items-center gap-4">
             <h2 className="text-xl font-bold text-gray-900">{title}</h2>
             {dealBadge && (
-              <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium">
                 {dealBadge}
               </span>
             )}
