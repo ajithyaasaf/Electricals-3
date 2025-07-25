@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,8 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { signInWithGoogle } from "@/lib/firebase";
+import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { AdminLogin } from "@/components/admin/admin-login";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useForm } from "react-hook-form";
@@ -33,7 +31,9 @@ import {
   BarChart3,
   DollarSign,
   TrendingUp,
-  Activity
+  Activity,
+  LogOut,
+  Shield
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -79,7 +79,7 @@ type ServiceFormData = z.infer<typeof serviceSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
 
 export default function Admin() {
-  const { isAuthenticated, loading: authLoading, user } = useFirebaseAuth();
+  const { isAdminAuthenticated, loading: authLoading, adminUser, adminSignOut } = useAdminAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -88,47 +88,46 @@ export default function Admin() {
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
-  // Check if user is admin
-  const isAdmin = user?.email === 'admin@copperbear.com';
+  // Show login form if not authenticated as admin
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-copper-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading admin panel...</p>
+        </div>
+      </div>
+    );
+  }
 
-  // Redirect if not authenticated or not admin
-  useEffect(() => {
-    if (!authLoading && (!isAuthenticated || !isAdmin)) {
-      toast({
-        title: "Access denied",
-        description: "You don't have permission to access this page.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 1000);
-    }
-  }, [isAuthenticated, authLoading, isAdmin, toast]);
+  if (!isAdminAuthenticated) {
+    return <AdminLogin onLoginSuccess={() => {}} />;
+  }
 
   // Fetch data with proper typing
   const { data: productsData = { products: [], total: 0 }, isLoading: productsLoading } = useQuery({
     queryKey: ["/api/products", { limit: 100 }],
-    enabled: isAuthenticated && isAdmin,
+    enabled: isAdminAuthenticated,
   });
 
   const { data: servicesData = { services: [], total: 0 }, isLoading: servicesLoading } = useQuery({
     queryKey: ["/api/services", { limit: 100 }],
-    enabled: isAuthenticated && isAdmin,
+    enabled: isAdminAuthenticated,
   });
 
   const { data: categoriesData = { categories: [] }, isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: isAuthenticated && isAdmin,
+    enabled: isAdminAuthenticated,
   });
 
   const { data: ordersData = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
-    enabled: isAuthenticated && isAdmin,
+    enabled: isAdminAuthenticated,
   });
 
   const { data: bookingsData = [], isLoading: bookingsLoading } = useQuery({
     queryKey: ["/api/bookings"],
-    enabled: isAuthenticated && isAdmin,
+    enabled: isAdminAuthenticated,
   });
 
   // Extract arrays for easier access
@@ -274,26 +273,21 @@ export default function Admin() {
     },
   });
 
-  if (authLoading || !isAuthenticated || !isAdmin) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          {authLoading ? (
-            <Skeleton className="w-full h-96" />
-          ) : (
-            <div className="text-center py-16">
-              <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-              <p className="text-gray-600 mb-6">You don't have permission to access this page.</p>
-              <Button asChild>
-                <Link href="/">Go Home</Link>
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = async () => {
+    try {
+      await adminSignOut();
+      toast({
+        title: "Logged out",
+        description: "Successfully logged out of admin panel.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Calculate dashboard stats
   const totalRevenue = orders.reduce((sum: number, order: any) => 
@@ -350,12 +344,41 @@ export default function Admin() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      {/* Admin Header */}
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <Shield className="w-6 h-6 text-copper-600" />
+                <h1 className="text-xl font-bold text-gray-900">CopperBear Admin</h1>
+              </div>
+              <Badge variant="secondary" className="bg-copper-100 text-copper-800">
+                Authenticated
+              </Badge>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-gray-600">
+                Welcome, {adminUser?.email}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleLogout}
+                className="flex items-center space-x-2"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
           <p className="text-gray-600">
             Manage products, services, orders, and users
           </p>
@@ -1088,8 +1111,6 @@ export default function Admin() {
           </TabsContent>
         </Tabs>
       </div>
-
-      <Footer />
     </div>
   );
 }
