@@ -234,15 +234,16 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* TEST - Simple Amazon-style section to verify rendering */}
-      <section className="bg-white py-8 border-t-4 border-red-500">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center text-red-600 mb-4">🚀 AMAZON-STYLE SECTIONS ARE NOW ACTIVE! 🚀</h2>
-          <p className="text-center text-gray-600">If you can see this red banner, the new sections are working!</p>
-        </div>
-      </section>
+      {/* Recently Viewed - Only show for returning users */}
+      <RecentlyViewed />
 
-      {/* Test Amazon-style Deals Section */}
+      {/* Deals Banner */}
+      <DealsBanner deals={mockDeals} />
+
+      {/* Visual Category Cards - Amazon Style */}
+      <VisualCategoryCards categories={visualCategories} />
+
+      {/* Amazon-style Deals Section */}
       <section className="bg-white py-6">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-6">
@@ -331,96 +332,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Best Sellers - Amazon Style Horizontal Scrolling */}
-      <section className="bg-white py-6">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">Best Sellers in Electrical</h2>
-            <Link href="/products?bestsellers=true" className="text-copper-600 hover:text-copper-700 font-medium text-sm">See all →</Link>
-          </div>
-          
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-            {mockProducts("bestsellers").map((product) => (
-              <Link key={product.id} href={`/products/${product.id}`} className="flex-shrink-0 w-48 group cursor-pointer">
-                <div className="h-full border-0 shadow-sm hover:shadow-md transition-shadow duration-200 bg-white rounded-lg p-3">
-                  <div className="relative mb-3">
-                    <LazyImage
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-40 object-cover rounded-lg"
-                      fallback="/api/placeholder/200/160"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-copper-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center gap-1">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <span key={i} className={`text-xs ${i < (product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
-                        ))}
-                      </div>
-                      <span className="text-xs text-gray-500">({product.rating})</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
-                      {product.originalPrice && product.originalPrice > product.price && (
-                        <span className="text-sm text-gray-500 line-through">${product.originalPrice.toFixed(2)}</span>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-500 capitalize">{product.category}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Best Sellers - Horizontal Scrolling */}
+      <HorizontalProductSection
+        title="Best Sellers in Electrical"
+        products={(bestSellersData as any)?.products || mockProducts("bestsellers")}
+        viewAllLink="/products?bestsellers=true"
+        showPrices={true}
+      />
 
-      {/* New Arrivals - Amazon Style Horizontal Scrolling */}
-      <section className="bg-gray-50 py-6">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">New Arrivals</h2>
-            <Link href="/products?new=true" className="text-copper-600 hover:text-copper-700 font-medium text-sm">See all →</Link>
-          </div>
-          
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
-            {mockProducts("new").map((product) => (
-              <Link key={product.id} href={`/products/${product.id}`} className="flex-shrink-0 w-48 group cursor-pointer">
-                <div className="h-full border-0 shadow-sm hover:shadow-md transition-shadow duration-200 bg-white rounded-lg p-3">
-                  <div className="relative mb-3">
-                    <LazyImage
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-40 object-cover rounded-lg"
-                      fallback="/api/placeholder/200/160"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-copper-600 transition-colors">
-                      {product.name}
-                    </h3>
-                    <div className="flex items-center gap-1">
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <span key={i} className={`text-xs ${i < (product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
-                        ))}
-                      </div>
-                      <span className="text-xs text-gray-500">({product.rating})</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
-                    </div>
-                    <p className="text-xs text-gray-500 capitalize">{product.category}</p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* New Arrivals - Horizontal Scrolling */}
+      <HorizontalProductSection
+        title="New Arrivals"
+        products={(newArrivalsData as any)?.products || mockProducts("new")}
+        viewAllLink="/products?new=true"
+        showPrices={true}
+      />
+
+      {/* Trending Now - Horizontal Scrolling */}
+      <HorizontalProductSection
+        title="Trending Now"
+        products={(trendingData as any)?.products || mockProducts("trending")}
+        viewAllLink="/products?trending=true"
+        showPrices={true}
+        dealBadge="Hot"
+      />
 
       {/* Personalized Recommendations */}
       <RecommendationEngine userId={user?.uid} />
