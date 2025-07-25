@@ -4,6 +4,11 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/common/hero-section";
 import { Testimonials } from "@/components/common/testimonials";
+import { HorizontalProductSection } from "@/components/common/horizontal-product-section";
+import { DealsBanner } from "@/components/common/deals-banner";
+import { VisualCategoryCards } from "@/components/common/visual-category-cards";
+import { RecentlyViewed } from "@/components/common/recently-viewed";
+import { RecommendationEngine } from "@/components/common/recommendation-engine";
 import { ProductGrid } from "@/components/product/product-grid";
 import { ProductGridSkeleton, HeroSkeleton } from "@/components/common/skeleton-loader";
 import { ServiceCard } from "@/components/service/service-card";
@@ -13,8 +18,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Zap, Wrench, ClipboardCheck, Tag, Clock, Shield, Phone } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { getOptimizedImageUrl } from "@/lib/performance";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 
 export default function Home() {
+  const { user } = useFirebaseAuth();
+
   // Fetch featured products
   const { data: productsData, isLoading: productsLoading } = useQuery({
     queryKey: ["/api/products", { featured: true, limit: 8 }],
@@ -25,42 +33,197 @@ export default function Home() {
     queryKey: ["/api/services", { limit: 3 }],
   });
 
-  const productCategories = [
+  // Fetch deals data
+  const { data: dealsData } = useQuery({
+    queryKey: ["/api/deals", { limit: 4 }],
+  });
+
+  // Fetch best sellers
+  const { data: bestSellersData } = useQuery({
+    queryKey: ["/api/products", { bestsellers: true, limit: 12 }],
+  });
+
+  // Fetch new arrivals
+  const { data: newArrivalsData } = useQuery({
+    queryKey: ["/api/products", { new: true, limit: 12 }],
+  });
+
+  // Fetch trending products
+  const { data: trendingData } = useQuery({
+    queryKey: ["/api/products", { trending: true, limit: 12 }],
+  });
+
+  // Visual category cards data
+  const visualCategories = [
     {
-      name: "Circuit Breakers",
+      name: "Circuit Breakers & Protection",
       slug: "circuit-breakers",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
-      color: "from-copper-100 to-copper-200"
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
+      description: "Professional-grade circuit breakers, GFCI outlets, and electrical protection equipment",
+      itemCount: 240,
+      featured: true
     },
     {
-      name: "Wiring & Cables", 
+      name: "Wiring & Cable Solutions", 
       slug: "wiring-cables",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
-      color: "from-electric-blue-100 to-electric-blue-200"
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
+      description: "High-quality electrical wiring, cables, and connectivity solutions for all projects",
+      itemCount: 180,
+      featured: true
     },
     {
-      name: "Electrical Tools",
+      name: "Professional Tools",
       slug: "electrical-tools", 
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
-      color: "from-orange-100 to-orange-200"
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
+      description: "Premium electrical tools and equipment for professionals and contractors",
+      itemCount: 320,
+      featured: true
     },
     {
       name: "Panels & Boxes",
       slug: "panels-boxes",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100), 
-      color: "from-gray-100 to-gray-200"
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
+      description: "Electrical panels and junction boxes",
+      itemCount: 85
     },
     {
       name: "Outlets & Switches",
       slug: "outlets-switches",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
-      color: "from-green-100 to-green-200"
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
+      description: "Modern outlets and switches",
+      itemCount: 150
     },
     {
-      name: "Professional Services",
-      slug: "services",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 100, 100),
-      color: "from-purple-100 to-purple-200"
+      name: "Lighting Solutions",
+      slug: "lighting",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
+      description: "LED lights and fixtures",
+      itemCount: 200
+    }
+  ];
+
+  // Mock deals data (in real app, this would come from API)
+  const mockDeals = dealsData?.deals || [
+    {
+      id: "deal1",
+      title: "Professional Electrical Tool Kit",
+      description: "Complete 50-piece electrician tool set with case",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
+      discount: "30% OFF",
+      originalPrice: 299.99,
+      salePrice: 209.99,
+      timeLeft: "2h 45m",
+      link: "/products/professional-tool-kit",
+      category: "tools"
+    },
+    {
+      id: "deal2", 
+      title: "Smart Circuit Breaker",
+      description: "WiFi-enabled smart breaker with app control",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
+      discount: "25% OFF",
+      originalPrice: 89.99,
+      salePrice: 67.49,
+      link: "/products/smart-breaker",
+      category: "breakers"
+    },
+    {
+      id: "deal3",
+      title: "LED Work Light Set",
+      description: "Portable LED work lights - Pack of 4",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
+      discount: "40% OFF", 
+      originalPrice: 79.99,
+      salePrice: 47.99,
+      link: "/products/led-work-lights",
+      category: "lighting"
+    },
+    {
+      id: "deal4",
+      title: "Wire Nuts Bulk Pack",
+      description: "Professional wire nuts - 500 piece assortment",
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
+      discount: "50% OFF",
+      originalPrice: 29.99,
+      salePrice: 14.99,
+      link: "/products/wire-nuts-bulk",
+      category: "wiring"
+    }
+  ];
+
+  // Mock product data generator for horizontal sections
+  const mockProducts = (type: string) => [
+    {
+      id: `${type}-1`,
+      name: "Professional Wire Stripper Set",
+      price: 29.99,
+      originalPrice: type === "trending" ? 39.99 : undefined,
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+      category: "tools",
+      rating: 4.5
+    },
+    {
+      id: `${type}-2`,
+      name: "Smart GFCI Outlet",
+      price: 45.99,
+      originalPrice: type === "trending" ? 55.99 : undefined,
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+      category: "outlets",
+      rating: 4.8
+    },
+    {
+      id: `${type}-3`,
+      name: "20A Circuit Breaker",
+      price: 18.99,
+      originalPrice: type === "trending" ? 24.99 : undefined,
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+      category: "breakers",
+      rating: 4.7
+    },
+    {
+      id: `${type}-4`,
+      name: "LED Work Light 2000LM",
+      price: 34.99,
+      originalPrice: type === "trending" ? 44.99 : undefined,
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+      category: "lighting",
+      rating: 4.6
+    },
+    {
+      id: `${type}-5`,
+      name: "12 AWG Copper Wire (100ft)",
+      price: 89.99,
+      originalPrice: type === "trending" ? 109.99 : undefined,
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+      category: "wiring",
+      rating: 4.9
+    },
+    {
+      id: `${type}-6`,
+      name: "Digital Multimeter",
+      price: 59.99,
+      originalPrice: type === "trending" ? 79.99 : undefined,
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+      category: "tools",
+      rating: 4.4
+    },
+    {
+      id: `${type}-7`,
+      name: "Electrical Panel Cover",
+      price: 24.99,
+      originalPrice: type === "trending" ? 29.99 : undefined,
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+      category: "panels",
+      rating: 4.3
+    },
+    {
+      id: `${type}-8`,
+      name: "Wire Nuts Assortment",
+      price: 12.99,
+      originalPrice: type === "trending" ? 16.99 : undefined,
+      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+      category: "wiring",
+      rating: 4.2
     }
   ];
 
@@ -71,51 +234,42 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Product Categories */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <h3 className="text-2xl font-bold text-gray-900 mb-8">Shop by Category</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {productCategories.map((category) => (
-              <Link
-                key={category.slug}
-                href={category.slug === "services" ? "/services" : `/products?category=${category.slug}`}
-                className="text-center group cursor-pointer"
-              >
-                <div className={`w-20 h-20 mx-auto mb-3 bg-gradient-to-r ${category.color} rounded-full flex items-center justify-center group-hover:shadow-md transition-all duration-300`}>
-                  <LazyImage
-                    src={category.image}
-                    alt={category.name}
-                    className="w-12 h-12 rounded-full object-cover"
-                    fallback="/api/placeholder/48/48"
-                  />
-                </div>
-                <p className="text-sm font-medium text-gray-900 group-hover:text-copper-600 transition-colors">
-                  {category.name}
-                </p>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Recently Viewed - Only show for returning users */}
+      <RecentlyViewed />
 
-      {/* Featured Products */}
-      <section className="py-12 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-between items-center mb-8">
-            <h3 className="text-2xl font-bold text-gray-900">Best-Selling Electrical Products</h3>
-            <Link href="/products" className="text-copper-600 hover:text-copper-700 font-medium">
-              View all products →
-            </Link>
-          </div>
-          
-          {productsLoading ? (
-            <ProductGridSkeleton count={8} />
-          ) : (
-            <ProductGrid products={productsData?.products || []} />
-          )}
-        </div>
-      </section>
+      {/* Deals Banner */}
+      <DealsBanner deals={mockDeals} />
+
+      {/* Visual Category Cards - Amazon Style */}
+      <VisualCategoryCards categories={visualCategories} />
+
+      {/* Best Sellers - Horizontal Scrolling */}
+      <HorizontalProductSection
+        title="Best Sellers in Electrical"
+        products={bestSellersData?.products || mockProducts("bestsellers")}
+        viewAllLink="/products?bestsellers=true"
+        showPrices={true}
+      />
+
+      {/* New Arrivals - Horizontal Scrolling */}
+      <HorizontalProductSection
+        title="New Arrivals"
+        products={newArrivalsData?.products || mockProducts("new")}
+        viewAllLink="/products?new=true"
+        showPrices={true}
+      />
+
+      {/* Trending Now - Horizontal Scrolling */}
+      <HorizontalProductSection
+        title="Trending Now"
+        products={trendingData?.products || mockProducts("trending")}
+        viewAllLink="/products?trending=true"
+        showPrices={true}
+        dealBadge="Hot"
+      />
+
+      {/* Personalized Recommendations */}
+      <RecommendationEngine userId={user?.uid} />
 
       {/* Services Section */}
       <section className="py-12 bg-white">
@@ -144,7 +298,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {servicesData?.services?.slice(0, 3).map((service) => (
+              {(servicesData?.services || []).slice(0, 3).map((service: any) => (
                 <ServiceCard key={service.id} service={service} />
               ))}
             </div>
