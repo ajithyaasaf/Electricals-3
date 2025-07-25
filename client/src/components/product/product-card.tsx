@@ -101,15 +101,7 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
     e.preventDefault();
     e.stopPropagation();
     
-    if (!isAuthenticated) {
-      toast({
-        title: "Please sign in",
-        description: "You need to sign in to add items to cart.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // Allow both authenticated and guest users to add to cart
     addToCartMutation.mutate();
   };
 
