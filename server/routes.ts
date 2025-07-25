@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupFirebaseAuth, isAuthenticated } from "./firebaseAuth";
+import { registerSeedRoute } from "./routes/seedRoute";
 import { 
   CreateProductSchema, 
   CreateServiceSchema, 
@@ -18,6 +19,9 @@ import { z } from "zod";
 export async function registerRoutes(app: Express): Promise<Server> {
   // Firebase Auth middleware
   await setupFirebaseAuth(app);
+
+  // Register seeding routes
+  registerSeedRoute(app);
 
   // Auth routes
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {

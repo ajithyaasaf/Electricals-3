@@ -42,16 +42,9 @@ app.use((req, res, next) => {
   console.log('🔥 Firebase authentication configured for CopperBear platform');
   console.log('🔐 Authentication: 100% Firebase - No Replit Auth dependencies');
   
-  try {
-    // Only attempt to seed if Firebase is properly configured
-    if (process.env.FIREBASE_PROJECT_ID) {
-      await FirestoreSeeder.seedDatabase();
-    } else {
-      console.log('📝 Firebase not configured, using mock data for development');
-    }
-  } catch (error) {
-    console.log('📝 Firebase connection issue, using mock data for development');
-  }
+  // Firebase is configured - seeding will be done via API endpoint
+  console.log('🔍 Firebase configuration ready');
+  console.log('📡 Use POST /api/admin/seed to create products in database');
 
   const server = await registerRoutes(app);
 

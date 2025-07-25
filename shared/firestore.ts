@@ -39,14 +39,5 @@ export const db = getFirestore(app);
 // Initialize Firebase Auth
 export const auth = getAuth(app);
 
-// Development emulator setup (optional)
-const isDev = process.env.NODE_ENV === 'development' || (typeof import.meta !== 'undefined' && import.meta.env?.DEV);
-const useEmulator = isDev && !process.env.VITE_FIREBASE_USE_EMULATOR_DISABLED && !import.meta?.env?.VITE_FIREBASE_USE_EMULATOR_DISABLED;
-
-if (useEmulator) {
-  try {
-    connectFirestoreEmulator(db, 'localhost', 8080);
-  } catch (error) {
-    // Emulator already connected or not available
-  }
-}
+// Skip emulator for production Firebase - connect directly to real Firestore
+console.log('🔗 Connecting to production Firestore database:', firebaseConfig.projectId);
