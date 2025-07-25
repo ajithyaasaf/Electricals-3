@@ -41,21 +41,7 @@ export const CreateCategorySchema = CategorySchema.omit({
 export type Category = z.infer<typeof CategorySchema>;
 export type CreateCategory = z.infer<typeof CreateCategorySchema>;
 
-// Dynamic Product Attribute System
-// This allows each product category to have different attributes
-export const ProductAttributeSchema = z.object({
-  name: z.string(), // e.g., "voltage", "current_rating", "power"
-  label: z.string(), // e.g., "Voltage", "Current Rating", "Power"
-  type: z.enum(['text', 'number', 'boolean', 'select', 'multi-select']),
-  required: z.boolean().default(false),
-  options: z.array(z.string()).optional(), // For select/multi-select
-  unit: z.string().optional(), // e.g., "V", "A", "W"
-  category: z.string(), // e.g., "electrical", "physical", "certification"
-});
-
-export type ProductAttribute = z.infer<typeof ProductAttributeSchema>;
-
-// Product types with enhanced specifications
+// Product types
 export const ProductSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -68,10 +54,7 @@ export const ProductSchema = z.object({
   stock: z.number().default(0),
   categoryId: z.string().optional(),
   imageUrls: z.array(z.string()).default([]),
-  // Dynamic specifications - can be any key-value pairs
-  specifications: z.record(z.union([z.string(), z.number(), z.boolean(), z.array(z.string())])).optional(),
-  // Metadata about which attributes this product uses
-  attributeTemplate: z.string().optional(), // e.g., "circuit_breaker", "wire_cable", "electrical_tool"
+  specifications: z.record(z.any()).optional(),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
   rating: z.number().default(0),
@@ -257,65 +240,3 @@ export const CreateWishlistItemSchema = WishlistItemSchema.omit({
 
 export type WishlistItem = z.infer<typeof WishlistItemSchema>;
 export type CreateWishlistItem = z.infer<typeof CreateWishlistItemSchema>;
-
-// Product Attribute Templates for different electrical product types
-export const ELECTRICAL_PRODUCT_TEMPLATES = {
-  circuit_breaker: {
-    name: "Circuit Breaker",
-    attributes: [
-      { name: "voltage", label: "Voltage", type: "select" as const, required: true, options: ["120V", "240V", "480V", "600V"], unit: "V", category: "electrical" },
-      { name: "current_rating", label: "Current Rating", type: "select" as const, required: true, options: ["15A", "20A", "30A", "50A", "100A"], unit: "A", category: "electrical" },
-      { name: "poles", label: "Number of Poles", type: "select" as const, required: true, options: ["1", "2", "3"], category: "electrical" },
-      { name: "breaking_capacity", label: "Breaking Capacity", type: "number" as const, unit: "kA", category: "electrical" },
-      { name: "mounting_type", label: "Mounting Type", type: "select" as const, options: ["Panel Mount", "DIN Rail", "Surface Mount"], category: "physical" },
-      { name: "ul_listed", label: "UL Listed", type: "boolean" as const, category: "certification" },
-      { name: "brand", label: "Brand", type: "select" as const, required: true, options: ["Schneider Electric", "ABB", "Siemens", "Eaton"], category: "general" }
-    ]
-  },
-  wire_cable: {
-    name: "Wire & Cable",
-    attributes: [
-      { name: "conductor_material", label: "Conductor Material", type: "select" as const, required: true, options: ["Copper", "Aluminum"], category: "physical" },
-      { name: "awg_size", label: "AWG Size", type: "select" as const, required: true, options: ["14 AWG", "12 AWG", "10 AWG", "8 AWG", "6 AWG"], category: "electrical" },
-      { name: "insulation_type", label: "Insulation Type", type: "select" as const, required: true, options: ["THHN", "THWN", "XHHW", "NM-B"], category: "physical" },
-      { name: "voltage_rating", label: "Voltage Rating", type: "select" as const, required: true, options: ["300V", "600V", "1000V"], unit: "V", category: "electrical" },
-      { name: "length", label: "Length", type: "number" as const, required: true, unit: "ft", category: "physical" },
-      { name: "stranded", label: "Stranded", type: "boolean" as const, category: "physical" },
-      { name: "outdoor_rated", label: "Outdoor Rated", type: "boolean" as const, category: "environmental" }
-    ]
-  },
-  electrical_tool: {
-    name: "Electrical Tool",
-    attributes: [
-      { name: "tool_type", label: "Tool Type", type: "select" as const, required: true, options: ["Multimeter", "Wire Stripper", "Crimping Tool", "Voltage Tester"], category: "general" },
-      { name: "power_source", label: "Power Source", type: "select" as const, options: ["Battery", "AC Power", "Manual"], category: "electrical" },
-      { name: "measurement_range", label: "Measurement Range", type: "text" as const, category: "specifications" },
-      { name: "accuracy", label: "Accuracy", type: "text" as const, category: "specifications" },
-      { name: "safety_rating", label: "Safety Rating", type: "select" as const, options: ["CAT I", "CAT II", "CAT III", "CAT IV"], category: "safety" },
-      { name: "warranty_years", label: "Warranty", type: "number" as const, unit: "years", category: "general" }
-    ]
-  },
-  lighting: {
-    name: "Lighting",
-    attributes: [
-      { name: "light_type", label: "Light Type", type: "select" as const, required: true, options: ["LED", "Fluorescent", "Incandescent", "Halogen"], category: "general" },
-      { name: "wattage", label: "Wattage", type: "number" as const, required: true, unit: "W", category: "electrical" },
-      { name: "lumens", label: "Lumens", type: "number" as const, unit: "lm", category: "specifications" },
-      { name: "color_temperature", label: "Color Temperature", type: "select" as const, options: ["2700K", "3000K", "4000K", "5000K", "6500K"], unit: "K", category: "specifications" },
-      { name: "dimmable", label: "Dimmable", type: "boolean" as const, category: "features" },
-      { name: "beam_angle", label: "Beam Angle", type: "number" as const, unit: "degrees", category: "specifications" },
-      { name: "ip_rating", label: "IP Rating", type: "select" as const, options: ["IP20", "IP44", "IP54", "IP65", "IP67"], category: "environmental" }
-    ]
-  },
-  panel_equipment: {
-    name: "Panel Equipment",
-    attributes: [
-      { name: "panel_type", label: "Panel Type", type: "select" as const, required: true, options: ["Main Panel", "Sub Panel", "Distribution Panel"], category: "general" },
-      { name: "amperage", label: "Main Amperage", type: "select" as const, required: true, options: ["100A", "150A", "200A", "400A"], unit: "A", category: "electrical" },
-      { name: "spaces", label: "Circuit Spaces", type: "number" as const, required: true, category: "physical" },
-      { name: "main_breaker", label: "Main Breaker Included", type: "boolean" as const, category: "features" },
-      { name: "indoor_outdoor", label: "Installation", type: "select" as const, required: true, options: ["Indoor", "Outdoor"], category: "environmental" },
-      { name: "nema_rating", label: "NEMA Rating", type: "select" as const, options: ["NEMA 1", "NEMA 3R", "NEMA 4"], category: "environmental" }
-    ]
-  }
-} as const;

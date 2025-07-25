@@ -25,15 +25,28 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={!isAuthenticated ? Landing : Home} />
-      <Route path="/products" component={Products} />
-      <Route path="/products/:slug" component={ProductDetail} />
-      <Route path="/services" component={Services} />
-      <Route path="/services/:slug" component={ServiceDetail} />
-      <Route path="/cart" component={Cart} />
-      <Route path="/checkout" component={Checkout} />
-      <Route path="/account" component={Account} />
-      <Route path="/admin" component={Admin} />
+      {loading || !isAuthenticated ? (
+        <>
+          <Route path="/" component={Landing} />
+          <Route path="/products" component={Products} />
+          <Route path="/products/:slug" component={ProductDetail} />
+          <Route path="/services" component={Services} />
+          <Route path="/services/:slug" component={ServiceDetail} />
+          <Route path="/account" component={Account} />
+        </>
+      ) : (
+        <>
+          <Route path="/" component={Home} />
+          <Route path="/products" component={Products} />
+          <Route path="/products/:slug" component={ProductDetail} />
+          <Route path="/services" component={Services} />
+          <Route path="/services/:slug" component={ServiceDetail} />
+          <Route path="/cart" component={Cart} />
+          <Route path="/checkout" component={Checkout} />
+          <Route path="/account" component={Account} />
+          <Route path="/admin" component={Admin} />
+        </>
+      )}
       <Route component={NotFound} />
     </Switch>
   );
