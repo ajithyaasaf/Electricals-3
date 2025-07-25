@@ -35,7 +35,7 @@ export default function Products() {
     search: initialSearch,
     featured: initialFeatured,
     minPrice: 0,
-    maxPrice: 1000,
+    maxPrice: 100000,
     sortBy: "newest" as "name" | "price" | "rating" | "newest",
     sortOrder: "desc" as "asc" | "desc"
   });
@@ -91,7 +91,7 @@ export default function Products() {
       search: "",
       featured: false,
       minPrice: 0,
-      maxPrice: 1000,
+      maxPrice: 100000,
       sortBy: "newest",
       sortOrder: "desc"
     });
@@ -142,15 +142,15 @@ export default function Products() {
                 updateFilter("minPrice", min);
                 updateFilter("maxPrice", max);
               }}
-              max={1000}
-              step={10}
+              max={100000}
+              step={500}
               className="w-full"
             />
           </div>
           <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <span>${filters.minPrice}</span>
+            <span>₹{filters.minPrice.toLocaleString('en-IN')}</span>
             <span>-</span>
-            <span>${filters.maxPrice}</span>
+            <span>₹{filters.maxPrice.toLocaleString('en-IN')}</span>
           </div>
         </div>
       </div>

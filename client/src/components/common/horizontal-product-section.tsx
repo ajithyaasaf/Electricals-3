@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatPrice, formatSavings, calculateDiscount } from "@/lib/currency";
 
 interface Product {
   id: string;
@@ -138,7 +139,7 @@ export function HorizontalProductSection({
                       />
                       {product.originalPrice && product.originalPrice > product.price && (
                         <div className="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-medium shadow-sm">
-                          {Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)}% OFF
+                          {calculateDiscount(product.originalPrice, product.price)}% OFF
                         </div>
                       )}
                       {/* Quick Action Badge */}
@@ -178,17 +179,17 @@ export function HorizontalProductSection({
                         <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-base sm:text-lg font-bold text-gray-900">
-                              ${product.price.toFixed(2)}
+                              {formatPrice(product.price)}
                             </span>
                             {product.originalPrice && product.originalPrice > product.price && (
                               <span className="text-xs sm:text-sm text-gray-500 line-through">
-                                ${product.originalPrice.toFixed(2)}
+                                {formatPrice(product.originalPrice)}
                               </span>
                             )}
                           </div>
                           {product.originalPrice && product.originalPrice > product.price && (
                             <div className="text-xs text-green-600 font-medium">
-                              Save ${(product.originalPrice - product.price).toFixed(2)}
+                              {formatSavings(product.originalPrice, product.price)}
                             </div>
                           )}
                         </div>

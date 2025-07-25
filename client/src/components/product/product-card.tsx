@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatPrice } from "@/lib/currency";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import type { ProductWithCategory } from "@/lib/types";
 
@@ -193,11 +194,11 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center space-x-2">
               <span className="text-2xl font-bold text-gray-900">
-                ${price.toFixed(2)}
+                {formatPrice(price)}
               </span>
               {originalPrice && (
                 <span className="text-sm text-gray-500 line-through">
-                  ${originalPrice.toFixed(2)}
+                  {formatPrice(originalPrice)}
                 </span>
               )}
             </div>

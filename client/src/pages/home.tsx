@@ -19,6 +19,7 @@ import { Zap, Wrench, ClipboardCheck, Tag, Clock, Shield, Phone } from "lucide-r
 import { CATEGORIES } from "@/lib/constants";
 import { getOptimizedImageUrl } from "@/lib/performance";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { formatPrice } from "@/lib/currency";
 
 export default function Home() {
   const { user } = useFirebaseAuth();
@@ -110,8 +111,8 @@ export default function Home() {
       description: "Complete 50-piece electrician tool set with case",
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
       discount: "30% OFF",
-      originalPrice: 299.99,
-      salePrice: 209.99,
+      originalPrice: 24999,
+      salePrice: 17499,
       timeLeft: "2h 45m",
       link: "/products/professional-tool-kit",
       category: "tools"
@@ -121,9 +122,9 @@ export default function Home() {
       title: "Smart Circuit Breaker",
       description: "WiFi-enabled smart breaker with app control",
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
-      discount: "25% OFF",
-      originalPrice: 89.99,
-      salePrice: 67.49,
+      discount: "25% OFF",  
+      originalPrice: 7499,
+      salePrice: 5624,
       link: "/products/smart-breaker",
       category: "breakers"
     },
@@ -133,8 +134,8 @@ export default function Home() {
       description: "Portable LED work lights - Pack of 4",
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
       discount: "40% OFF", 
-      originalPrice: 79.99,
-      salePrice: 47.99,
+      originalPrice: 6649,
+      salePrice: 3999,
       link: "/products/led-work-lights",
       category: "lighting"
     },
@@ -144,8 +145,8 @@ export default function Home() {
       description: "Professional wire nuts - 500 piece assortment",
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
       discount: "50% OFF",
-      originalPrice: 29.99,
-      salePrice: 14.99,
+      originalPrice: 2499,
+      salePrice: 1249,
       link: "/products/wire-nuts-bulk",
       category: "wiring"
     }
@@ -156,8 +157,8 @@ export default function Home() {
     {
       id: `${type}-1`,
       name: "Professional Wire Stripper Set",
-      price: 29.99,
-      originalPrice: type === "trending" ? 39.99 : undefined,
+      price: 2499,
+      originalPrice: type === "trending" ? 3324 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "tools",
       rating: 4.5
@@ -165,8 +166,8 @@ export default function Home() {
     {
       id: `${type}-2`,
       name: "Smart GFCI Outlet",
-      price: 45.99,
-      originalPrice: type === "trending" ? 55.99 : undefined,
+      price: 3824,
+      originalPrice: type === "trending" ? 4649 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "outlets",
       rating: 4.8
@@ -174,8 +175,8 @@ export default function Home() {
     {
       id: `${type}-3`,
       name: "20A Circuit Breaker",
-      price: 18.99,
-      originalPrice: type === "trending" ? 24.99 : undefined,
+      price: 1579,
+      originalPrice: type === "trending" ? 2074 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "breakers",
       rating: 4.7
@@ -183,8 +184,8 @@ export default function Home() {
     {
       id: `${type}-4`,
       name: "LED Work Light 2000LM",
-      price: 34.99,
-      originalPrice: type === "trending" ? 44.99 : undefined,
+      price: 2904,
+      originalPrice: type === "trending" ? 3737 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "lighting",
       rating: 4.6
@@ -192,8 +193,8 @@ export default function Home() {
     {
       id: `${type}-5`,
       name: "12 AWG Copper Wire (100ft)",
-      price: 89.99,
-      originalPrice: type === "trending" ? 109.99 : undefined,
+      price: 7479,
+      originalPrice: type === "trending" ? 9149 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "wiring",
       rating: 4.9
@@ -201,8 +202,8 @@ export default function Home() {
     {
       id: `${type}-6`,
       name: "Digital Multimeter",
-      price: 59.99,
-      originalPrice: type === "trending" ? 79.99 : undefined,
+      price: 4984,
+      originalPrice: type === "trending" ? 6649 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "tools",
       rating: 4.4
@@ -210,8 +211,8 @@ export default function Home() {
     {
       id: `${type}-7`,
       name: "Electrical Panel Cover",
-      price: 24.99,
-      originalPrice: type === "trending" ? 29.99 : undefined,
+      price: 2074,
+      originalPrice: type === "trending" ? 2494 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "panels",
       rating: 4.3
@@ -219,8 +220,8 @@ export default function Home() {
     {
       id: `${type}-8`,
       name: "Wire Nuts Assortment",
-      price: 12.99,
-      originalPrice: type === "trending" ? 16.99 : undefined,
+      price: 1079,
+      originalPrice: type === "trending" ? 1414 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "wiring",
       rating: 4.2
@@ -264,8 +265,8 @@ export default function Home() {
                     <h3 className="text-2xl font-bold text-gray-900">Professional Electrical Tool Kit</h3>
                     <p className="text-gray-600">Complete 50-piece electrician tool set with case</p>
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl font-bold text-yellow-600">$209.99</span>
-                      <span className="text-lg text-gray-500 line-through">$299.99</span>
+                      <span className="text-3xl font-bold text-yellow-600">{formatPrice(17499)}</span>
+                      <span className="text-lg text-gray-500 line-through">{formatPrice(24999)}</span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-amber-600">
                       <Clock className="w-4 h-4" />
@@ -299,8 +300,8 @@ export default function Home() {
                 </div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">Smart Circuit Breaker</h4>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-yellow-600">$67.49</span>
-                  <span className="text-sm text-gray-500 line-through">$89.99</span>
+                  <span className="text-lg font-bold text-yellow-600">{formatPrice(5624)}</span>
+                  <span className="text-sm text-gray-500 line-through">{formatPrice(7499)}</span>
                 </div>
               </div>
               
@@ -316,8 +317,8 @@ export default function Home() {
                 </div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">LED Work Light Set</h4>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-yellow-600">$47.99</span>
-                  <span className="text-sm text-gray-500 line-through">$79.99</span>
+                  <span className="text-lg font-bold text-yellow-600">{formatPrice(3999)}</span>
+                  <span className="text-sm text-gray-500 line-through">{formatPrice(6649)}</span>
                 </div>
               </div>
             </div>

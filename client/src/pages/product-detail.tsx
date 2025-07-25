@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatPrice, formatSavings } from "@/lib/currency";
 import { Star, Heart, ShoppingCart, Minus, Plus, Shield, Truck, RotateCcw, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { ReviewList } from "@/components/reviews/review-list";
@@ -250,16 +251,16 @@ export default function ProductDetail() {
               {/* Price */}
               <div className="flex items-center space-x-4 mb-6">
                 <span className="text-3xl font-bold text-gray-900">
-                  ${price.toFixed(2)}
+                  {formatPrice(price)}
                 </span>
                 {originalPrice && (
                   <span className="text-xl text-gray-500 line-through">
-                    ${originalPrice.toFixed(2)}
+                    {formatPrice(originalPrice)}
                   </span>
                 )}
                 {hasDiscount && (
                   <Badge className="bg-red-500">
-                    Save ${(originalPrice! - price).toFixed(2)}
+                    {formatSavings(originalPrice!, price)}
                   </Badge>
                 )}
               </div>
