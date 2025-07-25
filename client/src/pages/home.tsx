@@ -247,31 +247,31 @@ export default function Home() {
       <section className="bg-white py-6">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-3 mb-6">
-            <Tag className="w-6 h-6 text-red-500" />
+            <Tag className="w-6 h-6 text-yellow-500" />
             <h2 className="text-2xl font-bold text-gray-900">Today's Deals</h2>
-            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">Limited Time</span>
+            <span className="bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium">Limited Time</span>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
             {/* Main Featured Deal */}
             <div className="lg:col-span-2">
-              <div className="relative bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-6 border border-red-100">
+              <div className="relative bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 border border-yellow-200">
                 <div className="absolute top-4 left-4 z-10">
-                  <span className="bg-red-500 text-white px-3 py-1 text-sm font-bold rounded">30% OFF</span>
+                  <span className="bg-yellow-400 text-black px-3 py-1 text-sm font-bold rounded">30% OFF</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                   <div className="space-y-4">
                     <h3 className="text-2xl font-bold text-gray-900">Professional Electrical Tool Kit</h3>
                     <p className="text-gray-600">Complete 50-piece electrician tool set with case</p>
                     <div className="flex items-center gap-3">
-                      <span className="text-3xl font-bold text-red-600">$209.99</span>
+                      <span className="text-3xl font-bold text-yellow-600">$209.99</span>
                       <span className="text-lg text-gray-500 line-through">$299.99</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-orange-600">
+                    <div className="flex items-center gap-2 text-sm text-amber-600">
                       <Clock className="w-4 h-4" />
                       <span className="font-medium">Ends in 2h 45m</span>
                     </div>
-                    <Button className="bg-red-600 hover:bg-red-700 text-white font-medium">Shop Deal Now</Button>
+                    <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-medium">Shop Deal Now</Button>
                   </div>
                   <div>
                     <LazyImage
@@ -295,11 +295,11 @@ export default function Home() {
                     className="w-full h-32 object-cover rounded-md"
                     fallback="/api/placeholder/200/128"
                   />
-                  <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">25% OFF</span>
+                  <span className="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded">25% OFF</span>
                 </div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">Smart Circuit Breaker</h4>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-red-600">$67.49</span>
+                  <span className="text-lg font-bold text-yellow-600">$67.49</span>
                   <span className="text-sm text-gray-500 line-through">$89.99</span>
                 </div>
               </div>
@@ -312,11 +312,11 @@ export default function Home() {
                     className="w-full h-32 object-cover rounded-md"
                     fallback="/api/placeholder/200/128"
                   />
-                  <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">40% OFF</span>
+                  <span className="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded">40% OFF</span>
                 </div>
                 <h4 className="text-sm font-semibold text-gray-900 mb-2">LED Work Light Set</h4>
                 <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-red-600">$47.99</span>
+                  <span className="text-lg font-bold text-yellow-600">$47.99</span>
                   <span className="text-sm text-gray-500 line-through">$79.99</span>
                 </div>
               </div>
