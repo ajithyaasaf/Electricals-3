@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { useQueryClient } from '@tanstack/react-query';
 
 export interface GuestCartItem {
   id: string;
@@ -12,6 +13,7 @@ export interface GuestCartItem {
 export function useGuestCart() {
   const [guestCart, setGuestCart] = useState<GuestCartItem[]>([]);
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   // Load cart from localStorage on mount
   useEffect(() => {
@@ -61,10 +63,14 @@ export function useGuestCart() {
       description: "Item added successfully. Sign in at checkout to complete your order.",
       duration: 2000, // 2 seconds instead of default 5 seconds
     });
+
+    // Invalidate cart queries to refresh the cart sidebar
+    queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
   };
 
   const removeFromGuestCart = (itemId: string) => {
     setGuestCart(prev => prev.filter(item => item.id !== itemId));
+    queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
   };
 
   const updateGuestCartQuantity = (itemId: string, quantity: number) => {
@@ -78,11 +84,13 @@ export function useGuestCart() {
         item.id === itemId ? { ...item, quantity } : item
       )
     );
+    queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
   };
 
   const clearGuestCart = () => {
     setGuestCart([]);
     localStorage.removeItem('copperbear_guest_cart');
+    queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
   };
 
   const getCartItemsCount = () => {

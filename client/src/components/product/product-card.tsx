@@ -46,8 +46,10 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
           title: "Added to cart",
           description: `${product.name} has been added to your cart.`,
         });
+      } else {
+        // Invalidate guest cart queries to refresh cart sidebar
+        queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
       }
-      // Guest users get toast from addToGuestCart function
     },
     onError: (error) => {
       if (!isAuthenticated) return; // Guest cart errors are handled by useGuestCart
