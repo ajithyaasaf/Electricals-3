@@ -658,10 +658,10 @@ function AdminDashboard() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {products.products.map((product: any) => (
+                      {products.map((product: any) => (
                         <TableRow key={product.id}>
                           <TableCell className="font-medium">{product.name}</TableCell>
-                          <TableCell>${parseFloat(product.price).toFixed(2)}</TableCell>
+                          <TableCell>₹{parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>{product.stock}</TableCell>
                           <TableCell>
                             <Badge variant={product.isActive ? "default" : "secondary"}>
@@ -850,10 +850,10 @@ function AdminDashboard() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {services.services.map((service: any) => (
+                      {services.map((service: any) => (
                         <TableRow key={service.id}>
                           <TableCell className="font-medium">{service.name}</TableCell>
-                          <TableCell>${parseFloat(service.startingPrice).toFixed(2)}</TableCell>
+                          <TableCell>₹{parseFloat(service.startingPrice).toFixed(2)}</TableCell>
                           <TableCell>
                             {service.duration ? `${service.duration} min` : "Varies"}
                           </TableCell>
@@ -1019,7 +1019,7 @@ function AdminDashboard() {
                           <TableCell>
                             {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
                           </TableCell>
-                          <TableCell>${parseFloat(order.totalAmount).toFixed(2)}</TableCell>
+                          <TableCell>₹{parseFloat(order.totalAmount).toFixed(2)}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="capitalize">
                               {order.status}
