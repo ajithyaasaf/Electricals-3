@@ -59,6 +59,7 @@ export function useGuestCart() {
     toast({
       title: "Added to cart",
       description: "Item added successfully. Sign in at checkout to complete your order.",
+      duration: 2000, // 2 seconds instead of default 5 seconds
     });
   };
 

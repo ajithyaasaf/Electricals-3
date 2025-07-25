@@ -7,7 +7,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useGuestCart } from "@/hooks/use-guest-cart";
 import { apiRequest } from "@/lib/queryClient";
 import { formatPrice } from "@/lib/currency";
 import { ShoppingCart, CreditCard, X } from "lucide-react";
@@ -18,27 +19,58 @@ interface CartSidebarProps {
 }
 
 export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useFirebaseAuth();
+  const { guestCart, removeFromGuestCart, updateGuestCartQuantity, clearGuestCart } = useGuestCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch cart items with product details
-  const { data: cartItems = [], isLoading } = useQuery({
+  // Fetch authenticated user cart items
+  const { data: authCartItems = [], isLoading } = useQuery({
     queryKey: ["/api/cart"],
     enabled: isAuthenticated && open,
   });
 
+  // Fetch guest cart items with product details
+  const { data: guestCartItems = [], isLoading: guestCartLoading } = useQuery({
+    queryKey: ["/api/cart/guest", guestCart],
+    queryFn: async () => {
+      if (guestCart.length === 0) return [];
+      
+      const response = await fetch("/api/cart/guest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ items: guestCart }),
+      });
+      
+      if (!response.ok) throw new Error("Failed to fetch guest cart");
+      return response.json();
+    },
+    enabled: !isAuthenticated && open && guestCart.length > 0,
+  });
+
+  // Use appropriate cart items based on authentication status
+  const cartItems = isAuthenticated ? authCartItems : guestCartItems;
+
   const clearCartMutation = useMutation({
     mutationFn: async () => {
-      for (const item of cartItems) {
-        await apiRequest("DELETE", `/api/cart/${item.id}`);
+      if (isAuthenticated) {
+        for (const item of cartItems) {
+          await apiRequest("DELETE", `/api/cart/${item.id}`);
+        }
+      } else {
+        clearGuestCart();
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
+      }
       toast({
         title: "Cart cleared",
         description: "All items have been removed from your cart.",
+        duration: 2000,
       });
     },
     onError: () => {
@@ -46,13 +78,15 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
         title: "Error",
         description: "Failed to clear cart.",
         variant: "destructive",
+        duration: 2000,
       });
     },
   });
 
   // Calculate totals
   const subtotal = cartItems.reduce((total: number, item: any) => {
-    return total + (parseFloat(item.product?.price || 0) * item.quantity);
+    const price = parseFloat(item.product?.price || "0");
+    return total + (price * item.quantity);
   }, 0);
 
   const tax = subtotal * 0.08; // 8% tax
