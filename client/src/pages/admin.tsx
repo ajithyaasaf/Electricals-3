@@ -88,9 +88,12 @@ export default function Admin() {
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
+  // Check if user is admin
+  const isAdmin = user?.email === 'admin@copperbear.com';
+
   // Redirect if not authenticated or not admin
   useEffect(() => {
-    if (!authLoading && (!isAuthenticated || user?.email !== 'admin@copperbear.com')) {
+    if (!authLoading && (!isAuthenticated || !isAdmin)) {
       toast({
         title: "Access denied",
         description: "You don't have permission to access this page.",
@@ -100,33 +103,40 @@ export default function Admin() {
         window.location.href = "/";
       }, 1000);
     }
-  }, [isAuthenticated, authLoading, user, toast]);
+  }, [isAuthenticated, authLoading, isAdmin, toast]);
 
-  // Fetch data
-  const { data: products = { products: [], total: 0 }, isLoading: productsLoading } = useQuery({
+  // Fetch data with proper typing
+  const { data: productsData = { products: [], total: 0 }, isLoading: productsLoading } = useQuery({
     queryKey: ["/api/products", { limit: 100 }],
-    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
+    enabled: isAuthenticated && isAdmin,
   });
 
-  const { data: services = { services: [], total: 0 }, isLoading: servicesLoading } = useQuery({
+  const { data: servicesData = { services: [], total: 0 }, isLoading: servicesLoading } = useQuery({
     queryKey: ["/api/services", { limit: 100 }],
-    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
+    enabled: isAuthenticated && isAdmin,
   });
 
-  const { data: categories = [], isLoading: categoriesLoading } = useQuery({
+  const { data: categoriesData = { categories: [] }, isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
+    enabled: isAuthenticated && isAdmin,
   });
 
-  const { data: orders = [], isLoading: ordersLoading } = useQuery({
+  const { data: ordersData = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
-    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
+    enabled: isAuthenticated && isAdmin,
   });
 
-  const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
+  const { data: bookingsData = [], isLoading: bookingsLoading } = useQuery({
     queryKey: ["/api/bookings"],
-    enabled: isAuthenticated && user?.email === 'admin@copperbear.com',
+    enabled: isAuthenticated && isAdmin,
   });
+
+  // Extract arrays for easier access
+  const products = (productsData as any)?.products || [];
+  const services = (servicesData as any)?.services || [];
+  const categories = (categoriesData as any)?.categories || [];
+  const orders = Array.isArray(ordersData) ? ordersData : [];
+  const bookings = Array.isArray(bookingsData) ? bookingsData : [];
 
   // Forms
   const productForm = useForm<ProductFormData>({
@@ -264,7 +274,7 @@ export default function Admin() {
     },
   });
 
-  if (authLoading || !isAuthenticated || !user?.isAdmin) {
+  if (authLoading || !isAuthenticated || !isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
@@ -287,9 +297,9 @@ export default function Admin() {
 
   // Calculate dashboard stats
   const totalRevenue = orders.reduce((sum: number, order: any) => 
-    sum + parseFloat(order.totalAmount || "0"), 0);
-  const totalProducts = products.total;
-  const totalServices = services.total;
+    sum + parseFloat(order.total || "0"), 0);
+  const totalProducts = (productsData as any)?.total || 0;
+  const totalServices = (servicesData as any)?.total || 0;
   const totalOrders = orders.length;
 
   const onProductSubmit = (data: ProductFormData) => {
