@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { Shield, Eye, EyeOff } from "lucide-react";
+import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 const adminLoginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -82,8 +82,22 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-copper-50 to-copper-100 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0">
+    <div className="min-h-screen bg-gradient-to-br from-copper-50 to-copper-100">
+      {/* Header with back navigation */}
+      <div className="absolute top-0 left-0 right-0 p-6">
+        <Button
+          variant="ghost"
+          onClick={() => window.location.href = '/'}
+          className="flex items-center space-x-2 text-copper-700 hover:text-copper-800 hover:bg-copper-100/50"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>Back to CopperBear</span>
+        </Button>
+      </div>
+      
+      {/* Login Form */}
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <Card className="w-full max-w-md shadow-2xl border-0">
         <CardHeader className="text-center pb-6">
           <div className="mx-auto w-16 h-16 bg-gradient-to-br from-copper-600 to-copper-700 rounded-full flex items-center justify-center mb-4">
             <Shield className="w-8 h-8 text-white" />
@@ -174,7 +188,8 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
             </p>
           </div>
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   );
 }
