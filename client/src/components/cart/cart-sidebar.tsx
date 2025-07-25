@@ -9,6 +9,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
+import { formatPrice } from "@/lib/currency";
 import { ShoppingCart, CreditCard, X } from "lucide-react";
 
 interface CartSidebarProps {
@@ -55,7 +56,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
   }, 0);
 
   const tax = subtotal * 0.08; // 8% tax
-  const shipping = subtotal > 100 ? 0 : 15.99; // Free shipping over $100
+  const shipping = subtotal > 8300 ? 0 : 1329; // Free shipping over ₹8,300
   const total = subtotal + tax + shipping;
 
   const handleCheckout = () => {
@@ -145,20 +146,20 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span>Subtotal:</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                  <span>{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Tax:</span>
-                  <span>${tax.toFixed(2)}</span>
+                  <span>{formatPrice(tax)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span>Shipping:</span>
-                  <span>{shipping === 0 ? "FREE" : `$${shipping.toFixed(2)}`}</span>
+                  <span>{shipping === 0 ? "FREE" : formatPrice(shipping)}</span>
                 </div>
                 <Separator />
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total:</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
               </div>
 

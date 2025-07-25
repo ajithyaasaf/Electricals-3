@@ -17,6 +17,7 @@ import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { signInWithGoogle } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatPrice } from "@/lib/currency";
 import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle } from "lucide-react";
 
 interface CheckoutFormData {
@@ -161,7 +162,7 @@ export default function Checkout() {
     return total + (price * item.quantity);
   }, 0);
 
-  const shipping = subtotal > 100 ? 0 : 15.99;
+  const shipping = subtotal > 8300 ? 0 : 1329;
   const tax = subtotal * 0.08;
   const total = subtotal + shipping + tax;
 
@@ -525,7 +526,7 @@ export default function Checkout() {
                   {cartItems.map((item: any) => (
                     <div key={item.id} className="flex justify-between text-sm">
                       <span>{item.product?.name} × {item.quantity}</span>
-                      <span>${(parseFloat(item.product?.price || "0") * item.quantity).toFixed(2)}</span>
+                      <span>{formatPrice(parseFloat(item.product?.price || "0") * item.quantity)}</span>
                     </div>
                   ))}
                 </div>
@@ -535,15 +536,15 @@ export default function Checkout() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span>{shipping === 0 ? "Free" : `$${shipping.toFixed(2)}`}</span>
+                    <span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Tax</span>
-                    <span>${tax.toFixed(2)}</span>
+                    <span>{formatPrice(tax)}</span>
                   </div>
                 </div>
                 
@@ -551,12 +552,12 @@ export default function Checkout() {
                 
                 <div className="flex justify-between font-medium">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{formatPrice(total)}</span>
                 </div>
                 
-                {subtotal < 100 && (
+                {subtotal < 8300 && (
                   <div className="text-xs text-gray-500 mt-2">
-                    Add ${(100 - subtotal).toFixed(2)} more for free shipping!
+                    Add {formatPrice(8300 - subtotal)} more for free shipping!
                   </div>
                 )}
               </CardContent>

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatPrice } from "@/lib/currency";
 import { Clock, Star, Calendar } from "lucide-react";
 import type { ServiceWithCategory } from "@/lib/types";
 
@@ -130,7 +131,7 @@ export function ServiceCard({ service, showCategory = false }: ServiceCardProps)
         {/* Price and Book Button */}
         <div className="flex items-center justify-between">
           <span className="text-2xl font-bold text-gray-900">
-            From ${startingPrice.toFixed(0)}
+            From {formatPrice(startingPrice)}
           </span>
           <Button
             onClick={handleBookService}

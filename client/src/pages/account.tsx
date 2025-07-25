@@ -16,6 +16,7 @@ import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { signInWithGoogle, signOutUser } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatPrice } from "@/lib/currency";
 import { 
   User, 
   Package, 
@@ -430,7 +431,7 @@ export default function Account() {
                               {getStatusIcon(order.status)}
                               <span className="capitalize">{order.status}</span>
                             </Badge>
-                            <p className="font-semibold">${parseFloat(order.totalAmount).toFixed(2)}</p>
+                            <p className="font-semibold">{formatPrice(parseFloat(order.totalAmount))}</p>
                           </div>
                         </div>
                         
@@ -448,7 +449,7 @@ export default function Account() {
                                   <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                                 </div>
                                 <p className="text-sm font-medium">
-                                  ${parseFloat(item.price).toFixed(2)}
+                                  {formatPrice(parseFloat(item.price))}
                                 </p>
                               </div>
                             ))}

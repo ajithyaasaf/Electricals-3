@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { formatPrice } from "@/lib/currency";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -241,7 +242,7 @@ export default function ServiceDetail() {
               <div className="flex items-center space-x-6 mb-6">
                 <div>
                   <span className="text-3xl font-bold text-gray-900">
-                    From ${startingPrice.toFixed(0)}
+                    From {formatPrice(startingPrice)}
                   </span>
                   <p className="text-sm text-gray-600">Starting price</p>
                 </div>
