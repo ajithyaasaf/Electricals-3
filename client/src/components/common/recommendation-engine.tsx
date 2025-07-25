@@ -53,50 +53,50 @@ export function RecommendationEngine({ productId, category, userId }: Recommenda
   const recommendations = [];
 
   // Add "Customers who bought this also bought" section
-  if (productId && (alsoBoughtData?.products?.length > 0 || !alsoBoughtData)) {
+  if (productId && ((alsoBoughtData as any)?.products?.length > 0 || !alsoBoughtData)) {
     recommendations.push({
       title: "Customers who bought this item also bought",
-      products: alsoBoughtData?.products || generateMockProducts("also-bought"),
+      products: (alsoBoughtData as any)?.products || generateMockProducts("also-bought"),
       viewAllLink: `/products?related=${productId}`,
       key: "also-bought"
     });
   }
 
   // Add personalized recommendations for logged-in users
-  if (user && (personalizedData?.products?.length > 0 || !personalizedData)) {
+  if (user && ((personalizedData as any)?.products?.length > 0 || !personalizedData)) {
     recommendations.push({
       title: "Recommended for you",
-      products: personalizedData?.products || generateMockProducts("personalized"),
+      products: (personalizedData as any)?.products || generateMockProducts("personalized"),
       viewAllLink: "/products?personalized=true",
       key: "personalized"
     });
   }
 
   // Add category-based recommendations
-  if (category || (categoryData?.products?.length > 0 || !categoryData)) {
+  if (category || ((categoryData as any)?.products?.length > 0 || !categoryData)) {
     recommendations.push({
       title: `More in ${category || 'this category'}`,
-      products: categoryData?.products || generateMockProducts("category"),
+      products: (categoryData as any)?.products || generateMockProducts("category"),
       viewAllLink: `/products?category=${category}`,
       key: "category"
     });
   }
 
   // Add trending products
-  if (trendingData?.products?.length > 0 || !trendingData) {
+  if ((trendingData as any)?.products?.length > 0 || !trendingData) {
     recommendations.push({
       title: "Trending electrical products",
-      products: trendingData?.products || generateMockProducts("trending"),
+      products: (trendingData as any)?.products || generateMockProducts("trending"),
       viewAllLink: "/products?trending=true",
       key: "trending"
     });
   }
 
   // Add "Frequently bought together" for product pages
-  if (productId && (bundleData?.products?.length > 0 || !bundleData)) {
+  if (productId && ((bundleData as any)?.products?.length > 0 || !bundleData)) {
     recommendations.push({
       title: "Frequently bought together",
-      products: bundleData?.products || generateMockProducts("bundle"),
+      products: (bundleData as any)?.products || generateMockProducts("bundle"),
       viewAllLink: `/products?bundle=${productId}`,
       key: "bundle"
     });

@@ -103,7 +103,7 @@ export default function Home() {
   ];
 
   // Mock deals data (in real app, this would come from API)
-  const mockDeals = dealsData?.deals || [
+  const mockDeals = (dealsData as any)?.deals || [
     {
       id: "deal1",
       title: "Professional Electrical Tool Kit",
@@ -246,7 +246,7 @@ export default function Home() {
       {/* Best Sellers - Horizontal Scrolling */}
       <HorizontalProductSection
         title="Best Sellers in Electrical"
-        products={bestSellersData?.products || mockProducts("bestsellers")}
+        products={(bestSellersData as any)?.products || mockProducts("bestsellers")}
         viewAllLink="/products?bestsellers=true"
         showPrices={true}
       />
@@ -254,7 +254,7 @@ export default function Home() {
       {/* New Arrivals - Horizontal Scrolling */}
       <HorizontalProductSection
         title="New Arrivals"
-        products={newArrivalsData?.products || mockProducts("new")}
+        products={(newArrivalsData as any)?.products || mockProducts("new")}
         viewAllLink="/products?new=true"
         showPrices={true}
       />
@@ -262,7 +262,7 @@ export default function Home() {
       {/* Trending Now - Horizontal Scrolling */}
       <HorizontalProductSection
         title="Trending Now"
-        products={trendingData?.products || mockProducts("trending")}
+        products={(trendingData as any)?.products || mockProducts("trending")}
         viewAllLink="/products?trending=true"
         showPrices={true}
         dealBadge="Hot"
@@ -298,7 +298,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {(servicesData?.services || []).slice(0, 3).map((service: any) => (
+              {((servicesData as any)?.services || []).slice(0, 3).map((service: any) => (
                 <ServiceCard key={service.id} service={service} />
               ))}
             </div>
