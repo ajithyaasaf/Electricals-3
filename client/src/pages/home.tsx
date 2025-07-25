@@ -234,14 +234,13 @@ export default function Home() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Recently Viewed - Only show for returning users */}
-      <RecentlyViewed />
-
-      {/* Deals Banner */}
-      <DealsBanner deals={mockDeals} />
-
-      {/* Visual Category Cards - Amazon Style */}
-      <VisualCategoryCards categories={visualCategories} />
+      {/* TEST - Simple Amazon-style section to verify rendering */}
+      <section className="bg-white py-8 border-t-4 border-red-500">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center text-red-600 mb-4">🚀 AMAZON-STYLE SECTIONS ARE NOW ACTIVE! 🚀</h2>
+          <p className="text-center text-gray-600">If you can see this red banner, the new sections are working!</p>
+        </div>
+      </section>
 
       {/* Test Amazon-style Deals Section */}
       <section className="bg-white py-6">
