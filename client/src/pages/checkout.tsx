@@ -14,6 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useGuestCart } from "@/hooks/use-guest-cart";
 import { signInWithGoogle } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
@@ -45,6 +46,7 @@ interface CheckoutFormData {
 
 export default function Checkout() {
   const { isAuthenticated, loading: authLoading } = useFirebaseAuth();
+  const { guestCart, migrateToUserCart, clearGuestCart } = useGuestCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 

@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useGuestCart } from "@/hooks/use-guest-cart";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice } from "@/lib/currency";
@@ -18,37 +19,39 @@ interface ProductCardProps {
 }
 
 export const ProductCard = memo(function ProductCard({ product, showCategory = false }: ProductCardProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useFirebaseAuth();
+  const { addToGuestCart } = useGuestCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/cart", {
-        productId: product.id,
-        quantity: 1,
-      });
+      if (isAuthenticated) {
+        // Add to user's cart in database
+        await apiRequest("POST", "/api/cart", {
+          productId: product.id,
+          quantity: 1,
+        });
+      } else {
+        // Add to guest cart in localStorage
+        addToGuestCart(product.id);
+        return Promise.resolve(); // Return resolved promise for guest users
+      }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      toast({
-        title: "Added to cart",
-        description: `${product.name} has been added to your cart.`,
-      });
+      if (isAuthenticated) {
+        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+        toast({
+          title: "Added to cart",
+          description: `${product.name} has been added to your cart.`,
+        });
+      }
+      // Guest users get toast from addToGuestCart function
     },
     onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Please sign in",
-          description: "You need to sign in to add items to cart.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 1000);
-        return;
-      }
+      if (!isAuthenticated) return; // Guest cart errors are handled by useGuestCart
+      
       toast({
         title: "Error",
         description: "Failed to add item to cart.",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useGuestCart } from "@/hooks/use-guest-cart";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
   const { isAuthenticated, user, loading } = useFirebaseAuth();
+  const { getCartItemsCount } = useGuestCart();
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -33,7 +35,10 @@ export function Header() {
     enabled: isAuthenticated,
   });
 
-  const cartCount = Array.isArray(cartItems) ? cartItems.length : 0;
+  // Calculate cart count for both authenticated and guest users
+  const authenticatedCartCount = Array.isArray(cartItems) ? cartItems.length : 0;
+  const guestCartCount = getCartItemsCount();
+  const cartCount = isAuthenticated ? authenticatedCartCount : guestCartCount;
 
   // Amazon-style hierarchical navigation for electrical products
   const mobileNavigation = [

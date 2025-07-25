@@ -278,6 +278,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Guest cart endpoint - no authentication required for adding to cart
+  app.post("/api/cart/guest", async (req, res) => {
+    try {
+      const { items } = req.body; // Array of cart items from frontend
+      
+      // For guest users, just return the items with product/service details
+      const enrichedItems = [];
+      
+      for (const item of items) {
+        let enrichedItem = { ...item };
+        
+        if (item.productId) {
+          const product = await storage.getProductById(item.productId);
+          enrichedItem.product = product;
+        }
+        
+        if (item.serviceId) {
+          const service = await storage.getServiceById(item.serviceId);
+          enrichedItem.service = service;
+        }
+        
+        enrichedItems.push(enrichedItem);
+      }
+      
+      res.json(enrichedItems);
+    } catch (error) {
+      console.error("Error processing guest cart:", error);
+      res.status(500).json({ message: "Failed to process guest cart" });
+    }
+  });
+
+  // Authenticated cart endpoint for logged-in users
   app.post("/api/cart", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.uid;
