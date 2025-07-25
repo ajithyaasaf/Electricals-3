@@ -98,28 +98,8 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
     // Navigation to checkout will be handled by the Link component
   };
 
-  if (!isAuthenticated) {
-    return (
-      <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-full sm:w-96">
-          <SheetHeader>
-            <SheetTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              Shopping Cart
-            </SheetTitle>
-          </SheetHeader>
-          <div className="flex flex-col items-center justify-center h-64 text-center">
-            <ShoppingCart className="h-16 w-16 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Sign in to view your cart</h3>
-            <p className="text-gray-600 mb-4">You need to be logged in to see your cart items.</p>
-            <Button asChild>
-              <a href="/api/login">Sign In</a>
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
-    );
-  }
+  // Handle loading state for both authenticated and guest users
+  const isLoadingState = isAuthenticated ? isLoading : guestCartLoading;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -143,7 +123,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
           </SheetTitle>
         </SheetHeader>
 
-        {isLoading ? (
+        {isLoadingState ? (
           <div className="space-y-4 flex-1">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="flex items-center space-x-4">
@@ -199,6 +179,11 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
 
               {/* Action Buttons */}
               <div className="mt-6 space-y-2">
+                {!isAuthenticated && (
+                  <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-center">
+                    <p className="text-sm text-blue-700">Sign in at checkout to complete your order</p>
+                  </div>
+                )}
                 <Button 
                   asChild 
                   className="w-full" 
