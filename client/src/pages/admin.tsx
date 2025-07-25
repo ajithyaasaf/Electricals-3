@@ -36,6 +36,10 @@ import {
   Activity
 } from "lucide-react";
 import { Link } from "wouter";
+import { formatPrice } from "@/lib/currency";
+
+import { DynamicProductForm } from "@/components/admin/dynamic-product-form";
+import { ELECTRICAL_PRODUCT_TEMPLATES } from "../../../shared/types";
 
 // Form schemas
 const productSchema = z.object({
@@ -49,6 +53,8 @@ const productSchema = z.object({
   stock: z.number().min(0, "Stock must be 0 or greater"),
   categoryId: z.number().optional(),
   imageUrls: z.array(z.string()).optional(),
+  attributeTemplate: z.string().optional(),
+  specifications: z.record(z.any()).optional(),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
 });
@@ -306,19 +312,6 @@ export default function Admin() {
 
   const handleEditProduct = (product: any) => {
     setEditingItem(product);
-    productForm.reset({
-      name: product.name,
-      slug: product.slug,
-      description: product.description || "",
-      shortDescription: product.shortDescription || "",
-      price: product.price,
-      originalPrice: product.originalPrice || "",
-      sku: product.sku || "",
-      stock: product.stock || 0,
-      categoryId: product.categoryId || undefined,
-      isFeatured: product.isFeatured || false,
-      isActive: product.isActive !== false,
-    });
     setProductDialogOpen(true);
   };
 
@@ -497,132 +490,18 @@ export default function Admin() {
                         Add Product
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>
                           {editingItem ? "Edit Product" : "Add New Product"}
                         </DialogTitle>
                       </DialogHeader>
                       
-                      <Form {...productForm}>
-                        <form onSubmit={productForm.handleSubmit(onProductSubmit)} className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={productForm.control}
-                              name="name"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Product Name</FormLabel>
-                                  <FormControl>
-                                    <Input {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={productForm.control}
-                              name="slug"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Slug</FormLabel>
-                                  <FormControl>
-                                    <Input {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <FormField
-                            control={productForm.control}
-                            name="shortDescription"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Short Description</FormLabel>
-                                <FormControl>
-                                  <Textarea {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={productForm.control}
-                              name="price"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Price</FormLabel>
-                                  <FormControl>
-                                    <Input type="number" step="0.01" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                            
-                            <FormField
-                              control={productForm.control}
-                              name="stock"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Stock</FormLabel>
-                                  <FormControl>
-                                    <Input 
-                                      type="number" 
-                                      {...field} 
-                                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <FormField
-                            control={productForm.control}
-                            name="categoryId"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Category</FormLabel>
-                                <Select onValueChange={(value) => field.onChange(parseInt(value))}>
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select a category" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {categories.map((category: any) => (
-                                      <SelectItem key={category.id} value={category.id.toString()}>
-                                        {category.name}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <Button 
-                            type="submit" 
-                            disabled={createProductMutation.isPending}
-                            className="w-full bg-copper-600 hover:bg-copper-700"
-                          >
-                            {createProductMutation.isPending 
-                              ? "Saving..." 
-                              : editingItem 
-                                ? "Update Product" 
-                                : "Create Product"
-                            }
-                          </Button>
-                        </form>
-                      </Form>
+                      <DynamicProductForm
+                        product={editingItem}
+                        onSubmit={onProductSubmit}
+                        isLoading={createProductMutation.isPending}
+                      />
                     </DialogContent>
                   </Dialog>
                 </div>
@@ -639,6 +518,7 @@ export default function Admin() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Name</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead>Price</TableHead>
                         <TableHead>Stock</TableHead>
                         <TableHead>Status</TableHead>
@@ -648,9 +528,29 @@ export default function Admin() {
                     <TableBody>
                       {products.products.map((product: any) => (
                         <TableRow key={product.id}>
-                          <TableCell className="font-medium">{product.name}</TableCell>
-                          <TableCell>${parseFloat(product.price).toFixed(2)}</TableCell>
-                          <TableCell>{product.stock}</TableCell>
+                          <TableCell className="font-medium">
+                            <div>
+                              <p>{product.name}</p>
+                              {product.sku && (
+                                <p className="text-sm text-muted-foreground">SKU: {product.sku}</p>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {product.attributeTemplate ? (
+                              <Badge variant="outline">
+                                {ELECTRICAL_PRODUCT_TEMPLATES[product.attributeTemplate as keyof typeof ELECTRICAL_PRODUCT_TEMPLATES]?.name || 'Custom'}
+                              </Badge>
+                            ) : (
+                              <Badge variant="secondary">Custom</Badge>
+                            )}
+                          </TableCell>
+                          <TableCell>{formatPrice(parseFloat(product.price))}</TableCell>
+                          <TableCell>
+                            <Badge variant={product.stock > 0 ? "default" : "destructive"}>
+                              {product.stock} units
+                            </Badge>
+                          </TableCell>
                           <TableCell>
                             <Badge variant={product.isActive ? "default" : "secondary"}>
                               {product.isActive ? "Active" : "Inactive"}
