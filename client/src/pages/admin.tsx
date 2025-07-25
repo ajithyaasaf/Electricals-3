@@ -78,8 +78,8 @@ type ProductFormData = z.infer<typeof productSchema>;
 type ServiceFormData = z.infer<typeof serviceSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
 
-export default function Admin() {
-  const { isAdminAuthenticated, loading: authLoading, adminUser, adminSignOut } = useAdminAuth();
+function AdminDashboard() {
+  const { adminUser, adminSignOut } = useAdminAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -88,46 +88,25 @@ export default function Admin() {
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
-  // Show login form if not authenticated as admin
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-copper-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading admin panel...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdminAuthenticated) {
-    return <AdminLogin onLoginSuccess={() => {}} />;
-  }
-
   // Fetch data with proper typing
   const { data: productsData = { products: [], total: 0 }, isLoading: productsLoading } = useQuery({
     queryKey: ["/api/products", { limit: 100 }],
-    enabled: isAdminAuthenticated,
   });
 
   const { data: servicesData = { services: [], total: 0 }, isLoading: servicesLoading } = useQuery({
     queryKey: ["/api/services", { limit: 100 }],
-    enabled: isAdminAuthenticated,
   });
 
   const { data: categoriesData = { categories: [] }, isLoading: categoriesLoading } = useQuery({
     queryKey: ["/api/categories"],
-    enabled: isAdminAuthenticated,
   });
 
   const { data: ordersData = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
-    enabled: isAdminAuthenticated,
   });
 
   const { data: bookingsData = [], isLoading: bookingsLoading } = useQuery({
     queryKey: ["/api/bookings"],
-    enabled: isAdminAuthenticated,
   });
 
   // Extract arrays for easier access
@@ -1113,4 +1092,28 @@ export default function Admin() {
       </div>
     </div>
   );
+}
+
+export default function Admin() {
+  const { isAdminAuthenticated, loading: authLoading } = useAdminAuth();
+
+  // Show loading state
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-copper-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading admin panel...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show login form if not authenticated as admin
+  if (!isAdminAuthenticated) {
+    return <AdminLogin onLoginSuccess={() => {}} />;
+  }
+
+  // Show admin dashboard if authenticated
+  return <AdminDashboard />;
 }
