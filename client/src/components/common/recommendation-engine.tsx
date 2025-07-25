@@ -126,7 +126,7 @@ const generateMockProducts = (type: string): Product[] => [
   {
     id: `${type}-rec-1`,
     name: "Professional Electrical Toolkit",
-    price: 149.99,
+    price: 12449,
     image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=160",
     category: "tools",
     rating: 4.8
@@ -134,7 +134,7 @@ const generateMockProducts = (type: string): Product[] => [
   {
     id: `${type}-rec-2`,
     name: "Smart Circuit Breaker Panel",
-    price: 299.99,
+    price: 24899,
     image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=160",
     category: "panels",
     rating: 4.7
@@ -142,7 +142,7 @@ const generateMockProducts = (type: string): Product[] => [
   {
     id: `${type}-rec-3`,
     name: "Industrial Grade Cable",
-    price: 79.99,
+    price: 6639,
     image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=160",
     category: "wiring",
     rating: 4.9
@@ -150,7 +150,7 @@ const generateMockProducts = (type: string): Product[] => [
   {
     id: `${type}-rec-4`,
     name: "LED Flood Light 5000LM",
-    price: 89.99,
+    price: 7469,
     image: "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=160",
     category: "lighting",
     rating: 4.6

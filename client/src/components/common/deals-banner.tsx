@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatPrice } from "@/lib/currency";
 import { Clock, Tag, Zap } from "lucide-react";
 
 interface Deal {
@@ -66,13 +67,13 @@ export function DealsBanner({ deals }: DealsBannerProps) {
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                         <span className="text-2xl sm:text-3xl font-bold text-yellow-600">
-                          ${mainDeal.salePrice.toFixed(2)}
+                          {formatPrice(mainDeal.salePrice)}
                         </span>
                         <span className="text-base sm:text-lg text-gray-500 line-through">
-                          ${mainDeal.originalPrice.toFixed(2)}
+                          {formatPrice(mainDeal.originalPrice)}
                         </span>
                         <span className="text-xs sm:text-sm text-green-600 font-medium bg-green-50 px-2 py-1 rounded">
-                          Save ${(mainDeal.originalPrice - mainDeal.salePrice).toFixed(2)}
+                          Save {formatPrice(mainDeal.originalPrice - mainDeal.salePrice)}
                         </span>
                       </div>
 
@@ -129,10 +130,10 @@ export function DealsBanner({ deals }: DealsBannerProps) {
                     
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-base sm:text-lg font-bold text-yellow-600">
-                        ${deal.salePrice.toFixed(2)}
+                        {formatPrice(deal.salePrice)}
                       </span>
                       <span className="text-xs sm:text-sm text-gray-500 line-through">
-                        ${deal.originalPrice.toFixed(2)}
+                        {formatPrice(deal.originalPrice)}
                       </span>
                     </div>
 
