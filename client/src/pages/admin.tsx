@@ -382,7 +382,7 @@ function AdminDashboard() {
                     <div>
                       <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                       <p className="text-2xl font-bold text-gray-900">
-                        ${totalRevenue.toFixed(2)}
+                        ₹{totalRevenue.toFixed(2)}
                       </p>
                     </div>
                     <DollarSign className="w-8 h-8 text-green-600" />
@@ -451,7 +451,7 @@ function AdminDashboard() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">${parseFloat(order.totalAmount).toFixed(2)}</p>
+                            <p className="font-medium">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
                             <Badge variant="outline" className="text-xs">
                               {order.status}
                             </Badge>
