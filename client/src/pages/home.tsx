@@ -243,30 +243,185 @@ export default function Home() {
       {/* Visual Category Cards - Amazon Style */}
       <VisualCategoryCards categories={visualCategories} />
 
-      {/* Best Sellers - Horizontal Scrolling */}
-      <HorizontalProductSection
-        title="Best Sellers in Electrical"
-        products={(bestSellersData as any)?.products || mockProducts("bestsellers")}
-        viewAllLink="/products?bestsellers=true"
-        showPrices={true}
-      />
+      {/* Test Amazon-style Deals Section */}
+      <section className="bg-white py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center gap-3 mb-6">
+            <Tag className="w-6 h-6 text-red-500" />
+            <h2 className="text-2xl font-bold text-gray-900">Today's Deals</h2>
+            <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">Limited Time</span>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Main Featured Deal */}
+            <div className="lg:col-span-2">
+              <div className="relative bg-gradient-to-r from-red-50 to-orange-50 rounded-xl p-6 border border-red-100">
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="bg-red-500 text-white px-3 py-1 text-sm font-bold rounded">30% OFF</span>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                  <div className="space-y-4">
+                    <h3 className="text-2xl font-bold text-gray-900">Professional Electrical Tool Kit</h3>
+                    <p className="text-gray-600">Complete 50-piece electrician tool set with case</p>
+                    <div className="flex items-center gap-3">
+                      <span className="text-3xl font-bold text-red-600">$209.99</span>
+                      <span className="text-lg text-gray-500 line-through">$299.99</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-orange-600">
+                      <Clock className="w-4 h-4" />
+                      <span className="font-medium">Ends in 2h 45m</span>
+                    </div>
+                    <Button className="bg-red-600 hover:bg-red-700 text-white font-medium">Shop Deal Now</Button>
+                  </div>
+                  <div>
+                    <LazyImage
+                      src={getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 300, 200)}
+                      alt="Professional Tool Kit"
+                      className="w-full h-48 object-cover rounded-lg"
+                      fallback="/api/placeholder/300/200"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Smaller Deals */}
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="relative mb-3">
+                  <LazyImage
+                    src={getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 128)}
+                    alt="Smart Circuit Breaker" 
+                    className="w-full h-32 object-cover rounded-md"
+                    fallback="/api/placeholder/200/128"
+                  />
+                  <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">25% OFF</span>
+                </div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-2">Smart Circuit Breaker</h4>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-red-600">$67.49</span>
+                  <span className="text-sm text-gray-500 line-through">$89.99</span>
+                </div>
+              </div>
+              
+              <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="relative mb-3">
+                  <LazyImage
+                    src={getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 128)}
+                    alt="LED Work Lights"
+                    className="w-full h-32 object-cover rounded-md"
+                    fallback="/api/placeholder/200/128"
+                  />
+                  <span className="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">40% OFF</span>
+                </div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-2">LED Work Light Set</h4>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg font-bold text-red-600">$47.99</span>
+                  <span className="text-sm text-gray-500 line-through">$79.99</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center mt-6">
+            <Link href="/deals" className="inline-flex items-center gap-2 text-copper-600 hover:text-copper-700 font-medium">
+              <Zap className="w-4 h-4" />
+              View All Deals & Offers
+            </Link>
+          </div>
+        </div>
+      </section>
 
-      {/* New Arrivals - Horizontal Scrolling */}
-      <HorizontalProductSection
-        title="New Arrivals"
-        products={(newArrivalsData as any)?.products || mockProducts("new")}
-        viewAllLink="/products?new=true"
-        showPrices={true}
-      />
+      {/* Best Sellers - Amazon Style Horizontal Scrolling */}
+      <section className="bg-white py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Best Sellers in Electrical</h2>
+            <Link href="/products?bestsellers=true" className="text-copper-600 hover:text-copper-700 font-medium text-sm">See all →</Link>
+          </div>
+          
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            {mockProducts("bestsellers").map((product) => (
+              <Link key={product.id} href={`/products/${product.id}`} className="flex-shrink-0 w-48 group cursor-pointer">
+                <div className="h-full border-0 shadow-sm hover:shadow-md transition-shadow duration-200 bg-white rounded-lg p-3">
+                  <div className="relative mb-3">
+                    <LazyImage
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-40 object-cover rounded-lg"
+                      fallback="/api/placeholder/200/160"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-copper-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <div className="flex items-center gap-1">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className={`text-xs ${i < (product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-500">({product.rating})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
+                      {product.originalPrice && product.originalPrice > product.price && (
+                        <span className="text-sm text-gray-500 line-through">${product.originalPrice.toFixed(2)}</span>
+                      )}
+                    </div>
+                    <p className="text-xs text-gray-500 capitalize">{product.category}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
-      {/* Trending Now - Horizontal Scrolling */}
-      <HorizontalProductSection
-        title="Trending Now"
-        products={(trendingData as any)?.products || mockProducts("trending")}
-        viewAllLink="/products?trending=true"
-        showPrices={true}
-        dealBadge="Hot"
-      />
+      {/* New Arrivals - Amazon Style Horizontal Scrolling */}
+      <section className="bg-gray-50 py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">New Arrivals</h2>
+            <Link href="/products?new=true" className="text-copper-600 hover:text-copper-700 font-medium text-sm">See all →</Link>
+          </div>
+          
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2">
+            {mockProducts("new").map((product) => (
+              <Link key={product.id} href={`/products/${product.id}`} className="flex-shrink-0 w-48 group cursor-pointer">
+                <div className="h-full border-0 shadow-sm hover:shadow-md transition-shadow duration-200 bg-white rounded-lg p-3">
+                  <div className="relative mb-3">
+                    <LazyImage
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-40 object-cover rounded-lg"
+                      fallback="/api/placeholder/200/160"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <h3 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-copper-600 transition-colors">
+                      {product.name}
+                    </h3>
+                    <div className="flex items-center gap-1">
+                      <div className="flex">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className={`text-xs ${i < (product.rating || 0) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-500">({product.rating})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-bold text-gray-900">${product.price.toFixed(2)}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 capitalize">{product.category}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Personalized Recommendations */}
       <RecommendationEngine userId={user?.uid} />
