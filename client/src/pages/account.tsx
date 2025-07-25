@@ -29,7 +29,21 @@ import {
   Clock,
   CheckCircle,
   XCircle,
-  Truck
+  Truck,
+  CreditCard,
+  Shield,
+  Bell,
+  Download,
+  FileText,
+  Star,
+  BarChart3,
+  UserCheck,
+  Building,
+  Globe,
+  Lock,
+  Smartphone,
+  AlertTriangle,
+  TrendingUp
 } from "lucide-react";
 import { ORDER_STATUSES, BOOKING_STATUSES } from "@/lib/constants";
 import type { OrderWithItems, BookingWithService } from "@/lib/types";
@@ -228,27 +242,88 @@ export default function Account() {
           </p>
         </div>
 
+        {/* Account Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{(orders as any[]).length}</p>
+                <p className="text-sm text-gray-600">Total Orders</p>
+              </div>
+              <div className="w-12 h-12 bg-copper-100 rounded-lg flex items-center justify-center">
+                <Package className="w-6 h-6 text-copper-600" />
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{(bookings as any[]).length}</p>
+                <p className="text-sm text-gray-600">Service Bookings</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-blue-600" />
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{(wishlist as any[]).length}</p>
+                <p className="text-sm text-gray-600">Saved Items</p>
+              </div>
+              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
+                <Heart className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+          </Card>
+          
+          <Card className="p-6 hover:shadow-lg transition-shadow">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-2xl font-bold text-gray-900">
+                  ${(orders as any[]).reduce((sum: number, order: any) => sum + parseFloat(order.totalAmount || 0), 0).toFixed(2)}
+                </p>
+                <p className="text-sm text-gray-600">Total Spent</p>
+              </div>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-green-600" />
+              </div>
+            </div>
+          </Card>
+        </div>
+
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="profile" className="flex items-center">
-              <User className="w-4 h-4 mr-2" />
-              Profile
+          <TabsList className="grid w-full grid-cols-7">
+            <TabsTrigger value="profile" className="flex items-center text-xs sm:text-sm">
+              <User className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Profile</span>
             </TabsTrigger>
-            <TabsTrigger value="orders" className="flex items-center">
-              <Package className="w-4 h-4 mr-2" />
-              Orders
+            <TabsTrigger value="orders" className="flex items-center text-xs sm:text-sm">
+              <Package className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Orders</span>
             </TabsTrigger>
-            <TabsTrigger value="bookings" className="flex items-center">
-              <Calendar className="w-4 h-4 mr-2" />
-              Bookings
+            <TabsTrigger value="bookings" className="flex items-center text-xs sm:text-sm">
+              <Calendar className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Bookings</span>
             </TabsTrigger>
-            <TabsTrigger value="wishlist" className="flex items-center">
-              <Heart className="w-4 h-4 mr-2" />
-              Wishlist
+            <TabsTrigger value="wishlist" className="flex items-center text-xs sm:text-sm">
+              <Heart className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Wishlist</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center">
-              <Settings className="w-4 h-4 mr-2" />
-              Settings
+            <TabsTrigger value="payments" className="flex items-center text-xs sm:text-sm">
+              <CreditCard className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Payments</span>
+            </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center text-xs sm:text-sm">
+              <Shield className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Security</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center text-xs sm:text-sm">
+              <Settings className="w-4 h-4 mr-1 sm:mr-2" />
+              <span className="hidden sm:inline">Settings</span>
             </TabsTrigger>
           </TabsList>
 
@@ -547,67 +622,270 @@ export default function Account() {
             </Card>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Settings</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="border-b pb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Account Actions</h3>
+          {/* Payments Tab */}
+          <TabsContent value="payments" className="mt-6">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <CreditCard className="w-5 h-5 mr-2" />
+                    Payment Methods
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
-                    <Button 
-                      variant="outline" 
-                      onClick={handleSignOut}
-                      className="w-full sm:w-auto"
-                    >
-                      Sign Out
+                    <div className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-10 h-6 bg-blue-600 rounded text-white flex items-center justify-center text-xs font-bold">
+                            VISA
+                          </div>
+                          <div>
+                            <p className="font-medium">•••• •••• •••• 4242</p>
+                            <p className="text-sm text-gray-600">Expires 12/27</p>
+                          </div>
+                        </div>
+                        <Badge variant="secondary">Default</Badge>
+                      </div>
+                    </div>
+                    
+                    <Button variant="outline" className="w-full">
+                      <CreditCard className="w-4 h-4 mr-2" />
+                      Add New Payment Method
                     </Button>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
 
-                <div className="border-b pb-6">
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Preferences</h3>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <FileText className="w-5 h-5 mr-2" />
+                    Billing History
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between py-3 border-b">
                       <div>
-                        <h4 className="font-medium">Email Notifications</h4>
-                        <p className="text-sm text-gray-600">Receive updates about your orders and services</p>
+                        <p className="font-medium">Order #CB-2024-001</p>
+                        <p className="text-sm text-gray-600">January 15, 2024</p>
                       </div>
-                      <input type="checkbox" defaultChecked className="rounded" />
+                      <div className="text-right">
+                        <p className="font-medium">$249.99</p>
+                        <Button variant="ghost" size="sm">
+                          <Download className="w-4 h-4 mr-1" />
+                          Invoice
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-between">
+                    
+                    <div className="flex items-center justify-between py-3 border-b">
                       <div>
-                        <h4 className="font-medium">Marketing Emails</h4>
-                        <p className="text-sm text-gray-600">Receive promotional offers and news</p>
+                        <p className="font-medium">Order #CB-2023-087</p>
+                        <p className="text-sm text-gray-600">December 8, 2023</p>
                       </div>
-                      <input type="checkbox" className="rounded" />
+                      <div className="text-right">
+                        <p className="font-medium">$156.50</p>
+                        <Button variant="ghost" size="sm">
+                          <Download className="w-4 h-4 mr-1" />
+                          Invoice
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
 
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-4">Support</h3>
-                  <div className="space-y-4">
+          {/* Security Tab */}
+          <TabsContent value="security" className="mt-6">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Shield className="w-5 h-5 mr-2" />
+                    Security Settings
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <Phone className="w-5 h-5 text-gray-500" />
+                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                        <CheckCircle className="w-5 h-5 text-green-600" />
+                      </div>
                       <div>
-                        <p className="font-medium">Customer Support</p>
-                        <p className="text-sm text-gray-600">(555) 123-4567</p>
+                        <p className="font-medium">Two-Factor Authentication</p>
+                        <p className="text-sm text-gray-600">Extra security for your account</p>
                       </div>
                     </div>
+                    <Button variant="outline" size="sm">
+                      Enable
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex items-center space-x-3">
-                      <Mail className="w-5 h-5 text-gray-500" />
-                      <div>
-                        <p className="font-medium">Email Support</p>
-                        <p className="text-sm text-gray-600">support@copperbear.com</p>
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <Smartphone className="w-5 h-5 text-blue-600" />
                       </div>
+                      <div>
+                        <p className="font-medium">Login Notifications</p>
+                        <p className="text-sm text-gray-600">Get notified of new sign-ins</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Configure
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <Lock className="w-5 h-5 text-yellow-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Password</p>
+                        <p className="text-sm text-gray-600">Last changed 3 months ago</p>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm">
+                      Change
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Globe className="w-5 h-5 mr-2" />
+                    Active Sessions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
+                      <div>
+                        <p className="font-medium">Current Session</p>
+                        <p className="text-sm text-gray-600">Chrome on Windows • United States</p>
+                        <p className="text-xs text-gray-500">Last activity: Just now</p>
+                      </div>
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        Current
+                      </Badge>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">Mobile App</p>
+                        <p className="text-sm text-gray-600">iOS App • New York</p>
+                        <p className="text-xs text-gray-500">Last activity: 2 hours ago</p>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        Sign Out
+                      </Button>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="mt-6">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Bell className="w-5 h-5 mr-2" />
+                    Notification Preferences
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Order Updates</p>
+                      <p className="text-sm text-gray-600">Get notified about order status changes</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="toggle" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Promotional Emails</p>
+                      <p className="text-sm text-gray-600">Receive special offers and deals</p>
+                    </div>
+                    <input type="checkbox" defaultChecked className="toggle" />
+                  </div>
+                  
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium">Service Reminders</p>
+                      <p className="text-sm text-gray-600">Maintenance and service notifications</p>
+                    </div>
+                    <input type="checkbox" className="toggle" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Building className="w-5 h-5 mr-2" />
+                    Business Account
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="p-4 border rounded-lg bg-blue-50">
+                    <div className="flex items-center space-x-3 mb-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <UserCheck className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Upgrade to Business</p>
+                        <p className="text-sm text-gray-600">Access bulk pricing and contractor benefits</p>
+                      </div>
+                    </div>
+                    <Button className="w-full">
+                      Learn More About Business Account
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Settings className="w-5 h-5 mr-2" />
+                    Account Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Button 
+                    variant="outline" 
+                    onClick={handleSignOut}
+                    className="w-full"
+                  >
+                    Sign Out
+                  </Button>
+                  
+                  <div className="pt-4 border-t">
+                    <div className="flex items-center space-x-2 text-red-600">
+                      <AlertTriangle className="w-4 h-4" />
+                      <span className="text-sm font-medium">Danger Zone</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-2 mb-4">
+                      These actions are permanent and cannot be undone.
+                    </p>
+                    <Button variant="destructive" className="w-full">
+                      Delete Account
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
