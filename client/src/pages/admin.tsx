@@ -33,7 +33,8 @@ import {
   TrendingUp,
   Activity,
   LogOut,
-  Shield
+  Shield,
+  ExternalLink
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -337,6 +338,15 @@ function AdminDashboard() {
               </Badge>
             </div>
             <div className="flex items-center space-x-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open('/', '_blank')}
+                className="flex items-center space-x-2 text-copper-600 border-copper-200 hover:bg-copper-50"
+              >
+                <ExternalLink className="w-4 h-4" />
+                <span>View Site</span>
+              </Button>
               <span className="text-sm text-gray-600">
                 Welcome, {adminUser?.email}
               </span>
