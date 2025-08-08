@@ -117,13 +117,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Product routes
   app.get("/api/products", async (req, res) => {
     try {
-      const { categoryId, search, featured, limit = 20, offset = 0 } = req.query;
+      const { categoryId, category, search, featured, limit = 20, offset = 0 } = req.query;
       
-      let products;
+      let products: any[] = [];
       if (featured === "true") {
         products = await storage.getFeaturedProducts();
       } else if (categoryId) {
         products = await storage.getProductsByCategory(categoryId as string);
+      } else if (category) {
+        // Handle category slug - find category by slug first, then get products
+        const categories = await storage.getAllCategories();
+        const foundCategory = categories.find(cat => cat.slug === category);
+        if (foundCategory) {
+          products = await storage.getProductsByCategory(foundCategory.id);
+        } else {
+          products = [];
+        }
       } else if (search) {
         products = await storage.searchProducts(search as string);
       } else {
