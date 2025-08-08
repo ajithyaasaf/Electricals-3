@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
+import { SmartLink } from "@/components/navigation/smart-link";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useGuestCart } from "@/hooks/use-guest-cart";
 import { useQuery } from "@tanstack/react-query";
@@ -245,7 +246,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between py-3 sm:py-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 flex-shrink-0">
+          <SmartLink href="/" className="flex items-center space-x-2 flex-shrink-0">
             <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-copper-500 to-copper-600 rounded-lg flex items-center justify-center">
               <Zap className="text-white text-base sm:text-lg" />
             </div>
@@ -257,7 +258,7 @@ export function Header() {
                 Electrical Solutions
               </p>
             </div>
-          </Link>
+          </SmartLink>
 
           {/* Search Bar - Desktop */}
           {!isMobile && (
@@ -323,7 +324,7 @@ export function Header() {
                             {expandedSections[section.title] && (
                               <div className="bg-copper-50">
                                 {section.items.map((item) => (
-                                  <Link
+                                  <SmartLink
                                     key={item.name}
                                     href={item.href}
                                     className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-electric-blue-600 active:text-electric-blue-700 hover:bg-white active:bg-copper-25 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
@@ -333,7 +334,7 @@ export function Header() {
                                     <span className="block truncate">
                                       {item.name}
                                     </span>
-                                  </Link>
+                                  </SmartLink>
                                 ))}
                               </div>
                             )}
@@ -347,7 +348,7 @@ export function Header() {
                             </div>
                             <div>
                               {section.items.map((item) => (
-                                <Link
+                                <SmartLink
                                   key={item.name}
                                   href={item.href}
                                   className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-electric-blue-600 active:text-electric-blue-700 hover:bg-copper-50 active:bg-copper-100 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
@@ -357,7 +358,7 @@ export function Header() {
                                   <span className="block truncate">
                                     {item.name}
                                   </span>
-                                </Link>
+                                </SmartLink>
                               ))}
                             </div>
                           </>
@@ -385,19 +386,19 @@ export function Header() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem asChild>
-                    <Link href="/account">My Account</Link>
+                    <SmartLink href="/account">My Account</SmartLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/account?tab=orders">Orders</Link>
+                    <SmartLink href="/account?tab=orders">Orders</SmartLink>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link href="/account?tab=bookings">Service Bookings</Link>
+                    <SmartLink href="/account?tab=bookings">Service Bookings</SmartLink>
                   </DropdownMenuItem>
                   {user?.email === "admin@copperbear.com" && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
-                        <Link href="/admin">Admin Panel</Link>
+                        <SmartLink href="/admin">Admin Panel</SmartLink>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -457,7 +458,7 @@ export function Header() {
             <ul className="flex items-center space-x-4 lg:space-x-8 text-sm overflow-x-auto scrollbar-hide">
               {desktopNavigation.map((item) => (
                 <li key={item.name} className="flex-shrink-0">
-                  <Link
+                  <SmartLink
                     href={item.href}
                     className={`whitespace-nowrap transition-colors px-2 py-1 rounded-md touch-manipulation ${
                       item.name === "Today's Deals"
@@ -466,7 +467,7 @@ export function Header() {
                     }`}
                   >
                     {item.name}
-                  </Link>
+                  </SmartLink>
                 </li>
               ))}
             </ul>
