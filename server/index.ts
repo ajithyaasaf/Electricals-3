@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { FirestoreSeeder } from "./data/firestoreSeeder";
+import { setupFirebaseAuth } from "./firebaseAuth";
 
 const app = express();
 app.use(express.json());
@@ -38,9 +39,8 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize Firestore with sample data
-  console.log('🔥 Firebase authentication configured for CopperBear platform');
-  console.log('🔐 Authentication: 100% Firebase - No Replit Auth dependencies');
+  // Initialize Firebase Admin SDK for security + performance
+  await setupFirebaseAuth(app);
   
   // Firebase is configured - seeding will be done via API endpoint
   console.log('🔍 Firebase configuration ready');

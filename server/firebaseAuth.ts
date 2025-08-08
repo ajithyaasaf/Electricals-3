@@ -1,5 +1,6 @@
 import { Express, Request, Response, NextFunction } from 'express';
 import { storage } from './storage';
+import admin from 'firebase-admin';
 
 // Firebase Admin interface for middleware
 interface AuthenticatedRequest extends Request {
@@ -12,10 +13,26 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-// Complete Firebase Authentication setup - no Replit Auth dependencies
+// Initialize Firebase Admin SDK with service account
 export async function setupFirebaseAuth(app: Express) {
-  console.log('Firebase authentication configured for CopperBear platform');
-  console.log('Authentication: 100% Firebase - No Replit Auth dependencies');
+  try {
+    // Parse service account key from environment
+    const serviceAccountKey = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY || '{}');
+    
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccountKey),
+        projectId: serviceAccountKey.project_id
+      });
+    }
+    
+    console.log('🔐 Firebase Admin SDK initialized with service account');
+    console.log('⚡ Perfect security + Fast performance enabled');
+    console.log('🛡️ Real token verification active');
+  } catch (error) {
+    console.error('❌ Firebase Admin SDK initialization failed:', error);
+    throw error;
+  }
 }
 
 // Pure Firebase token verification middleware - No Replit Auth dependencies
@@ -34,21 +51,15 @@ export async function isAuthenticated(
     const token = authorization.split('Bearer ')[1];
     
     try {
-      // Firebase client-side authentication approach
-      // Client sends Firebase user data as base64-encoded token
-      const userInfo = JSON.parse(Buffer.from(token, 'base64').toString());
-      
-      // Validate Firebase user structure
-      if (!userInfo.uid) {
-        return res.status(401).json({ message: 'Invalid Firebase token structure' });
-      }
+      // Firebase Admin SDK: Verify real ID token from client
+      const decodedToken = await admin.auth().verifyIdToken(token);
       
       req.user = {
-        uid: userInfo.uid,
-        email: userInfo.email,
-        emailVerified: userInfo.emailVerified || false,
-        displayName: userInfo.displayName || 'User',
-        photoURL: userInfo.photoURL
+        uid: decodedToken.uid,
+        email: decodedToken.email,
+        emailVerified: decodedToken.email_verified || false,
+        displayName: decodedToken.name || 'User',
+        photoURL: decodedToken.picture
       };
 
       // Auto-create user in Firestore if doesn't exist
