@@ -5,7 +5,15 @@ export function useScrollRestoration() {
   const [location] = useLocation();
 
   useEffect(() => {
-    // Scroll to top when route changes
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    // Small delay to ensure DOM is ready, then smooth scroll to top
+    const timer = setTimeout(() => {
+      window.scrollTo({ 
+        top: 0, 
+        left: 0, 
+        behavior: "smooth" 
+      });
+    }, 50);
+
+    return () => clearTimeout(timer);
   }, [location]);
 }
