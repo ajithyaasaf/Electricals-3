@@ -136,7 +136,7 @@ export default function Landing() {
               asChild 
               size="lg" 
               variant="outline" 
-              className="border-white text-white hover:bg-white hover:text-copper-700"
+              className="border-white text-white bg-transparent hover:bg-white hover:text-copper-700 font-medium"
             >
               <Link href="/services">Book a Service</Link>
             </Button>
