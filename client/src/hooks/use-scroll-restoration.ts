@@ -14,9 +14,18 @@ export function useScrollRestoration() {
       });
     };
 
-    // For product pages or pages with dynamic content, wait a bit longer
-    const isProductPage = location.includes('/products/') || location.includes('/services/');
-    const delay = isProductPage ? 150 : 50;
+    // Determine delay based on page type
+    const isCategoryPage = location.includes('/products?category=') || location.includes('/services?category=');
+    const isProductDetailPage = location.includes('/products/') || location.includes('/services/');
+    const isSearchPage = location.includes('?') && (location.includes('featured=') || location.includes('bulk=') || location.includes('clearance='));
+    
+    // Category pages and search pages need more time to load filtered data
+    let delay = 50; // Default for regular pages
+    if (isCategoryPage || isSearchPage) {
+      delay = 200; // Categories from header navigation
+    } else if (isProductDetailPage) {
+      delay = 150; // Individual product pages
+    }
 
     const timer = setTimeout(scrollToTop, delay);
 
