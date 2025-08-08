@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { PerformanceMonitor } from "@/components/layout/performance-monitor";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import { FirebaseRedirectHandler } from "@/components/auth/firebase-redirect-handler";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
@@ -22,6 +23,7 @@ import Admin from "@/pages/admin";
 
 function Router() {
   const { isAuthenticated, loading } = useFirebaseAuth();
+  useScrollRestoration();
 
   return (
     <Switch>
