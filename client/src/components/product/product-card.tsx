@@ -1,5 +1,5 @@
 import { useState, memo } from "react";
-import { Link } from "wouter";
+import { SmartLink } from "@/components/navigation/smart-link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -132,7 +132,7 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-300 group">
-      <Link href={`/products/${product.slug}`}>
+      <SmartLink href={`/products/${product.slug}`}>
         <div className="relative overflow-hidden rounded-t-lg">
           <LazyImage
             src={imageUrl}
@@ -219,7 +219,7 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
             )}
           </Button>
         </div>
-      </Link>
+      </SmartLink>
     </div>
   );
 });

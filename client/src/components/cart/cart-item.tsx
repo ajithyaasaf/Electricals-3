@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "wouter";
+import { SmartLink } from "@/components/navigation/smart-link";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,22 +90,22 @@ export function CartItem({ item }: CartItemProps) {
   return (
     <div className="flex items-center space-x-4 py-4 border-b border-gray-200">
       {/* Product Image */}
-      <Link href={`/products/${item.product.id}`} className="flex-shrink-0">
+      <SmartLink href={`/products/${item.product.id}`} className="flex-shrink-0">
         <img
           src={imageUrl}
           alt={item.product.name}
           className="w-20 h-20 object-cover rounded-lg"
         />
-      </Link>
+      </SmartLink>
 
       {/* Product Details */}
       <div className="flex-1 min-w-0">
-        <Link
+        <SmartLink
           href={`/products/${item.product.id}`}
           className="text-lg font-medium text-gray-900 hover:text-copper-600 transition-colors"
         >
           {item.product.name}
-        </Link>
+        </SmartLink>
         <p className="text-sm text-gray-500 mt-1">
           ${price.toFixed(2)} each
         </p>

@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { SmartLink } from "@/components/navigation/smart-link";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { ArrowRight } from "lucide-react";
 
@@ -36,7 +36,7 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
         {featuredCategories.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
             {featuredCategories.map((category) => (
-              <Link
+              <SmartLink
                 key={category.slug}
                 href={category.slug === "services" ? "/services" : `/products?category=${category.slug}`}
                 className="group block"
@@ -91,7 +91,7 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
                     </div>
                   </div>
                 </div>
-              </Link>
+              </SmartLink>
             ))}
           </div>
         )}
@@ -107,7 +107,7 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
             {/* Mobile: Horizontal Scroll, Desktop: Grid */}
             <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 sm:grid sm:grid-cols-4 lg:grid-cols-6 sm:gap-4 sm:overflow-visible sm:pb-0">
               {regularCategories.map((category) => (
-                <Link
+                <SmartLink
                   key={category.slug}
                   href={category.slug === "services" ? "/services" : `/products?category=${category.slug}`}
                   className="group block flex-shrink-0 w-32 sm:w-auto"
@@ -134,7 +134,7 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
                       </p>
                     </div>
                   </div>
-                </Link>
+                </SmartLink>
               ))}
             </div>
           </div>

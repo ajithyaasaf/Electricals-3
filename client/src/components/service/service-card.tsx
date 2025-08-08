@@ -3,7 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/useAuth";
+import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice } from "@/lib/currency";
 import { Clock, Star, Calendar } from "lucide-react";
@@ -15,7 +15,7 @@ interface ServiceCardProps {
 }
 
 export function ServiceCard({ service, showCategory = false }: ServiceCardProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useFirebaseAuth();
   const { toast } = useToast();
 
   const bookServiceMutation = useMutation({

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { SmartLink } from "@/components/navigation/smart-link";
 import { CartItem } from "@/components/cart/cart-item";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -142,7 +142,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
             <p className="text-gray-600 mb-4">Add some electrical products to get started!</p>
             <Button asChild onClick={() => onOpenChange(false)}>
-              <Link href="/products">Browse Products</Link>
+              <SmartLink href="/products">Browse Products</SmartLink>
             </Button>
           </div>
         ) : (
@@ -191,10 +191,10 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                   size="lg"
                   onClick={handleCheckout}
                 >
-                  <Link href="/checkout">
+                  <SmartLink href="/checkout">
                     <CreditCard className="h-4 w-4 mr-2" />
                     Proceed to Checkout
-                  </Link>
+                  </SmartLink>
                 </Button>
                 <Button 
                   variant="outline" 
@@ -202,7 +202,7 @@ export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
                   onClick={() => onOpenChange(false)}
                   asChild
                 >
-                  <Link href="/products">Continue Shopping</Link>
+                  <SmartLink href="/products">Continue Shopping</SmartLink>
                 </Button>
               </div>
 

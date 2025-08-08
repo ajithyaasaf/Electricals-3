@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { SmartLink } from "@/components/navigation/smart-link";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
 
@@ -61,7 +61,7 @@ export function HeroSection() {
                     size="lg"
                     className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
                   >
-                    <Link href="/products">Book Your Visit Now</Link>
+                    <SmartLink href="/products">Book Your Visit Now</SmartLink>
                   </Button>
                 </div>
               </div>
@@ -96,7 +96,7 @@ export function HeroSection() {
                   size="sm"
                   className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold w-fit rounded-full px-6"
                 >
-                  <Link href="/products?category=wiring-cables">Shop Now</Link>
+                  <SmartLink href="/products?category=wiring-cables">Shop Now</SmartLink>
                 </Button>
               </div>
             </div>
@@ -126,7 +126,7 @@ export function HeroSection() {
                   size="sm"
                   className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold w-fit rounded-full px-6"
                 >
-                  <Link href="/services">Order your samples online</Link>
+                  <SmartLink href="/services">Order your samples online</SmartLink>
                 </Button>
               </div>
             </div>
