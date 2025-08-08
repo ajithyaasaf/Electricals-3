@@ -17,12 +17,16 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SearchInput } from "@/components/common/search-input";
 import { useProducts, useCategories } from "@/features/products/hooks/useProducts";
+import { useScrollRestoration } from "@/hooks/use-scroll-restoration";
 import type { ProductFilters } from "@/features/products/types";
 
 export default function Products() {
   const searchParams = useSearch();
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
+  
+  // Enable scroll restoration for category navigation
+  useScrollRestoration();
   
   // Parse URL parameters
   const urlParams = new URLSearchParams(searchParams);
