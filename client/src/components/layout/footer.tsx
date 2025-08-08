@@ -1,5 +1,6 @@
 import { Link } from "wouter";
-import { Zap } from "lucide-react";
+import { Zap, CreditCard } from "lucide-react";
+import { SiVisa, SiMastercard, SiAmericanexpress, SiPaypal } from "react-icons/si";
 import { COMPANY_INFO, CONTACT_INFO } from "@/lib/constants";
 
 export function Footer() {
@@ -139,11 +140,11 @@ export function Footer() {
           </div>
           <div className="flex items-center space-x-4 mt-4 md:mt-0">
             <span className="text-sm text-gray-400">We Accept:</span>
-            <div className="flex space-x-2 text-xl text-gray-400">
-              <span>💳</span>
-              <span>💳</span>
-              <span>💳</span>
-              <span>💳</span>
+            <div className="flex space-x-3 text-2xl text-gray-400">
+              <SiVisa className="w-8 h-6" title="Visa" />
+              <SiMastercard className="w-8 h-6" title="Mastercard" />
+              <SiAmericanexpress className="w-8 h-6" title="American Express" />
+              <SiPaypal className="w-8 h-6" title="PayPal" />
             </div>
           </div>
         </div>
