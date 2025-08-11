@@ -65,6 +65,18 @@ export function CartProvider({ children }: CartProviderProps) {
   const pendingUpdatesRef = useRef<Set<string>>(new Set());
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const saveGuestCartTimeoutRef = useRef<NodeJS.Timeout>();
+  
+  // Add-to-cart operation queue
+  const addOperationQueueRef = useRef<Array<{
+    id: string;
+    productId?: string;
+    serviceId?: string;
+    quantity: number;
+    customizations?: Record<string, any>;
+    resolve: () => void;
+    reject: (error: Error) => void;
+  }>>([]);
+  const isProcessingAddOperations = useRef(false);
 
   // Load guest cart from localStorage on mount
   useEffect(() => {
@@ -242,6 +254,37 @@ export function CartProvider({ children }: CartProviderProps) {
     migrateGuestCart();
   }, [isAuthenticated, user, guestCart, loadAuthenticatedCart, toast]);
 
+  // Process add-to-cart operations queue for authenticated users
+  const processAddOperationQueue = useCallback(async () => {
+    if (isProcessingAddOperations.current || addOperationQueueRef.current.length === 0) {
+      return;
+    }
+
+    isProcessingAddOperations.current = true;
+
+    while (addOperationQueueRef.current.length > 0) {
+      const operation = addOperationQueueRef.current.shift();
+      if (!operation) continue;
+
+      try {
+        await apiRequest('POST', '/api/cart/items', {
+          productId: operation.productId,
+          serviceId: operation.serviceId,
+          quantity: operation.quantity,
+          customizations: operation.customizations
+        });
+        operation.resolve();
+      } catch (error) {
+        console.error('[CART CONTEXT] Error processing add operation:', error);
+        operation.reject(error as Error);
+      }
+    }
+
+    // Refresh cart once after all operations are complete
+    await loadAuthenticatedCart();
+    isProcessingAddOperations.current = false;
+  }, [loadAuthenticatedCart]);
+
   // Cart actions
   const addItem = useCallback(async (
     productId?: string, 
@@ -258,37 +301,117 @@ export function CartProvider({ children }: CartProviderProps) {
       return;
     }
 
+    // Immediate optimistic UI update for both authenticated and guest users
+    const optimisticItemId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
     if (isAuthenticated) {
-      // Authenticated user - add to server cart
-      setIsLoading(true);
-      try {
-        await apiRequest('POST', '/api/cart/items', {
+      // Optimistically add to cart display immediately
+      setCart(prev => {
+        if (!prev) {
+          // If no cart exists, create a basic structure
+          const newCart: Cart = {
+            id: `temp_cart_${Date.now()}`,
+            items: [],
+            totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
+            currency: 'INR',
+            lastUpdated: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            appliedCoupons: [],
+            userId: user?.uid,
+            sessionId: undefined,
+            shippingAddress: undefined,
+            expiresAt: undefined
+          };
+          prev = newCart;
+        }
+
+        // Check if item already exists
+        const existingItemIndex = prev.items.findIndex(item => 
+          (item.product?.id === productId || item.service?.id === serviceId)
+        );
+
+        if (existingItemIndex >= 0) {
+          // Update existing item quantity
+          const updatedItems = prev.items.map((item, index) =>
+            index === existingItemIndex
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+          
+          return {
+            ...prev,
+            items: updatedItems
+          };
+        } else {
+          // Add new item with temporary data
+          const newItem: CartItem = {
+            id: optimisticItemId,
+            productId,
+            serviceId,
+            quantity,
+            unitPrice: 0, // Will be updated when real data comes back
+            originalPrice: 0,
+            discount: 0,
+            appliedCoupons: [],
+            customizations: customizations || {},
+            notes: '',
+            savedForLater: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            // Temporary product/service data
+            product: productId ? { id: productId, name: 'Loading...', price: 0 } as any : undefined,
+            service: serviceId ? { id: serviceId, name: 'Loading...', price: 0 } as any : undefined
+          };
+
+          return {
+            ...prev,
+            items: [...prev.items, newItem]
+          };
+        }
+      });
+
+      // Queue the actual API operation
+      return new Promise<void>((resolve, reject) => {
+        addOperationQueueRef.current.push({
+          id: optimisticItemId,
           productId,
           serviceId,
           quantity,
-          customizations
+          customizations,
+          resolve: () => {
+            resolve();
+            toast({
+              title: "Added to Cart",
+              description: "Item added successfully",
+            });
+          },
+          reject: (error) => {
+            // Remove optimistic item on error
+            setCart(prev => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                items: prev.items.filter(item => item.id !== optimisticItemId)
+              };
+            });
+            reject(error);
+            toast({
+              title: "Error",
+              description: "Failed to add item to cart",
+              variant: "destructive",
+            });
+          }
         });
-        
-        await loadAuthenticatedCart();
-        
-        toast({
-          title: "Added to Cart",
-          description: `Item added successfully`,
-        });
-      } catch (error) {
-        console.error('[CART CONTEXT] Error adding item to authenticated cart:', error);
-        toast({
-          title: "Error",
-          description: "Failed to add item to cart",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
+
+        // Process the queue
+        processAddOperationQueue();
+      });
     } else {
-      // Guest user - add to localStorage cart
+      // Guest user - immediate update with optimistic UI
       console.log('[CART CONTEXT] Adding item to guest cart:', { productId, serviceId, quantity });
       
+      // Update guest cart array immediately
       setGuestCart(prev => {
         const existingIndex = prev.findIndex(item => 
           item.productId === productId && item.serviceId === serviceId
@@ -317,19 +440,82 @@ export function CartProvider({ children }: CartProviderProps) {
         }
         
         console.log('[CART CONTEXT] Updated guest cart:', newCart);
-        
-        // Refresh cart display
-        setTimeout(() => loadGuestCartAsCart(), 100);
-        
         return newCart;
       });
+
+      // Also immediately update the cart display object optimistically
+      setCart(prev => {
+        if (!prev) {
+          // Create empty cart structure
+          prev = {
+            id: `guest_cart_${Date.now()}`,
+            items: [],
+            totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
+            currency: 'INR',
+            lastUpdated: new Date(),
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            appliedCoupons: [],
+            userId: undefined,
+            sessionId: `guest_session_${Date.now()}`,
+            shippingAddress: undefined,
+            expiresAt: undefined
+          };
+        }
+
+        // Check if item already exists in display cart
+        const existingItemIndex = prev.items.findIndex(item => 
+          (item.product?.id === productId || item.service?.id === serviceId)
+        );
+
+        if (existingItemIndex >= 0) {
+          // Update existing item
+          const updatedItems = prev.items.map((item, index) =>
+            index === existingItemIndex
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          );
+          
+          return {
+            ...prev,
+            items: updatedItems
+          };
+        } else {
+          // Add new optimistic item
+          const newItem: CartItem = {
+            id: optimisticItemId,
+            productId,
+            serviceId,
+            quantity,
+            unitPrice: 0,
+            originalPrice: 0,
+            discount: 0,
+            appliedCoupons: [],
+            customizations: customizations || {},
+            notes: '',
+            savedForLater: false,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            product: productId ? { id: productId, name: 'Loading...', price: 0 } as any : undefined,
+            service: serviceId ? { id: serviceId, name: 'Loading...', price: 0 } as any : undefined
+          };
+
+          return {
+            ...prev,
+            items: [...prev.items, newItem]
+          };
+        }
+      });
+      
+      // Update full cart object with proper data shortly after
+      setTimeout(() => loadGuestCartAsCart(), 50);
       
       toast({
         title: "Added to Cart",
-        description: `Item added successfully`,
+        description: "Item added successfully",
       });
     }
-  }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
+  }, [isAuthenticated, processAddOperationQueue, loadGuestCartAsCart, toast, user]);
 
   const removeItem = useCallback(async (itemId: string) => {
     // Immediate optimistic removal for instant UI feedback
@@ -495,6 +681,8 @@ export function CartProvider({ children }: CartProviderProps) {
       debounceTimersRef.current.clear();
       updateQueueRef.current.clear();
       pendingUpdatesRef.current.clear();
+      addOperationQueueRef.current.length = 0;
+      isProcessingAddOperations.current = false;
       if (saveGuestCartTimeoutRef.current) {
         clearTimeout(saveGuestCartTimeoutRef.current);
       }
