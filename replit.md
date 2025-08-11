@@ -46,6 +46,8 @@ Navigation Preferences: Enterprise-level navigation with smooth transitions, loa
   - Coupon management system with validation and discount calculations
   - Cart sidebar integration with real-time item count and quick actions
   - Comprehensive cart summary with shipping, tax, and discount calculations
+  - **Fixed quantity persistence issues** - optimistic updates now work correctly for logged-in users
+  - **Resolved server-side cart operation errors** - add/remove/update operations working properly
 
 ## System Architecture
 

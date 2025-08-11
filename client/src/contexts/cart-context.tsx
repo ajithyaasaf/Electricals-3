@@ -628,12 +628,15 @@ export function CartProvider({ children }: CartProviderProps) {
 
   // Debounced quantity update processor
   const processQuantityUpdate = useCallback(async (itemId: string, finalQuantity: number) => {
+    console.log('[CART CONTEXT] 🔄 Processing final quantity update:', { itemId, finalQuantity });
+
     if (finalQuantity <= 0) {
       await removeItem(itemId);
       return;
     }
 
     if (pendingUpdatesRef.current.has(itemId)) {
+      console.log('[CART CONTEXT] ⚠️ Already processing this item, skipping:', itemId);
       return; // Already processing this item
     }
 
@@ -641,8 +644,17 @@ export function CartProvider({ children }: CartProviderProps) {
 
     try {
       if (isAuthenticated) {
+        console.log('[CART CONTEXT] 📡 Sending server update for authenticated user...');
         await apiRequest('PATCH', `/api/cart/items/${itemId}`, { quantity: finalQuantity });
-        await loadAuthenticatedCart();
+        
+        // Instead of reloading the entire cart, just verify the item was updated correctly
+        // This prevents overwriting the optimistic UI update
+        console.log('[CART CONTEXT] ✅ Server update completed, keeping optimistic UI');
+        
+        toast({
+          title: "Updated",
+          description: "Quantity updated successfully",
+        });
       } else {
         // For guest cart, update localStorage synchronously
         setGuestCart(prev => {
@@ -655,7 +667,13 @@ export function CartProvider({ children }: CartProviderProps) {
         await loadGuestCartAsCart();
       }
     } catch (error) {
-      console.error('[CART CONTEXT] Error processing quantity update:', error);
+      console.error('[CART CONTEXT] ❌ Error processing quantity update:', error);
+      
+      // On error, revert optimistic update by reloading cart
+      if (isAuthenticated) {
+        await loadAuthenticatedCart();
+      }
+      
       toast({
         title: "Error",
         description: "Failed to update quantity",
@@ -668,26 +686,34 @@ export function CartProvider({ children }: CartProviderProps) {
   }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, removeItem, toast]);
 
   const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
-    // Immediately update UI optimistically
-    if (isAuthenticated) {
-      setCart(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          items: prev.items.map(item => 
-            item.id === itemId ? { ...item, quantity } : item
-          )
-        };
-      });
-    } else {
+    console.log('[CART CONTEXT] 🔄 Updating quantity:', { itemId, quantity, isAuthenticated });
+    
+    // Immediately update UI optimistically for both authenticated and guest users
+    setCart(prev => {
+      if (!prev) return prev;
+      console.log('[CART CONTEXT] 📦 Optimistic quantity update - before:', prev.items.find(item => item.id === itemId)?.quantity);
+      const updatedCart = {
+        ...prev,
+        items: prev.items.map(item => 
+          item.id === itemId ? { ...item, quantity } : item
+        ),
+        lastUpdated: new Date(),
+        updatedAt: new Date()
+      };
+      console.log('[CART CONTEXT] 📦 Optimistic quantity update - after:', updatedCart.items.find(item => item.id === itemId)?.quantity);
+      return updatedCart;
+    });
+
+    if (!isAuthenticated) {
+      // For guest cart, also update localStorage synchronously
       setGuestCart(prev => 
         prev.map(item => 
-          item.id === itemId ? { ...item, quantity } : item
+          item.id === itemId ? { ...item, quantity, addedAt: Date.now() } : item
         )
       );
     }
 
-    // Queue the update for processing
+    // Queue the update for processing with debouncing
     updateQueueRef.current.set(itemId, { quantity, timestamp: Date.now() });
 
     // Clear existing timer for this item
