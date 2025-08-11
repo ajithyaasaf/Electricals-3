@@ -26,6 +26,51 @@ const CART_CONFIG = {
   taxRate: 0.08 // 8%
 };
 
+// Helper function to enrich guest cart items
+async function enrichGuestCartItems(guestItems: any[]) {
+  const enrichedItems = [];
+  
+  for (const item of guestItems) {
+    let enrichedItem = {
+      id: item.id || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      productId: item.productId,
+      serviceId: item.serviceId,
+      quantity: item.quantity || 1,
+      unitPrice: 0,
+      originalPrice: 0,
+      discount: 0,
+      appliedCoupons: [],
+      customizations: {},
+      notes: '',
+      savedForLater: false,
+      createdAt: new Date(item.addedAt || Date.now()),
+      updatedAt: new Date()
+    };
+    
+    if (item.productId) {
+      const product = await storage.getProductById(item.productId);
+      if (product) {
+        enrichedItem.unitPrice = product.price;
+        enrichedItem.originalPrice = product.originalPrice || product.price;
+      }
+    }
+    
+    if (item.serviceId) {
+      const service = await storage.getServiceById(item.serviceId);
+      if (service) {
+        enrichedItem.unitPrice = service.price;
+        enrichedItem.originalPrice = service.price;
+      }
+    }
+    
+    if (enrichedItem.unitPrice > 0) {
+      enrichedItems.push(enrichedItem);
+    }
+  }
+  
+  return enrichedItems;
+}
+
 // Mock coupon data (replace with database)
 const MOCK_COUPONS: Coupon[] = [
   {
@@ -47,6 +92,7 @@ const MOCK_COUPONS: Coupon[] = [
     type: 'shipping',
     value: 0,
     minOrderAmount: 5000,
+    usedCount: 0,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date()
@@ -57,6 +103,7 @@ const MOCK_COUPONS: Coupon[] = [
     type: 'fixed',
     value: 500,
     minOrderAmount: 3000,
+    usedCount: 0,
     isActive: true,
     createdAt: new Date(),
     updatedAt: new Date()
@@ -77,7 +124,7 @@ export function registerCartRoutes(app: Express) {
         // Authenticated user cart
         cartItems = await storage.getUserCartItems(userId);
       } else if (sessionId) {
-        // Guest cart from session
+        // Guest cart from request body (localStorage data)
         const guestItems = req.body?.items || [];
         cartItems = await enrichGuestCartItems(guestItems);
       }
@@ -138,6 +185,77 @@ export function registerCartRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching enhanced cart:", error);
       res.status(500).json({ message: "Failed to fetch cart" });
+    }
+  });
+
+  // Guest cart API - for localStorage-based guest cart
+  app.post("/api/cart/guest", async (req, res) => {
+    try {
+      const { items = [] } = req.body;
+      
+      // Enrich guest cart items with product/service details
+      const enrichedItems: CartItemWithDetails[] = [];
+      
+      for (const item of items) {
+        let enrichedItem: CartItemWithDetails = {
+          id: item.id || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          productId: item.productId,
+          serviceId: item.serviceId,
+          quantity: item.quantity || 1,
+          unitPrice: 0,
+          originalPrice: 0,
+          discount: 0,
+          appliedCoupons: [],
+          customizations: {},
+          notes: '',
+          savedForLater: false,
+          createdAt: new Date(item.addedAt || Date.now()),
+          updatedAt: new Date()
+        };
+        
+        if (item.productId) {
+          const product = await storage.getProductById(item.productId);
+          if (product) {
+            enrichedItem.product = product;
+            enrichedItem.unitPrice = product.price;
+            enrichedItem.originalPrice = product.originalPrice || product.price;
+          }
+        }
+        
+        if (item.serviceId) {
+          const service = await storage.getServiceById(item.serviceId);
+          if (service) {
+            enrichedItem.service = service;
+            enrichedItem.unitPrice = service.price;
+            enrichedItem.originalPrice = service.price;
+          }
+        }
+        
+        if (enrichedItem.unitPrice > 0) {
+          enrichedItems.push(enrichedItem);
+        }
+      }
+
+      // Calculate totals
+      const totals = calculateCartTotals(enrichedItems, []);
+      
+      const cart: Cart = {
+        id: `guest_cart_${Date.now()}`,
+        sessionId: `guest_session_${Date.now()}`,
+        items: enrichedItems,
+        appliedCoupons: [],
+        totals,
+        currency: 'INR',
+        lastUpdated: new Date(),
+        expiresAt: new Date(Date.now() + CART_CONFIG.cartExpiryHours * 60 * 60 * 1000),
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      res.json(cart);
+    } catch (error) {
+      console.error("Error processing guest cart:", error);
+      res.status(500).json({ message: "Failed to process guest cart" });
     }
   });
 
@@ -418,35 +536,6 @@ export function registerCartRoutes(app: Express) {
 }
 
 // Helper functions
-async function enrichGuestCartItems(guestItems: any[]): Promise<any[]> {
-  const enriched = [];
-  
-  for (const item of guestItems) {
-    const enrichedItem = { ...item };
-    
-    if (item.productId) {
-      const product = await storage.getProductById(item.productId);
-      if (product) {
-        enrichedItem.product = product;
-        enrichedItem.unitPrice = product.price;
-        enrichedItem.originalPrice = product.originalPrice || product.price;
-      }
-    }
-    
-    if (item.serviceId) {
-      const service = await storage.getServiceById(item.serviceId);
-      if (service) {
-        enrichedItem.service = service;
-        enrichedItem.unitPrice = service.price;
-        enrichedItem.originalPrice = service.price;
-      }
-    }
-    
-    enriched.push(enrichedItem);
-  }
-  
-  return enriched;
-}
 
 function calculateCartTotals(items: CartItemWithDetails[], coupons: Coupon[] = []): CartTotals {
   const activeItems = items.filter(item => !item.savedForLater);

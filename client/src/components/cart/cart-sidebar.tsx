@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatPrice } from '@/lib/currency';
-import { useCart } from '@/hooks/useCart';
+import { useUnifiedCart } from '@/hooks/useUnifiedCart';
 import { cn } from '@/lib/utils';
 
 interface CartSidebarProps {
@@ -30,13 +30,16 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
   const setIsOpen = onOpenChange || setInternalOpen;
   
   const {
-    cartItems,
-    itemCount,
-    totals,
+    cart,
     isLoading,
     updateQuantity,
-    removeItem
-  } = useCart();
+    removeItem,
+    getItemsCount
+  } = useUnifiedCart();
+  
+  const cartItems = cart?.items || [];
+  const itemCount = getItemsCount();
+  const totals = cart?.totals;
 
   // Quick item component for sidebar
   const QuickCartItem = ({ item }: { item: any }) => {
@@ -69,7 +72,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                onClick={() => updateQuantity({ itemId: item.id, quantity: item.quantity - 1 })}
                 disabled={item.quantity <= 1 || isLoading}
                 className="h-6 w-6 p-0"
               >
@@ -83,7 +86,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                onClick={() => updateQuantity({ itemId: item.id, quantity: item.quantity + 1 })}
                 disabled={item.quantity >= 99 || isLoading}
                 className="h-6 w-6 p-0"
               >
@@ -164,20 +167,20 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
             <div className="py-4 space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal</span>
-                <span className="font-medium">{formatPrice(totals.subtotal)}</span>
+                <span className="font-medium">{formatPrice(totals?.subtotal || 0)}</span>
               </div>
 
-              {totals.discount > 0 && (
+              {(totals?.discount || 0) > 0 && (
                 <div className="flex justify-between text-sm text-green-600">
                   <span>Discount</span>
-                  <span>-{formatPrice(totals.discount)}</span>
+                  <span>-{formatPrice(totals?.discount || 0)}</span>
                 </div>
               )}
 
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Shipping</span>
                 <span className="font-medium">
-                  {totals.shipping > 0 ? formatPrice(totals.shipping) : 'Free'}
+                  {(totals?.shipping || 0) > 0 ? formatPrice(totals?.shipping || 0) : 'Free'}
                 </span>
               </div>
 
@@ -185,12 +188,12 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
 
               <div className="flex justify-between text-base font-semibold">
                 <span>Total</span>
-                <span>{formatPrice(totals.total)}</span>
+                <span>{formatPrice(totals?.total || 0)}</span>
               </div>
 
-              {totals.savings > 0 && (
+              {(totals?.savings || 0) > 0 && (
                 <div className="text-center text-sm text-green-600 bg-green-50 py-2 rounded-md">
-                  You're saving {formatPrice(totals.savings)}!
+                  You're saving {formatPrice(totals?.savings || 0)}!
                 </div>
               )}
             </div>

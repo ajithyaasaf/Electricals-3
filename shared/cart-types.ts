@@ -56,6 +56,9 @@ export const CreateEnhancedCartItemSchema = EnhancedCartItemSchema.omit({
 export type EnhancedCartItem = z.infer<typeof EnhancedCartItemSchema>;
 export type CreateEnhancedCartItem = z.infer<typeof CreateEnhancedCartItemSchema>;
 
+// Alias for backward compatibility
+export type CartItem = EnhancedCartItem;
+
 // Cart Summary and Totals
 export const CartTotalsSchema = z.object({
   subtotal: z.number(),

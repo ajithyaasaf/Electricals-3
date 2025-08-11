@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { useGuestCart } from "@/hooks/use-guest-cart";
+import { useUnifiedCart } from "@/hooks/useUnifiedCart";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice } from "@/lib/currency";
@@ -19,25 +19,14 @@ interface ProductCardProps {
 }
 
 export const ProductCard = memo(function ProductCard({ product, showCategory = false }: ProductCardProps) {
-  const { isAuthenticated } = useFirebaseAuth();
-  const { addToGuestCart } = useGuestCart();
+  const { addItem, isAuthenticated } = useUnifiedCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      if (isAuthenticated) {
-        // Add to user's cart in database
-        await apiRequest("POST", "/api/cart", {
-          productId: product.id,
-          quantity: 1,
-        });
-      } else {
-        // Add to guest cart in localStorage
-        addToGuestCart(product.id);
-        return Promise.resolve(); // Return resolved promise for guest users
-      }
+      addItem({ productId: product.id, quantity: 1 });
     },
     onSuccess: () => {
       if (isAuthenticated) {

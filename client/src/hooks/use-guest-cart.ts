@@ -65,11 +65,13 @@ export function useGuestCart() {
     });
 
     // Invalidate cart queries to refresh the cart sidebar
+    queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
   };
 
   const removeFromGuestCart = (itemId: string) => {
     setGuestCart(prev => prev.filter(item => item.id !== itemId));
+    queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
     queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
   };
 

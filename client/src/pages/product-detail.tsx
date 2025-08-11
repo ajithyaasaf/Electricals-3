@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
+import { useUnifiedCart } from "@/hooks/useUnifiedCart";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice, formatSavings } from "@/lib/currency";
@@ -21,7 +22,7 @@ import { ReviewForm } from "@/components/reviews/review-form";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const { isAuthenticated } = useFirebaseAuth();
+  const { addItem } = useUnifiedCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -48,30 +49,17 @@ export default function ProductDetail() {
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", "/api/cart", {
-        productId: product?.id,
-        quantity,
-      });
+      addItem({ productId: product?.id, quantity });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       toast({
         title: "Added to cart",
         description: `${quantity} ${product?.name} added to your cart.`,
+        duration: 2000
       });
     },
     onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Please sign in",
-          description: "You need to sign in to add items to cart.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 1000);
-        return;
-      }
       toast({
         title: "Error",
         description: "Failed to add item to cart.",
@@ -154,14 +142,6 @@ export default function ProductDetail() {
   const reviewCount = product.reviewCount || 0;
 
   const handleAddToCart = () => {
-    if (!isAuthenticated) {
-      toast({
-        title: "Please sign in",
-        description: "You need to sign in to add items to cart.",
-        variant: "destructive",
-      });
-      return;
-    }
     addToCartMutation.mutate();
   };
 
