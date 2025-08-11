@@ -310,8 +310,8 @@ export function registerCartRoutes(app: Express) {
         });
       }
 
-      // Return updated cart
-      return app.get("/api/cart")(req, res);
+      // Return success and let client refresh cart
+      res.json({ message: "Item added to cart successfully" });
       
     } catch (error) {
       console.error("Error adding item to cart:", error);
@@ -343,8 +343,8 @@ export function registerCartRoutes(app: Express) {
         await storage.updateCartItem(itemId, updates);
       }
 
-      // Return updated cart
-      return app.get("/api/cart")(req, res);
+      // Return success and let client refresh cart
+      res.json({ message: "Cart item updated successfully" });
       
     } catch (error) {
       console.error("Error updating cart item:", error);
@@ -368,8 +368,8 @@ export function registerCartRoutes(app: Express) {
         await storage.deleteCartItem(itemId);
       }
 
-      // Return updated cart
-      return app.get("/api/cart")(req, res);
+      // Return success and let client refresh cart
+      res.json({ message: "Item removed from cart successfully" });
       
     } catch (error) {
       console.error("Error removing cart item:", error);
