@@ -89,6 +89,59 @@ export async function isAuthenticated(
   }
 }
 
+// Optional authentication middleware for guest cart support
+export async function optionalAuth(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const authorization = req.headers.authorization;
+    
+    if (authorization && authorization.startsWith('Bearer ')) {
+      const token = authorization.split('Bearer ')[1];
+      
+      try {
+        // Try to verify the token, but don't fail if it's invalid
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        
+        req.user = {
+          uid: decodedToken.uid,
+          email: decodedToken.email,
+          emailVerified: decodedToken.email_verified || false,
+          displayName: decodedToken.name || 'User',
+          photoURL: decodedToken.picture
+        };
+
+        // Auto-create user in Firestore if doesn't exist
+        if (req.user.uid && req.user.email) {
+          let existingUser = await storage.getUserById(req.user.uid);
+          if (!existingUser) {
+            await storage.createUser({
+              id: req.user.uid,
+              email: req.user.email,
+              firstName: req.user.displayName?.split(' ')[0] || 'User',
+              lastName: req.user.displayName?.split(' ').slice(1).join(' ') || '',
+              profileImageUrl: req.user.photoURL || '',
+              isAdmin: req.user.email === 'admin@copperbear.com'
+            });
+          }
+        }
+      } catch (tokenError) {
+        // Token is invalid, but we continue without authentication for guest support
+        console.log('Optional auth: Invalid token, continuing as guest');
+      }
+    }
+    
+    // Always continue, regardless of authentication status
+    next();
+  } catch (error) {
+    console.error('Optional auth middleware error:', error);
+    // Still continue for guest support
+    next();
+  }
+}
+
 // Helper function to get current user from request
 export function getCurrentUser(req: AuthenticatedRequest) {
   return req.user;

@@ -6,6 +6,7 @@ import { registerOrderRoutes } from "./orders";
 import { registerServiceRoutes } from "./services";
 import { registerAdminRoutes } from "./admin";
 import { registerCartRoutes } from "./cart";
+import { registerEnhancedCartRoutes } from "./enhanced-cart";
 import { registerReviewRoutes } from "./reviews";
 import { registerWishlistRoutes } from "./wishlist";
 import { setupFirebaseAuth } from "../../firebaseAuth";
@@ -30,6 +31,7 @@ export async function registerAllRoutes(app: Express) {
   registerOrderRoutes(app);
   registerServiceRoutes(app);
   registerCartRoutes(app);
+  registerEnhancedCartRoutes(app);
   registerReviewRoutes(app);
   registerWishlistRoutes(app);
   registerAdminRoutes(app);

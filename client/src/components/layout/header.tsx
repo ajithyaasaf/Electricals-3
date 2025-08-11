@@ -24,6 +24,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SearchBar } from "@/components/common/search-bar";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
+import { EnhancedCartSidebar } from "@/components/cart/enhanced-cart-sidebar";
 import { AuthModal } from "@/components/auth/auth-modal";
 import {
   Zap,
@@ -475,8 +476,10 @@ export function Header() {
         )}
       </div>
 
-      {/* Cart Sidebar */}
-      <CartSidebar open={cartOpen} onOpenChange={setCartOpen} />
+      {/* Enhanced Cart Sidebar */}
+      <EnhancedCartSidebar>
+        <div />
+      </EnhancedCartSidebar>
 
       {/* Auth Modal */}
       <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
