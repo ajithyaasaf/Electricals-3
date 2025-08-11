@@ -13,37 +13,43 @@ import { db } from '@shared/firestore';
 import { COLLECTIONS } from '../firestoreService';
 import type { CreateCategory, CreateProduct } from '@shared/types';
 
-// High-quality electrical product images from curated sources
+// High-quality electrical product images - specific and accurate for each product type
 const ELECTRICAL_PRODUCT_IMAGES = {
-  circuit_breakers: [
-    'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=800&fit=crop'
-  ],
-  outlets_switches: [
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1572013577480-ad5f3b4b0cfe?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1527359443443-84a48c62c88b?w=800&h=800&fit=crop'
-  ],
-  lighting: [
-    'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'
-  ],
-  wiring: [
-    'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1581092335878-82e573d7e4f1?w=800&h=800&fit=crop'
-  ],
-  tools: [
-    'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1609205264892-da6e93e5816e?w=800&h=800&fit=crop'
-  ],
+  // Circuit breaker panels and electrical panels
   panels: [
-    'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=800&fit=crop',
-    'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=800&fit=crop'
+    'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=800&fit=crop', // Electrical panel
+    'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=800&fit=crop', // Industrial electrical box
+    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=800&fit=crop'  // Electrical cabinet
+  ],
+  // GFCI outlets, switches, and wall plates  
+  outlets_switches: [
+    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop', // Wall outlet
+    'https://images.unsplash.com/photo-1572013577480-ad5f3b4b0cfe?w=800&h=800&fit=crop', // Switch plate
+    'https://images.unsplash.com/photo-1527359443443-84a48c62c88b?w=800&h=800&fit=crop'  // Light switch
+  ],
+  // LED bulbs, fixtures, and lighting equipment
+  lighting: [
+    'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&h=800&fit=crop', // LED bulb close-up
+    'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800&h=800&fit=crop', // Light fixture
+    'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'     // Industrial lighting
+  ],
+  // Electrical wire, cable, and wiring materials
+  wiring: [
+    'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop', // Electrical cables
+    'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&h=800&fit=crop', // Wire bundles
+    'https://images.unsplash.com/photo-1581092335878-82e573d7e4f1?w=800&h=800&fit=crop'  // Coiled electrical wire
+  ],
+  // Electrical tools, multimeters, and testing equipment
+  tools: [
+    'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&h=800&fit=crop', // Professional tools
+    'https://images.unsplash.com/photo-1609205264892-da6e93e5816e?w=800&h=800&fit=crop', // Measuring equipment  
+    'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=800&fit=crop'  // Tool collection
+  ],
+  // Circuit breakers - specific to individual breaker units
+  circuit_breakers: [
+    'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=800&fit=crop', // Circuit breaker detail
+    'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=800&fit=crop', // Breaker switches
+    'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=800&fit=crop'  // Electrical components
   ]
 };
 
@@ -457,14 +463,37 @@ export class FirestoreSeeder {
     return !categoriesSnapshot.empty && !productsSnapshot.empty;
   }
 
-  static async seedDatabase(): Promise<void> {
+  static async clearDatabase(): Promise<void> {
+    console.log('🧹 Clearing existing database data...');
+    
+    const batch = writeBatch(db);
+    
+    // Clear products
+    const productsSnapshot = await getDocs(collection(db, COLLECTIONS.PRODUCTS));
+    productsSnapshot.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    
+    // Clear categories
+    const categoriesSnapshot = await getDocs(collection(db, COLLECTIONS.CATEGORIES));
+    categoriesSnapshot.docs.forEach(doc => {
+      batch.delete(doc.ref);
+    });
+    
+    await batch.commit();
+    console.log('✅ Database cleared successfully');
+  }
+
+  static async seedDatabase(skipCheck: boolean = false): Promise<void> {
     try {
-      console.log('🔍 Checking if data already exists...');
-      const dataExists = await this.checkIfDataExists();
-      
-      if (dataExists) {
-        console.log('📊 Database already contains data, skipping seeding');
-        return;
+      if (!skipCheck) {
+        console.log('🔍 Checking if data already exists...');
+        const dataExists = await this.checkIfDataExists();
+        
+        if (dataExists) {
+          console.log('📊 Database already contains data, skipping seeding');
+          return;
+        }
       }
 
       console.log('🚀 Starting database seeding process...');

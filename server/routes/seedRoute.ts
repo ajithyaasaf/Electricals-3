@@ -6,8 +6,16 @@ export function registerSeedRoute(app: Express) {
   // Manual seeding endpoint for development
   app.post("/api/admin/seed", async (req, res) => {
     try {
+      const forceRefresh = req.query.force === 'true' || req.body.force === true;
       console.log('🌱 Manual seeding requested...');
-      await FirestoreSeeder.seedDatabase();
+      
+      if (forceRefresh) {
+        console.log('🔄 Force refresh requested, clearing existing data...');
+        await FirestoreSeeder.clearDatabase();
+        await FirestoreSeeder.seedDatabase(true); // Skip data check since we just cleared
+      } else {
+        await FirestoreSeeder.seedDatabase();
+      }
       res.json({ 
         success: true, 
         message: "Database seeded successfully with electrical products" 
