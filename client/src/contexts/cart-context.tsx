@@ -368,16 +368,36 @@ export function CartProvider({ children }: CartProviderProps) {
       // Immediately update the cart object as well for instant UI sync
       setCart(prev => {
         if (!prev) return prev;
+        const filteredItems = prev.items.filter(item => item.id !== itemId);
+        
+        // Recalculate totals based on remaining items
+        const subtotal = filteredItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+        const discount = 0; // Calculate any applicable discounts
+        const shipping = subtotal > 50000 ? 0 : 5000; // Free shipping over ₹500
+        const tax = Math.round(subtotal * 0.18); // 18% GST
+        const total = subtotal - discount + shipping + tax;
+        const savings = filteredItems.reduce((sum, item) => {
+          const originalPrice = item.originalPrice || item.unitPrice;
+          return sum + ((originalPrice - item.unitPrice) * item.quantity);
+        }, 0);
+        
         return {
           ...prev,
-          items: prev.items.filter(item => item.id !== itemId)
+          items: filteredItems,
+          totals: {
+            subtotal,
+            discount,
+            shipping,
+            tax,
+            total,
+            savings
+          },
+          lastUpdated: new Date(),
+          updatedAt: new Date()
         };
       });
       
       console.log('[CART CONTEXT] Removed item from guest cart:', itemId);
-      
-      // Still refresh the full cart object, but with a shorter delay
-      setTimeout(() => loadGuestCartAsCart(), 50);
       
       toast({
         title: "Removed",
@@ -517,10 +537,23 @@ export function CartProvider({ children }: CartProviderProps) {
       setGuestCart([]);
       localStorage.removeItem(GUEST_CART_KEY);
       
-      console.log('[CART CONTEXT] Cleared guest cart');
+      // Set cart to empty state immediately
+      setCart({
+        id: `guest_cart_${Date.now()}`,
+        items: [],
+        totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
+        currency: 'INR',
+        lastUpdated: new Date(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        appliedCoupons: [],
+        userId: undefined,
+        sessionId: `guest_session_${Date.now()}`,
+        shippingAddress: undefined,
+        expiresAt: undefined
+      });
       
-      // Refresh cart object with short delay
-      setTimeout(() => loadGuestCartAsCart(), 50);
+      console.log('[CART CONTEXT] Cleared guest cart');
       
       toast({
         title: "Cart Cleared",
