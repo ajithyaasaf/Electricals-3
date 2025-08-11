@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -361,9 +360,8 @@ const WhyChooseEditor: React.FC = () => {
           <CardContent>
             <div className="space-y-4 max-h-96 overflow-y-auto">
               {data.features.map((feature) => (
-                <motion.div
+                <div
                   key={feature.id}
-                  layout
                   className="border rounded-lg p-4 space-y-3"
                   data-testid={`feature-editor-${feature.id}`}
                 >
@@ -438,9 +436,9 @@ const WhyChooseEditor: React.FC = () => {
                       <div>
                         <Label>Stat Value</Label>
                         <Input
-                          value={feature.stat.value}
+                          value={feature.stat?.value || ''}
                           onChange={(e) => updateFeature(feature.id, { 
-                            stat: { ...feature.stat, value: e.target.value }
+                            stat: { ...feature.stat!, value: e.target.value }
                           })}
                           placeholder="e.g., 98%, 24/7"
                         />
@@ -448,16 +446,16 @@ const WhyChooseEditor: React.FC = () => {
                       <div>
                         <Label>Stat Label</Label>
                         <Input
-                          value={feature.stat.label}
+                          value={feature.stat?.label || ''}
                           onChange={(e) => updateFeature(feature.id, { 
-                            stat: { ...feature.stat, label: e.target.value }
+                            stat: { ...feature.stat!, label: e.target.value }
                           })}
                           placeholder="e.g., Success rate"
                         />
                       </div>
                     </div>
                   )}
-                </motion.div>
+                </div>
               ))}
             </div>
           </CardContent>

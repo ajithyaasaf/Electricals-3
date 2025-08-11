@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { 
   Shield, 
   Clock, 
@@ -199,40 +198,7 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
     setIsLoading(false);
   }, [realtimePath]);
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut",
-      },
-    },
-  };
-
-  const cardHoverVariants = {
-    hover: {
-      y: -4,
-      scale: 1.02,
-      transition: {
-        duration: 0.2,
-        ease: "easeOut",
-      },
-    },
-  };
+  // Removed animations for consistency with rest of website
 
   // Render dynamic icon
   const renderIcon = (iconName: string) => {
@@ -242,11 +208,7 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
 
   // Feature card component with accessibility
   const FeatureCard: React.FC<{ feature: FeatureCardData; index: number }> = ({ feature, index }) => (
-    <motion.div
-      variants={itemVariants}
-      whileHover="hover"
-      className="group"
-    >
+    <div className="group">
       <Card 
         className="h-full transition-all duration-200 hover:shadow-lg focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary cursor-pointer"
         tabIndex={0}
@@ -261,47 +223,45 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
           }
         }}
       >
-        <motion.div variants={cardHoverVariants}>
-          <CardContent className="p-6 text-center">
-            {/* Icon */}
-            <div 
-              className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4 group-hover:bg-primary/15 transition-colors"
-              aria-hidden="true"
-            >
-              {renderIcon(feature.icon)}
-            </div>
-            
-            {/* Title */}
-            <h3 
-              id={`feature-title-${feature.id}`}
-              className="text-lg font-semibold text-foreground mb-2"
-            >
-              {feature.title}
-            </h3>
-            
-            {/* Benefit */}
-            <p 
-              id={`feature-benefit-${feature.id}`}
-              className="text-sm text-muted-foreground mb-3 line-clamp-2"
-            >
-              {feature.benefit}
-            </p>
-            
-            {/* Stat */}
-            {feature.stat && (
-              <div className="text-center" aria-label={`Statistic: ${feature.stat.value} ${feature.stat.label}`}>
-                <div className="text-xl font-bold text-primary" data-testid={`stat-value-${feature.id}`}>
-                  {feature.stat.value}
-                </div>
-                <div className="text-xs text-muted-foreground" data-testid={`stat-label-${feature.id}`}>
-                  {feature.stat.label}
-                </div>
+        <CardContent className="p-6 text-center">
+          {/* Icon */}
+          <div 
+            className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4 group-hover:bg-primary/15 transition-colors"
+            aria-hidden="true"
+          >
+            {renderIcon(feature.icon)}
+          </div>
+          
+          {/* Title */}
+          <h3 
+            id={`feature-title-${feature.id}`}
+            className="text-lg font-semibold text-foreground mb-2"
+          >
+            {feature.title}
+          </h3>
+          
+          {/* Benefit */}
+          <p 
+            id={`feature-benefit-${feature.id}`}
+            className="text-sm text-muted-foreground mb-3 line-clamp-2"
+          >
+            {feature.benefit}
+          </p>
+          
+          {/* Stat */}
+          {feature.stat && (
+            <div className="text-center" aria-label={`Statistic: ${feature.stat.value} ${feature.stat.label}`}>
+              <div className="text-xl font-bold text-primary" data-testid={`stat-value-${feature.id}`}>
+                {feature.stat.value}
               </div>
-            )}
-          </CardContent>
-        </motion.div>
+              <div className="text-xs text-muted-foreground" data-testid={`stat-label-${feature.id}`}>
+                {feature.stat.label}
+              </div>
+            </div>
+          )}
+        </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 
   if (isLoading) {
@@ -328,18 +288,9 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
       data-testid="why-choose-section"
     >
       <div className="container mx-auto px-4">
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-          className="grid lg:grid-cols-3 gap-12 items-start"
-        >
+        <div className="grid lg:grid-cols-3 gap-12 items-start">
           {/* Hero Content - Left Side */}
-          <motion.div 
-            variants={itemVariants}
-            className="lg:col-span-1 space-y-6"
-          >
+          <div className="lg:col-span-1 space-y-6">
             <div>
               <h2 
                 id="why-choose-heading"
@@ -352,9 +303,8 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
               {/* Bullet Points */}
               <ul className="space-y-3" role="list" aria-label="Key reasons to choose CopperBear">
                 {data.bulletReasons.map((reason, index) => (
-                  <motion.li
+                  <li
                     key={index}
-                    variants={itemVariants}
                     className="flex items-start gap-3"
                     data-testid={`bullet-reason-${index}`}
                   >
@@ -365,7 +315,7 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
                     <span className="text-muted-foreground leading-relaxed">
                       {reason}
                     </span>
-                  </motion.li>
+                  </li>
                 ))}
               </ul>
             </div>
@@ -412,13 +362,10 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
             <div id="cta-description" className="sr-only">
               Opens a modal with contact information to get a free quote
             </div>
-          </motion.div>
+          </div>
 
           {/* Feature Cards Grid - Right Side */}
-          <motion.div 
-            variants={itemVariants}
-            className="lg:col-span-2"
-          >
+          <div className="lg:col-span-2">
             <div 
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               role="grid"
@@ -432,8 +379,8 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
                   </div>
                 ))}
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );

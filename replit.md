@@ -22,7 +22,7 @@ Navigation Preferences: Enterprise-level navigation with smooth transitions, loa
   - Real-time Firebase integration for admin editing
   - Responsive design (1-col mobile, 2-col md, 3-col lg)
   - Accessibility compliant with ARIA labels and keyboard navigation
-  - Framer Motion animations and smooth interactions
+  - Consistent styling without page-load animations (matches rest of website)
   - Admin editor interface for live content management
 - ✅ **Folder Structure Optimization** (Latest Update):
   - Organized all documentation files into `/docs` folder 
