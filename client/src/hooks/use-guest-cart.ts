@@ -104,11 +104,23 @@ export function useGuestCart() {
     // This will be called when user signs in
     // Transfer all guest cart items to user's account
     try {
+      const { auth } = await import('@/lib/firebase');
+      const user = auth.currentUser;
+      
+      if (!user || guestCart.length === 0) {
+        clearGuestCart();
+        return true;
+      }
+
+      // Get auth token for authenticated requests
+      const token = await user.getIdToken(true); // Force refresh to get fresh token
+      
       for (const item of guestCart) {
-        await fetch('/api/cart', {
+        const response = await fetch('/api/cart', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
             productId: item.productId,
@@ -116,6 +128,10 @@ export function useGuestCart() {
             quantity: item.quantity,
           }),
         });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to migrate item: ${response.statusText}`);
+        }
       }
       clearGuestCart();
       return true;

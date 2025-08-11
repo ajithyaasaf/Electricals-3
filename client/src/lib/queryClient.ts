@@ -14,18 +14,9 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
   
   if (auth.currentUser) {
     try {
-      // For development, we'll send user data as base64-encoded string
-      // In production, you would send the Firebase ID token
-      const userData = {
-        uid: auth.currentUser.uid,
-        email: auth.currentUser.email,
-        displayName: auth.currentUser.displayName,
-        photoURL: auth.currentUser.photoURL,
-        emailVerified: auth.currentUser.emailVerified,
-      };
-      
-      const userToken = Buffer.from(JSON.stringify(userData)).toString('base64');
-      headers.Authorization = `Bearer ${userToken}`;
+      // Get the actual Firebase ID token
+      const idToken = await auth.currentUser.getIdToken();
+      headers.Authorization = `Bearer ${idToken}`;
     } catch (error) {
       console.error('Error getting auth token:', error);
     }

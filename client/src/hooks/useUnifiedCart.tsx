@@ -4,13 +4,52 @@ import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useGuestCart } from '@/hooks/use-guest-cart';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
+import { useEffect, useRef } from 'react';
 import type { Cart } from '@shared/cart-types';
 
 export function useUnifiedCart() {
-  const { isAuthenticated } = useFirebaseAuth();
-  const { guestCart, addToGuestCart, removeFromGuestCart, updateGuestCartQuantity, getCartItemsCount } = useGuestCart();
+  const { isAuthenticated, user } = useFirebaseAuth();
+  const { guestCart, addToGuestCart, removeFromGuestCart, updateGuestCartQuantity, getCartItemsCount, migrateToUserCart, clearGuestCart } = useGuestCart();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const hasMigrated = useRef(false);
+
+  // Handle cart migration when user becomes authenticated
+  useEffect(() => {
+    const handleCartMigration = async () => {
+      if (isAuthenticated && user && !hasMigrated.current && guestCart.length > 0) {
+        hasMigrated.current = true;
+        try {
+          console.log('Migrating guest cart to authenticated user...');
+          await migrateToUserCart(user.uid);
+          
+          // Invalidate both cart queries to refresh data
+          queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
+          
+          toast({
+            title: "Cart merged",
+            description: "Your guest cart items have been added to your account.",
+            duration: 2000,
+          });
+        } catch (error) {
+          console.error('Cart migration failed:', error);
+          toast({
+            title: "Cart merge failed",
+            description: "Some items couldn't be transferred to your account.",
+            variant: "destructive",
+          });
+        }
+      }
+      
+      // Reset migration flag when user logs out
+      if (!isAuthenticated) {
+        hasMigrated.current = false;
+      }
+    };
+
+    handleCartMigration();
+  }, [isAuthenticated, user, guestCart.length, migrateToUserCart, queryClient, toast]);
 
   // For authenticated users - regular cart API
   const authenticatedCartQuery = useQuery({
@@ -63,7 +102,11 @@ export function useUnifiedCart() {
           serviceId,
           quantity,
         });
-        if (!response.ok) throw new Error('Failed to add item to cart');
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Add to cart error:', errorText);
+          throw new Error('Failed to add item to cart');
+        }
         return await response.json();
       } else {
         // Add to guest cart
