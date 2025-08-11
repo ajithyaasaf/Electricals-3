@@ -2,9 +2,10 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/common/hero-section";
 import { Testimonials } from "@/components/common/testimonials";
+import WhyChooseSection from "@/components/common/why-choose-section";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { Zap, Shield, Clock, Star, ArrowRight } from "lucide-react";
+import { Zap, Shield, Clock, Star, ArrowRight, Users, Award, MapPin } from "lucide-react";
 
 export default function Landing() {
   const features = [
@@ -50,31 +51,61 @@ export default function Landing() {
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Features Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Why Choose CopperBear Electrical?
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Professional electrical solutions backed by expertise, quality products, and exceptional service.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="text-center p-6 rounded-lg hover:bg-gray-50 transition-colors">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Why Choose CopperBear Section - Landing Version */}
+      <WhyChooseSection 
+        headline="Why CopperBear is Your Trusted Electrical Partner"
+        bulletReasons={[
+          "15+ years serving homeowners and businesses",
+          "Licensed, insured professionals you can trust", 
+          "24/7 emergency service - we're always here"
+        ]}
+        ctaText="Get Started Today"
+        features={[
+          {
+            id: "trusted-experts",
+            icon: "Shield",
+            title: "Trusted Experts",
+            benefit: "Licensed & insured professionals",
+            stat: { value: "98%", label: "Customer satisfaction" }
+          },
+          {
+            id: "fast-response", 
+            icon: "Clock",
+            title: "Fast Response",
+            benefit: "Same-day service available",
+            stat: { value: "2hr", label: "Response time" }
+          },
+          {
+            id: "quality-work",
+            icon: "Award", 
+            title: "Quality Work",
+            benefit: "Guaranteed workmanship",
+            stat: { value: "100%", label: "Work guaranteed" }
+          },
+          {
+            id: "experienced-team",
+            icon: "Users",
+            title: "Experienced Team", 
+            benefit: "15+ years in electrical",
+            stat: { value: "15+", label: "Years experience" }
+          },
+          {
+            id: "local-business",
+            icon: "MapPin",
+            title: "Local Business",
+            benefit: "Serving your community", 
+            stat: { value: "1000+", label: "Projects completed" }
+          },
+          {
+            id: "modern-solutions",
+            icon: "Zap",
+            title: "Modern Solutions", 
+            benefit: "Latest electrical technology",
+            stat: { value: "5⭐", label: "Google rating" }
+          }
+        ]}
+        className="bg-white"
+      />
 
       {/* Product Highlights */}
       <section className="py-16 bg-gray-50">
