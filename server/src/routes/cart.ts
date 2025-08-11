@@ -513,6 +513,7 @@ export function registerCartRoutes(app: Express) {
       // Get current authenticated user cart items
       const existingCartItems = await storage.getUserCartItems(userId);
       console.log(`[CART MIGRATION] User ${userId} has ${existingCartItems.length} existing cart items`);
+      console.log(`[CART MIGRATION] Existing cart items:`, existingCartItems.map(item => ({ id: item.id, productId: item.productId, serviceId: item.serviceId, quantity: item.quantity })));
 
       let migratedCount = 0;
       let mergedCount = 0;
@@ -562,6 +563,10 @@ export function registerCartRoutes(app: Express) {
       }
 
       console.log(`[CART MIGRATION] Migration completed for user ${userId}: ${migratedCount} new items, ${mergedCount} merged items`);
+      
+      // Verify final cart state
+      const finalCartItems = await storage.getUserCartItems(userId);
+      console.log(`[CART MIGRATION] Final cart verification: ${finalCartItems.length} total items in database`);
 
       res.json({
         message: "Cart migration completed successfully",

@@ -127,16 +127,18 @@ export function CartProvider({ children }: CartProviderProps) {
   const loadAuthenticatedCart = useCallback(async () => {
     if (!isAuthenticated) return;
     
+    console.log('[CART CONTEXT] 🔄 Loading authenticated cart...');
     setIsLoading(true);
     setError(null);
     
     try {
       const response = await apiRequest('GET', '/api/cart');
       const cartData = await response.json();
+      console.log('[CART CONTEXT] 📦 Authenticated cart data received:', JSON.stringify(cartData, null, 2));
+      console.log('[CART CONTEXT] 🔢 Cart items count:', cartData.items?.length || 0);
       setCart(cartData);
-      console.log('[CART CONTEXT] Loaded authenticated cart:', cartData);
     } catch (error) {
-      console.error('[CART CONTEXT] Error loading authenticated cart:', error);
+      console.error('[CART CONTEXT] ❌ Error loading authenticated cart:', error);
       setError('Failed to load cart');
       // Fallback to empty cart
       setCart({
@@ -208,62 +210,86 @@ export function CartProvider({ children }: CartProviderProps) {
     refreshCart();
   }, [isAuthenticated, refreshCart]);
 
-  // Migrate guest cart when user signs in
+  // Migrate guest cart when user signs in (with proper debouncing)
   useEffect(() => {
+    let migrationTimeout: NodeJS.Timeout;
+    
     const migrateGuestCart = async () => {
-      if (isAuthenticated && guestCart.length > 0) {
-        console.log('[CART CONTEXT] Starting cart migration...');
-        
-        try {
-          // Prevent multiple migrations - check if we already have a recent migration flag
-          const existingFlag = localStorage.getItem(MIGRATION_FLAG_KEY);
-          const currentTime = Date.now();
-          
-          // Skip if migrated in the last 5 minutes to prevent duplicate migrations
-          if (existingFlag) {
-            const [, , timestamp] = existingFlag.split('_');
-            if (timestamp && (currentTime - parseInt(timestamp)) < 300000) { // 5 minutes
-              console.log('[CART CONTEXT] Recent migration detected, skipping');
-              return;
-            }
-          }
-          
-          console.log('[CART CONTEXT] Guest cart items to migrate:', guestCart);
-          
-          await apiRequest('POST', '/api/cart/migrate', {
-            guestItems: guestCart
-          });
-          
-          // Clear guest cart after successful migration
-          setGuestCart([]);
-          localStorage.removeItem(GUEST_CART_KEY);
-          localStorage.setItem(MIGRATION_FLAG_KEY, `migration_${user?.uid}_${Date.now()}`);
-          
-          // Refresh authenticated cart
-          await loadAuthenticatedCart();
-          
-          // Dispatch event for other components
-          window.dispatchEvent(new CustomEvent('cart-migrated'));
-          
-          toast({
-            title: "Cart Synced",
-            description: "Your cart items have been saved to your account.",
-          });
-          
-          console.log('[CART CONTEXT] Cart migration completed successfully');
-        } catch (error) {
-          console.error('[CART CONTEXT] Cart migration failed:', error);
-          toast({
-            title: "Sync Warning",
-            description: "Some cart items couldn't be synced. Please check your cart.",
-            variant: "destructive",
-          });
+      if (!isAuthenticated || guestCart.length === 0) {
+        if (isAuthenticated && guestCart.length === 0) {
+          console.log('[CART MIGRATION] ℹ️ User authenticated but no guest cart items to migrate');
         }
+        return;
+      }
+
+      console.log('[CART MIGRATION] 🚀 Starting cart migration...');
+      console.log('[CART MIGRATION] 📦 Guest cart data:', JSON.stringify(guestCart, null, 2));
+      console.log('[CART MIGRATION] 👤 User ID:', user?.uid);
+      
+      try {
+        // Set migration flag immediately to prevent race conditions
+        const migrationKey = `migration_${user?.uid}_${Date.now()}`;
+        localStorage.setItem(MIGRATION_FLAG_KEY, migrationKey);
+        
+        console.log('[CART MIGRATION] 📤 Sending migration request to server...');
+        const response = await apiRequest('POST', '/api/cart/migrate', {
+          guestItems: guestCart
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Migration failed with status: ${response.status}`);
+        }
+        
+        const migrationResult = await response.json();
+        console.log('[CART MIGRATION] 📨 Server response data:', migrationResult);
+        
+        // Clear guest cart after successful migration
+        console.log('[CART MIGRATION] 🧹 Clearing guest cart from localStorage...');
+        setGuestCart([]);
+        localStorage.removeItem(GUEST_CART_KEY);
+        
+        // Immediately refresh authenticated cart
+        console.log('[CART MIGRATION] 🔄 Refreshing authenticated cart...');
+        await loadAuthenticatedCart();
+        
+        // Dispatch event for other components
+        window.dispatchEvent(new CustomEvent('cart-migrated'));
+        
+        toast({
+          title: "Cart Synced",
+          description: `${migrationResult.totalItems || 0} items merged successfully.`,
+        });
+        
+        console.log('[CART MIGRATION] ✅ Cart migration completed successfully');
+      } catch (error) {
+        console.error('[CART MIGRATION] ❌ Cart migration failed:', error);
+        // Remove migration flag on failure to allow retry
+        localStorage.removeItem(MIGRATION_FLAG_KEY);
+        
+        toast({
+          title: "Sync Warning",
+          description: "Some cart items couldn't be synced. Please check your cart.",
+          variant: "destructive",
+        });
       }
     };
 
-    migrateGuestCart();
-  }, [isAuthenticated, user, guestCart, loadAuthenticatedCart, toast]);
+    // Check if migration is needed and not already in progress
+    const shouldMigrate = isAuthenticated && guestCart.length > 0 && user?.uid;
+    const existingFlag = localStorage.getItem(MIGRATION_FLAG_KEY);
+    const isMigrationInProgress = existingFlag && existingFlag.includes(user?.uid || '');
+    
+    if (shouldMigrate && !isMigrationInProgress) {
+      // Debounce migration to prevent rapid-fire calls
+      migrationTimeout = setTimeout(migrateGuestCart, 300);
+    }
+
+    return () => {
+      if (migrationTimeout) {
+        clearTimeout(migrationTimeout);
+      }
+    };
+  }, [isAuthenticated, user?.uid, guestCart.length > 0 ? JSON.stringify(guestCart) : '', loadAuthenticatedCart, toast]);
 
   // Process add-to-cart operations queue for authenticated users
   const processAddOperationQueue = useCallback(async () => {
