@@ -1,8 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
+import { registerAllRoutes } from "./src/routes/index";
 import { setupVite, serveStatic, log } from "./vite";
 import { FirestoreSeeder } from "./data/firestoreSeeder";
-import { setupFirebaseAuth } from "./firebaseAuth";
 
 const app = express();
 app.use(express.json());
@@ -39,14 +38,12 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize Firebase Admin SDK for security + performance
-  await setupFirebaseAuth(app);
-  
   // Firebase is configured - seeding will be done via API endpoint
   console.log('🔍 Firebase configuration ready');
   console.log('📡 Use POST /api/admin/seed to create products in database');
 
-  const server = await registerRoutes(app);
+  // Register all organized routes (includes Firebase Auth setup)  
+  await registerAllRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
@@ -55,6 +52,10 @@ app.use((req, res, next) => {
     res.status(status).json({ message });
     throw err;
   });
+
+  // Create HTTP server and setup Vite
+  const { createServer } = await import("http");
+  const server = createServer(app);
 
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route

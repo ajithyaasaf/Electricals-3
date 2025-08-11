@@ -5,8 +5,15 @@ import { registerCategoryRoutes } from "./categories";
 import { registerOrderRoutes } from "./orders";
 import { registerServiceRoutes } from "./services";
 import { registerAdminRoutes } from "./admin";
+import { registerCartRoutes } from "./cart";
+import { registerReviewRoutes } from "./reviews";
+import { registerWishlistRoutes } from "./wishlist";
+import { setupFirebaseAuth } from "../../firebaseAuth";
 
-export function registerAllRoutes(app: Express) {
+export async function registerAllRoutes(app: Express) {
+  // Firebase Auth middleware setup
+  await setupFirebaseAuth(app);
+
   // Health check
   app.get('/api/health', (req, res) => {
     res.json({ 
@@ -22,5 +29,8 @@ export function registerAllRoutes(app: Express) {
   registerProductRoutes(app);
   registerOrderRoutes(app);
   registerServiceRoutes(app);
+  registerCartRoutes(app);
+  registerReviewRoutes(app);
+  registerWishlistRoutes(app);
   registerAdminRoutes(app);
 }
