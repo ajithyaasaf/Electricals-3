@@ -215,9 +215,20 @@ export function CartProvider({ children }: CartProviderProps) {
         console.log('[CART CONTEXT] Starting cart migration...');
         
         try {
-          // Prevent multiple migrations
-          const migrationKey = `migration_${user?.uid}_${Date.now()}`;
-          if (localStorage.getItem(MIGRATION_FLAG_KEY) === migrationKey) return;
+          // Prevent multiple migrations - check if we already have a recent migration flag
+          const existingFlag = localStorage.getItem(MIGRATION_FLAG_KEY);
+          const currentTime = Date.now();
+          
+          // Skip if migrated in the last 5 minutes to prevent duplicate migrations
+          if (existingFlag) {
+            const [, , timestamp] = existingFlag.split('_');
+            if (timestamp && (currentTime - parseInt(timestamp)) < 300000) { // 5 minutes
+              console.log('[CART CONTEXT] Recent migration detected, skipping');
+              return;
+            }
+          }
+          
+          console.log('[CART CONTEXT] Guest cart items to migrate:', guestCart);
           
           await apiRequest('POST', '/api/cart/migrate', {
             guestItems: guestCart
@@ -226,7 +237,7 @@ export function CartProvider({ children }: CartProviderProps) {
           // Clear guest cart after successful migration
           setGuestCart([]);
           localStorage.removeItem(GUEST_CART_KEY);
-          localStorage.setItem(MIGRATION_FLAG_KEY, migrationKey);
+          localStorage.setItem(MIGRATION_FLAG_KEY, `migration_${user?.uid}_${Date.now()}`);
           
           // Refresh authenticated cart
           await loadAuthenticatedCart();
@@ -328,7 +339,7 @@ export function CartProvider({ children }: CartProviderProps) {
 
         // Check if item already exists
         const existingItemIndex = prev.items.findIndex(item => 
-          (item.product?.id === productId || item.service?.id === serviceId)
+          (item.productId === productId || item.serviceId === serviceId)
         );
 
         if (existingItemIndex >= 0) {
@@ -359,9 +370,7 @@ export function CartProvider({ children }: CartProviderProps) {
             savedForLater: false,
             createdAt: new Date(),
             updatedAt: new Date(),
-            // Temporary product/service data
-            product: productId ? { id: productId, name: 'Loading...', price: 0 } as any : undefined,
-            service: serviceId ? { id: serviceId, name: 'Loading...', price: 0 } as any : undefined
+            // Note: product/service details will be loaded from server
           };
 
           return {
@@ -465,7 +474,7 @@ export function CartProvider({ children }: CartProviderProps) {
 
         // Check if item already exists in display cart
         const existingItemIndex = prev.items.findIndex(item => 
-          (item.product?.id === productId || item.service?.id === serviceId)
+          (item.productId === productId || item.serviceId === serviceId)
         );
 
         if (existingItemIndex >= 0) {
@@ -496,8 +505,7 @@ export function CartProvider({ children }: CartProviderProps) {
             savedForLater: false,
             createdAt: new Date(),
             updatedAt: new Date(),
-            product: productId ? { id: productId, name: 'Loading...', price: 0 } as any : undefined,
-            service: serviceId ? { id: serviceId, name: 'Loading...', price: 0 } as any : undefined
+            // Note: product/service details will be loaded from server
           };
 
           return {

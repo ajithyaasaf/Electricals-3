@@ -493,6 +493,92 @@ export function registerCartRoutes(app: Express) {
     }
   });
 
+  // Migrate guest cart to authenticated user cart
+  app.post("/api/cart/migrate", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.uid;
+      const { guestItems = [] } = req.body;
+
+      console.log(`[CART MIGRATION] Starting migration for user ${userId}:`, guestItems);
+
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required for cart migration" });
+      }
+
+      if (!Array.isArray(guestItems) || guestItems.length === 0) {
+        console.log(`[CART MIGRATION] No guest items to migrate for user ${userId}`);
+        return res.json({ message: "No guest items to migrate", migratedCount: 0 });
+      }
+
+      // Get current authenticated user cart items
+      const existingCartItems = await storage.getUserCartItems(userId);
+      console.log(`[CART MIGRATION] User ${userId} has ${existingCartItems.length} existing cart items`);
+
+      let migratedCount = 0;
+      let mergedCount = 0;
+
+      // Process each guest item
+      for (const guestItem of guestItems) {
+        try {
+          console.log(`[CART MIGRATION] Processing guest item:`, guestItem);
+
+          // Validate guest item structure
+          if (!guestItem.productId && !guestItem.serviceId) {
+            console.warn(`[CART MIGRATION] Skipping invalid guest item (no productId/serviceId):`, guestItem);
+            continue;
+          }
+
+          const quantity = parseInt(guestItem.quantity) || 1;
+
+          // Check if item already exists in user's cart
+          const existingItem = existingCartItems.find(item => 
+            (guestItem.productId && item.productId === guestItem.productId) ||
+            (guestItem.serviceId && item.serviceId === guestItem.serviceId)
+          );
+
+          if (existingItem) {
+            // Merge quantities for existing items
+            const newQuantity = Math.min(existingItem.quantity + quantity, CART_CONFIG.maxQuantityPerItem);
+            console.log(`[CART MIGRATION] Merging item ${existingItem.id}: ${existingItem.quantity} + ${quantity} = ${newQuantity}`);
+            
+            await storage.updateCartItem(existingItem.id, { quantity: newQuantity });
+            mergedCount++;
+          } else {
+            // Add new item to user's cart
+            console.log(`[CART MIGRATION] Adding new item to cart: ${guestItem.productId || guestItem.serviceId}`);
+            
+            await storage.addToCart(
+              userId, 
+              guestItem.productId || null, 
+              guestItem.serviceId || null, 
+              quantity
+            );
+            migratedCount++;
+          }
+        } catch (itemError) {
+          console.error(`[CART MIGRATION] Error processing guest item:`, guestItem, itemError);
+          // Continue processing other items even if one fails
+        }
+      }
+
+      console.log(`[CART MIGRATION] Migration completed for user ${userId}: ${migratedCount} new items, ${mergedCount} merged items`);
+
+      res.json({
+        message: "Cart migration completed successfully",
+        migratedCount,
+        mergedCount,
+        totalItems: migratedCount + mergedCount
+      });
+
+    } catch (error) {
+      console.error("[CART MIGRATION] Error migrating guest cart:", error);
+      res.status(500).json({ 
+        message: "Failed to migrate guest cart", 
+        error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined 
+      });
+    }
+  });
+
   // Get shipping options
   app.get("/api/cart/shipping-options", optionalAuth, async (req: any, res) => {
     try {

@@ -248,13 +248,21 @@ export class CartQueries {
       });
       return existingItem.id;
     } else {
-      // Create new cart item
-      return cartService.create({
+      // Create new cart item - filter out undefined values for Firebase
+      const cartItemData: any = {
         userId,
-        productId,
-        serviceId,
         quantity,
-      });
+      };
+      
+      if (productId !== undefined) {
+        cartItemData.productId = productId;
+      }
+      
+      if (serviceId !== undefined) {
+        cartItemData.serviceId = serviceId;
+      }
+      
+      return cartService.create(cartItemData);
     }
   }
 }
