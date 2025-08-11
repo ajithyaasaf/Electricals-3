@@ -471,10 +471,10 @@ export function Header() {
         )}
       </div>
 
-      {/* Enhanced Cart Sidebar */}
-      <EnhancedCartSidebar>
+      {/* Cart Sidebar */}
+      <CartSidebar>
         <div />
-      </EnhancedCartSidebar>
+      </CartSidebar>
 
       {/* Auth Modal */}
       <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
