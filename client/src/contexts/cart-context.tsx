@@ -332,26 +332,59 @@ export function CartProvider({ children }: CartProviderProps) {
   }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
 
   const removeItem = useCallback(async (itemId: string) => {
+    // Immediate optimistic removal for instant UI feedback
     if (isAuthenticated) {
-      setIsLoading(true);
+      // Optimistically remove from cart display
+      setCart(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          items: prev.items.filter(item => item.id !== itemId)
+        };
+      });
+      
       try {
         await apiRequest('DELETE', `/api/cart/items/${itemId}`);
         await loadAuthenticatedCart();
+        toast({
+          title: "Removed",
+          description: "Item removed from cart",
+        });
       } catch (error) {
         console.error('[CART CONTEXT] Error removing item:', error);
+        // Revert optimistic change on error
+        await loadAuthenticatedCart();
         toast({
           title: "Error",
           description: "Failed to remove item",
           variant: "destructive",
         });
-      } finally {
-        setIsLoading(false);
       }
     } else {
-      setGuestCart(prev => prev.filter(item => item.id !== itemId));
-      setTimeout(() => loadGuestCartAsCart(), 100);
+      // Guest cart - immediate removal with instant cart object update
+      const newGuestCart = guestCart.filter(item => item.id !== itemId);
+      setGuestCart(newGuestCart);
+      
+      // Immediately update the cart object as well for instant UI sync
+      setCart(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          items: prev.items.filter(item => item.id !== itemId)
+        };
+      });
+      
+      console.log('[CART CONTEXT] Removed item from guest cart:', itemId);
+      
+      // Still refresh the full cart object, but with a shorter delay
+      setTimeout(() => loadGuestCartAsCart(), 50);
+      
+      toast({
+        title: "Removed",
+        description: "Item removed from cart",
+      });
     }
-  }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
+  }, [isAuthenticated, guestCart, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
 
   // Debounced quantity update processor
   const processQuantityUpdate = useCallback(async (itemId: string, finalQuantity: number) => {
@@ -449,13 +482,28 @@ export function CartProvider({ children }: CartProviderProps) {
   }, []);
 
   const clearCart = useCallback(async () => {
+    // Immediate optimistic clear for instant UI feedback
+    setCart(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        items: []
+      };
+    });
+    
     if (isAuthenticated) {
       setIsLoading(true);
       try {
         await apiRequest('DELETE', '/api/cart');
         await loadAuthenticatedCart();
+        toast({
+          title: "Cart Cleared",
+          description: "All items removed from cart",
+        });
       } catch (error) {
         console.error('[CART CONTEXT] Error clearing cart:', error);
+        // Revert optimistic change on error
+        await loadAuthenticatedCart();
         toast({
           title: "Error",
           description: "Failed to clear cart",
@@ -465,9 +513,19 @@ export function CartProvider({ children }: CartProviderProps) {
         setIsLoading(false);
       }
     } else {
+      // Guest cart - immediate clear
       setGuestCart([]);
       localStorage.removeItem(GUEST_CART_KEY);
-      setTimeout(() => loadGuestCartAsCart(), 100);
+      
+      console.log('[CART CONTEXT] Cleared guest cart');
+      
+      // Refresh cart object with short delay
+      setTimeout(() => loadGuestCartAsCart(), 50);
+      
+      toast({
+        title: "Cart Cleared",
+        description: "All items removed from cart",
+      });
     }
   }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
 
