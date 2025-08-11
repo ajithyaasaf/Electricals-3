@@ -472,7 +472,7 @@ export function Header() {
       </div>
 
       {/* Cart Sidebar */}
-      <CartSidebar>
+      <CartSidebar open={cartOpen} onOpenChange={setCartOpen}>
         <div />
       </CartSidebar>
 

@@ -20,10 +20,14 @@ import { cn } from '@/lib/utils';
 interface CartSidebarProps {
   children: React.ReactNode;
   className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function CartSidebar({ children, className }: CartSidebarProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function CartSidebar({ children, className, open = false, onOpenChange }: CartSidebarProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = open !== undefined ? open : internalOpen;
+  const setIsOpen = onOpenChange || setInternalOpen;
   
   const {
     cartItems,
@@ -107,21 +111,13 @@ export function CartSidebar({ children, className }: CartSidebarProps) {
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetTrigger asChild>
-        <div className={cn("relative", className)}>
-          {children}
-          
-          {/* Item count badge */}
-          {itemCount > 0 && (
-            <Badge 
-              className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-primary text-white text-xs rounded-full"
-            >
-              {itemCount > 99 ? '99+' : itemCount}
-            </Badge>
-          )}
-        </div>
-      </SheetTrigger>
+    <>
+      {/* This div is just for the children, the sheet is controlled externally */}
+      <div className={cn("relative", className)}>
+        {children}
+      </div>
+      
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
 
       <SheetContent side="right" className="w-full sm:max-w-md">
         <SheetHeader>
@@ -207,7 +203,7 @@ export function CartSidebar({ children, className }: CartSidebarProps) {
                 onClick={() => setIsOpen(false)}
                 asChild
               >
-                <Link href="/cart/enhanced">
+                <Link href="/cart">
                   <span className="flex items-center justify-center gap-2">
                     View Cart
                     <ArrowRight className="w-4 h-4" />
@@ -241,5 +237,6 @@ export function CartSidebar({ children, className }: CartSidebarProps) {
         )}
       </SheetContent>
     </Sheet>
+    </>
   );
 }
