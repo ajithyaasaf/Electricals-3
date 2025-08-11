@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { useUnifiedCart } from "@/hooks/useUnifiedCart";
+import { useCartContext } from "@/contexts/cart-context";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice } from "@/lib/currency";
@@ -19,14 +19,15 @@ interface ProductCardProps {
 }
 
 export const ProductCard = memo(function ProductCard({ product, showCategory = false }: ProductCardProps) {
-  const { addItem, isAuthenticated } = useUnifiedCart();
+  const { addItem } = useCartContext();
+  const { isAuthenticated } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      addItem({ productId: product.id, quantity: 1 });
+      await addItem(product.id, undefined, 1);
     },
     onSuccess: () => {
       if (isAuthenticated) {

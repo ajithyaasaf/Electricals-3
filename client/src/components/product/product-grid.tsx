@@ -3,7 +3,7 @@ import type { ProductWithCategory } from "@/lib/types";
 import type { ProductItem } from "@/features/products/types";
 
 interface ProductGridProps {
-  products: ProductWithCategory[] | ProductItem[];
+  products: ProductWithCategory[];
   showCategory?: boolean;
 }
 
