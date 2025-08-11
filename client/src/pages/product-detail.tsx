@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { useUnifiedCart } from "@/hooks/useUnifiedCart";
+import { useCartContext } from "@/contexts/cart-context";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice, formatSavings } from "@/lib/currency";
@@ -22,7 +22,7 @@ import { ReviewForm } from "@/components/reviews/review-form";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const { addItem } = useUnifiedCart();
+  const { addItem } = useCartContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
@@ -49,10 +49,9 @@ export default function ProductDetail() {
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      addItem({ productId: product?.id, quantity });
+      await addItem(product?.id, undefined, quantity);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       toast({
         title: "Added to cart",
         description: `${quantity} ${product?.name} added to your cart.`,

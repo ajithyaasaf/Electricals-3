@@ -14,7 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatPrice } from '@/lib/currency';
-import { useUnifiedCart } from '@/hooks/useUnifiedCart';
+import { useCartContext } from '@/contexts/cart-context';
 import { cn } from '@/lib/utils';
 
 interface CartSidebarProps {
@@ -34,11 +34,11 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
     isLoading,
     updateQuantity,
     removeItem,
-    getItemsCount
-  } = useUnifiedCart();
+    totalQuantity
+  } = useCartContext();
   
   const cartItems = cart?.items || [];
-  const itemCount = getItemsCount();
+  const itemCount = totalQuantity;
   const totals = cart?.totals;
 
   // Quick item component for sidebar
@@ -72,7 +72,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => updateQuantity({ itemId: item.id, quantity: item.quantity - 1 })}
+                onClick={() => updateQuantity(item.id, item.quantity - 1)}
                 disabled={item.quantity <= 1 || isLoading}
                 className="h-6 w-6 p-0"
               >
@@ -86,7 +86,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => updateQuantity({ itemId: item.id, quantity: item.quantity + 1 })}
+                onClick={() => updateQuantity(item.id, item.quantity + 1)}
                 disabled={item.quantity >= 99 || isLoading}
                 className="h-6 w-6 p-0"
               >
