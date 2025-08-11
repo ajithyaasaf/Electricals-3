@@ -1,5 +1,5 @@
 // Global Cart Context - Unified state management for guest and authenticated users
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -59,6 +59,12 @@ export function CartProvider({ children }: CartProviderProps) {
   const [guestCart, setGuestCart] = useState<GuestCartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // Request queue and debouncing for quantity updates
+  const updateQueueRef = useRef<Map<string, { quantity: number; timestamp: number }>>(new Map());
+  const pendingUpdatesRef = useRef<Set<string>>(new Set());
+  const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const saveGuestCartTimeoutRef = useRef<NodeJS.Timeout>();
 
   // Load guest cart from localStorage on mount
   useEffect(() => {
@@ -81,14 +87,28 @@ export function CartProvider({ children }: CartProviderProps) {
     loadGuestCart();
   }, []);
 
-  // Save guest cart to localStorage whenever it changes
+  // Save guest cart to localStorage whenever it changes (debounced)
   useEffect(() => {
-    try {
-      console.log('[CART CONTEXT] Saving guest cart to localStorage:', guestCart);
-      localStorage.setItem(GUEST_CART_KEY, JSON.stringify(guestCart));
-    } catch (error) {
-      console.error('[CART CONTEXT] Error saving guest cart:', error);
+    // Clear existing timeout
+    if (saveGuestCartTimeoutRef.current) {
+      clearTimeout(saveGuestCartTimeoutRef.current);
     }
+    
+    // Debounce localStorage saves to prevent multiple rapid writes
+    saveGuestCartTimeoutRef.current = setTimeout(() => {
+      try {
+        console.log('[CART CONTEXT] Saving guest cart to localStorage:', guestCart);
+        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(guestCart));
+      } catch (error) {
+        console.error('[CART CONTEXT] Error saving guest cart:', error);
+      }
+    }, 100);
+    
+    return () => {
+      if (saveGuestCartTimeoutRef.current) {
+        clearTimeout(saveGuestCartTimeoutRef.current);
+      }
+    };
   }, [guestCart]);
 
   // Load authenticated user's cart
@@ -333,36 +353,100 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
 
-  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
-    if (quantity <= 0) {
+  // Debounced quantity update processor
+  const processQuantityUpdate = useCallback(async (itemId: string, finalQuantity: number) => {
+    if (finalQuantity <= 0) {
       await removeItem(itemId);
       return;
     }
 
-    if (isAuthenticated) {
-      setIsLoading(true);
-      try {
-        await apiRequest('PATCH', `/api/cart/items/${itemId}`, { quantity });
+    if (pendingUpdatesRef.current.has(itemId)) {
+      return; // Already processing this item
+    }
+
+    pendingUpdatesRef.current.add(itemId);
+
+    try {
+      if (isAuthenticated) {
+        await apiRequest('PATCH', `/api/cart/items/${itemId}`, { quantity: finalQuantity });
         await loadAuthenticatedCart();
-      } catch (error) {
-        console.error('[CART CONTEXT] Error updating quantity:', error);
-        toast({
-          title: "Error",
-          description: "Failed to update quantity",
-          variant: "destructive",
+      } else {
+        // For guest cart, update localStorage synchronously
+        setGuestCart(prev => {
+          const updated = prev.map(item => 
+            item.id === itemId ? { ...item, quantity: finalQuantity } : item
+          );
+          console.log('[CART CONTEXT] Processed guest quantity update:', { itemId, finalQuantity });
+          return updated;
         });
-      } finally {
-        setIsLoading(false);
+        await loadGuestCartAsCart();
       }
+    } catch (error) {
+      console.error('[CART CONTEXT] Error processing quantity update:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update quantity",
+        variant: "destructive",
+      });
+    } finally {
+      pendingUpdatesRef.current.delete(itemId);
+      updateQueueRef.current.delete(itemId);
+    }
+  }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, removeItem, toast]);
+
+  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
+    // Immediately update UI optimistically
+    if (isAuthenticated) {
+      setCart(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          items: prev.items.map(item => 
+            item.id === itemId ? { ...item, quantity } : item
+          )
+        };
+      });
     } else {
       setGuestCart(prev => 
         prev.map(item => 
           item.id === itemId ? { ...item, quantity } : item
         )
       );
-      setTimeout(() => loadGuestCartAsCart(), 100);
     }
-  }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, removeItem, toast]);
+
+    // Queue the update for processing
+    updateQueueRef.current.set(itemId, { quantity, timestamp: Date.now() });
+
+    // Clear existing timer for this item
+    const existingTimer = debounceTimersRef.current.get(itemId);
+    if (existingTimer) {
+      clearTimeout(existingTimer);
+    }
+
+    // Set new debounced timer
+    const newTimer = setTimeout(() => {
+      const queuedUpdate = updateQueueRef.current.get(itemId);
+      if (queuedUpdate) {
+        processQuantityUpdate(itemId, queuedUpdate.quantity);
+      }
+      debounceTimersRef.current.delete(itemId);
+    }, 300); // 300ms debounce
+
+    debounceTimersRef.current.set(itemId, newTimer);
+  }, [isAuthenticated, processQuantityUpdate]);
+
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      debounceTimersRef.current.forEach(timer => clearTimeout(timer));
+      debounceTimersRef.current.clear();
+      updateQueueRef.current.clear();
+      pendingUpdatesRef.current.clear();
+      if (saveGuestCartTimeoutRef.current) {
+        clearTimeout(saveGuestCartTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const clearCart = useCallback(async () => {
     if (isAuthenticated) {
@@ -387,16 +471,24 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
 
-  // Calculate cart statistics
+  // Calculate cart statistics with real-time updates
   const itemsCount = cart?.items?.length || 0;
   const totalQuantity = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
+  // For guest users, also include items not yet synced to Cart object
+  const guestItemsCount = !isAuthenticated ? guestCart.length : 0;
+  const guestTotalQuantity = !isAuthenticated ? guestCart.reduce((sum, item) => sum + item.quantity, 0) : 0;
+  
+  // Use guest data if cart is not loaded yet (instant feedback)
+  const finalItemsCount = cart ? itemsCount : guestItemsCount;
+  const finalTotalQuantity = cart ? totalQuantity : guestTotalQuantity;
 
   const value: CartContextType = {
     cart,
     isLoading,
     error,
-    itemsCount,
-    totalQuantity,
+    itemsCount: finalItemsCount,
+    totalQuantity: finalTotalQuantity,
     addItem,
     removeItem,
     updateQuantity,
