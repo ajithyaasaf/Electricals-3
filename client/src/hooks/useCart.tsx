@@ -1,4 +1,4 @@
-// Enhanced Cart Hook - Real-time cart management with enterprise features
+// Cart Hook - Real-time cart management with enterprise features
 import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/hooks/use-toast';
@@ -6,14 +6,14 @@ import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { cartService } from '@/lib/cart-service';
 import type { 
   Cart, 
-  EnhancedCartItem, 
+  CartItem, 
   CartItemWithDetails, 
   Coupon,
   ShippingOption 
 } from '@shared/cart-types';
 
-// Enhanced cart hook with real-time updates
-export function useEnhancedCart() {
+// Cart hook with real-time updates
+export function useCart() {
   const { isAuthenticated } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -25,7 +25,7 @@ export function useEnhancedCart() {
     isLoading: cartLoading,
     error: cartError
   } = useQuery({
-    queryKey: ['cart', 'enhanced', cartService.getSessionId()],
+    queryKey: ['cart', cartService.getSessionId()],
     queryFn: () => cartService.getCart(),
     refetchOnWindowFocus: true,
     refetchInterval: isAuthenticated ? false : 30000, // Refresh guest cart every 30s
@@ -45,10 +45,10 @@ export function useEnhancedCart() {
       setIsLoading(true);
       
       // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: ['cart', 'enhanced'] });
+      await queryClient.cancelQueries({ queryKey: ['cart'] });
 
       // Snapshot the previous value for rollback
-      const previousCart = queryClient.getQueryData(['cart', 'enhanced', cartService.getSessionId()]);
+      const previousCart = queryClient.getQueryData(['cart', cartService.getSessionId()]);
 
       // Optimistically update cart
       if (previousCart && cart) {
@@ -72,13 +72,13 @@ export function useEnhancedCart() {
         };
         
         optimisticCart.items = [...optimisticCart.items, optimisticItem];
-        queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], optimisticCart);
+        queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], optimisticCart);
       }
 
       return { previousCart };
     },
     onSuccess: (updatedCart) => {
-      queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], updatedCart);
+      queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], updatedCart);
       
       toast({
         title: "Added to cart",
@@ -89,7 +89,7 @@ export function useEnhancedCart() {
     onError: (error, newItem, context) => {
       // Rollback on error
       if (context?.previousCart) {
-        queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], context.previousCart);
+        queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], context.previousCart);
       }
       
       toast({
@@ -100,19 +100,19 @@ export function useEnhancedCart() {
     },
     onSettled: () => {
       setIsLoading(false);
-      queryClient.invalidateQueries({ queryKey: ['cart', 'enhanced'] });
+      queryClient.invalidateQueries({ queryKey: ['cart', 'cart'] });
     }
   });
 
   const updateItemMutation = useMutation({
     mutationFn: async ({ itemId, updates }: {
       itemId: string;
-      updates: Partial<EnhancedCartItem>;
+      updates: Partial<CartItem>;
     }) => {
       return cartService.updateItem(itemId, updates);
     },
     onSuccess: (updatedCart) => {
-      queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], updatedCart);
+      queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], updatedCart);
       
       toast({
         title: "Cart updated",
@@ -128,7 +128,7 @@ export function useEnhancedCart() {
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart', 'enhanced'] });
+      queryClient.invalidateQueries({ queryKey: ['cart', 'cart'] });
     }
   });
 
@@ -137,20 +137,20 @@ export function useEnhancedCart() {
       return cartService.removeItem(itemId);
     },
     onMutate: async (itemId) => {
-      await queryClient.cancelQueries({ queryKey: ['cart', 'enhanced'] });
-      const previousCart = queryClient.getQueryData(['cart', 'enhanced', cartService.getSessionId()]);
+      await queryClient.cancelQueries({ queryKey: ['cart', 'cart'] });
+      const previousCart = queryClient.getQueryData(['cart', 'cart', cartService.getSessionId()]);
 
       // Optimistically remove item
       if (previousCart && cart) {
         const optimisticCart = { ...cart };
         optimisticCart.items = optimisticCart.items.filter(item => item.id !== itemId);
-        queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], optimisticCart);
+        queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], optimisticCart);
       }
 
       return { previousCart };
     },
     onSuccess: (updatedCart) => {
-      queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], updatedCart);
+      queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], updatedCart);
       
       toast({
         title: "Item removed",
@@ -160,7 +160,7 @@ export function useEnhancedCart() {
     },
     onError: (error, itemId, context) => {
       if (context?.previousCart) {
-        queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], context.previousCart);
+        queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], context.previousCart);
       }
       
       toast({
@@ -170,14 +170,14 @@ export function useEnhancedCart() {
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart', 'enhanced'] });
+      queryClient.invalidateQueries({ queryKey: ['cart', 'cart'] });
     }
   });
 
   const clearCartMutation = useMutation({
     mutationFn: () => cartService.clearCart(),
     onSuccess: (updatedCart) => {
-      queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], updatedCart);
+      queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], updatedCart);
       
       toast({
         title: "Cart cleared",
@@ -193,14 +193,14 @@ export function useEnhancedCart() {
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart', 'enhanced'] });
+      queryClient.invalidateQueries({ queryKey: ['cart', 'cart'] });
     }
   });
 
   const applyCouponMutation = useMutation({
     mutationFn: (couponCode: string) => cartService.applyCoupon(couponCode),
     onSuccess: (updatedCart) => {
-      queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], updatedCart);
+      queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], updatedCart);
       
       toast({
         title: "Coupon applied",
@@ -216,7 +216,7 @@ export function useEnhancedCart() {
       });
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['cart', 'enhanced'] });
+      queryClient.invalidateQueries({ queryKey: ['cart', 'cart'] });
     }
   });
 
@@ -230,7 +230,7 @@ export function useEnhancedCart() {
     addItemMutation.mutate({ productId, serviceId, quantity, customizations });
   }, [addItemMutation]);
 
-  const updateItem = useCallback((itemId: string, updates: Partial<EnhancedCartItem>) => {
+  const updateItem = useCallback((itemId: string, updates: Partial<CartItem>) => {
     updateItemMutation.mutate({ itemId, updates });
   }, [updateItemMutation]);
 
@@ -279,7 +279,7 @@ export function useEnhancedCart() {
   // Real-time updates subscription
   useEffect(() => {
     const unsubscribe = cartService.subscribe((updatedCart) => {
-      queryClient.setQueryData(['cart', 'enhanced', cartService.getSessionId()], updatedCart);
+      queryClient.setQueryData(['cart', 'cart', cartService.getSessionId()], updatedCart);
     });
 
     return unsubscribe;
@@ -317,4 +317,4 @@ export function useEnhancedCart() {
   };
 }
 
-export default useEnhancedCart;
+export default useCart;

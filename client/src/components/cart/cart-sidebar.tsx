@@ -1,221 +1,243 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { SmartLink } from "@/components/navigation/smart-link";
-import { CartItem } from "@/components/cart/cart-item";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useToast } from "@/hooks/use-toast";
-import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { useGuestCart } from "@/hooks/use-guest-cart";
-import { apiRequest } from "@/lib/queryClient";
-import { formatPrice } from "@/lib/currency";
-import { ShoppingCart, CreditCard, X } from "lucide-react";
+// Cart Sidebar - Real-time cart preview with quick actions
+import { useState } from 'react';
+import { X, Minus, Plus, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Link } from 'wouter';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetTrigger 
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { formatPrice } from '@/lib/currency';
+import { useCart } from '@/hooks/useCart';
+import { cn } from '@/lib/utils';
 
 interface CartSidebarProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  children: React.ReactNode;
+  className?: string;
 }
 
-export function CartSidebar({ open, onOpenChange }: CartSidebarProps) {
-  const { isAuthenticated } = useFirebaseAuth();
-  const { guestCart, removeFromGuestCart, updateGuestCartQuantity, clearGuestCart } = useGuestCart();
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+export function CartSidebar({ children, className }: CartSidebarProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  
+  const {
+    cartItems,
+    itemCount,
+    totals,
+    isLoading,
+    updateQuantity,
+    removeItem
+  } = useCart();
 
-  // Fetch authenticated user cart items
-  const { data: authCartItems = [], isLoading } = useQuery({
-    queryKey: ["/api/cart"],
-    enabled: isAuthenticated && open,
-  });
+  // Quick item component for sidebar
+  const QuickCartItem = ({ item }: { item: any }) => {
+    const productOrService = item.product || item.service;
+    if (!productOrService) return null;
 
-  // Fetch guest cart items with product details
-  const { data: guestCartItems = [], isLoading: guestCartLoading } = useQuery({
-    queryKey: ["/api/cart/guest", guestCart],
-    queryFn: async () => {
-      if (guestCart.length === 0) return [];
-      
-      const response = await fetch("/api/cart/guest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: guestCart }),
-      });
-      
-      if (!response.ok) throw new Error("Failed to fetch guest cart");
-      return response.json();
-    },
-    enabled: !isAuthenticated && open,
-    retry: false,
-  });
-
-  // Use appropriate cart items based on authentication status
-  const cartItems = isAuthenticated ? authCartItems : guestCartItems;
-
-  const clearCartMutation = useMutation({
-    mutationFn: async () => {
-      if (isAuthenticated) {
-        for (const item of cartItems) {
-          await apiRequest("DELETE", `/api/cart/${item.id}`);
-        }
-      } else {
-        clearGuestCart();
-      }
-    },
-    onSuccess: () => {
-      if (isAuthenticated) {
-        queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      } else {
-        queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
-      }
-      toast({
-        title: "Cart cleared",
-        description: "All items have been removed from your cart.",
-        duration: 2000,
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to clear cart.",
-        variant: "destructive",
-        duration: 2000,
-      });
-    },
-  });
-
-  // Calculate totals
-  const subtotal = cartItems.reduce((total: number, item: any) => {
-    const price = parseFloat(item.product?.price || "0");
-    return total + (price * item.quantity);
-  }, 0);
-
-  const tax = subtotal * 0.08; // 8% tax
-  const shipping = subtotal > 8300 ? 0 : 1329; // Free shipping over ₹8,300
-  const total = subtotal + tax + shipping;
-
-  const handleCheckout = () => {
-    onOpenChange(false); // Close the sidebar
-    // Navigation to checkout will be handled by the Link component
-  };
-
-  // Handle loading state for both authenticated and guest users
-  const isLoadingState = isAuthenticated ? isLoading : guestCartLoading;
-
-  return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-96 flex flex-col">
-        <SheetHeader>
-          <SheetTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5" />
-              Shopping Cart ({cartItems.length})
+    return (
+      <div className="flex gap-3 py-3">
+        <div className="w-12 h-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+          {productOrService.imageUrls?.[0] ? (
+            <img 
+              src={productOrService.imageUrls[0]}
+              alt={productOrService.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+              No Image
             </div>
-            {cartItems.length > 0 && (
+          )}
+        </div>
+
+        <div className="flex-grow min-w-0">
+          <h4 className="text-sm font-medium text-gray-900 truncate">
+            {productOrService.name}
+          </h4>
+          
+          <div className="flex items-center justify-between mt-1">
+            <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => clearCartMutation.mutate()}
-                disabled={clearCartMutation.isPending}
+                onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                disabled={item.quantity <= 1 || isLoading}
+                className="h-6 w-6 p-0"
               >
-                Clear All
+                <Minus className="w-3 h-3" />
               </Button>
-            )}
+              
+              <span className="text-sm font-medium px-2">
+                {item.quantity}
+              </span>
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                disabled={item.quantity >= 99 || isLoading}
+                className="h-6 w-6 p-0"
+              >
+                <Plus className="w-3 h-3" />
+              </Button>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => removeItem(item.id)}
+              disabled={isLoading}
+              className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
+            >
+              <X className="w-3 h-3" />
+            </Button>
+          </div>
+
+          <p className="text-sm font-semibold text-gray-900 mt-1">
+            {formatPrice(item.unitPrice * item.quantity)}
+          </p>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+      <SheetTrigger asChild>
+        <div className={cn("relative", className)}>
+          {children}
+          
+          {/* Item count badge */}
+          {itemCount > 0 && (
+            <Badge 
+              className="absolute -top-2 -right-2 h-5 w-5 p-0 flex items-center justify-center bg-primary text-white text-xs rounded-full"
+            >
+              {itemCount > 99 ? '99+' : itemCount}
+            </Badge>
+          )}
+        </div>
+      </SheetTrigger>
+
+      <SheetContent side="right" className="w-full sm:max-w-md">
+        <SheetHeader>
+          <SheetTitle className="flex items-center gap-2">
+            <ShoppingBag className="w-5 h-5" />
+            Shopping Cart ({itemCount})
           </SheetTitle>
         </SheetHeader>
 
-        {isLoadingState ? (
-          <div className="space-y-4 flex-1">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4">
-                <Skeleton className="h-16 w-16 rounded" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-3 w-1/2" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : cartItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 text-center">
-            <ShoppingCart className="h-16 w-16 text-gray-400 mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Your cart is empty</h3>
-            <p className="text-gray-600 mb-4">Add some electrical products to get started!</p>
-            <Button asChild onClick={() => onOpenChange(false)}>
-              <SmartLink href="/products">Browse Products</SmartLink>
+        {cartItems.length === 0 ? (
+          // Empty state
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <ShoppingBag className="w-16 h-16 text-gray-300 mb-4" />
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Your cart is empty
+            </h3>
+            <p className="text-gray-600 mb-6 text-sm">
+              Add some items to get started
+            </p>
+            <Button 
+              onClick={() => setIsOpen(false)}
+              asChild
+            >
+              <Link href="/products">
+                Start Shopping
+              </Link>
             </Button>
           </div>
         ) : (
-          <>
-            {/* Cart Items */}
-            <ScrollArea className="flex-1 -mx-6 px-6">
-              <div className="space-y-4">
-                {cartItems.map((item: any) => (
-                  <CartItem key={item.id} item={item} />
+          // Cart items
+          <div className="flex flex-col h-full">
+            {/* Items list */}
+            <ScrollArea className="flex-grow py-4">
+              <div className="space-y-1">
+                {cartItems.map((item) => (
+                  <QuickCartItem key={item.id} item={item} />
                 ))}
               </div>
             </ScrollArea>
 
-            {/* Cart Summary */}
-            <div className="border-t pt-4 mt-4">
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal:</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Tax:</span>
-                  <span>{formatPrice(tax)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Shipping:</span>
-                  <span>{shipping === 0 ? "FREE" : formatPrice(shipping)}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total:</span>
-                  <span>{formatPrice(total)}</span>
-                </div>
+            <Separator />
+
+            {/* Cart summary */}
+            <div className="py-4 space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Subtotal</span>
+                <span className="font-medium">{formatPrice(totals.subtotal)}</span>
               </div>
 
-              {/* Action Buttons */}
-              <div className="mt-6 space-y-2">
-                {!isAuthenticated && (
-                  <div className="mb-2 p-2 bg-blue-50 border border-blue-200 rounded text-center">
-                    <p className="text-sm text-blue-700">Sign in at checkout to complete your order</p>
-                  </div>
-                )}
-                <Button 
-                  asChild 
-                  className="w-full" 
-                  size="lg"
-                  onClick={handleCheckout}
-                >
-                  <SmartLink href="/checkout">
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Proceed to Checkout
-                  </SmartLink>
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => onOpenChange(false)}
-                  asChild
-                >
-                  <SmartLink href="/products">Continue Shopping</SmartLink>
-                </Button>
+              {totals.discount > 0 && (
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Discount</span>
+                  <span>-{formatPrice(totals.discount)}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Shipping</span>
+                <span className="font-medium">
+                  {totals.shipping > 0 ? formatPrice(totals.shipping) : 'Free'}
+                </span>
               </div>
 
-              {/* Free Shipping Notice */}
-              {subtotal < 100 && (
-                <div className="mt-4 p-3 bg-copper-50 rounded-lg text-center">
-                  <p className="text-sm text-copper-700">
-                    Add ${(100 - subtotal).toFixed(2)} more for free shipping!
-                  </p>
+              <Separator />
+
+              <div className="flex justify-between text-base font-semibold">
+                <span>Total</span>
+                <span>{formatPrice(totals.total)}</span>
+              </div>
+
+              {totals.savings > 0 && (
+                <div className="text-center text-sm text-green-600 bg-green-50 py-2 rounded-md">
+                  You're saving {formatPrice(totals.savings)}!
                 </div>
               )}
             </div>
-          </>
+
+            {/* Action buttons */}
+            <div className="space-y-2 pt-4 border-t">
+              <Button 
+                className="w-full" 
+                size="lg"
+                onClick={() => setIsOpen(false)}
+                asChild
+              >
+                <Link href="/cart/enhanced">
+                  <span className="flex items-center justify-center gap-2">
+                    View Cart
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
+                </Link>
+              </Button>
+
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setIsOpen(false)}
+                asChild
+              >
+                <Link href="/checkout">
+                  Quick Checkout
+                </Link>
+              </Button>
+
+              <p className="text-xs text-gray-500 text-center pt-2">
+                Free shipping on orders over ₹8,300
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Loading overlay */}
+        {isLoading && (
+          <div className="absolute inset-0 bg-white bg-opacity-50 flex items-center justify-center">
+            <div className="animate-spin w-6 h-6 border-2 border-primary border-t-transparent rounded-full" />
+          </div>
         )}
       </SheetContent>
     </Sheet>

@@ -51,7 +51,8 @@ class CartService {
   // Cart Operations
   async getCart(): Promise<Cart> {
     try {
-      const response = await apiRequest('GET', '/api/cart/enhanced');
+      const sessionId = this.getSessionId();
+      const response = await apiRequest('GET', `/api/cart?sessionId=${sessionId}`);
       if (response.ok) {
         const cart = await response.json();
         this.notifyListeners(cart);
@@ -71,7 +72,7 @@ class CartService {
     customizations?: Record<string, any>
   ): Promise<Cart> {
     try {
-      const response = await apiRequest('POST', '/api/cart/enhanced/items', {
+      const response = await apiRequest('POST', '/api/cart/items', {
         productId,
         serviceId,
         quantity,
@@ -93,7 +94,7 @@ class CartService {
 
   async updateItem(itemId: string, updates: Partial<CreateEnhancedCartItem>): Promise<Cart> {
     try {
-      const response = await apiRequest('PUT', `/api/cart/enhanced/items/${itemId}`, updates);
+      const response = await apiRequest('PUT', `/api/cart/items/${itemId}`, updates);
       
       if (response.ok) {
         const cart = await response.json();
@@ -109,7 +110,7 @@ class CartService {
 
   async removeItem(itemId: string): Promise<Cart> {
     try {
-      const response = await apiRequest('DELETE', `/api/cart/enhanced/items/${itemId}`);
+      const response = await apiRequest('DELETE', `/api/cart/items/${itemId}`);
       
       if (response.ok) {
         const cart = await response.json();
@@ -132,7 +133,7 @@ class CartService {
 
   async clearCart(): Promise<Cart> {
     try {
-      const response = await apiRequest('DELETE', '/api/cart/enhanced');
+      const response = await apiRequest('DELETE', '/api/cart');
       
       if (response.ok) {
         const cart = await response.json();
@@ -157,7 +158,7 @@ class CartService {
   // Coupon Management
   async applyCoupon(couponCode: string): Promise<Cart> {
     try {
-      const response = await apiRequest('POST', '/api/cart/enhanced/coupons', {
+      const response = await apiRequest('POST', '/api/cart/coupons', {
         code: couponCode,
         sessionId: this.sessionId
       });
@@ -178,7 +179,7 @@ class CartService {
 
   async removeCoupon(couponCode: string): Promise<Cart> {
     try {
-      const response = await apiRequest('DELETE', `/api/cart/enhanced/coupons/${couponCode}`);
+      const response = await apiRequest('DELETE', `/api/cart/coupons/${couponCode}`);
       
       if (response.ok) {
         const cart = await response.json();
@@ -211,7 +212,7 @@ class CartService {
 
   async getShippingOptions(): Promise<ShippingOption[]> {
     try {
-      const response = await apiRequest('GET', '/api/cart/enhanced/shipping-options');
+      const response = await apiRequest('GET', '/api/cart/shipping-options');
       return response.ok ? await response.json() : [];
     } catch (error) {
       console.error('Error fetching shipping options:', error);
@@ -222,7 +223,7 @@ class CartService {
   // Validation and Business Rules
   async validateCart(): Promise<{ isValid: boolean; errors: string[] }> {
     try {
-      const response = await apiRequest('POST', '/api/cart/enhanced/validate');
+      const response = await apiRequest('POST', '/api/cart/validate');
       return response.ok ? await response.json() : { isValid: false, errors: ['Validation failed'] };
     } catch (error) {
       console.error('Error validating cart:', error);

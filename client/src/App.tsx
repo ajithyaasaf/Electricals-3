@@ -17,7 +17,6 @@ import Services from "@/pages/services";
 import ServiceDetail from "@/pages/service-detail";
 
 import Cart from "@/pages/cart";
-import EnhancedCart from "@/pages/enhanced-cart";
 import Checkout from "@/pages/checkout";
 import Account from "@/pages/account";
 import Admin from "@/pages/admin";
@@ -55,7 +54,6 @@ function Router() {
           <Route path="/services" component={Services} />
           <Route path="/services/:slug" component={ServiceDetail} />
           <Route path="/cart" component={Cart} />
-        <Route path="/cart/enhanced" component={EnhancedCart} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/account" component={Account} />
           <Route path="/admin" component={Admin} />

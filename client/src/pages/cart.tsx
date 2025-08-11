@@ -1,95 +1,80 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "wouter";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { CartItem } from "@/components/cart/cart-item";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { signInWithGoogle } from "@/lib/firebase";
-import { apiRequest } from "@/lib/queryClient";
-import { formatPrice } from "@/lib/currency";
-import { ShoppingCart, ArrowLeft, CreditCard } from "lucide-react";
-import { useEffect } from "react";
+// Enhanced Cart Page - Enterprise-grade shopping cart with all features
+import { useState, useEffect } from 'react';
+import { Link } from 'wouter';
+import { ArrowLeft, Package2, Heart, ShoppingBag, AlertCircle, CheckCircle } from 'lucide-react';
+import { Header } from '@/components/layout/header';
+import { Footer } from '@/components/layout/footer';
+import { BreadcrumbNavigation } from '@/components/navigation/breadcrumb-navigation';
+import { CartItem } from '@/components/cart/cart-item';
+import { CartSummary } from '@/components/cart/cart-summary';
+import { EmptyCart } from '@/components/cart/empty-cart';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useCart } from '@/hooks/useCart';
+import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
+import { signInWithGoogle } from '@/lib/firebase';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Cart() {
   const { isAuthenticated, loading: authLoading } = useFirebaseAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState('cart');
+  
+  const {
+    cart,
+    cartItems,
+    savedItems,
+    itemCount,
+    isEmpty,
+    totals,
+    isLoading,
+    isAddingItem,
+    isUpdatingItem,
+    isRemovingItem,
+    isClearingCart,
+    isApplyingCoupon,
+    addItem,
+    updateItem,
+    removeItem,
+    updateQuantity,
+    clearCart,
+    applyCoupon,
+    saveForLater,
+    moveToCart,
+    error
+  } = useCart();
 
-  // Redirect to login if not authenticated
+  // Handle guest checkout warning
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!authLoading && !isAuthenticated && !isEmpty) {
       toast({
-        title: "Please sign in",
-        description: "You need to sign in to view your cart.",
-        variant: "destructive",
+        title: "Guest Cart",
+        description: "Sign in at checkout to save your cart and complete your order.",
+        duration: 5000
       });
-      setTimeout(() => {
-        signInWithGoogle();
-      }, 1000);
     }
-  }, [isAuthenticated, authLoading, toast]);
+  }, [isAuthenticated, authLoading, isEmpty, toast]);
 
-  // Fetch cart items with product details
-  const { data: cartItems = [], isLoading } = useQuery({
-    queryKey: ["/api/cart"],
-    enabled: isAuthenticated,
-  });
+  // Handle cart notes update
+  const handleUpdateNotes = async (itemId: string, notes: string) => {
+    try {
+      await updateItem(itemId, { notes });
+    } catch (error) {
+      console.error('Error updating notes:', error);
+    }
+  };
 
-  const clearCartMutation = useMutation({
-    mutationFn: async () => {
-      // Clear cart by removing all items
-      for (const item of cartItems) {
-        await apiRequest("DELETE", `/api/cart/${item.id}`);
-      }
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-      toast({
-        title: "Cart cleared",
-        description: "All items have been removed from your cart.",
-      });
-    },
-    onError: () => {
-      toast({
-        title: "Error",
-        description: "Failed to clear cart.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  if (authLoading || !isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <Skeleton className="w-full h-96" />
-        </div>
-      </div>
-    );
-  }
-
-  // Calculate totals
-  const subtotal = cartItems.reduce((total: number, item: any) => {
-    const price = parseFloat(item.product?.price || "0");
-    return total + (price * item.quantity);
-  }, 0);
-
-  const shipping = subtotal > 8300 ? 0 : 1329; // Free shipping over ₹8,300 (approx $100)
-  const tax = subtotal * 0.08; // 8% tax
-  const total = subtotal + shipping + tax;
-
-  if (isLoading) {
+  // Loading state
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gray-50">
         <Header />
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-6">
               {[...Array(3)].map((_, i) => (
                 <div key={i} className="bg-white rounded-lg p-6">
                   <div className="flex items-center space-x-4">
@@ -97,6 +82,7 @@ export default function Cart() {
                     <div className="flex-1 space-y-2">
                       <Skeleton className="w-3/4 h-4" />
                       <Skeleton className="w-1/2 h-4" />
+                      <Skeleton className="w-1/4 h-6" />
                     </div>
                     <Skeleton className="w-24 h-8" />
                   </div>
@@ -104,7 +90,7 @@ export default function Cart() {
               ))}
             </div>
             <div className="lg:col-span-1">
-              <Skeleton className="w-full h-64" />
+              <Skeleton className="w-full h-96" />
             </div>
           </div>
         </div>
@@ -112,153 +98,229 @@ export default function Cart() {
     );
   }
 
+  // Error state
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Failed to load cart. Please try refreshing the page.
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty cart state
+  if (isEmpty && savedItems.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          {/* Breadcrumb */}
+          <BreadcrumbNavigation 
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Shopping Cart", href: "/cart" }
+            ]} 
+            className="mb-6"
+          />
+          
+          <EmptyCart savedItemsCount={savedItems.length} />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Shopping Cart", href: "/cart" }
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
-        <nav className="text-sm text-gray-600 mb-6">
-          <Link href="/" className="hover:text-gray-900">Home</Link>
-          {" / "}
-          <span className="text-gray-900">Shopping Cart</span>
-        </nav>
+        <BreadcrumbNavigation items={breadcrumbItems} className="mb-6" />
 
         {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-          <Link href="/products">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Continue Shopping
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
+            <p className="text-gray-600 mt-1">
+              {itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart
+              {savedItems.length > 0 && (
+                <span className="ml-2">
+                  • {savedItems.length} saved for later
+                </span>
+              )}
+            </p>
+          </div>
+
+          {!isEmpty && (
+            <Button
+              variant="outline"
+              onClick={clearCart}
+              disabled={isClearingCart}
+              className="text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+            >
+              {isClearingCart ? (
+                <div className="animate-spin w-4 h-4 border-2 border-current border-t-transparent rounded-full mr-2" />
+              ) : null}
+              Clear Cart
             </Button>
-          </Link>
+          )}
         </div>
 
-        {cartItems.length === 0 ? (
-          /* Empty Cart */
-          <div className="text-center py-16">
-            <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <ShoppingCart className="w-12 h-12 text-gray-400" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">Add some electrical products to get started.</p>
-            <Button asChild className="bg-copper-600 hover:bg-copper-700">
-              <Link href="/products">Shop Products</Link>
-            </Button>
-          </div>
-        ) : (
-          /* Cart with Items */
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Cart Items */}
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded-lg shadow-sm">
-                <div className="p-6 border-b border-gray-200">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                      Cart Items ({cartItems.length})
-                    </h2>
-                    {cartItems.length > 0 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => clearCartMutation.mutate()}
-                        disabled={clearCartMutation.isPending}
-                      >
-                        {clearCartMutation.isPending ? "Clearing..." : "Clear Cart"}
-                      </Button>
-                    )}
-                  </div>
-                </div>
-                
-                <div className="divide-y divide-gray-200">
-                  {cartItems.map((item: any) => (
-                    <div key={item.id} className="p-6">
-                      <CartItem item={item} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+        {/* Guest User Notice */}
+        {!isAuthenticated && !isEmpty && (
+          <Alert className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription className="flex items-center justify-between">
+              <span>Sign in to save your cart and access member benefits</span>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={signInWithGoogle}
+              >
+                Sign In
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
 
-            {/* Order Summary */}
-            <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Order Summary</h2>
-                
-                <div className="space-y-4">
-                  <div className="flex justify-between text-gray-600">
-                    <span>Subtotal</span>
-                    <span>{formatPrice(subtotal)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between text-gray-600">
-                    <span>Shipping</span>
-                    <span>
-                      {shipping === 0 ? (
-                        <span className="text-green-600 font-medium">FREE</span>
-                      ) : (
-                        formatPrice(shipping)
-                      )}
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between text-gray-600">
-                    <span>Tax</span>
-                    <span>{formatPrice(tax)}</span>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="flex justify-between text-lg font-semibold text-gray-900">
-                    <span>Total</span>
-                    <span>{formatPrice(total)}</span>
-                  </div>
-                </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Cart Items Section */}
+          <div className="lg:col-span-2">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="cart" className="flex items-center gap-2">
+                  <ShoppingBag className="w-4 h-4" />
+                  Cart ({itemCount})
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="saved" 
+                  className="flex items-center gap-2"
+                  disabled={savedItems.length === 0}
+                >
+                  <Heart className="w-4 h-4" />
+                  Saved ({savedItems.length})
+                </TabsTrigger>
+              </TabsList>
 
-                {subtotal < 8300 && (
-                  <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      Add {formatPrice(8300 - subtotal)} more for free shipping!
+              {/* Cart Items */}
+              <TabsContent value="cart" className="space-y-4">
+                {cartItems.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-lg border">
+                    <Package2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Your cart is empty
+                    </h3>
+                    <p className="text-gray-600 mb-6">
+                      Add some items to get started
+                    </p>
+                    <Link href="/products">
+                      <Button>Continue Shopping</Button>
+                    </Link>
+                  </div>
+                ) : (
+                  cartItems.map((item) => (
+                    <CartItem
+                      key={item.id}
+                      item={item}
+                      onUpdateQuantity={updateQuantity}
+                      onRemove={removeItem}
+                      onSaveForLater={saveForLater}
+                      onMoveToCart={moveToCart}
+                      onUpdateNotes={handleUpdateNotes}
+                      isUpdating={isUpdatingItem || isRemovingItem}
+                    />
+                  ))
+                )}
+              </TabsContent>
+
+              {/* Saved Items */}
+              <TabsContent value="saved" className="space-y-4">
+                {savedItems.length === 0 ? (
+                  <div className="text-center py-12 bg-white rounded-lg border">
+                    <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      No saved items
+                    </h3>
+                    <p className="text-gray-600">
+                      Items you save for later will appear here
                     </p>
                   </div>
+                ) : (
+                  savedItems.map((item) => (
+                    <CartItem
+                      key={item.id}
+                      item={item}
+                      onUpdateQuantity={updateQuantity}
+                      onRemove={removeItem}
+                      onSaveForLater={saveForLater}
+                      onMoveToCart={moveToCart}
+                      onUpdateNotes={handleUpdateNotes}
+                      isUpdating={isUpdatingItem || isRemovingItem}
+                    />
+                  ))
                 )}
+              </TabsContent>
+            </Tabs>
+          </div>
 
-                <Button 
-                  asChild 
-                  className="w-full mt-6 bg-electric-blue-600 hover:bg-electric-blue-700 text-white"
-                  size="lg"
-                >
-                  <Link href="/checkout">
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Proceed to Checkout
-                  </Link>
-                </Button>
+          {/* Cart Summary Sidebar */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-4">
+              <CartSummary
+                totals={totals}
+                itemCount={itemCount}
+                appliedCoupons={cart?.appliedCoupons || []}
+                onApplyCoupon={applyCoupon}
+                onRemoveCoupon={(code) => {
+                  // Implement remove coupon logic
+                  console.log('Remove coupon:', code);
+                }}
+                isApplyingCoupon={isApplyingCoupon}
+              />
 
-                {/* Security Notice */}
-                <div className="mt-4 text-center text-sm text-gray-500">
-                  <p>🔒 Secure checkout with SSL encryption</p>
-                </div>
+              {/* Continue Shopping */}
+              <div className="mt-6">
+                <Link href="/products">
+                  <Button variant="outline" className="w-full">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Continue Shopping
+                  </Button>
+                </Link>
+              </div>
 
-                {/* Additional Info */}
-                <div className="mt-6 space-y-3 text-sm text-gray-600">
-                  <div className="flex items-center space-x-2">
-                    <span>✓</span>
-                    <span>30-day return policy</span>
+              {/* Trust Indicators */}
+              <div className="mt-6 p-4 bg-white rounded-lg border">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    <span>30-day money-back guarantee</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span>✓</span>
-                    <span>Manufacturer warranty included</span>
+                  <div className="flex items-center gap-3 text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    <span>Free shipping on orders over ₹8,300</span>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span>✓</span>
-                    <span>Expert customer support</span>
+                  <div className="flex items-center gap-3 text-sm text-gray-600">
+                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    <span>Expert technical support</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        )}
+        </div>
       </div>
 
       <Footer />

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { SmartLink } from "@/components/navigation/smart-link";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
-import { useGuestCart } from "@/hooks/use-guest-cart";
+import { useCart } from "@/hooks/useCart";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,6 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SearchBar } from "@/components/common/search-bar";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
-import { EnhancedCartSidebar } from "@/components/cart/enhanced-cart-sidebar";
 import { AuthModal } from "@/components/auth/auth-modal";
 import {
   Zap,
@@ -43,7 +42,7 @@ import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
   const { isAuthenticated, user, loading } = useFirebaseAuth();
-  const { getCartItemsCount } = useGuestCart();
+  const { itemCount } = useCart();
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -60,12 +59,8 @@ export function Header() {
     enabled: isAuthenticated,
   });
 
-  // Calculate cart count for both authenticated and guest users
-  const authenticatedCartCount = Array.isArray(cartItems)
-    ? cartItems.length
-    : 0;
-  const guestCartCount = getCartItemsCount();
-  const cartCount = isAuthenticated ? authenticatedCartCount : guestCartCount;
+  // Use cart count from useCart hook
+  const cartCount = itemCount || 0;
 
   // Amazon-style hierarchical navigation for electrical products
   const mobileNavigation = [
