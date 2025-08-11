@@ -1,5 +1,6 @@
 // Unified Cart Hook - Works for both authenticated and guest users
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useCartPersistence } from '@/hooks/useCartPersistence';
 import { useToast } from '@/hooks/use-toast';
@@ -11,6 +12,18 @@ export function useUnifiedCart() {
   const { guestCart, addToGuestCart, removeFromGuestCart, updateGuestCartQuantity, getCartItemsCount } = useCartPersistence();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Listen for cart migration events to refresh data
+  useEffect(() => {
+    const handleCartMigrated = () => {
+      console.log('[UNIFIED CART] Cart migration event received, refreshing cart data');
+      queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      queryClient.refetchQueries({ queryKey: ["/api/cart"] });
+    };
+
+    window.addEventListener('cart-migrated', handleCartMigrated);
+    return () => window.removeEventListener('cart-migrated', handleCartMigrated);
+  }, [queryClient]);
 
   // For authenticated users - regular cart API (fallback to empty cart on error)
   const authenticatedCartQuery = useQuery({
@@ -110,11 +123,13 @@ export function useUnifiedCart() {
         return await response.json();
       } else {
         // Add to guest cart
+        console.log('[UNIFIED CART] Adding to guest cart:', { productId, serviceId, quantity });
         addToGuestCart(productId, serviceId, quantity);
         return Promise.resolve();
       }
     },
     onSuccess: () => {
+      console.log('[UNIFIED CART] Item added successfully, invalidating queries');
       // Invalidate appropriate cart queries
       if (isAuthenticated) {
         queryClient.invalidateQueries({ queryKey: ["/api/cart"] });

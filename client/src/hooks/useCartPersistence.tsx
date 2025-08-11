@@ -46,13 +46,19 @@ export function useCartPersistence() {
   // Save guest cart to localStorage whenever it changes
   useEffect(() => {
     try {
+      console.log('[GUEST CART] Saving to localStorage:', guestCart);
       localStorage.setItem(GUEST_CART_KEY, JSON.stringify(guestCart));
+      
+      // Verify it was saved correctly
+      const saved = localStorage.getItem(GUEST_CART_KEY);
+      const parsed = saved ? JSON.parse(saved) : [];
+      console.log('[GUEST CART] Verified saved cart:', parsed);
     } catch (error) {
-      console.error('Error saving guest cart:', error);
+      console.error('[GUEST CART] Error saving guest cart:', error);
     }
   }, [guestCart]);
 
-  // Add item to guest cart
+  // Add item to guest cart with enhanced debugging
   const addToGuestCart = useCallback((
     productId?: string, 
     serviceId?: string, 
@@ -60,15 +66,23 @@ export function useCartPersistence() {
     customizations?: Record<string, any>,
     notes?: string
   ) => {
-    if (!productId && !serviceId) return;
+    if (!productId && !serviceId) {
+      console.warn('[GUEST CART] No productId or serviceId provided');
+      return;
+    }
+
+    console.log('[GUEST CART] Adding item:', { productId, serviceId, quantity });
 
     setGuestCart(prev => {
+      console.log('[GUEST CART] Current cart before addition:', prev);
+      
       const existingIndex = prev.findIndex(item => 
         item.productId === productId && item.serviceId === serviceId
       );
 
       if (existingIndex >= 0) {
         // Update existing item quantity
+        console.log('[GUEST CART] Found existing item at index:', existingIndex);
         const updated = [...prev];
         updated[existingIndex] = {
           ...updated[existingIndex],
@@ -76,6 +90,7 @@ export function useCartPersistence() {
           customizations: { ...updated[existingIndex].customizations, ...customizations },
           notes: notes || updated[existingIndex].notes
         };
+        console.log('[GUEST CART] Updated cart:', updated);
         return updated;
       } else {
         // Add new item
@@ -88,7 +103,10 @@ export function useCartPersistence() {
           customizations,
           notes
         };
-        return [...prev, newItem];
+        console.log('[GUEST CART] Adding new item:', newItem);
+        const newCart = [...prev, newItem];
+        console.log('[GUEST CART] New cart after addition:', newCart);
+        return newCart;
       }
     });
   }, []);
@@ -112,6 +130,7 @@ export function useCartPersistence() {
 
   // Clear guest cart
   const clearGuestCart = useCallback(() => {
+    console.log('[GUEST CART] Clearing guest cart');
     setGuestCart([]);
     localStorage.removeItem(GUEST_CART_KEY);
     localStorage.removeItem(MIGRATION_FLAG_KEY);
@@ -154,9 +173,19 @@ export function useCartPersistence() {
     }
   }, []);
 
-  // Migrate guest cart to authenticated user cart with smart merging
+  // Migrate guest cart to authenticated user cart with enhanced debugging
   const migrateToUserCart = useCallback(async (): Promise<{ success: boolean; errors: string[] }> => {
-    if (!isAuthenticated || !user || guestCart.length === 0) {
+    console.log('[CART MIGRATION] Starting migration...');
+    console.log('[CART MIGRATION] Auth state:', { isAuthenticated, hasUser: !!user });
+    console.log('[CART MIGRATION] Guest cart to migrate:', guestCart);
+
+    if (!isAuthenticated || !user) {
+      console.log('[CART MIGRATION] User not authenticated, skipping migration');
+      return { success: true, errors: [] };
+    }
+
+    if (guestCart.length === 0) {
+      console.log('[CART MIGRATION] Guest cart is empty, skipping migration');
       return { success: true, errors: [] };
     }
 
@@ -165,17 +194,34 @@ export function useCartPersistence() {
     let successCount = 0;
 
     try {
+      console.log('[CART MIGRATION] Fetching user cart...');
       // Get user's existing cart
       const userCartResponse = await apiRequest('GET', '/api/cart');
-      const userCart = userCartResponse.ok ? await userCartResponse.json() : { items: [] };
+      console.log('[CART MIGRATION] User cart response status:', userCartResponse.status);
+      
+      let userCart;
+      if (userCartResponse.ok) {
+        userCart = await userCartResponse.json();
+        console.log('[CART MIGRATION] Current user cart:', userCart);
+      } else {
+        console.log('[CART MIGRATION] Failed to fetch user cart, using empty cart');
+        userCart = { items: [] };
+      }
+      
       const existingItems = userCart.items || [];
+      console.log('[CART MIGRATION] Existing items in user cart:', existingItems);
 
       // Process each guest cart item
-      for (const guestItem of guestCart) {
+      for (let i = 0; i < guestCart.length; i++) {
+        const guestItem = guestCart[i];
+        console.log(`[CART MIGRATION] Processing guest item ${i + 1}/${guestCart.length}:`, guestItem);
+
         try {
           // Validate item first
+          console.log('[CART MIGRATION] Validating item...');
           const validation = await validateCartItem(guestItem);
           if (!validation.valid) {
+            console.log('[CART MIGRATION] Item validation failed:', validation.reason);
             errors.push(`${guestItem.productId ? 'Product' : 'Service'}: ${validation.reason}`);
             continue;
           }
@@ -186,61 +232,94 @@ export function useCartPersistence() {
           );
 
           if (existingItem) {
+            console.log('[CART MIGRATION] Found existing item, merging quantities:', existingItem);
             // Merge quantities
             const newQuantity = existingItem.quantity + guestItem.quantity;
-            await apiRequest('PUT', `/api/cart/items/${existingItem.id}`, {
+            console.log('[CART MIGRATION] New quantity:', newQuantity);
+            
+            const updateResponse = await apiRequest('PUT', `/api/cart/items/${existingItem.id}`, {
               quantity: newQuantity,
               customizations: { ...existingItem.customizations, ...guestItem.customizations },
               notes: guestItem.notes || existingItem.notes
             });
+            console.log('[CART MIGRATION] Update response status:', updateResponse.status);
           } else {
+            console.log('[CART MIGRATION] Adding new item to user cart...');
             // Add new item to user cart
-            await apiRequest('POST', '/api/cart', {
+            const addResponse = await apiRequest('POST', '/api/cart', {
               productId: guestItem.productId,
               serviceId: guestItem.serviceId,
               quantity: guestItem.quantity,
               customizations: guestItem.customizations,
               notes: guestItem.notes
             });
+            console.log('[CART MIGRATION] Add response status:', addResponse.status);
           }
 
           successCount++;
+          console.log('[CART MIGRATION] Successfully processed item, success count:', successCount);
         } catch (error) {
-          console.error('Error migrating cart item:', error);
+          console.error('[CART MIGRATION] Error migrating cart item:', error);
           errors.push(`Failed to add ${guestItem.productId ? 'product' : 'service'} to cart`);
         }
       }
 
+      console.log('[CART MIGRATION] Migration completed. Success count:', successCount, 'Errors:', errors);
+
       // Clear guest cart after successful migration
       if (successCount > 0) {
-        clearGuestCart();
+        console.log('[CART MIGRATION] Clearing guest cart after successful migration');
         localStorage.setItem(MIGRATION_FLAG_KEY, 'true');
+        clearGuestCart();
       }
 
       return { success: successCount > 0, errors };
 
     } catch (error) {
-      console.error('Cart migration failed:', error);
+      console.error('[CART MIGRATION] Cart migration failed:', error);
       return { success: false, errors: ['Failed to migrate cart items'] };
     } finally {
       setIsLoading(false);
     }
   }, [isAuthenticated, user, guestCart, validateCartItem, clearGuestCart]);
 
-  // Auto-migrate when user logs in
+  // Auto-migrate when user logs in with enhanced debugging
   useEffect(() => {
     const handleAutoMigration = async () => {
+      console.log('[AUTO MIGRATION] Effect triggered');
+      console.log('[AUTO MIGRATION] State:', { 
+        isAuthenticated, 
+        hasUser: !!user, 
+        guestCartLength: guestCart.length,
+        guestCart: guestCart
+      });
+
       if (isAuthenticated && user && guestCart.length > 0) {
         const migrated = localStorage.getItem(MIGRATION_FLAG_KEY);
-        if (migrated) return; // Already migrated
+        console.log('[AUTO MIGRATION] Migration flag:', migrated);
+        
+        if (migrated) {
+          console.log('[AUTO MIGRATION] Already migrated, skipping');
+          return;
+        }
 
         try {
+          console.log('[AUTO MIGRATION] Starting migration process...');
+          const itemCount = guestCart.length; // Store count before migration clears it
           const result = await migrateToUserCart();
+          
+          console.log('[AUTO MIGRATION] Migration result:', result);
+          
+          // Trigger cart query refresh after migration
+          if (typeof window !== 'undefined' && window.location) {
+            console.log('[AUTO MIGRATION] Triggering cart refresh...');
+            window.dispatchEvent(new CustomEvent('cart-migrated'));
+          }
           
           if (result.success) {
             toast({
               title: "Cart merged successfully",
-              description: `${guestCart.length} items added to your account`,
+              description: `${itemCount} items added to your account`,
               duration: 3000,
             });
           }
@@ -254,19 +333,25 @@ export function useCartPersistence() {
             });
           }
         } catch (error) {
-          console.error('Auto-migration failed:', error);
+          console.error('[AUTO MIGRATION] Auto-migration failed:', error);
           toast({
             title: "Cart merge failed",
             description: "Please try refreshing the page",
             variant: "destructive",
           });
         }
+      } else {
+        console.log('[AUTO MIGRATION] Conditions not met for migration');
       }
     };
 
     // Small delay to ensure user authentication is stable
+    console.log('[AUTO MIGRATION] Setting up migration timer');
     const timer = setTimeout(handleAutoMigration, 1000);
-    return () => clearTimeout(timer);
+    return () => {
+      console.log('[AUTO MIGRATION] Cleaning up migration timer');
+      clearTimeout(timer);
+    };
   }, [isAuthenticated, user, guestCart.length, migrateToUserCart, toast]);
 
   return {
