@@ -24,13 +24,22 @@ Navigation Preferences: Enterprise-level navigation with smooth transitions, loa
   - Accessibility compliant with ARIA labels and keyboard navigation
   - Framer Motion animations and smooth interactions
   - Admin editor interface for live content management
-- ✅ **Latest Update**: Fixed product images to be more accurate and relevant
-  - Updated image mapping system for better product-image matching
-  - Added force refresh capability for database seeding
-  - All electrical products now display appropriate product images
-  - Verified professional electrical products with correct specifications
+- ✅ **Folder Structure Optimization** (Latest Update):
+  - Organized documentation files into `/docs` folder 
+  - Created domain-based server routes structure (`server/src/routes/`)
+  - Separated API routes by business domain (auth, products, categories, orders, services, admin)
+  - Improved scalability with feature-based client organization
+  - Added comprehensive README.md with project overview
+  - Enhanced developer experience with clear folder structure guidelines
 
 ## System Architecture
+
+### Folder Structure (Scalable & Manageable)
+- **Root Level**: Clean with essential config files, documentation moved to `/docs`
+- **Client**: Feature-based organization with shared components, hooks, and utilities
+- **Server**: Domain-driven API routes (`/src/routes/`) separated by business concerns
+- **Shared**: Type definitions and schemas shared between client and server
+- **Documentation**: Centralized in `/docs` folder for easy reference
 
 ### Frontend Architecture
 - **Framework**: React 18 with TypeScript, Vite
@@ -44,8 +53,9 @@ Navigation Preferences: Enterprise-level navigation with smooth transitions, loa
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js
 - **Language**: TypeScript with ES modules
-- **Authentication**: Firebase Authentication with Google Sign-In, token-based session management.
-- **API Design**: RESTful API with consistent error handling.
+- **Authentication**: Firebase Authentication with Google Sign-In, token-based session management
+- **API Design**: RESTful API with domain-based routes (auth, products, categories, orders, services, admin)
+- **Organization**: Clean separation of concerns with organized route handlers
 
 ### Data Storage Solutions
 - **Primary Database**: Firestore (Google Cloud NoSQL database)
