@@ -9,6 +9,7 @@ import { DealsBanner } from "@/components/common/deals-banner";
 import { VisualCategoryCards } from "@/components/common/visual-category-cards";
 import { RecentlyViewed } from "@/components/common/recently-viewed";
 import { RecommendationEngine } from "@/components/common/recommendation-engine";
+import WhyChooseSection from "@/components/common/why-choose-section";
 import { ProductGrid } from "@/components/product/product-grid";
 import { ProductGridSkeleton, HeroSkeleton } from "@/components/common/skeleton-loader";
 import { ServiceCard } from "@/components/service/service-card";
@@ -429,6 +430,12 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Why Choose CopperBear Section */}
+      <WhyChooseSection 
+        realtimePath="siteContent/whyChooseSection"
+        className="bg-gray-50"
+      />
 
       {/* Testimonials */}
       <Testimonials />
