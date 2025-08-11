@@ -31,13 +31,14 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
     onSuccess: () => {
       if (isAuthenticated) {
         queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
-        toast({
-          title: "Added to cart",
-          description: `${product.name} has been added to your cart.`,
-        });
       } else {
         // Invalidate guest cart queries to refresh cart sidebar
         queryClient.invalidateQueries({ queryKey: ["/api/cart/guest"] });
+        toast({
+          title: "Added to cart",
+          description: `${product.name} has been added to your cart.`,
+          duration: 2000,
+        });
       }
     },
     onError: (error) => {

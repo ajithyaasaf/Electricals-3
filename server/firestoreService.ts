@@ -127,17 +127,24 @@ export class FirestoreService<T, C> {
   }
 
   async findByField(field: string, value: any, limitCount = 50): Promise<T[]> {
+    // Simplified query without orderBy to avoid index requirements
     const q = query(
       collection(db, this.collectionName),
       where(field, '==', value),
-      orderBy('createdAt', 'desc'),
       limit(limitCount)
     );
     
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
+    const items = querySnapshot.docs.map(doc => {
       const data = { id: doc.id, ...doc.data() };
       return convertFirestoreData<T>(data);
+    });
+    
+    // Sort by createdAt in memory to avoid Firestore index requirements
+    return items.sort((a: any, b: any) => {
+      const aDate = a.createdAt?.toDate?.() || new Date(a.createdAt);
+      const bDate = b.createdAt?.toDate?.() || new Date(b.createdAt);
+      return bDate.getTime() - aDate.getTime();
     });
   }
 }
