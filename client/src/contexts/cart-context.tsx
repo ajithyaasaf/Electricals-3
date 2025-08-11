@@ -1,20 +1,18 @@
-// Global Cart Context - Unified state management for guest and authenticated users
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
+// Global Cart Context - Unified state management with reducer pattern
+import { createContext, useContext, useEffect, useReducer, ReactNode, useCallback, useRef, useMemo } from 'react';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import type { Cart, CartItem } from '@shared/cart-types';
-
-// Enhanced guest cart item interface
-export interface GuestCartItem {
-  id: string;
-  productId?: string;
-  serviceId?: string;
-  quantity: number;
-  addedAt: number;
-  customizations?: Record<string, any>;
-  notes?: string;
-}
+import { 
+  cartReducer, 
+  initialCartState, 
+  selectCartTotalQuantity, 
+  selectCartItemsCount, 
+  selectCartTotals,
+  type GuestCartItem,
+  type CartState
+} from './cart-reducer';
 
 // Cart context interface
 interface CartContextType {
@@ -23,9 +21,17 @@ interface CartContextType {
   isLoading: boolean;
   error: string | null;
   
-  // Cart statistics
+  // Cart statistics (computed selectors)
   itemsCount: number;
   totalQuantity: number;
+  totals: {
+    subtotal: number;
+    discount: number;
+    shipping: number;
+    tax: number;
+    total: number;
+    savings: number;
+  };
   
   // Cart actions
   addItem: (productId?: string, serviceId?: string, quantity?: number, customizations?: Record<string, any>) => Promise<void>;
@@ -54,11 +60,13 @@ export function CartProvider({ children }: CartProviderProps) {
   const { isAuthenticated, user } = useFirebaseAuth();
   const { toast } = useToast();
   
-  // State management
-  const [cart, setCart] = useState<Cart | null>(null);
-  const [guestCart, setGuestCart] = useState<GuestCartItem[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // State management with reducer
+  const [state, dispatch] = useReducer(cartReducer, initialCartState);
+  
+  // Computed selectors using useMemo for performance
+  const itemsCount = useMemo(() => selectCartItemsCount(state), [state]);
+  const totalQuantity = useMemo(() => selectCartTotalQuantity(state), [state]);
+  const totals = useMemo(() => selectCartTotals(state), [state]);
   
   // Request queue and debouncing for quantity updates
   const updateQueueRef = useRef<Map<string, { quantity: number; timestamp: number }>>(new Map());
@@ -86,13 +94,13 @@ export function CartProvider({ children }: CartProviderProps) {
         if (stored) {
           const parsed = JSON.parse(stored);
           const validCart = Array.isArray(parsed) ? parsed : [];
-          setGuestCart(validCart);
+          dispatch({ type: 'SET_GUEST_CART', payload: validCart });
           console.log('[CART CONTEXT] Loaded guest cart:', validCart);
         }
       } catch (error) {
         console.error('[CART CONTEXT] Error loading guest cart:', error);
         localStorage.removeItem(GUEST_CART_KEY);
-        setGuestCart([]);
+        dispatch({ type: 'SET_GUEST_CART', payload: [] });
       }
     };
 
@@ -109,8 +117,8 @@ export function CartProvider({ children }: CartProviderProps) {
     // Debounce localStorage saves to prevent multiple rapid writes
     saveGuestCartTimeoutRef.current = setTimeout(() => {
       try {
-        console.log('[CART CONTEXT] Saving guest cart to localStorage:', guestCart);
-        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(guestCart));
+        console.log('[CART CONTEXT] Saving guest cart to localStorage:', state.guestCart);
+        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(state.guestCart));
       } catch (error) {
         console.error('[CART CONTEXT] Error saving guest cart:', error);
       }
@@ -121,27 +129,27 @@ export function CartProvider({ children }: CartProviderProps) {
         clearTimeout(saveGuestCartTimeoutRef.current);
       }
     };
-  }, [guestCart]);
+  }, [state.guestCart]);
 
   // Load authenticated user's cart
   const loadAuthenticatedCart = useCallback(async () => {
     if (!isAuthenticated) return;
     
     console.log('[CART CONTEXT] 🔄 Loading authenticated cart...');
-    setIsLoading(true);
-    setError(null);
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
     
     try {
       const response = await apiRequest('GET', '/api/cart');
       const cartData = await response.json();
       console.log('[CART CONTEXT] 📦 Authenticated cart data received:', JSON.stringify(cartData, null, 2));
       console.log('[CART CONTEXT] 🔢 Cart items count:', cartData.items?.length || 0);
-      setCart(cartData);
+      dispatch({ type: 'SET_CART', payload: cartData });
     } catch (error) {
       console.error('[CART CONTEXT] ❌ Error loading authenticated cart:', error);
-      setError('Failed to load cart');
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load cart' });
       // Fallback to empty cart
-      setCart({
+      dispatch({ type: 'SET_CART', payload: {
         id: `fallback_cart_${Date.now()}`,
         items: [],
         totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
@@ -154,9 +162,9 @@ export function CartProvider({ children }: CartProviderProps) {
         sessionId: undefined,
         shippingAddress: undefined,
         expiresAt: undefined
-      });
+      } });
     } finally {
-      setIsLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   }, [isAuthenticated]);
 
