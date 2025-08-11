@@ -14,7 +14,7 @@ CopperBear follows industry-standard e-commerce practices by providing distinct 
 - **Why Choose Section**: Trust-building with credentials and social proof
 - **Product Highlights**: Category showcases to drive discovery
 - **Call-to-Action**: Sign up incentives and account creation prompts
-- **Testimonials**: Social proof for conversion
+- **Testimonials**: Social proof for conversion (builds trust)
 - **Service Overview**: Professional services marketing
 
 **Target Audience**: First-time visitors, potential customers
@@ -34,8 +34,9 @@ CopperBear follows industry-standard e-commerce practices by providing distinct 
 - **Recommendations**: AI-powered product suggestions
 - **Today's Deals**: Time-sensitive offers for engagement
 - **Why Choose Section**: Enhanced version with detailed features
-- **Account Quick Access**: Orders, saved items, account management
+- **Account Dashboard**: Direct access to orders, saved items, bookings, settings
 - **Service Booking**: Direct access to professional services
+- **No Testimonials**: Space used for functional user features instead
 
 **Target Audience**: Existing customers, registered users
 **Primary Goals**:
@@ -59,6 +60,7 @@ CopperBear follows industry-standard e-commerce practices by providing distinct 
 - Focus: Feature depth, service quality, customer retention
 - CTA: "Get Free Quote" (service booking)
 - Features: Detailed stats, comprehensive service info
+- Account Dashboard: Quick access to orders, saved items, bookings, settings
 
 ## E-commerce Industry Best Practices
 
