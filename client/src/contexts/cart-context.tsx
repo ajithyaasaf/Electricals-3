@@ -434,22 +434,11 @@ export function CartProvider({ children }: CartProviderProps) {
       console.error('[CART CONTEXT] Error parsing existing guest cart:', error);
     }
     
-    // Try to get the most recent cart data - fetch from server if needed
-    let cartToPreserve = currentCartRef.current || cart;
+    // Use cart state as the primary source (more reliable than fetching during logout)
+    let cartToPreserve = cart || currentCartRef.current;
     
-    // If we don't have cart data in memory, try to fetch it before logout completes
-    if ((!cartToPreserve || !cartToPreserve.items || cartToPreserve.items.length === 0) && isAuthenticated) {
-      console.log('[CART CONTEXT] 🔄 Cart not in memory, fetching latest cart data for preservation...');
-      try {
-        const response = await apiRequest('GET', '/api/cart');
-        if (response.ok) {
-          cartToPreserve = await response.json();
-          console.log('[CART CONTEXT] 📡 Fetched cart for preservation:', cartToPreserve?.items?.length || 0, 'items');
-        }
-      } catch (error) {
-        console.error('[CART CONTEXT] ❌ Error fetching cart for preservation:', error);
-      }
-    }
+    console.log('[CART CONTEXT] 🔍 Primary cart source (state):', cart?.items?.length || 0, 'items');
+    console.log('[CART CONTEXT] 🔍 Fallback cart source (ref):', currentCartRef.current?.items?.length || 0, 'items');
     
     console.log('[CART CONTEXT] 📦 Cart to preserve:', cartToPreserve?.items?.length || 0, 'items');
     console.log('[CART CONTEXT] 🔍 Current cart ref:', currentCartRef.current?.items?.length || 0, 'items');
