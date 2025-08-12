@@ -45,8 +45,9 @@ const PriceInputs = memo(({
 
   const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
-    setLocalMin(rawValue); // Always update display immediately
+    setLocalMin(rawValue); // Always allow any string value in display
     
+    // Only pass numeric values to parent, but don't restrict input display
     if (rawValue === "") {
       onMinPriceChange(0);
     } else {
@@ -59,8 +60,9 @@ const PriceInputs = memo(({
 
   const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
-    setLocalMax(rawValue); // Always update display immediately
+    setLocalMax(rawValue); // Always allow any string value in display
     
+    // Only pass numeric values to parent, but don't restrict input display
     if (rawValue === "") {
       onMaxPriceChange(100000);
     } else {
@@ -74,6 +76,7 @@ const PriceInputs = memo(({
   return (
     <div className="grid grid-cols-2 gap-2">
       <Input
+        key="min-price-input"
         type="number"
         placeholder="Min price"
         value={localMin}
@@ -81,6 +84,7 @@ const PriceInputs = memo(({
         className="text-sm"
       />
       <Input
+        key="max-price-input"
         type="number"
         placeholder="Max price"
         value={localMax}
@@ -90,6 +94,9 @@ const PriceInputs = memo(({
     </div>
   );
 });
+
+// Add display name for debugging
+PriceInputs.displayName = 'PriceInputs';
 
 export default function Products() {
   const searchParams = useSearch();
