@@ -662,10 +662,7 @@ export function CartProvider({ children }: CartProviderProps) {
         updatedAt: new Date(),
       };
       
-      // Use reducer for deterministic guest cart update (atomic operation)
-      dispatch({ type: 'ADD_ITEM', payload: guestOptimisticItem });
-      
-      // Atomically update guest cart array for localStorage persistence
+      // Immediately update guest cart array and localStorage atomically
       setGuestCart(prev => {
         const existingIndex = prev.findIndex(item => 
           item.productId === productId && item.serviceId === serviceId
@@ -706,12 +703,18 @@ export function CartProvider({ children }: CartProviderProps) {
         return newCart;
       });
       
-      // Load full cart object with proper product data (debounced)
-      setTimeout(() => loadGuestCartAsCart(), 100);
+      // Use reducer for deterministic guest cart display update (atomic operation)
+      dispatch({ type: 'ADD_ITEM', payload: guestOptimisticItem });
       
+      // Instant feedback without waiting for API
       toast({
         title: "Added to Cart",
         description: "Item added successfully",
+      });
+      
+      // Load full cart object with proper product data (non-blocking, in background)
+      loadGuestCartAsCart().catch(error => {
+        console.error('[CART CONTEXT] Background cart load failed:', error);
       });
     }
   }, [isAuthenticated, processAddOperationQueue, loadGuestCartAsCart, toast, user]);
