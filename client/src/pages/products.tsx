@@ -46,8 +46,10 @@ export default function Products() {
     sortOrder: "desc"
   });
 
-  // Debounce search to reduce API calls
+  // Debounce search and price inputs to reduce API calls
   const debouncedSearch = useDebounce(filters.search, 300);
+  const debouncedMinPrice = useDebounce(filters.minPrice, 500);
+  const debouncedMaxPrice = useDebounce(filters.maxPrice, 500);
   
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
@@ -56,13 +58,25 @@ export default function Products() {
   // Fetch categories using custom hook
   const { data: categories = [] } = useCategories();
 
+  // Local state for price inputs to prevent immediate API calls
+  const [localMinPrice, setLocalMinPrice] = useState(filters.minPrice);
+  const [localMaxPrice, setLocalMaxPrice] = useState(filters.maxPrice);
+
+  // Update local price state when filters change from other sources
+  useEffect(() => {
+    setLocalMinPrice(filters.minPrice);
+    setLocalMaxPrice(filters.maxPrice);
+  }, [filters.minPrice, filters.maxPrice]);
+
   // Memoize query parameters to prevent unnecessary re-renders
   const queryParams = useMemo(() => ({
     ...filters,
     search: debouncedSearch, // Use debounced search
+    minPrice: debouncedMinPrice, // Use debounced price
+    maxPrice: debouncedMaxPrice, // Use debounced price
     limit: itemsPerPage,
     offset: (currentPage - 1) * itemsPerPage
-  }), [filters, debouncedSearch, currentPage, itemsPerPage]);
+  }), [filters, debouncedSearch, debouncedMinPrice, debouncedMaxPrice, currentPage, itemsPerPage]);
 
   // Fetch products using custom hook
   const { data: productsData, isLoading } = useProducts(queryParams);
@@ -83,8 +97,16 @@ export default function Products() {
   }, [filters, categories, setLocation]);
 
   const updateFilter = (key: string, value: any) => {
+    // Store current scroll position to prevent jumping
+    const scrollY = window.scrollY;
+    
     setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1);
+    
+    // Restore scroll position after a brief delay to allow DOM updates
+    setTimeout(() => {
+      window.scrollTo({ top: scrollY, behavior: 'instant' });
+    }, 50);
   };
 
   const clearFilters = () => {
@@ -228,8 +250,10 @@ export default function Products() {
         <div className="space-y-6">
           <div className="px-2">
             <Slider
-              value={[filters.minPrice, filters.maxPrice]}
+              value={[localMinPrice, localMaxPrice]}
               onValueChange={([min, max]) => {
+                setLocalMinPrice(min);
+                setLocalMaxPrice(max);
                 updateFilter("minPrice", min);
                 updateFilter("maxPrice", max);
               }}
@@ -241,27 +265,49 @@ export default function Products() {
           <div className="flex items-center justify-between text-sm font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1">Minimum</div>
-              <div>₹{filters.minPrice.toLocaleString('en-IN')}</div>
+              <div>₹{localMinPrice.toLocaleString('en-IN')}</div>
             </div>
             <div className="text-gray-400">—</div>
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1">Maximum</div>
-              <div>₹{filters.maxPrice.toLocaleString('en-IN')}</div>
+              <div>₹{localMaxPrice.toLocaleString('en-IN')}</div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Input
               type="number"
               placeholder="Min price"
-              value={filters.minPrice}
-              onChange={(e) => updateFilter("minPrice", parseInt(e.target.value) || 0)}
+              value={localMinPrice}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 0;
+                setLocalMinPrice(value);
+                updateFilter("minPrice", value);
+              }}
+              onBlur={() => {
+                // Ensure valid range on blur
+                if (localMinPrice > localMaxPrice) {
+                  setLocalMinPrice(localMaxPrice);
+                  updateFilter("minPrice", localMaxPrice);
+                }
+              }}
               className="text-sm"
             />
             <Input
               type="number"
               placeholder="Max price"
-              value={filters.maxPrice}
-              onChange={(e) => updateFilter("maxPrice", parseInt(e.target.value) || 100000)}
+              value={localMaxPrice}
+              onChange={(e) => {
+                const value = parseInt(e.target.value) || 100000;
+                setLocalMaxPrice(value);
+                updateFilter("maxPrice", value);
+              }}
+              onBlur={() => {
+                // Ensure valid range on blur
+                if (localMaxPrice < localMinPrice) {
+                  setLocalMaxPrice(localMinPrice);
+                  updateFilter("maxPrice", localMinPrice);
+                }
+              }}
               className="text-sm"
             />
           </div>
@@ -495,7 +541,7 @@ export default function Products() {
             {isLoading ? (
               <ProductGridSkeleton count={12} />
             ) : (
-              <ProductGrid products={productsData?.products || []} showCategory />
+              <ProductGrid products={productsData?.products || [] as any} showCategory />
             )}
 
             {/* Pagination */}
