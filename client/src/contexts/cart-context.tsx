@@ -1,5 +1,5 @@
 // Global Cart Context - Unified state management for guest and authenticated users
-import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef, useMemo, useReducer } from 'react';
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -16,6 +16,161 @@ export interface GuestCartItem {
   notes?: string;
 }
 
+// Cart reducer actions
+type CartAction = 
+  | { type: 'SET_CART'; payload: Cart | null }
+  | { type: 'ADD_ITEM'; payload: CartItem }
+  | { type: 'UPDATE_QUANTITY'; payload: { itemId: string; quantity: number } }
+  | { type: 'REMOVE_ITEM'; payload: { itemId: string } }
+  | { type: 'CLEAR_CART' }
+  | { type: 'OPTIMISTIC_UPDATE_ITEM'; payload: { itemId: string; updates: Partial<CartItem> } }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null };
+
+// Cart reducer
+function cartReducer(state: Cart | null, action: CartAction): Cart | null {
+  switch (action.type) {
+    case 'SET_CART':
+      return action.payload;
+    
+    case 'ADD_ITEM':
+      if (!state) {
+        // Create new cart with the item
+        return {
+          id: `cart_${Date.now()}`,
+          items: [action.payload],
+          totals: calculateOptimisticTotals([action.payload]),
+          currency: 'INR',
+          lastUpdated: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          appliedCoupons: [],
+          userId: undefined,
+          sessionId: undefined,
+          shippingAddress: undefined,
+          expiresAt: undefined
+        };
+      }
+      
+      // Check if item already exists
+      const existingItemIndex = state.items.findIndex(item => 
+        (item.productId === action.payload.productId && item.productId) ||
+        (item.serviceId === action.payload.serviceId && item.serviceId)
+      );
+      
+      let newItems: CartItem[];
+      if (existingItemIndex >= 0) {
+        // Update quantity of existing item
+        newItems = state.items.map((item, index) =>
+          index === existingItemIndex 
+            ? { ...item, quantity: item.quantity + action.payload.quantity, updatedAt: new Date() }
+            : item
+        );
+      } else {
+        // Add new item
+        newItems = [...state.items, action.payload];
+      }
+      
+      return {
+        ...state,
+        items: newItems,
+        totals: calculateOptimisticTotals(newItems),
+        lastUpdated: new Date(),
+        updatedAt: new Date()
+      };
+    
+    case 'UPDATE_QUANTITY':
+      if (!state) return state;
+      
+      const updatedItems = state.items.map(item =>
+        item.id === action.payload.itemId
+          ? { ...item, quantity: action.payload.quantity, updatedAt: new Date() }
+          : item
+      );
+      
+      return {
+        ...state,
+        items: updatedItems,
+        totals: calculateOptimisticTotals(updatedItems),
+        lastUpdated: new Date(),
+        updatedAt: new Date()
+      };
+    
+    case 'REMOVE_ITEM':
+      if (!state) return state;
+      
+      const filteredItems = state.items.filter(item => item.id !== action.payload.itemId);
+      
+      return {
+        ...state,
+        items: filteredItems,
+        totals: calculateOptimisticTotals(filteredItems),
+        lastUpdated: new Date(),
+        updatedAt: new Date()
+      };
+    
+    case 'CLEAR_CART':
+      if (!state) return null;
+      
+      return {
+        ...state,
+        items: [],
+        totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
+        lastUpdated: new Date(),
+        updatedAt: new Date()
+      };
+    
+    case 'OPTIMISTIC_UPDATE_ITEM':
+      if (!state) return state;
+      
+      const optimisticItems = state.items.map(item =>
+        item.id === action.payload.itemId
+          ? { ...item, ...action.payload.updates, updatedAt: new Date() }
+          : item
+      );
+      
+      return {
+        ...state,
+        items: optimisticItems,
+        totals: calculateOptimisticTotals(optimisticItems),
+        lastUpdated: new Date(),
+        updatedAt: new Date()
+      };
+    
+    default:
+      return state;
+  }
+}
+
+// Calculate optimistic totals for immediate UI feedback
+function calculateOptimisticTotals(items: CartItem[]): Cart['totals'] {
+  const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+  const discount = items.reduce((sum, item) => sum + (item.discount || 0), 0);
+  
+  // Free shipping over ₹500 (50000 paise)
+  const shipping = subtotal > 50000 ? 0 : 5000;
+  
+  // 18% GST
+  const tax = Math.round(subtotal * 0.18);
+  
+  // Calculate savings (difference between original price and unit price)
+  const savings = items.reduce((sum, item) => {
+    const originalPrice = item.originalPrice || item.unitPrice;
+    return sum + ((originalPrice - item.unitPrice) * item.quantity);
+  }, 0);
+  
+  const total = subtotal - discount + shipping + tax;
+  
+  return {
+    subtotal: Math.max(0, subtotal),
+    discount: Math.max(0, discount),
+    shipping: Math.max(0, shipping),
+    tax: Math.max(0, tax),
+    total: Math.max(0, total),
+    savings: Math.max(0, savings)
+  };
+}
+
 // Cart context interface
 interface CartContextType {
   // Cart data
@@ -23,9 +178,15 @@ interface CartContextType {
   isLoading: boolean;
   error: string | null;
   
-  // Cart statistics
+  // Derived selectors with memoization
   itemsCount: number;
   totalQuantity: number;
+  subtotal: number;
+  discount: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  savings: number;
   
   // Cart actions
   addItem: (productId?: string, serviceId?: string, quantity?: number, customizations?: Record<string, any>) => Promise<void>;
@@ -54,8 +215,8 @@ export function CartProvider({ children }: CartProviderProps) {
   const { isAuthenticated, user } = useFirebaseAuth();
   const { toast } = useToast();
   
-  // State management
-  const [cart, setCart] = useState<Cart | null>(null);
+  // State management with reducer for deterministic updates
+  const [cart, dispatch] = useReducer(cartReducer, null);
   const [guestCart, setGuestCart] = useState<GuestCartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -136,12 +297,12 @@ export function CartProvider({ children }: CartProviderProps) {
       const cartData = await response.json();
       console.log('[CART CONTEXT] 📦 Authenticated cart data received:', JSON.stringify(cartData, null, 2));
       console.log('[CART CONTEXT] 🔢 Cart items count:', cartData.items?.length || 0);
-      setCart(cartData);
+      dispatch({ type: 'SET_CART', payload: cartData });
     } catch (error) {
       console.error('[CART CONTEXT] ❌ Error loading authenticated cart:', error);
       setError('Failed to load cart');
       // Fallback to empty cart
-      setCart({
+      dispatch({ type: 'SET_CART', payload: {
         id: `fallback_cart_${Date.now()}`,
         items: [],
         totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
@@ -154,7 +315,7 @@ export function CartProvider({ children }: CartProviderProps) {
         sessionId: undefined,
         shippingAddress: undefined,
         expiresAt: undefined
-      });
+      } });
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +324,7 @@ export function CartProvider({ children }: CartProviderProps) {
   // Load guest cart as Cart object
   const loadGuestCartAsCart = useCallback(async () => {
     if (guestCart.length === 0) {
-      setCart({
+      dispatch({ type: 'SET_CART', payload: {
         id: `guest_cart_${Date.now()}`,
         items: [],
         totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
@@ -176,7 +337,7 @@ export function CartProvider({ children }: CartProviderProps) {
         sessionId: undefined,
         shippingAddress: undefined,
         expiresAt: undefined
-      });
+      } });
       return;
     }
 
@@ -186,7 +347,7 @@ export function CartProvider({ children }: CartProviderProps) {
         items: guestCart
       });
       const cartData = await response.json();
-      setCart(cartData);
+      dispatch({ type: 'SET_CART', payload: cartData });
       console.log('[CART CONTEXT] Loaded guest cart as Cart:', cartData);
     } catch (error) {
       console.error('[CART CONTEXT] Error loading guest cart:', error);
@@ -342,69 +503,25 @@ export function CartProvider({ children }: CartProviderProps) {
     const optimisticItemId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     if (isAuthenticated) {
-      // Optimistically add to cart display immediately
-      setCart(prev => {
-        if (!prev) {
-          // If no cart exists, create a basic structure
-          const newCart: Cart = {
-            id: `temp_cart_${Date.now()}`,
-            items: [],
-            totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
-            currency: 'INR',
-            lastUpdated: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            appliedCoupons: [],
-            userId: user?.uid,
-            sessionId: undefined,
-            shippingAddress: undefined,
-            expiresAt: undefined
-          };
-          prev = newCart;
-        }
-
-        // Check if item already exists
-        const existingItemIndex = prev.items.findIndex(item => 
-          (item.productId === productId || item.serviceId === serviceId)
-        );
-
-        if (existingItemIndex >= 0) {
-          // Update existing item quantity
-          const updatedItems = prev.items.map((item, index) =>
-            index === existingItemIndex
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
-          );
-          
-          return {
-            ...prev,
-            items: updatedItems
-          };
-        } else {
-          // Add new item with temporary data
-          const newItem: CartItem = {
-            id: optimisticItemId,
-            productId,
-            serviceId,
-            quantity,
-            unitPrice: 0, // Will be updated when real data comes back
-            originalPrice: 0,
-            discount: 0,
-            appliedCoupons: [],
-            customizations: customizations || {},
-            notes: '',
-            savedForLater: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            // Note: product/service details will be loaded from server
-          };
-
-          return {
-            ...prev,
-            items: [...prev.items, newItem]
-          };
-        }
-      });
+      // Create optimistic item for authenticated users
+      const optimisticItem: CartItem = {
+        id: optimisticItemId,
+        productId,
+        serviceId,
+        quantity,
+        unitPrice: 0, // Will be updated when real data comes back
+        originalPrice: 0,
+        discount: 0,
+        appliedCoupons: [],
+        customizations: customizations || {},
+        notes: '',
+        savedForLater: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
+      // Use reducer for deterministic state update
+      dispatch({ type: 'ADD_ITEM', payload: optimisticItem });
 
       // Queue the actual API operation
       return new Promise<void>((resolve, reject) => {
@@ -423,13 +540,7 @@ export function CartProvider({ children }: CartProviderProps) {
           },
           reject: (error) => {
             // Remove optimistic item on error
-            setCart(prev => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                items: prev.items.filter(item => item.id !== optimisticItemId)
-              };
-            });
+            dispatch({ type: 'REMOVE_ITEM', payload: { itemId: optimisticItemId } });
             reject(error);
             toast({
               title: "Error",
@@ -478,68 +589,25 @@ export function CartProvider({ children }: CartProviderProps) {
         return newCart;
       });
 
-      // Also immediately update the cart display object optimistically
-      setCart(prev => {
-        if (!prev) {
-          // Create empty cart structure
-          prev = {
-            id: `guest_cart_${Date.now()}`,
-            items: [],
-            totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
-            currency: 'INR',
-            lastUpdated: new Date(),
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            appliedCoupons: [],
-            userId: undefined,
-            sessionId: `guest_session_${Date.now()}`,
-            shippingAddress: undefined,
-            expiresAt: undefined
-          };
-        }
-
-        // Check if item already exists in display cart
-        const existingItemIndex = prev.items.findIndex(item => 
-          (item.productId === productId || item.serviceId === serviceId)
-        );
-
-        if (existingItemIndex >= 0) {
-          // Update existing item
-          const updatedItems = prev.items.map((item, index) =>
-            index === existingItemIndex
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
-          );
-          
-          return {
-            ...prev,
-            items: updatedItems
-          };
-        } else {
-          // Add new optimistic item
-          const newItem: CartItem = {
-            id: optimisticItemId,
-            productId,
-            serviceId,
-            quantity,
-            unitPrice: 0,
-            originalPrice: 0,
-            discount: 0,
-            appliedCoupons: [],
-            customizations: customizations || {},
-            notes: '',
-            savedForLater: false,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            // Note: product/service details will be loaded from server
-          };
-
-          return {
-            ...prev,
-            items: [...prev.items, newItem]
-          };
-        }
-      });
+      // For guest users, also create optimistic item for cart display
+      const guestOptimisticItem: CartItem = {
+        id: optimisticItemId,
+        productId,
+        serviceId,
+        quantity,
+        unitPrice: 0,
+        originalPrice: 0,
+        discount: 0,
+        appliedCoupons: [],
+        customizations: customizations || {},
+        notes: '',
+        savedForLater: false,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      
+      // Use reducer for deterministic guest cart update
+      dispatch({ type: 'ADD_ITEM', payload: guestOptimisticItem });
       
       // Update full cart object with proper data shortly after
       setTimeout(() => loadGuestCartAsCart(), 50);
@@ -554,14 +622,8 @@ export function CartProvider({ children }: CartProviderProps) {
   const removeItem = useCallback(async (itemId: string) => {
     // Immediate optimistic removal for instant UI feedback
     if (isAuthenticated) {
-      // Optimistically remove from cart display
-      setCart(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          items: prev.items.filter(item => item.id !== itemId)
-        };
-      });
+      // Optimistically remove from cart display using reducer
+      dispatch({ type: 'REMOVE_ITEM', payload: { itemId } });
       
       try {
         await apiRequest('DELETE', `/api/cart/items/${itemId}`);
@@ -585,37 +647,8 @@ export function CartProvider({ children }: CartProviderProps) {
       const newGuestCart = guestCart.filter(item => item.id !== itemId);
       setGuestCart(newGuestCart);
       
-      // Immediately update the cart object as well for instant UI sync
-      setCart(prev => {
-        if (!prev) return prev;
-        const filteredItems = prev.items.filter(item => item.id !== itemId);
-        
-        // Recalculate totals based on remaining items
-        const subtotal = filteredItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
-        const discount = 0; // Calculate any applicable discounts
-        const shipping = subtotal > 50000 ? 0 : 5000; // Free shipping over ₹500
-        const tax = Math.round(subtotal * 0.18); // 18% GST
-        const total = subtotal - discount + shipping + tax;
-        const savings = filteredItems.reduce((sum, item) => {
-          const originalPrice = item.originalPrice || item.unitPrice;
-          return sum + ((originalPrice - item.unitPrice) * item.quantity);
-        }, 0);
-        
-        return {
-          ...prev,
-          items: filteredItems,
-          totals: {
-            subtotal,
-            discount,
-            shipping,
-            tax,
-            total,
-            savings
-          },
-          lastUpdated: new Date(),
-          updatedAt: new Date()
-        };
-      });
+      // Immediately update the cart object as well for instant UI sync using reducer
+      dispatch({ type: 'REMOVE_ITEM', payload: { itemId } });
       
       console.log('[CART CONTEXT] Removed item from guest cart:', itemId);
       
@@ -688,21 +721,9 @@ export function CartProvider({ children }: CartProviderProps) {
   const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     console.log('[CART CONTEXT] 🔄 Updating quantity:', { itemId, quantity, isAuthenticated });
     
-    // Immediately update UI optimistically for both authenticated and guest users
-    setCart(prev => {
-      if (!prev) return prev;
-      console.log('[CART CONTEXT] 📦 Optimistic quantity update - before:', prev.items.find(item => item.id === itemId)?.quantity);
-      const updatedCart = {
-        ...prev,
-        items: prev.items.map(item => 
-          item.id === itemId ? { ...item, quantity } : item
-        ),
-        lastUpdated: new Date(),
-        updatedAt: new Date()
-      };
-      console.log('[CART CONTEXT] 📦 Optimistic quantity update - after:', updatedCart.items.find(item => item.id === itemId)?.quantity);
-      return updatedCart;
-    });
+    // Immediately update UI optimistically for both authenticated and guest users using reducer
+    console.log('[CART CONTEXT] 📦 Optimistic quantity update:', { itemId, quantity });
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { itemId, quantity } });
 
     if (!isAuthenticated) {
       // For guest cart, also update localStorage synchronously
@@ -750,14 +771,8 @@ export function CartProvider({ children }: CartProviderProps) {
   }, []);
 
   const clearCart = useCallback(async () => {
-    // Immediate optimistic clear for instant UI feedback
-    setCart(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        items: []
-      };
-    });
+    // Immediate optimistic clear for instant UI feedback using reducer
+    dispatch({ type: 'CLEAR_CART' });
     
     if (isAuthenticated) {
       setIsLoading(true);
@@ -785,8 +800,8 @@ export function CartProvider({ children }: CartProviderProps) {
       setGuestCart([]);
       localStorage.removeItem(GUEST_CART_KEY);
       
-      // Set cart to empty state immediately
-      setCart({
+      // Set cart to empty state immediately using reducer
+      dispatch({ type: 'SET_CART', payload: {
         id: `guest_cart_${Date.now()}`,
         items: [],
         totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
@@ -799,7 +814,7 @@ export function CartProvider({ children }: CartProviderProps) {
         sessionId: `guest_session_${Date.now()}`,
         shippingAddress: undefined,
         expiresAt: undefined
-      });
+      } });
       
       console.log('[CART CONTEXT] Cleared guest cart');
       
@@ -810,24 +825,46 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
 
-  // Calculate cart statistics with real-time updates
-  const itemsCount = cart?.items?.length || 0;
-  const totalQuantity = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+  // Memoized derived selectors for optimal performance
+  const cartStats = useMemo(() => {
+    const itemsCount = cart?.items?.length || 0;
+    const totalQuantity = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
-  // For guest users, also include items not yet synced to Cart object
-  const guestItemsCount = !isAuthenticated ? guestCart.length : 0;
-  const guestTotalQuantity = !isAuthenticated ? guestCart.reduce((sum, item) => sum + item.quantity, 0) : 0;
-  
-  // Use guest data if cart is not loaded yet (instant feedback)
-  const finalItemsCount = cart ? itemsCount : guestItemsCount;
-  const finalTotalQuantity = cart ? totalQuantity : guestTotalQuantity;
+    // For guest users, also include items not yet synced to Cart object
+    const guestItemsCount = !isAuthenticated ? guestCart.length : 0;
+    const guestTotalQuantity = !isAuthenticated ? guestCart.reduce((sum, item) => sum + item.quantity, 0) : 0;
+    
+    // Use guest data if cart is not loaded yet (instant feedback)
+    const finalItemsCount = cart ? itemsCount : guestItemsCount;
+    const finalTotalQuantity = cart ? totalQuantity : guestTotalQuantity;
+
+    // Extract totals with fallbacks
+    const totals = cart?.totals || { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 };
+
+    return {
+      itemsCount: finalItemsCount,
+      totalQuantity: finalTotalQuantity,
+      subtotal: totals.subtotal,
+      discount: totals.discount,
+      shipping: totals.shipping,
+      tax: totals.tax,
+      total: totals.total,
+      savings: totals.savings,
+    };
+  }, [cart, guestCart, isAuthenticated]);
 
   const value: CartContextType = {
     cart,
     isLoading,
     error,
-    itemsCount: finalItemsCount,
-    totalQuantity: finalTotalQuantity,
+    itemsCount: cartStats.itemsCount,
+    totalQuantity: cartStats.totalQuantity,
+    subtotal: cartStats.subtotal,
+    discount: cartStats.discount,
+    shipping: cartStats.shipping,
+    tax: cartStats.tax,
+    total: cartStats.total,
+    savings: cartStats.savings,
     addItem,
     removeItem,
     updateQuantity,

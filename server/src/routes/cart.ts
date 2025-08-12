@@ -319,8 +319,8 @@ export function registerCartRoutes(app: Express) {
     }
   });
 
-  // Update cart item
-  app.put("/api/cart/items/:id", optionalAuth, async (req: any, res) => {
+  // Update cart item - support both PATCH and PUT
+  app.patch("/api/cart/items/:id", optionalAuth, async (req: any, res) => {
     try {
       const userId = req.user?.uid;
       const itemId = req.params.id;
@@ -340,10 +340,56 @@ export function registerCartRoutes(app: Express) {
           });
         }
 
+        console.log(`[CART UPDATE] Updating cart item ${itemId} with:`, updates);
         await storage.updateCartItem(itemId, updates);
+        
+        // Get updated item to verify
+        const updatedItem = await storage.getCartItemById(itemId);
+        console.log(`[CART UPDATE] Item updated successfully. New quantity: ${updatedItem?.quantity}`);
       }
 
-      // Return success and let client refresh cart
+      // Return success and let client keep optimistic UI
+      res.json({ message: "Cart item updated successfully" });
+      
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+      res.status(500).json({ message: "Failed to update cart item" });
+    }
+  });
+
+  // Update cart item - PUT endpoint for compatibility
+  app.put("/api/cart/items/:id", optionalAuth, async (req: any, res) => {
+    try {
+      const userId = req.user?.uid;
+      const itemId = req.params.id;
+      const updates = req.body;
+
+      console.log(`[CART UPDATE PUT] Processing item update for user ${userId}, item ${itemId}:`, updates);
+
+      if (userId) {
+        const cartItem = await storage.getCartItemById(itemId);
+        
+        if (!cartItem || cartItem.userId !== userId) {
+          console.log(`[CART UPDATE PUT] Cart item not found or unauthorized: ${itemId} for user ${userId}`);
+          return res.status(404).json({ message: "Cart item not found" });
+        }
+
+        // Validate quantity
+        if (updates.quantity && updates.quantity > CART_CONFIG.maxQuantityPerItem) {
+          return res.status(400).json({ 
+            message: `Maximum quantity per item is ${CART_CONFIG.maxQuantityPerItem}` 
+          });
+        }
+
+        console.log(`[CART UPDATE PUT] Updating cart item ${itemId} with:`, updates);
+        await storage.updateCartItem(itemId, updates);
+        
+        // Get updated item to verify
+        const updatedItem = await storage.getCartItemById(itemId);
+        console.log(`[CART UPDATE PUT] Item updated successfully. New quantity: ${updatedItem?.quantity}`);
+      }
+
+      // Return success and let client keep optimistic UI
       res.json({ message: "Cart item updated successfully" });
       
     } catch (error) {
