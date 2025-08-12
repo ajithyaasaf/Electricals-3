@@ -68,14 +68,7 @@ export default function Products() {
     setLocalMaxPrice(filters.maxPrice);
   }, [filters.minPrice, filters.maxPrice]);
 
-  // Sync debounced price values with filter state (without calling updateFilter to avoid re-renders)
-  useEffect(() => {
-    setFilters(prev => ({
-      ...prev,
-      minPrice: debouncedMinPrice,
-      maxPrice: debouncedMaxPrice
-    }));
-  }, [debouncedMinPrice, debouncedMaxPrice]);
+  // No need to sync debounced values with filter state - the query uses debounced values directly
 
   // Memoize query parameters to prevent unnecessary re-renders
   const queryParams = useMemo(() => ({
@@ -274,12 +267,12 @@ export default function Products() {
           <div className="flex items-center justify-between text-sm font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1">Minimum</div>
-              <div>₹{localMinPrice.toLocaleString('en-IN')}</div>
+              <div>₹{(localMinPrice || 0).toLocaleString('en-IN')}</div>
             </div>
             <div className="text-gray-400">—</div>
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1">Maximum</div>
-              <div>₹{localMaxPrice.toLocaleString('en-IN')}</div>
+              <div>₹{(localMaxPrice || 100000).toLocaleString('en-IN')}</div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -298,18 +291,6 @@ export default function Products() {
                   }
                 }
               }}
-              onBlur={() => {
-                // Ensure valid range on blur but don't call updateFilter
-                if (localMinPrice > localMaxPrice && localMaxPrice > 0) {
-                  setLocalMinPrice(localMaxPrice);
-                }
-              }}
-              onKeyDown={(e) => {
-                // No immediate filter update on Enter, debounced value will handle it
-                if (e.key === 'Enter') {
-                  e.target.blur();
-                }
-              }}
               className="text-sm"
             />
             <Input
@@ -325,18 +306,6 @@ export default function Products() {
                   if (!isNaN(value) && value >= 0) {
                     setLocalMaxPrice(value);
                   }
-                }
-              }}
-              onBlur={() => {
-                // Ensure valid range on blur but don't call updateFilter
-                if (localMaxPrice < localMinPrice && localMinPrice > 0) {
-                  setLocalMaxPrice(localMinPrice);
-                }
-              }}
-              onKeyDown={(e) => {
-                // No immediate filter update on Enter, debounced value will handle it
-                if (e.key === 'Enter') {
-                  e.target.blur();
                 }
               }}
               className="text-sm"
@@ -572,7 +541,7 @@ export default function Products() {
             {isLoading ? (
               <ProductGridSkeleton count={12} />
             ) : (
-              <ProductGrid products={productsData?.products || [] as any} showCategory />
+              <ProductGrid products={(productsData?.products || []) as any} showCategory />
             )}
 
             {/* Pagination */}
