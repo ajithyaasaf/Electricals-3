@@ -227,6 +227,9 @@ export function CartProvider({ children }: CartProviderProps) {
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const saveGuestCartTimeoutRef = useRef<NodeJS.Timeout>();
   
+  // Keep reference to current cart for logout preservation
+  const currentCartRef = useRef<Cart | null>(null);
+  
   // Add-to-cart operation queue
   const addOperationQueueRef = useRef<Array<{
     id: string;
@@ -304,6 +307,8 @@ export function CartProvider({ children }: CartProviderProps) {
       console.log('[CART CONTEXT] 📦 Authenticated cart data received:', JSON.stringify(cartData, null, 2));
       console.log('[CART CONTEXT] 🔢 Cart items count:', cartData.items?.length || 0);
       dispatch({ type: 'SET_CART', payload: cartData });
+      // Keep reference for logout preservation
+      currentCartRef.current = cartData;
     } catch (error) {
       console.error('[CART CONTEXT] ❌ Error loading authenticated cart:', error);
       setError('Failed to load cart');
@@ -354,6 +359,8 @@ export function CartProvider({ children }: CartProviderProps) {
       });
       const cartData = await response.json();
       dispatch({ type: 'SET_CART', payload: cartData });
+      // Keep reference for logout preservation
+      currentCartRef.current = cartData;
       console.log('[CART CONTEXT] Loaded guest cart as Cart:', cartData);
     } catch (error) {
       console.error('[CART CONTEXT] Error loading guest cart:', error);
@@ -376,6 +383,13 @@ export function CartProvider({ children }: CartProviderProps) {
   useEffect(() => {
     refreshCart();
   }, [isAuthenticated, refreshCart]);
+
+  // Update cart reference whenever cart state changes
+  useEffect(() => {
+    if (cart) {
+      currentCartRef.current = cart;
+    }
+  }, [cart]);
 
   // Preserve cart data when user logs out (prevent repeated executions)
   const preserveCartDataOnLogout = useCallback(async () => {
@@ -403,23 +417,9 @@ export function CartProvider({ children }: CartProviderProps) {
       console.error('[CART CONTEXT] Error parsing existing guest cart:', error);
     }
     
-    // Fetch the most current authenticated cart from server before preservation
-    let currentAuthenticatedCart: Cart | null = null;
-    try {
-      if (user?.uid) {
-        console.log('[CART CONTEXT] 📡 Fetching current authenticated cart for preservation...');
-        const response = await apiRequest('GET', '/api/cart');
-        if (response.ok) {
-          currentAuthenticatedCart = await response.json();
-          console.log('[CART CONTEXT] 📦 Current authenticated cart fetched:', currentAuthenticatedCart?.items?.length || 0, 'items');
-        }
-      }
-    } catch (error) {
-      console.error('[CART CONTEXT] Error fetching authenticated cart for preservation:', error);
-    }
-    
-    // Use fetched cart data for preservation (more reliable than local state)
-    const cartToPreserve = currentAuthenticatedCart || cart;
+    // Use stored cart reference for preservation (more reliable than fetching after logout)
+    const cartToPreserve = currentCartRef.current || cart;
+    console.log('[CART CONTEXT] 📦 Cart to preserve:', cartToPreserve?.items?.length || 0, 'items');
     
     // If we have a current cart with items, convert it to guest cart format
     if (cartToPreserve && cartToPreserve.items && cartToPreserve.items.length > 0) {
@@ -603,7 +603,7 @@ export function CartProvider({ children }: CartProviderProps) {
         clearTimeout(migrationTimeout);
       }
     };
-  }, [isAuthenticated, user?.uid, loadAuthenticatedCart, loadGuestCartAsCart, cart?.items?.length, toast]);
+  }, [isAuthenticated, user?.uid, loadAuthenticatedCart, loadGuestCartAsCart, cart?.items?.length, toast, preserveCartDataOnLogout]);
 
   // Process add-to-cart operations queue for authenticated users
   const processAddOperationQueue = useCallback(async () => {
