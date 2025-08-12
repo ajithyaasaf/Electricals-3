@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useLocation, useSearch } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -20,6 +20,58 @@ import { SearchInput } from "@/components/common/search-input";
 import { useProducts, useCategories } from "@/features/products/hooks/useProducts";
 import { useEnterpriseNavigation } from "@/hooks/use-enterprise-navigation";
 import type { ProductFilters } from "@/features/products/types";
+
+// Isolated component to prevent focus loss issues
+const PriceInputs = ({ 
+  minPrice, 
+  maxPrice, 
+  onMinPriceChange, 
+  onMaxPriceChange 
+}: {
+  minPrice: number;
+  maxPrice: number;
+  onMinPriceChange: (value: number) => void;
+  onMaxPriceChange: (value: number) => void;
+}) => {
+  return (
+    <div className="grid grid-cols-2 gap-2">
+      <Input
+        type="number"
+        placeholder="Min price"
+        value={minPrice === 0 ? "" : minPrice}
+        onChange={(e) => {
+          const rawValue = e.target.value;
+          if (rawValue === "") {
+            onMinPriceChange(0);
+          } else {
+            const value = parseInt(rawValue);
+            if (!isNaN(value) && value >= 0) {
+              onMinPriceChange(value);
+            }
+          }
+        }}
+        className="text-sm"
+      />
+      <Input
+        type="number"
+        placeholder="Max price"
+        value={maxPrice === 100000 ? "" : maxPrice}
+        onChange={(e) => {
+          const rawValue = e.target.value;
+          if (rawValue === "") {
+            onMaxPriceChange(100000);
+          } else {
+            const value = parseInt(rawValue);
+            if (!isNaN(value) && value >= 0) {
+              onMaxPriceChange(value);
+            }
+          }
+        }}
+        className="text-sm"
+      />
+    </div>
+  );
+};
 
 export default function Products() {
   const searchParams = useSearch();
@@ -46,11 +98,6 @@ export default function Products() {
     sortOrder: "desc"
   });
 
-  // Debounce search and price inputs to reduce API calls
-  const debouncedSearch = useDebounce(filters.search, 300);
-  const debouncedMinPrice = useDebounce(filters.minPrice, 500);
-  const debouncedMaxPrice = useDebounce(filters.maxPrice, 500);
-  
   const [currentPage, setCurrentPage] = useState(1);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const itemsPerPage = 20;
@@ -58,15 +105,14 @@ export default function Products() {
   // Fetch categories using custom hook
   const { data: categories = [] } = useCategories();
 
-  // Completely isolated local state for price inputs to prevent re-renders
-  const [localMinPrice, setLocalMinPrice] = useState(0);
-  const [localMaxPrice, setLocalMaxPrice] = useState(100000);
+  // Simple state for price inputs - separate from filters to prevent re-renders
+  const [localMinPrice, setLocalMinPrice] = useState(filters.minPrice);
+  const [localMaxPrice, setLocalMaxPrice] = useState(filters.maxPrice);
 
-  // Initialize local price state only once on mount
-  useEffect(() => {
-    setLocalMinPrice(filters.minPrice);
-    setLocalMaxPrice(filters.maxPrice);
-  }, []); // Empty dependency array - only run once
+  // Debounce search and price inputs to reduce API calls
+  const debouncedSearch = useDebounce(filters.search, 300);
+  const debouncedMinPrice = useDebounce(localMinPrice, 500);
+  const debouncedMaxPrice = useDebounce(localMaxPrice, 500);
 
   // No need to sync debounced values with filter state - the query uses debounced values directly
 
@@ -278,42 +324,12 @@ export default function Products() {
               <div>₹{(localMaxPrice || 100000).toLocaleString('en-IN')}</div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            <Input
-              type="number"
-              placeholder="Min price"
-              value={localMinPrice === 0 ? "" : localMinPrice}
-              onChange={(e) => {
-                const rawValue = e.target.value;
-                if (rawValue === "") {
-                  setLocalMinPrice(0);
-                } else {
-                  const value = parseInt(rawValue);
-                  if (!isNaN(value) && value >= 0) {
-                    setLocalMinPrice(value);
-                  }
-                }
-              }}
-              className="text-sm"
-            />
-            <Input
-              type="number"
-              placeholder="Max price"
-              value={localMaxPrice === 100000 ? "" : localMaxPrice}
-              onChange={(e) => {
-                const rawValue = e.target.value;
-                if (rawValue === "") {
-                  setLocalMaxPrice(100000);
-                } else {
-                  const value = parseInt(rawValue);
-                  if (!isNaN(value) && value >= 0) {
-                    setLocalMaxPrice(value);
-                  }
-                }
-              }}
-              className="text-sm"
-            />
-          </div>
+          <PriceInputs 
+            minPrice={localMinPrice}
+            maxPrice={localMaxPrice}
+            onMinPriceChange={setLocalMinPrice}
+            onMaxPriceChange={setLocalMaxPrice}
+          />
         </div>
       </div>
 
