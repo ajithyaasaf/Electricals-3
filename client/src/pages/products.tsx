@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback, memo } from "react";
 import { useLocation, useSearch } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -21,8 +21,8 @@ import { useProducts, useCategories } from "@/features/products/hooks/useProduct
 import { useEnterpriseNavigation } from "@/hooks/use-enterprise-navigation";
 import type { ProductFilters } from "@/features/products/types";
 
-// Isolated component to prevent focus loss issues
-const PriceInputs = ({ 
+// Completely memoized component to prevent focus loss issues
+const PriceInputs = memo(({ 
   minPrice, 
   maxPrice, 
   onMinPriceChange, 
@@ -33,45 +33,63 @@ const PriceInputs = ({
   onMinPriceChange: (value: number) => void;
   onMaxPriceChange: (value: number) => void;
 }) => {
+  // Use internal state to prevent parent re-renders from affecting inputs
+  const [localMin, setLocalMin] = useState("");
+  const [localMax, setLocalMax] = useState("");
+
+  // Initialize only once
+  useEffect(() => {
+    setLocalMin(minPrice === 0 ? "" : minPrice.toString());
+    setLocalMax(maxPrice === 100000 ? "" : maxPrice.toString());
+  }, []);
+
+  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    setLocalMin(rawValue); // Always update display immediately
+    
+    if (rawValue === "") {
+      onMinPriceChange(0);
+    } else {
+      const value = parseInt(rawValue);
+      if (!isNaN(value) && value >= 0) {
+        onMinPriceChange(value);
+      }
+    }
+  }, [onMinPriceChange]);
+
+  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value;
+    setLocalMax(rawValue); // Always update display immediately
+    
+    if (rawValue === "") {
+      onMaxPriceChange(100000);
+    } else {
+      const value = parseInt(rawValue);
+      if (!isNaN(value) && value >= 0) {
+        onMaxPriceChange(value);
+      }
+    }
+  }, [onMaxPriceChange]);
+
   return (
     <div className="grid grid-cols-2 gap-2">
       <Input
         type="number"
         placeholder="Min price"
-        value={minPrice === 0 ? "" : minPrice}
-        onChange={(e) => {
-          const rawValue = e.target.value;
-          if (rawValue === "") {
-            onMinPriceChange(0);
-          } else {
-            const value = parseInt(rawValue);
-            if (!isNaN(value) && value >= 0) {
-              onMinPriceChange(value);
-            }
-          }
-        }}
+        value={localMin}
+        onChange={handleMinChange}
         className="text-sm"
       />
       <Input
         type="number"
         placeholder="Max price"
-        value={maxPrice === 100000 ? "" : maxPrice}
-        onChange={(e) => {
-          const rawValue = e.target.value;
-          if (rawValue === "") {
-            onMaxPriceChange(100000);
-          } else {
-            const value = parseInt(rawValue);
-            if (!isNaN(value) && value >= 0) {
-              onMaxPriceChange(value);
-            }
-          }
-        }}
+        value={localMax}
+        onChange={handleMaxChange}
         className="text-sm"
       />
     </div>
   );
-};
+});
 
 export default function Products() {
   const searchParams = useSearch();
@@ -108,6 +126,15 @@ export default function Products() {
   // Simple state for price inputs - separate from filters to prevent re-renders
   const [localMinPrice, setLocalMinPrice] = useState(filters.minPrice);
   const [localMaxPrice, setLocalMaxPrice] = useState(filters.maxPrice);
+
+  // Memoize callback functions to prevent PriceInputs re-renders
+  const handleMinPriceChange = useCallback((value: number) => {
+    setLocalMinPrice(value);
+  }, []);
+
+  const handleMaxPriceChange = useCallback((value: number) => {
+    setLocalMaxPrice(value);
+  }, []);
 
   // Debounce search and price inputs to reduce API calls
   const debouncedSearch = useDebounce(filters.search, 300);
@@ -327,8 +354,8 @@ export default function Products() {
           <PriceInputs 
             minPrice={localMinPrice}
             maxPrice={localMaxPrice}
-            onMinPriceChange={setLocalMinPrice}
-            onMaxPriceChange={setLocalMaxPrice}
+            onMinPriceChange={handleMinPriceChange}
+            onMaxPriceChange={handleMaxPriceChange}
           />
         </div>
       </div>
