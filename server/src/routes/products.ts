@@ -7,7 +7,7 @@ export function registerProductRoutes(app: Express) {
   // Get all products with filtering and pagination
   app.get("/api/products", async (req, res) => {
     try {
-      const { categoryId, category, search, featured, limit = 20, offset = 0 } = req.query;
+      const { categoryId, category, search, featured, minPrice, maxPrice, sortBy = "newest", sortOrder = "desc", limit = 20, offset = 0 } = req.query;
       
       let products: any[] = [];
       if (featured === "true") {
@@ -28,6 +28,50 @@ export function registerProductRoutes(app: Express) {
       } else {
         products = await storage.getAllProducts();
       }
+
+      // Apply price filtering
+      if (minPrice || maxPrice) {
+        const minPriceNum = minPrice ? parseFloat(minPrice as string) : 0;
+        const maxPriceNum = maxPrice ? parseFloat(maxPrice as string) : Infinity;
+        
+        console.log(`🔍 Price filtering: min=${minPriceNum}, max=${maxPriceNum}`);
+        
+        const originalCount = products.length;
+        products = products.filter(product => {
+          const price = parseFloat(product.price.toString());
+          const withinRange = price >= minPriceNum && price <= maxPriceNum;
+          if (!withinRange) {
+            console.log(`🚫 Product ${product.name} (₹${price/100}) excluded from range ₹${minPriceNum/100}-₹${maxPriceNum/100}`);
+          }
+          return withinRange;
+        });
+        
+        console.log(`📊 Price filtering: ${originalCount} → ${products.length} products`);
+      }
+
+      // Apply sorting
+      products = products.sort((a, b) => {
+        let comparison = 0;
+        
+        switch (sortBy) {
+          case "name":
+            comparison = a.name.localeCompare(b.name);
+            break;
+          case "price":
+            comparison = parseFloat(a.price.toString()) - parseFloat(b.price.toString());
+            break;
+          case "rating":
+            comparison = (a.rating || 0) - (b.rating || 0);
+            break;
+          case "newest":
+          default:
+            // For newest, we'll use the product id or creation time if available
+            comparison = a.id.localeCompare(b.id);
+            break;
+        }
+        
+        return sortOrder === "desc" ? -comparison : comparison;
+      });
 
       // Apply pagination
       const limitNum = parseInt(limit as string);
