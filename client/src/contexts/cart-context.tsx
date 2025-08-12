@@ -434,9 +434,26 @@ export function CartProvider({ children }: CartProviderProps) {
       console.error('[CART CONTEXT] Error parsing existing guest cart:', error);
     }
     
-    // Use stored cart reference for preservation (more reliable than fetching after logout)
-    const cartToPreserve = currentCartRef.current || cart;
+    // Try to get the most recent cart data - fetch from server if needed
+    let cartToPreserve = currentCartRef.current || cart;
+    
+    // If we don't have cart data in memory, try to fetch it before logout completes
+    if ((!cartToPreserve || !cartToPreserve.items || cartToPreserve.items.length === 0) && isAuthenticated) {
+      console.log('[CART CONTEXT] 🔄 Cart not in memory, fetching latest cart data for preservation...');
+      try {
+        const response = await apiRequest('GET', '/api/cart');
+        if (response.ok) {
+          cartToPreserve = await response.json();
+          console.log('[CART CONTEXT] 📡 Fetched cart for preservation:', cartToPreserve?.items?.length || 0, 'items');
+        }
+      } catch (error) {
+        console.error('[CART CONTEXT] ❌ Error fetching cart for preservation:', error);
+      }
+    }
+    
     console.log('[CART CONTEXT] 📦 Cart to preserve:', cartToPreserve?.items?.length || 0, 'items');
+    console.log('[CART CONTEXT] 🔍 Current cart ref:', currentCartRef.current?.items?.length || 0, 'items');
+    console.log('[CART CONTEXT] 🔍 Cart state:', cart?.items?.length || 0, 'items');
     
     // If we have a current cart with items, convert it to guest cart format
     if (cartToPreserve && cartToPreserve.items && cartToPreserve.items.length > 0) {
