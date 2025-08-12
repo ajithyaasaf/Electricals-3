@@ -102,42 +102,131 @@ export default function Products() {
 
   const totalPages = Math.ceil((productsData?.total || 0) / itemsPerPage);
 
+  // Get active filters count for better UX
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filters.categoryId) count++;
+    if (filters.search) count++;
+    if (filters.featured) count++;
+    if (filters.minPrice > 0 || filters.maxPrice < 100000) count++;
+    return count;
+  }, [filters]);
+
   const FilterContent = () => (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Active Filters Summary */}
+      {activeFiltersCount > 0 && (
+        <div className="pb-4 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-medium text-gray-900">
+              Active Filters ({activeFiltersCount})
+            </h3>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={clearFilters}
+              className="text-copper-600 hover:text-copper-700 hover:bg-copper-50 h-auto p-1"
+            >
+              Clear all
+            </Button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {filters.categoryId && (
+              <Badge variant="secondary" className="bg-copper-100 text-copper-800 hover:bg-copper-200">
+                {categories.find(c => c.id === filters.categoryId)?.name}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateFilter("categoryId", undefined)}
+                  className="ml-1 h-auto p-0 hover:bg-transparent"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            )}
+            {filters.search && (
+              <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+                Search: "{filters.search}"
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateFilter("search", "")}
+                  className="ml-1 h-auto p-0 hover:bg-transparent"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            )}
+            {filters.featured && (
+              <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200">
+                Featured Only
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateFilter("featured", false)}
+                  className="ml-1 h-auto p-0 hover:bg-transparent"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            )}
+            {(filters.minPrice > 0 || filters.maxPrice < 100000) && (
+              <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200">
+                ₹{filters.minPrice.toLocaleString('en-IN')} - ₹{filters.maxPrice.toLocaleString('en-IN')}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    updateFilter("minPrice", 0);
+                    updateFilter("maxPrice", 100000);
+                  }}
+                  className="ml-1 h-auto p-0 hover:bg-transparent"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Categories */}
       <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Categories</h3>
-        <div className="space-y-2">
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="all-categories"
-              checked={!filters.categoryId}
-              onCheckedChange={() => updateFilter("categoryId", undefined)}
-            />
-            <label htmlFor="all-categories" className="text-sm text-gray-700">All Categories</label>
-          </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+          Categories
+        </h3>
+        <div className="space-y-1">
+          <button
+            onClick={() => updateFilter("categoryId", undefined)}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              !filters.categoryId 
+                ? "bg-copper-100 text-copper-900 border-2 border-copper-300" 
+                : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+            }`}
+          >
+            All Categories
+          </button>
           {categories.map(category => (
-            <div key={category.id} className="flex items-center space-x-2">
-              <Checkbox 
-                id={`category-${category.id}`}
-                checked={filters.categoryId === category.id}
-                onCheckedChange={() => 
-                  updateFilter("categoryId", filters.categoryId === category.id ? undefined : category.id)
-                }
-              />
-              <label htmlFor={`category-${category.id}`} className="text-sm text-gray-700">
-                {category.name}
-              </label>
-            </div>
+            <button
+              key={category.id}
+              onClick={() => updateFilter("categoryId", category.id)}
+              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                filters.categoryId === category.id 
+                  ? "bg-copper-100 text-copper-900 border-2 border-copper-300" 
+                  : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+              }`}
+            >
+              {category.name}
+            </button>
           ))}
         </div>
       </div>
 
       {/* Price Range */}
       <div>
-        <h3 className="font-semibold text-gray-900 mb-3">Price Range</h3>
-        <div className="space-y-4">
-          <div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Range</h3>
+        <div className="space-y-6">
+          <div className="px-2">
             <Slider
               value={[filters.minPrice, filters.maxPrice]}
               onValueChange={([min, max]) => {
@@ -149,32 +238,57 @@ export default function Products() {
               className="w-full"
             />
           </div>
-          <div className="flex items-center space-x-2 text-sm text-gray-600">
-            <span>₹{filters.minPrice.toLocaleString('en-IN')}</span>
-            <span>-</span>
-            <span>₹{filters.maxPrice.toLocaleString('en-IN')}</span>
+          <div className="flex items-center justify-between text-sm font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
+            <div className="text-center">
+              <div className="text-xs text-gray-500 mb-1">Minimum</div>
+              <div>₹{filters.minPrice.toLocaleString('en-IN')}</div>
+            </div>
+            <div className="text-gray-400">—</div>
+            <div className="text-center">
+              <div className="text-xs text-gray-500 mb-1">Maximum</div>
+              <div>₹{filters.maxPrice.toLocaleString('en-IN')}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Input
+              type="number"
+              placeholder="Min price"
+              value={filters.minPrice}
+              onChange={(e) => updateFilter("minPrice", parseInt(e.target.value) || 0)}
+              className="text-sm"
+            />
+            <Input
+              type="number"
+              placeholder="Max price"
+              value={filters.maxPrice}
+              onChange={(e) => updateFilter("maxPrice", parseInt(e.target.value) || 100000)}
+              className="text-sm"
+            />
           </div>
         </div>
       </div>
 
-      {/* Featured Products */}
+      {/* Special Filters */}
       <div>
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="featured"
-            checked={filters.featured}
-            onCheckedChange={(checked) => updateFilter("featured", checked)}
-          />
-          <label htmlFor="featured" className="text-sm font-medium text-gray-900">
-            Featured Products Only
-          </label>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">Special Filters</h3>
+        <div className="space-y-3">
+          <button
+            onClick={() => updateFilter("featured", !filters.featured)}
+            className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-between ${
+              filters.featured 
+                ? "bg-green-100 text-green-900 border-2 border-green-300" 
+                : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+            }`}
+          >
+            <span>Featured Products</span>
+            {filters.featured && (
+              <Badge variant="secondary" className="bg-green-200 text-green-800 text-xs">
+                Active
+              </Badge>
+            )}
+          </button>
         </div>
       </div>
-
-      {/* Clear Filters */}
-      <Button variant="outline" onClick={clearFilters} className="w-full">
-        Clear All Filters
-      </Button>
     </div>
   );
 
@@ -197,9 +311,19 @@ export default function Products() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters - Desktop */}
           {!isMobile && (
-            <div className="lg:w-64 flex-shrink-0">
-              <div className="bg-white rounded-lg p-6 sticky top-24">
-                <h2 className="font-semibold text-gray-900 mb-4">Filters</h2>
+            <div className="lg:w-72 flex-shrink-0">
+              <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-24">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
+                  {activeFiltersCount > 0 && (
+                    <Badge 
+                      variant="secondary" 
+                      className="bg-copper-100 text-copper-800"
+                    >
+                      {activeFiltersCount} active
+                    </Badge>
+                  )}
+                </div>
                 <FilterContent />
               </div>
             </div>
@@ -217,59 +341,112 @@ export default function Products() {
               </div>
             )}
             
-            {/* Toolbar */}
-            <div className="bg-white rounded-lg p-4 mb-6">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                {/* Mobile Filter Button */}
-                {isMobile && (
-                  <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" className="w-full sm:w-auto">
-                        <Filter className="w-4 h-4 mr-2" />
-                        Filters
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-80">
-                      <div className="py-6">
-                        <h2 className="font-semibold text-gray-900 mb-4">Filters</h2>
-                        <FilterContent />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                )}
-
-                {/* Search */}
-                <div className="flex-1 max-w-md">
-                  <SearchInput
-                    placeholder="Search products..."
-                    value={filters.search}
-                    onChange={(value) => updateFilter("search", value)}
-                  />
+            {/* Enhanced Toolbar */}
+            <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
+              <div className="flex flex-col gap-4">
+                {/* Top Row - Search and Results */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <div className="flex-1">
+                    <SearchInput
+                      placeholder="Search electrical products..."
+                      value={filters.search}
+                      onChange={(value) => updateFilter("search", value)}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <span className="font-medium">
+                      {productsData?.total || 0} products found
+                    </span>
+                  </div>
                 </div>
 
-                {/* Sort */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm text-gray-600">Sort by:</span>
-                  <Select 
-                    value={`${filters.sortBy}-${filters.sortOrder}`}
-                    onValueChange={(value) => {
-                      const [sortBy, sortOrder] = value.split("-");
-                      updateFilter("sortBy", sortBy);
-                      updateFilter("sortOrder", sortOrder);
-                    }}
-                  >
-                    <SelectTrigger className="w-40">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="newest-desc">Newest</SelectItem>
-                      <SelectItem value="name-asc">Name A-Z</SelectItem>
-                      <SelectItem value="name-desc">Name Z-A</SelectItem>
-                      <SelectItem value="price-asc">Price Low-High</SelectItem>
-                      <SelectItem value="price-desc">Price High-Low</SelectItem>
-                      <SelectItem value="rating-desc">Highest Rated</SelectItem>
-                    </SelectContent>
-                  </Select>
+                {/* Bottom Row - Filters and Sort */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  {/* Mobile Filter Button */}
+                  {isMobile && (
+                    <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
+                      <SheetTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          className="w-full sm:w-auto border-copper-200 hover:bg-copper-50 hover:border-copper-300"
+                        >
+                          <Filter className="w-4 h-4 mr-2" />
+                          Filters
+                          {activeFiltersCount > 0 && (
+                            <Badge 
+                              variant="secondary" 
+                              className="ml-2 bg-copper-600 text-white hover:bg-copper-700 text-xs"
+                            >
+                              {activeFiltersCount}
+                            </Badge>
+                          )}
+                        </Button>
+                      </SheetTrigger>
+                      <SheetContent side="left" className="w-80 p-0">
+                        <div className="p-6 h-full overflow-y-auto">
+                          <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
+                            {activeFiltersCount > 0 && (
+                              <Badge 
+                                variant="secondary" 
+                                className="bg-copper-100 text-copper-800"
+                              >
+                                {activeFiltersCount} active
+                              </Badge>
+                            )}
+                          </div>
+                          <FilterContent />
+                        </div>
+                      </SheetContent>
+                    </Sheet>
+                  )}
+
+                  {/* Active Filters Preview for Mobile */}
+                  {isMobile && activeFiltersCount > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {filters.categoryId && (
+                        <Badge variant="secondary" className="bg-copper-100 text-copper-800">
+                          {categories.find(c => c.id === filters.categoryId)?.name}
+                        </Badge>
+                      )}
+                      {filters.featured && (
+                        <Badge variant="secondary" className="bg-green-100 text-green-800">
+                          Featured
+                        </Badge>
+                      )}
+                      {(filters.minPrice > 0 || filters.maxPrice < 100000) && (
+                        <Badge variant="secondary" className="bg-purple-100 text-purple-800">
+                          Price Range
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Sort */}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Sort by:</span>
+                    <Select 
+                      value={`${filters.sortBy}-${filters.sortOrder}`}
+                      onValueChange={(value) => {
+                        const [sortBy, sortOrder] = value.split("-");
+                        updateFilter("sortBy", sortBy);
+                        updateFilter("sortOrder", sortOrder);
+                      }}
+                    >
+                      <SelectTrigger className="w-40 border-gray-200 focus:border-copper-300 focus:ring-copper-200">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest-desc">Newest First</SelectItem>
+                        <SelectItem value="name-asc">Name A-Z</SelectItem>
+                        <SelectItem value="name-desc">Name Z-A</SelectItem>
+                        <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                        <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                        <SelectItem value="rating-desc">Highest Rated</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
               </div>
 
