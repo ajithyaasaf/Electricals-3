@@ -377,6 +377,51 @@ export function CartProvider({ children }: CartProviderProps) {
     refreshCart();
   }, [isAuthenticated, refreshCart]);
 
+  // Preserve cart data when user logs out
+  const preserveCartDataOnLogout = useCallback(async () => {
+    console.log('[CART CONTEXT] 🔄 User logged out, preserving cart data...');
+    
+    // If we have a current cart with items, convert it to guest cart format
+    if (cart && cart.items && cart.items.length > 0) {
+      console.log('[CART CONTEXT] 📦 Converting authenticated cart to guest cart:', cart.items.length, 'items');
+      
+      // Convert authenticated cart items to guest cart format
+      const preservedGuestItems: GuestCartItem[] = cart.items.map(item => ({
+        id: `preserved_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        productId: item.productId,
+        serviceId: item.serviceId,
+        quantity: item.quantity,
+        addedAt: Date.now(),
+        customizations: item.customizations
+      }));
+      
+      // Save preserved items to localStorage immediately
+      try {
+        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(preservedGuestItems));
+        console.log('[CART CONTEXT] 💾 Preserved cart saved to localStorage:', preservedGuestItems);
+        
+        // Update guest cart state
+        setGuestCart(preservedGuestItems);
+        
+        // Load guest cart as Cart object for immediate display
+        await loadGuestCartAsCart();
+        
+        toast({
+          title: "Cart Preserved",
+          description: `${preservedGuestItems.length} items saved for your next visit.`,
+        });
+        
+        console.log('[CART CONTEXT] ✅ Cart preservation completed successfully');
+      } catch (error) {
+        console.error('[CART CONTEXT] ❌ Error preserving cart data:', error);
+      }
+    } else {
+      console.log('[CART CONTEXT] ℹ️ No cart items to preserve on logout');
+      // Still load guest cart in case there were previous guest items
+      await loadGuestCartAsCart();
+    }
+  }, [cart, loadGuestCartAsCart, toast]);
+
   // Migrate guest cart when user signs in - ALWAYS run on authentication change
   useEffect(() => {
     let migrationTimeout: NodeJS.Timeout;
@@ -467,8 +512,10 @@ export function CartProvider({ children }: CartProviderProps) {
       // Debounce migration to prevent rapid-fire calls
       migrationTimeout = setTimeout(migrateGuestCart, 300);
     } else if (!isAuthenticated) {
-      // When user logs out, just load guest cart
-      loadGuestCartAsCart();
+      // When user logs out, preserve authenticated cart data as guest cart
+      migrationTimeout = setTimeout(() => {
+        preserveCartDataOnLogout();
+      }, 100);
     }
 
     return () => {
@@ -476,7 +523,7 @@ export function CartProvider({ children }: CartProviderProps) {
         clearTimeout(migrationTimeout);
       }
     };
-  }, [isAuthenticated, user?.uid, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
+  }, [isAuthenticated, user?.uid, loadAuthenticatedCart, loadGuestCartAsCart, preserveCartDataOnLogout, toast]);
 
   // Process add-to-cart operations queue for authenticated users
   const processAddOperationQueue = useCallback(async () => {
