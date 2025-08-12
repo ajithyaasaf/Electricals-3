@@ -115,21 +115,8 @@ export default function Checkout() {
     },
   });
 
-  // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      toast({
-        title: "Please sign in",
-        description: "You need to sign in to proceed with checkout.",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 1000);
-    }
-  }, [isAuthenticated, authLoading, toast]);
-
-  if (authLoading || !isAuthenticated) {
+  // Show loading while auth is being determined
+  if (authLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Header />
@@ -210,6 +197,18 @@ export default function Checkout() {
   };
 
   const handlePlaceOrder = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Please sign in to complete your order",
+        description: "You need to sign in to place an order. Your cart items will be saved.",
+        variant: "default",
+      });
+      setTimeout(() => {
+        signInWithGoogle();
+      }, 1000);
+      return;
+    }
+
     if (validateStep(1) && validateStep(2)) {
       const orderData = {
         total: total.toFixed(2),
@@ -277,6 +276,32 @@ export default function Checkout() {
           </Button>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Checkout</h1>
         </div>
+
+        {/* Guest Checkout Notice */}
+        {!isAuthenticated && (
+          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <div className="flex items-start space-x-3">
+              <div className="flex-shrink-0">
+                <Lock className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-blue-800 dark:text-blue-200">Guest Checkout</h3>
+                <p className="mt-1 text-sm text-blue-600 dark:text-blue-300">
+                  You can fill out your shipping information now, but you'll need to sign in before placing your order. 
+                  Don't worry - your cart items will be saved!
+                </p>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2 text-blue-600 border-blue-300 hover:bg-blue-100 dark:text-blue-400 dark:border-blue-600 dark:hover:bg-blue-900/40"
+                  onClick={() => signInWithGoogle()}
+                >
+                  Sign In Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main checkout form */}
