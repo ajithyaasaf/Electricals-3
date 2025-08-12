@@ -334,7 +334,22 @@ export function CartProvider({ children }: CartProviderProps) {
 
   // Load guest cart as Cart object
   const loadGuestCartAsCart = useCallback(async () => {
-    const currentGuestCart = guestCart;
+    // Always read from localStorage for most up-to-date data
+    const guestCartData = localStorage.getItem(GUEST_CART_KEY);
+    let currentGuestCart: GuestCartItem[] = [];
+    
+    try {
+      if (guestCartData) {
+        const parsed = JSON.parse(guestCartData);
+        currentGuestCart = Array.isArray(parsed) ? parsed : [];
+      }
+    } catch (error) {
+      console.error('[CART CONTEXT] Error parsing guest cart from localStorage:', error);
+      localStorage.removeItem(GUEST_CART_KEY);
+    }
+    
+    console.log('[CART CONTEXT] 📖 Loading guest cart from localStorage:', currentGuestCart.length, 'items');
+    
     if (currentGuestCart.length === 0) {
       dispatch({ type: 'SET_CART', payload: {
         id: `guest_cart_${Date.now()}`,
@@ -362,7 +377,10 @@ export function CartProvider({ children }: CartProviderProps) {
       dispatch({ type: 'SET_CART', payload: cartData });
       // Keep reference for logout preservation
       currentCartRef.current = cartData;
-      console.log('[CART CONTEXT] Loaded guest cart as Cart:', cartData);
+      console.log('[CART CONTEXT] 📦 Loaded guest cart as Cart:', cartData);
+      
+      // Update guest cart state to match localStorage
+      setGuestCart(currentGuestCart);
     } catch (error) {
       console.error('[CART CONTEXT] Error loading guest cart:', error);
       setError('Failed to load cart');
