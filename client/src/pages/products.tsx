@@ -21,7 +21,7 @@ import { useProducts, useCategories } from "@/features/products/hooks/useProduct
 import { useEnterpriseNavigation } from "@/hooks/use-enterprise-navigation";
 import type { ProductFilters } from "@/features/products/types";
 
-// Minimal isolated inputs - no memoization, no complex logic
+// Minimal isolated inputs with debugging - moved outside main component
 const PriceInputs = ({ 
   onMinPriceChange, 
   onMaxPriceChange 
@@ -31,6 +31,12 @@ const PriceInputs = ({
 }) => {
   const [minVal, setMinVal] = useState("");
   const [maxVal, setMaxVal] = useState("");
+
+  // Debug: Log when component mounts
+  useEffect(() => {
+    console.log("🔍 PriceInputs component mounted");
+    return () => console.log("🚮 PriceInputs component unmounted");
+  }, []);
 
   return (
     <div className="grid grid-cols-2 gap-2">
@@ -57,6 +63,199 @@ const PriceInputs = ({
     </div>
   );
 };
+
+// FilterContent component moved outside to prevent recreation on every render
+const FilterContent = ({ 
+  filters, 
+  categories, 
+  activeFiltersCount,
+  debouncedMinPrice,
+  debouncedMaxPrice,
+  updateFilter,
+  clearFilters,
+  setMinPriceString,
+  setMaxPriceString,
+  minPriceNumber,
+  maxPriceNumber
+}: {
+  filters: any;
+  categories: any[];
+  activeFiltersCount: number;
+  debouncedMinPrice: number;
+  debouncedMaxPrice: number;
+  updateFilter: (key: string, value: any) => void;
+  clearFilters: () => void;
+  setMinPriceString: (value: string) => void;
+  setMaxPriceString: (value: string) => void;
+  minPriceNumber: number;
+  maxPriceNumber: number;
+}) => (
+  <div className="space-y-8">
+    {/* Active Filters Summary */}
+    {activeFiltersCount > 0 && (
+      <div className="pb-4 border-b border-gray-200">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-medium text-gray-900">
+            Active Filters ({activeFiltersCount})
+          </h3>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={clearFilters}
+            className="text-copper-600 hover:text-copper-700 hover:bg-copper-50 h-auto p-1"
+          >
+            Clear all
+          </Button>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {filters.categoryId && (
+            <Badge variant="secondary" className="bg-copper-100 text-copper-800 hover:bg-copper-200">
+              {categories.find(c => c.id === filters.categoryId)?.name}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => updateFilter("categoryId", undefined)}
+                className="ml-1 h-auto p-0 hover:bg-transparent"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          )}
+          {filters.search && (
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+              Search: "{filters.search}"
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => updateFilter("search", "")}
+                className="ml-1 h-auto p-0 hover:bg-transparent"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          )}
+          {filters.featured && (
+            <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200">
+              Featured Only
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => updateFilter("featured", false)}
+                className="ml-1 h-auto p-0 hover:bg-transparent"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          )}
+          {(debouncedMinPrice > 0 || debouncedMaxPrice < 100000) && (
+            <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200">
+              ₹{debouncedMinPrice.toLocaleString('en-IN')} - ₹{debouncedMaxPrice.toLocaleString('en-IN')}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setMinPriceString("");
+                  setMaxPriceString("");
+                }}
+                className="ml-1 h-auto p-0 hover:bg-transparent"
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </Badge>
+          )}
+        </div>
+      </div>
+    )}
+
+    {/* Categories */}
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+        Categories
+      </h3>
+      <div className="space-y-1">
+        <button
+          onClick={() => updateFilter("categoryId", undefined)}
+          className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+            !filters.categoryId 
+              ? "bg-copper-100 text-copper-900 border-2 border-copper-300" 
+              : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+          }`}
+        >
+          All Categories
+        </button>
+        {categories.map(category => (
+          <button
+            key={category.id}
+            onClick={() => updateFilter("categoryId", category.id)}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+              filters.categoryId === category.id 
+                ? "bg-copper-100 text-copper-900 border-2 border-copper-300" 
+                : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+            }`}
+          >
+            {category.name}
+          </button>
+        ))}
+      </div>
+    </div>
+
+    {/* Price Range */}
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Range</h3>
+      <div className="space-y-6">
+        <div className="px-2">
+          <Slider
+            value={[minPriceNumber, maxPriceNumber]}
+            onValueChange={([min, max]) => {
+              setMinPriceString(min.toString());
+              setMaxPriceString(max.toString());
+            }}
+            max={100000}
+            step={500}
+            className="w-full"
+          />
+        </div>
+        <div className="flex items-center justify-between text-sm font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
+          <div className="text-center">
+            <div className="text-xs text-gray-500 mb-1">Minimum</div>
+            <div>₹{minPriceNumber.toLocaleString('en-IN')}</div>
+          </div>
+          <div className="text-gray-400">—</div>
+          <div className="text-center">
+            <div className="text-xs text-gray-500 mb-1">Maximum</div>
+            <div>₹{maxPriceNumber.toLocaleString('en-IN')}</div>
+          </div>
+        </div>
+        <PriceInputs 
+          onMinPriceChange={setMinPriceString}
+          onMaxPriceChange={setMaxPriceString}
+        />
+      </div>
+    </div>
+
+    {/* Special Filters */}
+    <div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">Special Filters</h3>
+      <div className="space-y-3">
+        <button
+          onClick={() => updateFilter("featured", !filters.featured)}
+          className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-between ${
+            filters.featured 
+              ? "bg-green-100 text-green-900 border-2 border-green-300" 
+              : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+          }`}
+        >
+          <span>Featured Products</span>
+          {filters.featured && (
+            <Badge variant="secondary" className="bg-green-200 text-green-800 text-xs">
+              Active
+            </Badge>
+          )}
+        </button>
+      </div>
+    </div>
+  </div>
+);
 
 // Add display name for debugging
 PriceInputs.displayName = 'PriceInputs';
@@ -177,173 +376,7 @@ export default function Products() {
     return count;
   }, [filters.categoryId, filters.search, filters.featured, debouncedMinPrice, debouncedMaxPrice]);
 
-  const FilterContent = () => (
-    <div className="space-y-8">
-      {/* Active Filters Summary */}
-      {activeFiltersCount > 0 && (
-        <div className="pb-4 border-b border-gray-200">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-900">
-              Active Filters ({activeFiltersCount})
-            </h3>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={clearFilters}
-              className="text-copper-600 hover:text-copper-700 hover:bg-copper-50 h-auto p-1"
-            >
-              Clear all
-            </Button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {filters.categoryId && (
-              <Badge variant="secondary" className="bg-copper-100 text-copper-800 hover:bg-copper-200">
-                {categories.find(c => c.id === filters.categoryId)?.name}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => updateFilter("categoryId", undefined)}
-                  className="ml-1 h-auto p-0 hover:bg-transparent"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            )}
-            {filters.search && (
-              <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
-                Search: "{filters.search}"
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => updateFilter("search", "")}
-                  className="ml-1 h-auto p-0 hover:bg-transparent"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            )}
-            {filters.featured && (
-              <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200">
-                Featured Only
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => updateFilter("featured", false)}
-                  className="ml-1 h-auto p-0 hover:bg-transparent"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            )}
-            {(debouncedMinPrice > 0 || debouncedMaxPrice < 100000) && (
-              <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200">
-                ₹{debouncedMinPrice.toLocaleString('en-IN')} - ₹{debouncedMaxPrice.toLocaleString('en-IN')}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setMinPriceString("");
-                    setMaxPriceString("");
-                  }}
-                  className="ml-1 h-auto p-0 hover:bg-transparent"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              </Badge>
-            )}
-          </div>
-        </div>
-      )}
 
-      {/* Categories */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-          Categories
-        </h3>
-        <div className="space-y-1">
-          <button
-            onClick={() => updateFilter("categoryId", undefined)}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-              !filters.categoryId 
-                ? "bg-copper-100 text-copper-900 border-2 border-copper-300" 
-                : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
-            }`}
-          >
-            All Categories
-          </button>
-          {categories.map(category => (
-            <button
-              key={category.id}
-              onClick={() => updateFilter("categoryId", category.id)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                filters.categoryId === category.id 
-                  ? "bg-copper-100 text-copper-900 border-2 border-copper-300" 
-                  : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
-              }`}
-            >
-              {category.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Price Range */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Price Range</h3>
-        <div className="space-y-6">
-          <div className="px-2">
-            <Slider
-              value={[minPriceNumber, maxPriceNumber]}
-              onValueChange={([min, max]) => {
-                setMinPriceString(min.toString());
-                setMaxPriceString(max.toString());
-              }}
-              max={100000}
-              step={500}
-              className="w-full"
-            />
-          </div>
-          <div className="flex items-center justify-between text-sm font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
-            <div className="text-center">
-              <div className="text-xs text-gray-500 mb-1">Minimum</div>
-              <div>₹{minPriceNumber.toLocaleString('en-IN')}</div>
-            </div>
-            <div className="text-gray-400">—</div>
-            <div className="text-center">
-              <div className="text-xs text-gray-500 mb-1">Maximum</div>
-              <div>₹{maxPriceNumber.toLocaleString('en-IN')}</div>
-            </div>
-          </div>
-          <PriceInputs 
-            onMinPriceChange={setMinPriceString}
-            onMaxPriceChange={setMaxPriceString}
-          />
-        </div>
-      </div>
-
-      {/* Special Filters */}
-      <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Special Filters</h3>
-        <div className="space-y-3">
-          <button
-            onClick={() => updateFilter("featured", !filters.featured)}
-            className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-between ${
-              filters.featured 
-                ? "bg-green-100 text-green-900 border-2 border-green-300" 
-                : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
-            }`}
-          >
-            <span>Featured Products</span>
-            {filters.featured && (
-              <Badge variant="secondary" className="bg-green-200 text-green-800 text-xs">
-                Active
-              </Badge>
-            )}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -377,7 +410,19 @@ export default function Products() {
                     </Badge>
                   )}
                 </div>
-                <FilterContent />
+                <FilterContent 
+                  filters={filters}
+                  categories={categories}
+                  activeFiltersCount={activeFiltersCount}
+                  debouncedMinPrice={debouncedMinPrice}
+                  debouncedMaxPrice={debouncedMaxPrice}
+                  updateFilter={updateFilter}
+                  clearFilters={clearFilters}
+                  setMinPriceString={setMinPriceString}
+                  setMaxPriceString={setMaxPriceString}
+                  minPriceNumber={minPriceNumber}
+                  maxPriceNumber={maxPriceNumber}
+                />
               </div>
             </div>
           )}
@@ -449,7 +494,19 @@ export default function Products() {
                               </Badge>
                             )}
                           </div>
-                          <FilterContent />
+                          <FilterContent 
+                            filters={filters}
+                            categories={categories}
+                            activeFiltersCount={activeFiltersCount}
+                            debouncedMinPrice={debouncedMinPrice}
+                            debouncedMaxPrice={debouncedMaxPrice}
+                            updateFilter={updateFilter}
+                            clearFilters={clearFilters}
+                            setMinPriceString={setMinPriceString}
+                            setMaxPriceString={setMaxPriceString}
+                            minPriceNumber={minPriceNumber}
+                            maxPriceNumber={maxPriceNumber}
+                          />
                         </div>
                       </SheetContent>
                     </Sheet>
