@@ -584,9 +584,10 @@ export function registerCartRoutes(app: Express) {
           );
 
           if (existingItem) {
-            // Merge quantities for existing items
-            const newQuantity = Math.min(existingItem.quantity + quantity, CART_CONFIG.maxQuantityPerItem);
-            console.log(`[CART MIGRATION] Merging item ${existingItem.id}: ${existingItem.quantity} + ${quantity} = ${newQuantity}`);
+            // Use guest cart quantity as the new quantity (don't accumulate from previous sessions)
+            // This ensures guest sessions are independent and don't inflate quantities
+            const newQuantity = Math.min(quantity, CART_CONFIG.maxQuantityPerItem);
+            console.log(`[CART MIGRATION] Replacing item ${existingItem.id} quantity: ${existingItem.quantity} → ${newQuantity} (from guest cart)`);
             
             await storage.updateCartItem(existingItem.id, { quantity: newQuantity });
             mergedCount++;
