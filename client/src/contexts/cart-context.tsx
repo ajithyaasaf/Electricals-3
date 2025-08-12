@@ -403,12 +403,30 @@ export function CartProvider({ children }: CartProviderProps) {
       console.error('[CART CONTEXT] Error parsing existing guest cart:', error);
     }
     
+    // Fetch the most current authenticated cart from server before preservation
+    let currentAuthenticatedCart: Cart | null = null;
+    try {
+      if (user?.uid) {
+        console.log('[CART CONTEXT] 📡 Fetching current authenticated cart for preservation...');
+        const response = await apiRequest('GET', '/api/cart');
+        if (response.ok) {
+          currentAuthenticatedCart = await response.json();
+          console.log('[CART CONTEXT] 📦 Current authenticated cart fetched:', currentAuthenticatedCart?.items?.length || 0, 'items');
+        }
+      }
+    } catch (error) {
+      console.error('[CART CONTEXT] Error fetching authenticated cart for preservation:', error);
+    }
+    
+    // Use fetched cart data for preservation (more reliable than local state)
+    const cartToPreserve = currentAuthenticatedCart || cart;
+    
     // If we have a current cart with items, convert it to guest cart format
-    if (cart && cart.items && cart.items.length > 0) {
-      console.log('[CART CONTEXT] 📦 Converting authenticated cart to guest cart:', cart.items.length, 'items');
+    if (cartToPreserve && cartToPreserve.items && cartToPreserve.items.length > 0) {
+      console.log('[CART CONTEXT] 📦 Converting authenticated cart to guest cart:', cartToPreserve.items.length, 'items');
       
       // Convert authenticated cart items to guest cart format
-      const preservedGuestItems: GuestCartItem[] = cart.items.map(item => ({
+      const preservedGuestItems: GuestCartItem[] = cartToPreserve.items.map(item => ({
         id: `preserved_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         productId: item.productId,
         serviceId: item.serviceId,
@@ -527,6 +545,15 @@ export function CartProvider({ children }: CartProviderProps) {
         console.log('[CART MIGRATION] 🧹 Clearing guest cart from localStorage...');
         setGuestCart([]);
         localStorage.removeItem(GUEST_CART_KEY);
+        
+        // Store migrated items info for future logout preservation  
+        const migratedItemsInfo = currentGuestCart.map(item => ({
+          productId: item.productId,
+          serviceId: item.serviceId,
+          quantity: item.quantity,
+          source: 'migrated'
+        }));
+        localStorage.setItem('migrated_cart_info', JSON.stringify(migratedItemsInfo));
         
         // Clear any cached migration flags
         localStorage.removeItem(MIGRATION_FLAG_KEY);
