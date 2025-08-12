@@ -8,7 +8,7 @@ import { PerformanceMonitor } from "@/components/layout/performance-monitor";
 import { NavigationProgress } from "@/components/navigation/navigation-progress";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { FirebaseRedirectHandler } from "@/components/auth/firebase-redirect-handler";
-import { UnifiedCartProvider } from "@/contexts/unified-cart-context";
+import { CartProvider } from "@/contexts/cart-context";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -69,7 +69,7 @@ function App() {
   return (
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <UnifiedCartProvider>
+        <CartProvider>
           <TooltipProvider>
             <FirebaseRedirectHandler />
             <PerformanceMonitor />
@@ -77,7 +77,7 @@ function App() {
             <Toaster />
             <Router />
           </TooltipProvider>
-        </UnifiedCartProvider>
+        </CartProvider>
       </QueryClientProvider>
     </ErrorBoundary>
   );
