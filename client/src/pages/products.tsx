@@ -68,6 +68,15 @@ export default function Products() {
     setLocalMaxPrice(filters.maxPrice);
   }, [filters.minPrice, filters.maxPrice]);
 
+  // Sync debounced price values with filter state (without calling updateFilter to avoid re-renders)
+  useEffect(() => {
+    setFilters(prev => ({
+      ...prev,
+      minPrice: debouncedMinPrice,
+      maxPrice: debouncedMaxPrice
+    }));
+  }, [debouncedMinPrice, debouncedMaxPrice]);
+
   // Memoize query parameters to prevent unnecessary re-renders
   const queryParams = useMemo(() => ({
     ...filters,
@@ -277,17 +286,28 @@ export default function Products() {
             <Input
               type="number"
               placeholder="Min price"
-              value={localMinPrice}
+              value={localMinPrice === 0 ? "" : localMinPrice}
               onChange={(e) => {
-                const value = parseInt(e.target.value) || 0;
-                setLocalMinPrice(value);
-                updateFilter("minPrice", value);
+                const rawValue = e.target.value;
+                if (rawValue === "") {
+                  setLocalMinPrice(0);
+                } else {
+                  const value = parseInt(rawValue);
+                  if (!isNaN(value) && value >= 0) {
+                    setLocalMinPrice(value);
+                  }
+                }
               }}
               onBlur={() => {
-                // Ensure valid range on blur
-                if (localMinPrice > localMaxPrice) {
+                // Ensure valid range on blur but don't call updateFilter
+                if (localMinPrice > localMaxPrice && localMaxPrice > 0) {
                   setLocalMinPrice(localMaxPrice);
-                  updateFilter("minPrice", localMaxPrice);
+                }
+              }}
+              onKeyDown={(e) => {
+                // No immediate filter update on Enter, debounced value will handle it
+                if (e.key === 'Enter') {
+                  e.target.blur();
                 }
               }}
               className="text-sm"
@@ -295,17 +315,28 @@ export default function Products() {
             <Input
               type="number"
               placeholder="Max price"
-              value={localMaxPrice}
+              value={localMaxPrice === 100000 ? "" : localMaxPrice}
               onChange={(e) => {
-                const value = parseInt(e.target.value) || 100000;
-                setLocalMaxPrice(value);
-                updateFilter("maxPrice", value);
+                const rawValue = e.target.value;
+                if (rawValue === "") {
+                  setLocalMaxPrice(100000);
+                } else {
+                  const value = parseInt(rawValue);
+                  if (!isNaN(value) && value >= 0) {
+                    setLocalMaxPrice(value);
+                  }
+                }
               }}
               onBlur={() => {
-                // Ensure valid range on blur
-                if (localMaxPrice < localMinPrice) {
+                // Ensure valid range on blur but don't call updateFilter
+                if (localMaxPrice < localMinPrice && localMinPrice > 0) {
                   setLocalMaxPrice(localMinPrice);
-                  updateFilter("maxPrice", localMinPrice);
+                }
+              }}
+              onKeyDown={(e) => {
+                // No immediate filter update on Enter, debounced value will handle it
+                if (e.key === 'Enter') {
+                  e.target.blur();
                 }
               }}
               className="text-sm"
