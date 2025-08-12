@@ -58,27 +58,30 @@ export default function Products() {
   // Fetch categories using custom hook
   const { data: categories = [] } = useCategories();
 
-  // Local state for price inputs to prevent immediate API calls
-  const [localMinPrice, setLocalMinPrice] = useState(filters.minPrice);
-  const [localMaxPrice, setLocalMaxPrice] = useState(filters.maxPrice);
+  // Completely isolated local state for price inputs to prevent re-renders
+  const [localMinPrice, setLocalMinPrice] = useState(0);
+  const [localMaxPrice, setLocalMaxPrice] = useState(100000);
 
-  // Update local price state when filters change from other sources
+  // Initialize local price state only once on mount
   useEffect(() => {
     setLocalMinPrice(filters.minPrice);
     setLocalMaxPrice(filters.maxPrice);
-  }, [filters.minPrice, filters.maxPrice]);
+  }, []); // Empty dependency array - only run once
 
   // No need to sync debounced values with filter state - the query uses debounced values directly
 
   // Memoize query parameters to prevent unnecessary re-renders
   const queryParams = useMemo(() => ({
-    ...filters,
+    categoryId: filters.categoryId,
     search: debouncedSearch, // Use debounced search
+    featured: filters.featured,
     minPrice: debouncedMinPrice, // Use debounced price
     maxPrice: debouncedMaxPrice, // Use debounced price
+    sortBy: filters.sortBy,
+    sortOrder: filters.sortOrder,
     limit: itemsPerPage,
     offset: (currentPage - 1) * itemsPerPage
-  }), [filters, debouncedSearch, debouncedMinPrice, debouncedMaxPrice, currentPage, itemsPerPage]);
+  }), [filters.categoryId, filters.featured, filters.sortBy, filters.sortOrder, debouncedSearch, debouncedMinPrice, debouncedMaxPrice, currentPage, itemsPerPage]);
 
   // Fetch products using custom hook
   const { data: productsData, isLoading } = useProducts(queryParams);
@@ -132,9 +135,9 @@ export default function Products() {
     if (filters.categoryId) count++;
     if (filters.search) count++;
     if (filters.featured) count++;
-    if (filters.minPrice > 0 || filters.maxPrice < 100000) count++;
+    if (debouncedMinPrice > 0 || debouncedMaxPrice < 100000) count++;
     return count;
-  }, [filters]);
+  }, [filters.categoryId, filters.search, filters.featured, debouncedMinPrice, debouncedMaxPrice]);
 
   const FilterContent = () => (
     <div className="space-y-8">
@@ -194,15 +197,15 @@ export default function Products() {
                 </Button>
               </Badge>
             )}
-            {(filters.minPrice > 0 || filters.maxPrice < 100000) && (
+            {(debouncedMinPrice > 0 || debouncedMaxPrice < 100000) && (
               <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200">
-                ₹{filters.minPrice.toLocaleString('en-IN')} - ₹{filters.maxPrice.toLocaleString('en-IN')}
+                ₹{debouncedMinPrice.toLocaleString('en-IN')} - ₹{debouncedMaxPrice.toLocaleString('en-IN')}
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    updateFilter("minPrice", 0);
-                    updateFilter("maxPrice", 100000);
+                    setLocalMinPrice(0);
+                    setLocalMaxPrice(100000);
                   }}
                   className="ml-1 h-auto p-0 hover:bg-transparent"
                 >
@@ -461,7 +464,7 @@ export default function Products() {
                           Featured
                         </Badge>
                       )}
-                      {(filters.minPrice > 0 || filters.maxPrice < 100000) && (
+                      {(debouncedMinPrice > 0 || debouncedMaxPrice < 100000) && (
                         <Badge variant="secondary" className="bg-purple-100 text-purple-800">
                           Price Range
                         </Badge>
