@@ -330,11 +330,12 @@ export function CartProvider({ children }: CartProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [isAuthenticated]);
+  }, []);
 
   // Load guest cart as Cart object
   const loadGuestCartAsCart = useCallback(async () => {
-    if (guestCart.length === 0) {
+    const currentGuestCart = guestCart;
+    if (currentGuestCart.length === 0) {
       dispatch({ type: 'SET_CART', payload: {
         id: `guest_cart_${Date.now()}`,
         items: [],
@@ -355,7 +356,7 @@ export function CartProvider({ children }: CartProviderProps) {
     setIsLoading(true);
     try {
       const response = await apiRequest('POST', '/api/cart/guest', {
-        items: guestCart
+        items: currentGuestCart
       });
       const cartData = await response.json();
       dispatch({ type: 'SET_CART', payload: cartData });
@@ -368,7 +369,7 @@ export function CartProvider({ children }: CartProviderProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [guestCart]);
+  }, []);
 
   // Refresh cart data
   const refreshCart = useCallback(async () => {
@@ -379,10 +380,26 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart]);
 
-  // Load cart when authentication state changes
+  // Load cart when authentication state changes (only once per auth change)
   useEffect(() => {
-    refreshCart();
-  }, [isAuthenticated, refreshCart]);
+    let isMounted = true;
+    
+    const loadCart = async () => {
+      if (!isMounted) return;
+      
+      if (isAuthenticated) {
+        await loadAuthenticatedCart();
+      } else {
+        await loadGuestCartAsCart();
+      }
+    };
+    
+    loadCart();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated]); // Remove the function dependencies
 
   // Update cart reference whenever cart state changes
   useEffect(() => {
@@ -519,8 +536,23 @@ export function CartProvider({ children }: CartProviderProps) {
       
       if (currentGuestCart.length === 0) {
         console.log('[CART MIGRATION] ℹ️ No guest cart items to migrate');
-        // Still load authenticated cart even if no guest items
-        await loadAuthenticatedCart();
+        // Still load authenticated cart even if no guest items (but don't trigger another migration)
+        console.log('[CART MIGRATION] 🔄 Loading authenticated cart directly...');
+        setIsLoading(true);
+        setError(null);
+        
+        try {
+          const response = await apiRequest('GET', '/api/cart');
+          const cartData = await response.json();
+          console.log('[CART CONTEXT] 📦 Authenticated cart data received:', JSON.stringify(cartData, null, 2));
+          dispatch({ type: 'SET_CART', payload: cartData });
+          currentCartRef.current = cartData;
+        } catch (error) {
+          console.error('[CART CONTEXT] ❌ Error loading authenticated cart:', error);
+          setError('Failed to load cart');
+        } finally {
+          setIsLoading(false);
+        }
         return;
       }
 
@@ -558,9 +590,19 @@ export function CartProvider({ children }: CartProviderProps) {
         // Clear any cached migration flags
         localStorage.removeItem(MIGRATION_FLAG_KEY);
         
-        // Immediately refresh authenticated cart
+        // Immediately refresh authenticated cart (direct call to avoid loop)
         console.log('[CART MIGRATION] 🔄 Refreshing authenticated cart...');
-        await loadAuthenticatedCart();
+        setIsLoading(true);
+        try {
+          const response = await apiRequest('GET', '/api/cart');
+          const cartData = await response.json();
+          dispatch({ type: 'SET_CART', payload: cartData });
+          currentCartRef.current = cartData;
+        } catch (error) {
+          console.error('[CART CONTEXT] ❌ Error refreshing authenticated cart:', error);
+        } finally {
+          setIsLoading(false);
+        }
         
         // Dispatch event for other components
         window.dispatchEvent(new CustomEvent('cart-migrated'));
@@ -582,20 +624,37 @@ export function CartProvider({ children }: CartProviderProps) {
           variant: "destructive",
         });
         
-        // Still load authenticated cart even if migration fails
-        await loadAuthenticatedCart();
+        // Still load authenticated cart even if migration fails (direct call)
+        setIsLoading(true);
+        try {
+          const response = await apiRequest('GET', '/api/cart');
+          const cartData = await response.json();
+          dispatch({ type: 'SET_CART', payload: cartData });
+          currentCartRef.current = cartData;
+        } catch (error) {
+          console.error('[CART CONTEXT] ❌ Error loading authenticated cart after migration failure:', error);
+        } finally {
+          setIsLoading(false);
+        }
       }
     };
 
-    // Run migration on every authentication state change to authenticated
-    if (isAuthenticated && user?.uid) {
-      // Debounce migration to prevent rapid-fire calls
-      migrationTimeout = setTimeout(migrateGuestCart, 300);
-    } else if (!isAuthenticated) {
-      // When user logs out, preserve authenticated cart data as guest cart (run once)
-      migrationTimeout = setTimeout(() => {
-        preserveCartDataOnLogout();
-      }, 100);
+    // Run migration only when authentication state actually changes (prevent loops)
+    const migrationKey = `migration_${isAuthenticated ? 'auth' : 'guest'}_${user?.uid || 'none'}`;
+    const lastMigrationKey = sessionStorage.getItem('last_migration_key');
+    
+    if (lastMigrationKey !== migrationKey) {
+      sessionStorage.setItem('last_migration_key', migrationKey);
+      
+      if (isAuthenticated && user?.uid) {
+        // Debounce migration to prevent rapid-fire calls
+        migrationTimeout = setTimeout(migrateGuestCart, 300);
+      } else if (!isAuthenticated) {
+        // When user logs out, preserve authenticated cart data as guest cart (run once)
+        migrationTimeout = setTimeout(() => {
+          preserveCartDataOnLogout();
+        }, 100);
+      }
     }
 
     return () => {
@@ -603,7 +662,7 @@ export function CartProvider({ children }: CartProviderProps) {
         clearTimeout(migrationTimeout);
       }
     };
-  }, [isAuthenticated, user?.uid, loadAuthenticatedCart, loadGuestCartAsCart, cart?.items?.length, toast, preserveCartDataOnLogout]);
+  }, [isAuthenticated, user?.uid]); // Only depend on auth state
 
   // Process add-to-cart operations queue for authenticated users
   const processAddOperationQueue = useCallback(async () => {
@@ -631,10 +690,21 @@ export function CartProvider({ children }: CartProviderProps) {
       }
     }
 
-    // Refresh cart once after all operations are complete
-    await loadAuthenticatedCart();
+    // Refresh cart once after all operations are complete (direct call to avoid loop)
+    setIsLoading(true);
+    try {
+      const response = await apiRequest('GET', '/api/cart');
+      const cartData = await response.json();
+      dispatch({ type: 'SET_CART', payload: cartData });
+      currentCartRef.current = cartData;
+    } catch (error) {
+      console.error('[CART CONTEXT] ❌ Error refreshing cart after queue processing:', error);
+    } finally {
+      setIsLoading(false);
+    }
+    
     isProcessingAddOperations.current = false;
-  }, [loadAuthenticatedCart]);
+  }, []); // Remove loadAuthenticatedCart dependency
 
   // Cart actions
   const addItem = useCallback(async (

@@ -8,7 +8,8 @@ Preferred communication style: Simple, everyday language.
 Navigation Preferences: Enterprise-level navigation with smooth transitions, loading states, and scroll restoration.
 
 ## Recent Changes (January 2025)
-- ✅ **Migration Complete** - Successfully migrated from Replit Agent to Replit environment with enhanced cart system  
+- ✅ **Migration Complete** - Successfully migrated from Replit Agent to Replit environment with enhanced cart system
+- ✅ **Fixed Critical Cart Performance Issue** (August 12, 2025) - Resolved infinite loop in cart context that was causing excessive API calls every second, significantly improving performance and user experience  
 - ✅ **Fixed Bidirectional Cart Merging** - Resolved guest/authenticated cart sync issues with proper preservation logic
 - ✅ Fixed guest cart real-time updates - products now appear instantly without page refresh
 - ✅ Unified cart system using single CartContext for consistent state management
