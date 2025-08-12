@@ -1,0 +1,58 @@
+Guest user – “Second product not adding immediately”
+Symptom:
+
+On products page, add product A → works.
+
+Immediately click “Add to cart” for product B → cart icon flashes 2 then reverts to 1.
+
+If you wait a few seconds and try again → works.
+
+Likely cause:
+
+You have a race condition between two addToCart requests in guest mode.
+
+The first request is still updating local storage/state when the second request starts, so the second update overwrites the first one.
+
+This is common when you’re mutating cart in state or localStorage without locking or merging properly.
+
+Fix direction:
+
+Use a single synchronous reducer for cart state (both guest and logged-in).
+
+When adding an item, always base changes on the latest state, not on a stale snapshot.
+
+If localStorage is used, debounce or wrap writes so two adds can’t overwrite each other.
+
+2️⃣ Guest → Login → Logout → Guest again – “New products not showing after login”
+Symptom:
+
+Start as guest → add products A & B → log in → cart shows them (✅ works).
+
+Log out → clear cart → add new products as guest.
+
+Log in again → the new guest products don’t appear.
+
+Likely cause:
+
+Your cart migration logic only runs when the user first logs in after having a guest cart.
+
+After logout, the system may still have the old guest cart ID or state cached in memory/session.
+
+When logging in the second time, it ignores the current guest cart and just loads the user’s saved cart from the database, overwriting the merge.
+
+Fix direction:
+
+Always run guest→user cart merge every time a login happens.
+
+Ensure guest cart is read from current localStorage at login, not from a stale variable in context.
+
+After merge, clear guest cart from localStorage so the same items aren’t re-added next time.
+
+What I’d do next
+To fix both problems, you probably need to:
+
+Unify cart logic so guest and logged-in carts share the same reducer and state management.
+
+Make addToCart atomic — no matter how fast you click, the latest state should win.
+
+Run cart merge on every login, not just first time, and use current localStorage guest cart when merging.

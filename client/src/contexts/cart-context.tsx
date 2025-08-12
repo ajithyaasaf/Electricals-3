@@ -260,29 +260,35 @@ export function CartProvider({ children }: CartProviderProps) {
     loadGuestCart();
   }, []);
 
-  // Save guest cart to localStorage whenever it changes (debounced)
+  // Save guest cart to localStorage whenever it changes (debounced, but allow immediate writes)
   useEffect(() => {
+    // Skip if guest cart is empty or user is authenticated
+    if (guestCart.length === 0 || isAuthenticated) {
+      return;
+    }
+    
     // Clear existing timeout
     if (saveGuestCartTimeoutRef.current) {
       clearTimeout(saveGuestCartTimeoutRef.current);
     }
     
     // Debounce localStorage saves to prevent multiple rapid writes
+    // But this is secondary to the immediate saves in addItem
     saveGuestCartTimeoutRef.current = setTimeout(() => {
       try {
-        console.log('[CART CONTEXT] Saving guest cart to localStorage:', guestCart);
+        console.log('[CART CONTEXT] Debounced save of guest cart to localStorage:', guestCart);
         localStorage.setItem(GUEST_CART_KEY, JSON.stringify(guestCart));
       } catch (error) {
         console.error('[CART CONTEXT] Error saving guest cart:', error);
       }
-    }, 100);
+    }, 200);
     
     return () => {
       if (saveGuestCartTimeoutRef.current) {
         clearTimeout(saveGuestCartTimeoutRef.current);
       }
     };
-  }, [guestCart]);
+  }, [guestCart, isAuthenticated]);
 
   // Load authenticated user's cart
   const loadAuthenticatedCart = useCallback(async () => {
@@ -371,30 +377,45 @@ export function CartProvider({ children }: CartProviderProps) {
     refreshCart();
   }, [isAuthenticated, refreshCart]);
 
-  // Migrate guest cart when user signs in (with proper debouncing)
+  // Migrate guest cart when user signs in - ALWAYS run on authentication change
   useEffect(() => {
     let migrationTimeout: NodeJS.Timeout;
     
     const migrateGuestCart = async () => {
-      if (!isAuthenticated || guestCart.length === 0) {
-        if (isAuthenticated && guestCart.length === 0) {
-          console.log('[CART MIGRATION] ℹ️ User authenticated but no guest cart items to migrate');
+      // Always read current guest cart from localStorage for most up-to-date data
+      const currentGuestCartData = localStorage.getItem(GUEST_CART_KEY);
+      let currentGuestCart: GuestCartItem[] = [];
+      
+      try {
+        if (currentGuestCartData) {
+          const parsed = JSON.parse(currentGuestCartData);
+          currentGuestCart = Array.isArray(parsed) ? parsed : [];
         }
+      } catch (error) {
+        console.error('[CART MIGRATION] Error parsing guest cart from localStorage:', error);
+        localStorage.removeItem(GUEST_CART_KEY);
+      }
+      
+      if (!isAuthenticated) {
+        console.log('[CART MIGRATION] ℹ️ User not authenticated, skipping migration');
+        return;
+      }
+      
+      if (currentGuestCart.length === 0) {
+        console.log('[CART MIGRATION] ℹ️ No guest cart items to migrate');
+        // Still load authenticated cart even if no guest items
+        await loadAuthenticatedCart();
         return;
       }
 
       console.log('[CART MIGRATION] 🚀 Starting cart migration...');
-      console.log('[CART MIGRATION] 📦 Guest cart data:', JSON.stringify(guestCart, null, 2));
+      console.log('[CART MIGRATION] 📦 Current guest cart data from localStorage:', JSON.stringify(currentGuestCart, null, 2));
       console.log('[CART MIGRATION] 👤 User ID:', user?.uid);
       
       try {
-        // Set migration flag immediately to prevent race conditions
-        const migrationKey = `migration_${user?.uid}_${Date.now()}`;
-        localStorage.setItem(MIGRATION_FLAG_KEY, migrationKey);
-        
         console.log('[CART MIGRATION] 📤 Sending migration request to server...');
         const response = await apiRequest('POST', '/api/cart/migrate', {
-          guestItems: guestCart
+          guestItems: currentGuestCart
         });
         
         if (!response.ok) {
@@ -409,6 +430,9 @@ export function CartProvider({ children }: CartProviderProps) {
         setGuestCart([]);
         localStorage.removeItem(GUEST_CART_KEY);
         
+        // Clear any cached migration flags
+        localStorage.removeItem(MIGRATION_FLAG_KEY);
+        
         // Immediately refresh authenticated cart
         console.log('[CART MIGRATION] 🔄 Refreshing authenticated cart...');
         await loadAuthenticatedCart();
@@ -416,33 +440,35 @@ export function CartProvider({ children }: CartProviderProps) {
         // Dispatch event for other components
         window.dispatchEvent(new CustomEvent('cart-migrated'));
         
-        toast({
-          title: "Cart Synced",
-          description: `${migrationResult.totalItems || 0} items merged successfully.`,
-        });
+        if (migrationResult.totalItems > 0) {
+          toast({
+            title: "Cart Synced",
+            description: `${migrationResult.totalItems || 0} items merged successfully.`,
+          });
+        }
         
         console.log('[CART MIGRATION] ✅ Cart migration completed successfully');
       } catch (error) {
         console.error('[CART MIGRATION] ❌ Cart migration failed:', error);
-        // Remove migration flag on failure to allow retry
-        localStorage.removeItem(MIGRATION_FLAG_KEY);
         
         toast({
           title: "Sync Warning",
           description: "Some cart items couldn't be synced. Please check your cart.",
           variant: "destructive",
         });
+        
+        // Still load authenticated cart even if migration fails
+        await loadAuthenticatedCart();
       }
     };
 
-    // Check if migration is needed and not already in progress
-    const shouldMigrate = isAuthenticated && guestCart.length > 0 && user?.uid;
-    const existingFlag = localStorage.getItem(MIGRATION_FLAG_KEY);
-    const isMigrationInProgress = existingFlag && existingFlag.includes(user?.uid || '');
-    
-    if (shouldMigrate && !isMigrationInProgress) {
+    // Run migration on every authentication state change to authenticated
+    if (isAuthenticated && user?.uid) {
       // Debounce migration to prevent rapid-fire calls
       migrationTimeout = setTimeout(migrateGuestCart, 300);
+    } else if (!isAuthenticated) {
+      // When user logs out, just load guest cart
+      loadGuestCartAsCart();
     }
 
     return () => {
@@ -450,7 +476,7 @@ export function CartProvider({ children }: CartProviderProps) {
         clearTimeout(migrationTimeout);
       }
     };
-  }, [isAuthenticated, user?.uid, guestCart.length > 0 ? JSON.stringify(guestCart) : '', loadAuthenticatedCart, toast]);
+  }, [isAuthenticated, user?.uid, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
 
   // Process add-to-cart operations queue for authenticated users
   const processAddOperationQueue = useCallback(async () => {
@@ -554,48 +580,16 @@ export function CartProvider({ children }: CartProviderProps) {
         processAddOperationQueue();
       });
     } else {
-      // Guest user - immediate update with optimistic UI
+      // Guest user - atomic update with reducer to prevent race conditions
       console.log('[CART CONTEXT] Adding item to guest cart:', { productId, serviceId, quantity });
       
-      // Update guest cart array immediately
-      setGuestCart(prev => {
-        const existingIndex = prev.findIndex(item => 
-          item.productId === productId && item.serviceId === serviceId
-        );
-        
-        let newCart: GuestCartItem[];
-        
-        if (existingIndex >= 0) {
-          // Update existing item quantity
-          newCart = prev.map((item, index) => 
-            index === existingIndex 
-              ? { ...item, quantity: item.quantity + quantity, addedAt: Date.now() }
-              : item
-          );
-        } else {
-          // Add new item
-          const newItem: GuestCartItem = {
-            id: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            productId,
-            serviceId,
-            quantity,
-            addedAt: Date.now(),
-            customizations
-          };
-          newCart = [...prev, newItem];
-        }
-        
-        console.log('[CART CONTEXT] Updated guest cart:', newCart);
-        return newCart;
-      });
-
-      // For guest users, also create optimistic item for cart display
+      // Create optimistic item for immediate cart display
       const guestOptimisticItem: CartItem = {
         id: optimisticItemId,
         productId,
         serviceId,
         quantity,
-        unitPrice: 0,
+        unitPrice: 0, // Will be updated when real data loads
         originalPrice: 0,
         discount: 0,
         appliedCoupons: [],
@@ -606,11 +600,52 @@ export function CartProvider({ children }: CartProviderProps) {
         updatedAt: new Date(),
       };
       
-      // Use reducer for deterministic guest cart update
+      // Use reducer for deterministic guest cart update (atomic operation)
       dispatch({ type: 'ADD_ITEM', payload: guestOptimisticItem });
       
-      // Update full cart object with proper data shortly after
-      setTimeout(() => loadGuestCartAsCart(), 50);
+      // Atomically update guest cart array for localStorage persistence
+      setGuestCart(prev => {
+        const existingIndex = prev.findIndex(item => 
+          item.productId === productId && item.serviceId === serviceId
+        );
+        
+        let newCart: GuestCartItem[];
+        
+        if (existingIndex >= 0) {
+          // Update existing item quantity atomically
+          newCart = prev.map((item, index) => 
+            index === existingIndex 
+              ? { ...item, quantity: item.quantity + quantity, addedAt: Date.now() }
+              : item
+          );
+        } else {
+          // Add new item atomically
+          const newItem: GuestCartItem = {
+            id: optimisticItemId, // Use same ID for consistency
+            productId,
+            serviceId,
+            quantity,
+            addedAt: Date.now(),
+            customizations
+          };
+          newCart = [...prev, newItem];
+        }
+        
+        console.log('[CART CONTEXT] Updated guest cart atomically:', newCart);
+        
+        // Immediately save to localStorage to prevent race conditions
+        try {
+          localStorage.setItem(GUEST_CART_KEY, JSON.stringify(newCart));
+          console.log('[CART CONTEXT] Guest cart saved to localStorage immediately');
+        } catch (error) {
+          console.error('[CART CONTEXT] Error saving guest cart to localStorage:', error);
+        }
+        
+        return newCart;
+      });
+      
+      // Load full cart object with proper product data (debounced)
+      setTimeout(() => loadGuestCartAsCart(), 100);
       
       toast({
         title: "Added to Cart",
