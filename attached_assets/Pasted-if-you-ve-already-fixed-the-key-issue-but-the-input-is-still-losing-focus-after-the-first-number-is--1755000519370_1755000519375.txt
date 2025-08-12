@@ -1,0 +1,75 @@
+if you’ve already fixed the key issue but the input is still losing focus after the first number is entered, that means it’s almost certainly one of these two:
+
+The parent component is remounting on every change
+
+The value prop is being replaced with something that React treats as a new element (e.g., converting "1" → 1 mid-typing)
+
+Here’s how to systematically fix it:
+1. Keep value as a string until submit
+Number inputs in React don’t like when you force them to store only numeric types while typing.
+If you type 1, React sets state to 1 (number), but the browser input was expecting a string, so it refreshes → losing focus.
+
+✅ Correct approach:
+
+tsx
+Copy
+Edit
+const [min, setMin] = useState("");
+
+<input
+  type="number"
+  value={min}
+  onChange={(e) => setMin(e.target.value)}
+/>
+Only convert to Number() when filtering or submitting.
+
+2. Prevent parent remounts
+If your Products page calls something like:
+
+tsx
+Copy
+Edit
+<PriceFilter key={someChangingValue} ... />
+or:
+
+tsx
+Copy
+Edit
+{showFilter && <PriceFilter ... />}
+then every keystroke that updates a parent state will cause PriceFilter to unmount/remount → losing focus.
+
+✅ Solution:
+
+Remove changing key props unless absolutely necessary.
+
+If conditionally rendering, instead hide with CSS:
+
+tsx
+Copy
+Edit
+{showFilter && <PriceFilter ... />} // ❌ remounts
+<div style={{ display: showFilter ? 'block' : 'none' }}>
+  <PriceFilter ... /> // ✅ stays mounted
+</div>
+3. Memoize only if props are stable
+If your memoized component gets a new object/array prop every render, memoization won’t help — it will still re-render.
+
+tsx
+Copy
+Edit
+<PriceFilter filters={{ min, max }} /> // ❌ new object every time
+
+// ✅ fix:
+const filters = useMemo(() => ({ min, max }), [min, max]);
+<PriceFilter filters={filters} />
+4. Test with an isolated minimal input
+To confirm if the problem is value-handling or remounting, try replacing your input with:
+
+tsx
+Copy
+Edit
+const [val, setVal] = useState("");
+return <input type="number" value={val} onChange={(e) => setVal(e.target.value)} />;
+If this keeps focus fine → problem is your parent/component structure.
+If it still loses focus → problem is your state/value handling.
+

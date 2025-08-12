@@ -21,79 +21,42 @@ import { useProducts, useCategories } from "@/features/products/hooks/useProduct
 import { useEnterpriseNavigation } from "@/hooks/use-enterprise-navigation";
 import type { ProductFilters } from "@/features/products/types";
 
-// Completely memoized component to prevent focus loss issues
-const PriceInputs = memo(({ 
-  minPrice, 
-  maxPrice, 
+// Minimal isolated inputs - no memoization, no complex logic
+const PriceInputs = ({ 
   onMinPriceChange, 
   onMaxPriceChange 
 }: {
-  minPrice: number;
-  maxPrice: number;
-  onMinPriceChange: (value: number) => void;
-  onMaxPriceChange: (value: number) => void;
+  onMinPriceChange: (value: string) => void;
+  onMaxPriceChange: (value: string) => void;
 }) => {
-  // Use internal state to prevent parent re-renders from affecting inputs
-  const [localMin, setLocalMin] = useState("");
-  const [localMax, setLocalMax] = useState("");
-
-  // Initialize only once
-  useEffect(() => {
-    setLocalMin(minPrice === 0 ? "" : minPrice.toString());
-    setLocalMax(maxPrice === 100000 ? "" : maxPrice.toString());
-  }, []);
-
-  const handleMinChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
-    setLocalMin(rawValue); // Always allow any string value in display
-    
-    // Only pass numeric values to parent, but don't restrict input display
-    if (rawValue === "") {
-      onMinPriceChange(0);
-    } else {
-      const value = parseInt(rawValue);
-      if (!isNaN(value) && value >= 0) {
-        onMinPriceChange(value);
-      }
-    }
-  }, [onMinPriceChange]);
-
-  const handleMaxChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value;
-    setLocalMax(rawValue); // Always allow any string value in display
-    
-    // Only pass numeric values to parent, but don't restrict input display
-    if (rawValue === "") {
-      onMaxPriceChange(100000);
-    } else {
-      const value = parseInt(rawValue);
-      if (!isNaN(value) && value >= 0) {
-        onMaxPriceChange(value);
-      }
-    }
-  }, [onMaxPriceChange]);
+  const [minVal, setMinVal] = useState("");
+  const [maxVal, setMaxVal] = useState("");
 
   return (
     <div className="grid grid-cols-2 gap-2">
       <Input
-        key="min-price-input"
         type="number"
         placeholder="Min price"
-        value={localMin}
-        onChange={handleMinChange}
+        value={minVal}
+        onChange={(e) => {
+          setMinVal(e.target.value);
+          onMinPriceChange(e.target.value);
+        }}
         className="text-sm"
       />
       <Input
-        key="max-price-input"
         type="number"
         placeholder="Max price"
-        value={localMax}
-        onChange={handleMaxChange}
+        value={maxVal}
+        onChange={(e) => {
+          setMaxVal(e.target.value);
+          onMaxPriceChange(e.target.value);
+        }}
         className="text-sm"
       />
     </div>
   );
-});
+};
 
 // Add display name for debugging
 PriceInputs.displayName = 'PriceInputs';
@@ -130,23 +93,18 @@ export default function Products() {
   // Fetch categories using custom hook
   const { data: categories = [] } = useCategories();
 
-  // Simple state for price inputs - separate from filters to prevent re-renders
-  const [localMinPrice, setLocalMinPrice] = useState(filters.minPrice);
-  const [localMaxPrice, setLocalMaxPrice] = useState(filters.maxPrice);
+  // Keep price values as strings to prevent input focus loss
+  const [minPriceString, setMinPriceString] = useState("");
+  const [maxPriceString, setMaxPriceString] = useState("");
 
-  // Memoize callback functions to prevent PriceInputs re-renders
-  const handleMinPriceChange = useCallback((value: number) => {
-    setLocalMinPrice(value);
-  }, []);
-
-  const handleMaxPriceChange = useCallback((value: number) => {
-    setLocalMaxPrice(value);
-  }, []);
+  // Convert strings to numbers for API calls only
+  const minPriceNumber = minPriceString === "" ? 0 : parseInt(minPriceString) || 0;
+  const maxPriceNumber = maxPriceString === "" ? 100000 : parseInt(maxPriceString) || 100000;
 
   // Debounce search and price inputs to reduce API calls
   const debouncedSearch = useDebounce(filters.search, 300);
-  const debouncedMinPrice = useDebounce(localMinPrice, 500);
-  const debouncedMaxPrice = useDebounce(localMaxPrice, 500);
+  const debouncedMinPrice = useDebounce(minPriceNumber, 500);
+  const debouncedMaxPrice = useDebounce(maxPriceNumber, 500);
 
   // No need to sync debounced values with filter state - the query uses debounced values directly
 
@@ -284,8 +242,8 @@ export default function Products() {
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setLocalMinPrice(0);
-                    setLocalMaxPrice(100000);
+                    setMinPriceString("");
+                    setMaxPriceString("");
                   }}
                   className="ml-1 h-auto p-0 hover:bg-transparent"
                 >
@@ -335,12 +293,10 @@ export default function Products() {
         <div className="space-y-6">
           <div className="px-2">
             <Slider
-              value={[localMinPrice, localMaxPrice]}
+              value={[minPriceNumber, maxPriceNumber]}
               onValueChange={([min, max]) => {
-                setLocalMinPrice(min);
-                setLocalMaxPrice(max);
-                updateFilter("minPrice", min);
-                updateFilter("maxPrice", max);
+                setMinPriceString(min.toString());
+                setMaxPriceString(max.toString());
               }}
               max={100000}
               step={500}
@@ -350,19 +306,17 @@ export default function Products() {
           <div className="flex items-center justify-between text-sm font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1">Minimum</div>
-              <div>₹{(localMinPrice || 0).toLocaleString('en-IN')}</div>
+              <div>₹{minPriceNumber.toLocaleString('en-IN')}</div>
             </div>
             <div className="text-gray-400">—</div>
             <div className="text-center">
               <div className="text-xs text-gray-500 mb-1">Maximum</div>
-              <div>₹{(localMaxPrice || 100000).toLocaleString('en-IN')}</div>
+              <div>₹{maxPriceNumber.toLocaleString('en-IN')}</div>
             </div>
           </div>
           <PriceInputs 
-            minPrice={localMinPrice}
-            maxPrice={localMaxPrice}
-            onMinPriceChange={handleMinPriceChange}
-            onMaxPriceChange={handleMaxPriceChange}
+            onMinPriceChange={setMinPriceString}
+            onMaxPriceChange={setMaxPriceString}
           />
         </div>
       </div>
