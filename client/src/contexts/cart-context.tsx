@@ -390,6 +390,19 @@ export function CartProvider({ children }: CartProviderProps) {
     console.log('[CART CONTEXT] 🔄 User logged out, preserving cart data...');
     localStorage.setItem('recent_cart_preservation', Date.now().toString());
     
+    // Check if we have current cart items OR check if there are any existing guest items to preserve
+    const existingGuestCart = localStorage.getItem(GUEST_CART_KEY);
+    let hasExistingGuestItems = false;
+    
+    try {
+      if (existingGuestCart) {
+        const parsed = JSON.parse(existingGuestCart);
+        hasExistingGuestItems = Array.isArray(parsed) && parsed.length > 0;
+      }
+    } catch (error) {
+      console.error('[CART CONTEXT] Error parsing existing guest cart:', error);
+    }
+    
     // If we have a current cart with items, convert it to guest cart format
     if (cart && cart.items && cart.items.length > 0) {
       console.log('[CART CONTEXT] 📦 Converting authenticated cart to guest cart:', cart.items.length, 'items');
@@ -404,13 +417,34 @@ export function CartProvider({ children }: CartProviderProps) {
         customizations: item.customizations
       }));
       
+      // Merge with any existing guest items to prevent overwriting
+      let finalGuestItems = preservedGuestItems;
+      if (hasExistingGuestItems) {
+        try {
+          const existingItems = JSON.parse(existingGuestCart!);
+          console.log('[CART CONTEXT] 🔗 Merging with existing guest items:', existingItems.length);
+          
+          // Add existing items that don't conflict with preserved items
+          for (const existingItem of existingItems) {
+            const conflictIndex = preservedGuestItems.findIndex(p => 
+              p.productId === existingItem.productId && p.serviceId === existingItem.serviceId
+            );
+            if (conflictIndex === -1) {
+              finalGuestItems.push(existingItem);
+            }
+          }
+        } catch (error) {
+          console.error('[CART CONTEXT] Error merging guest items:', error);
+        }
+      }
+      
       // Save preserved items to localStorage immediately
       try {
-        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(preservedGuestItems));
-        console.log('[CART CONTEXT] 💾 Preserved cart saved to localStorage:', preservedGuestItems);
+        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(finalGuestItems));
+        console.log('[CART CONTEXT] 💾 Preserved cart saved to localStorage:', finalGuestItems);
         
         // Update guest cart state
-        setGuestCart(preservedGuestItems);
+        setGuestCart(finalGuestItems);
         
         // Load guest cart as Cart object for immediate display
         await loadGuestCartAsCart();
@@ -418,13 +452,17 @@ export function CartProvider({ children }: CartProviderProps) {
         // Only show toast once for preservation
         toast({
           title: "Cart Preserved",
-          description: `${preservedGuestItems.length} items saved for your next visit.`,
+          description: `${finalGuestItems.length} items saved for your next visit.`,
         });
         
         console.log('[CART CONTEXT] ✅ Cart preservation completed successfully');
       } catch (error) {
         console.error('[CART CONTEXT] ❌ Error preserving cart data:', error);
       }
+    } else if (hasExistingGuestItems) {
+      console.log('[CART CONTEXT] 🔄 No authenticated cart items but preserving existing guest items');
+      // Load existing guest cart without clearing it
+      await loadGuestCartAsCart();
     } else {
       console.log('[CART CONTEXT] ℹ️ No cart items to preserve on logout');
       // Still load guest cart in case there were previous guest items
