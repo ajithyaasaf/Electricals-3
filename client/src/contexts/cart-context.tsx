@@ -377,9 +377,18 @@ export function CartProvider({ children }: CartProviderProps) {
     refreshCart();
   }, [isAuthenticated, refreshCart]);
 
-  // Preserve cart data when user logs out
+  // Preserve cart data when user logs out (prevent repeated executions)
   const preserveCartDataOnLogout = useCallback(async () => {
+    // Prevent repeated preservation calls
+    const preservationKey = `cart_preserved_${Date.now()}`;
+    const recentPreservation = localStorage.getItem('recent_cart_preservation');
+    if (recentPreservation && (Date.now() - parseInt(recentPreservation)) < 2000) {
+      console.log('[CART CONTEXT] ⏭️ Skipping cart preservation - recently executed');
+      return;
+    }
+    
     console.log('[CART CONTEXT] 🔄 User logged out, preserving cart data...');
+    localStorage.setItem('recent_cart_preservation', Date.now().toString());
     
     // If we have a current cart with items, convert it to guest cart format
     if (cart && cart.items && cart.items.length > 0) {
@@ -406,6 +415,7 @@ export function CartProvider({ children }: CartProviderProps) {
         // Load guest cart as Cart object for immediate display
         await loadGuestCartAsCart();
         
+        // Only show toast once for preservation
         toast({
           title: "Cart Preserved",
           description: `${preservedGuestItems.length} items saved for your next visit.`,
@@ -420,6 +430,11 @@ export function CartProvider({ children }: CartProviderProps) {
       // Still load guest cart in case there were previous guest items
       await loadGuestCartAsCart();
     }
+    
+    // Clean up preservation flag after a short delay
+    setTimeout(() => {
+      localStorage.removeItem('recent_cart_preservation');
+    }, 3000);
   }, [cart, loadGuestCartAsCart, toast]);
 
   // Migrate guest cart when user signs in - ALWAYS run on authentication change
@@ -512,7 +527,7 @@ export function CartProvider({ children }: CartProviderProps) {
       // Debounce migration to prevent rapid-fire calls
       migrationTimeout = setTimeout(migrateGuestCart, 300);
     } else if (!isAuthenticated) {
-      // When user logs out, preserve authenticated cart data as guest cart
+      // When user logs out, preserve authenticated cart data as guest cart (run once)
       migrationTimeout = setTimeout(() => {
         preserveCartDataOnLogout();
       }, 100);
@@ -523,7 +538,7 @@ export function CartProvider({ children }: CartProviderProps) {
         clearTimeout(migrationTimeout);
       }
     };
-  }, [isAuthenticated, user?.uid, loadAuthenticatedCart, loadGuestCartAsCart, preserveCartDataOnLogout, toast]);
+  }, [isAuthenticated, user?.uid, loadAuthenticatedCart, loadGuestCartAsCart, cart?.items?.length, toast]);
 
   // Process add-to-cart operations queue for authenticated users
   const processAddOperationQueue = useCallback(async () => {
