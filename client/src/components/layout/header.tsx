@@ -422,7 +422,7 @@ export function Header() {
 
             {/* Cart */}
             <Button
-              className="flex items-center space-x-1 sm:space-x-2 bg-electric-blue-600 text-white hover:bg-electric-blue-700 active:bg-electric-blue-800 relative h-10 sm:h-11 px-3 sm:px-4 touch-manipulation"
+              className="flex items-center space-x-1 sm:space-x-2 bg-lime-600 text-graphite hover:bg-lime-700 active:bg-lime-800 relative h-10 sm:h-11 px-3 sm:px-4 touch-manipulation"
               style={{ minHeight: "44px" }} // iOS minimum touch target
               onClick={() => setCartOpen(true)}
             >
