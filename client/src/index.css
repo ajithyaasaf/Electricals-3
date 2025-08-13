@@ -69,40 +69,45 @@ input:focus {
   --card-foreground: hsl(20, 14.3%, 4.1%);
   --border: hsl(20, 5.9%, 90%);
   --input: hsl(20, 5.9%, 90%);
-  --primary: hsl(20, 60%, 35%);
+  --primary: hsl(20, 51%, 49%);
   --primary-foreground: hsl(0, 0%, 98%);
   --secondary: hsl(60, 4.8%, 95.9%);
   --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(207, 90%, 54%);
-  --accent-foreground: hsl(211, 100%, 99%);
+  --accent: hsl(82, 74%, 56%);
+  --accent-foreground: hsl(212, 45%, 12%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
   --ring: hsl(20, 14.3%, 4.1%);
   --radius: 0.5rem;
   
-  /* CopperBear brand colors */
-  --copper-50: hsl(24, 56%, 97%);
-  --copper-100: hsl(25, 55%, 94%);
-  --copper-200: hsl(24, 54%, 87%);
-  --copper-300: hsl(24, 52%, 75%);
-  --copper-400: hsl(24, 49%, 58%);
-  --copper-500: hsl(20, 60%, 35%);
-  --copper-600: hsl(20, 65%, 30%);
-  --copper-700: hsl(20, 70%, 25%);
-  --copper-800: hsl(20, 75%, 20%);
-  --copper-900: hsl(20, 80%, 15%);
+  /* CopperBear brand colors - Updated to match prompt #B46A3C */
+  --copper-50: hsl(20, 51%, 97%);
+  --copper-100: hsl(20, 51%, 94%);
+  --copper-200: hsl(20, 51%, 87%);
+  --copper-300: hsl(20, 51%, 75%);
+  --copper-400: hsl(20, 51%, 62%);
+  --copper-500: hsl(20, 51%, 49%);
+  --copper-600: hsl(20, 51%, 42%);
+  --copper-700: hsl(20, 51%, 35%);
+  --copper-800: hsl(20, 51%, 28%);
+  --copper-900: hsl(20, 51%, 21%);
   
-  /* Electric blue accents */
-  --electric-blue-50: hsl(210, 100%, 97%);
-  --electric-blue-100: hsl(210, 100%, 94%);
-  --electric-blue-200: hsl(210, 100%, 87%);
-  --electric-blue-300: hsl(210, 100%, 78%);
-  --electric-blue-400: hsl(210, 100%, 68%);
-  --electric-blue-500: hsl(207, 90%, 54%);
-  --electric-blue-600: hsl(210, 90%, 48%);
-  --electric-blue-700: hsl(213, 90%, 42%);
-  --electric-blue-800: hsl(216, 90%, 36%);
-  --electric-blue-900: hsl(219, 90%, 30%);
+  /* Accent Lime colors - Updated to match prompt #A3E635 */
+  --lime-50: hsl(82, 74%, 97%);
+  --lime-100: hsl(82, 74%, 94%);
+  --lime-200: hsl(82, 74%, 87%);
+  --lime-300: hsl(82, 74%, 76%);
+  --lime-400: hsl(82, 74%, 66%);
+  --lime-500: hsl(82, 74%, 56%);
+  --lime-600: hsl(82, 74%, 49%);
+  --lime-700: hsl(82, 74%, 42%);
+  --lime-800: hsl(82, 74%, 35%);
+  --lime-900: hsl(82, 74%, 28%);
+  
+  /* Charcoal and Graphite colors - From prompt */
+  --charcoal: hsl(212, 30%, 17%);
+  --graphite: hsl(212, 45%, 12%);
+  --off-white: hsl(210, 40%, 98%);
 }
 
 .dark {
@@ -116,11 +121,11 @@ input:focus {
   --card-foreground: hsl(0, 0%, 98%);
   --border: hsl(240, 3.7%, 15.9%);
   --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(20, 60%, 35%);
+  --primary: hsl(20, 51%, 49%);
   --primary-foreground: hsl(0, 0%, 98%);
   --secondary: hsl(240, 3.7%, 15.9%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(207, 90%, 54%);
+  --accent: hsl(82, 74%, 56%);
   --accent-foreground: hsl(0, 0%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
@@ -160,27 +165,27 @@ input:focus {
   .bg-copper-800 { background-color: var(--copper-800); }
   .bg-copper-900 { background-color: var(--copper-900); }
   
-  .text-electric-blue-50 { color: var(--electric-blue-50); }
-  .text-electric-blue-100 { color: var(--electric-blue-100); }
-  .text-electric-blue-200 { color: var(--electric-blue-200); }
-  .text-electric-blue-300 { color: var(--electric-blue-300); }
-  .text-electric-blue-400 { color: var(--electric-blue-400); }
-  .text-electric-blue-500 { color: var(--electric-blue-500); }
-  .text-electric-blue-600 { color: var(--electric-blue-600); }
-  .text-electric-blue-700 { color: var(--electric-blue-700); }
-  .text-electric-blue-800 { color: var(--electric-blue-800); }
-  .text-electric-blue-900 { color: var(--electric-blue-900); }
+  .text-lime-50 { color: var(--lime-50); }
+  .text-lime-100 { color: var(--lime-100); }
+  .text-lime-200 { color: var(--lime-200); }
+  .text-lime-300 { color: var(--lime-300); }
+  .text-lime-400 { color: var(--lime-400); }
+  .text-lime-500 { color: var(--lime-500); }
+  .text-lime-600 { color: var(--lime-600); }
+  .text-lime-700 { color: var(--lime-700); }
+  .text-lime-800 { color: var(--lime-800); }
+  .text-lime-900 { color: var(--lime-900); }
   
-  .bg-electric-blue-50 { background-color: var(--electric-blue-50); }
-  .bg-electric-blue-100 { background-color: var(--electric-blue-100); }
-  .bg-electric-blue-200 { background-color: var(--electric-blue-200); }
-  .bg-electric-blue-300 { background-color: var(--electric-blue-300); }
-  .bg-electric-blue-400 { background-color: var(--electric-blue-400); }
-  .bg-electric-blue-500 { background-color: var(--electric-blue-500); }
-  .bg-electric-blue-600 { background-color: var(--electric-blue-600); }
-  .bg-electric-blue-700 { background-color: var(--electric-blue-700); }
-  .bg-electric-blue-800 { background-color: var(--electric-blue-800); }
-  .bg-electric-blue-900 { background-color: var(--electric-blue-900); }
+  .bg-lime-50 { background-color: var(--lime-50); }
+  .bg-lime-100 { background-color: var(--lime-100); }
+  .bg-lime-200 { background-color: var(--lime-200); }
+  .bg-lime-300 { background-color: var(--lime-300); }
+  .bg-lime-400 { background-color: var(--lime-400); }
+  .bg-lime-500 { background-color: var(--lime-500); }
+  .bg-lime-600 { background-color: var(--lime-600); }
+  .bg-lime-700 { background-color: var(--lime-700); }
+  .bg-lime-800 { background-color: var(--lime-800); }
+  .bg-lime-900 { background-color: var(--lime-900); }
   
   .border-copper-50 { border-color: var(--copper-50); }
   .border-copper-100 { border-color: var(--copper-100); }
@@ -193,21 +198,29 @@ input:focus {
   .border-copper-800 { border-color: var(--copper-800); }
   .border-copper-900 { border-color: var(--copper-900); }
   
-  .border-electric-blue-50 { border-color: var(--electric-blue-50); }
-  .border-electric-blue-100 { border-color: var(--electric-blue-100); }
-  .border-electric-blue-200 { border-color: var(--electric-blue-200); }
-  .border-electric-blue-300 { border-color: var(--electric-blue-300); }
-  .border-electric-blue-400 { border-color: var(--electric-blue-400); }
-  .border-electric-blue-500 { border-color: var(--electric-blue-500); }
-  .border-electric-blue-600 { border-color: var(--electric-blue-600); }
-  .border-electric-blue-700 { border-color: var(--electric-blue-700); }
-  .border-electric-blue-800 { border-color: var(--electric-blue-800); }
-  .border-electric-blue-900 { border-color: var(--electric-blue-900); }
+  .border-lime-50 { border-color: var(--lime-50); }
+  .border-lime-100 { border-color: var(--lime-100); }
+  .border-lime-200 { border-color: var(--lime-200); }
+  .border-lime-300 { border-color: var(--lime-300); }
+  .border-lime-400 { border-color: var(--lime-400); }
+  .border-lime-500 { border-color: var(--lime-500); }
+  .border-lime-600 { border-color: var(--lime-600); }
+  .border-lime-700 { border-color: var(--lime-700); }
+  .border-lime-800 { border-color: var(--lime-800); }
+  .border-lime-900 { border-color: var(--lime-900); }
   
   .hover\:bg-copper-700:hover { background-color: var(--copper-700); }
-  .hover\:bg-electric-blue-700:hover { background-color: var(--electric-blue-700); }
+  .hover\:bg-lime-700:hover { background-color: var(--lime-700); }
   .hover\:text-copper-600:hover { color: var(--copper-600); }
-  .hover\:text-electric-blue-600:hover { color: var(--electric-blue-600); }
+  .hover\:text-lime-600:hover { color: var(--lime-600); }
+  
+  /* Charcoal and Graphite utilities */
+  .text-charcoal { color: var(--charcoal); }
+  .text-graphite { color: var(--graphite); }
+  .text-off-white { color: var(--off-white); }
+  .bg-charcoal { background-color: var(--charcoal); }
+  .bg-graphite { background-color: var(--graphite); }
+  .bg-off-white { background-color: var(--off-white); }
   
   /* Scrollbar utilities */
   .scrollbar-hide {
