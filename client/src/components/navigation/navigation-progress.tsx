@@ -10,7 +10,7 @@ export function NavigationProgress() {
     <div className="fixed top-0 left-0 right-0 z-50">
       <div 
         className={cn(
-          "h-1 bg-gradient-to-r from-copper-500 to-electric-500",
+          "h-1 bg-gradient-to-r from-copper-500 to-lime-500",
           "transition-all duration-300 ease-out",
           "shadow-lg shadow-copper-500/20"
         )}

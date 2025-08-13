@@ -277,7 +277,7 @@ export default function ServiceDetail() {
                 <DialogTrigger asChild>
                   <Button 
                     onClick={handleBookService}
-                    className="w-full bg-electric-600 hover:bg-electric-700 text-white"
+                    className="w-full bg-lime-600 hover:bg-lime-700 text-white"
                     size="lg"
                   >
                     <CalendarIcon className="w-5 h-5 mr-2" />
@@ -443,7 +443,7 @@ export default function ServiceDetail() {
                       <Button
                         type="submit"
                         disabled={bookServiceMutation.isPending}
-                        className="w-full bg-electric-600 hover:bg-electric-700"
+                        className="w-full bg-lime-600 hover:bg-lime-700"
                       >
                         {bookServiceMutation.isPending ? "Booking..." : "Confirm Booking"}
                       </Button>

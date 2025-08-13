@@ -8,7 +8,6 @@ Preferred communication style: Simple, everyday language.
 Navigation Preferences: Enterprise-level navigation with smooth transitions, loading states, and scroll restoration.
 
 ## Recent Changes (August 2025)
-- ✅ **UI Design Enhancement - Lime to Electric Blue Migration** (August 13, 2025) - Replaced lime green accent colors with professional electric blue (#3B7CE5) throughout the application. Electric blue provides better brand alignment for an electrical company, improved accessibility, and more professional appearance while maintaining excellent contrast with copper primary colors
 - ✅ **Fixed Sign-Out Authentication Loop** (August 13, 2025) - Resolved issue where signing out would automatically trigger Google sign-in causing DOMAIN_NOT_AUTHORIZED error. Updated account page to redirect to home instead of auto-signing in, and replaced direct Google sign-in calls with auth modal triggers for better user experience
 - ✅ **Fixed Duplicate User Creation Bug** (August 13, 2025) - Resolved issue where users were being stored multiple times in Firestore by implementing specialized UserService with setDoc() instead of addDoc(), using Firebase UID as document ID to prevent duplicates
 - ✅ **Enhanced Product Filter UX** (August 12, 2025) - Redesigned filters with modern UX patterns: active filter badges, improved visual hierarchy, better mobile experience, clear interaction patterns, and enhanced price range controls
@@ -79,7 +78,7 @@ Navigation Preferences: Enterprise-level navigation with smooth transitions, loa
 - **UI Library**: Custom components built on Radix UI primitives, Shadcn/ui
 - **Styling**: Tailwind CSS with custom CopperBear brand colors (copper/lime theme)
 - **Forms**: React Hook Form with Zod validation
-- **UI/UX Decisions**: Copper primary colors with electric blue accents, responsive design (mobile-first), WCAG 2.1 AA accessibility considerations, Amazon-style mobile navigation.
+- **UI/UX Decisions**: Copper primary colors with lime green accents, responsive design (mobile-first), WCAG 2.1 AA accessibility considerations, Amazon-style mobile navigation.
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js

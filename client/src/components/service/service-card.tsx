@@ -62,13 +62,13 @@ export function ServiceCard({ service, showCategory = false }: ServiceCardProps)
 
   const categoryColors = {
     "installation-services": "from-copper-50 to-copper-100",
-    "repair-maintenance": "from-electric-50 to-electric-100", 
+    "repair-maintenance": "from-lime-50 to-lime-100", 
     "electrical-consulting": "from-green-50 to-green-100",
   };
 
   const buttonColors = {
     "installation-services": "bg-copper-600 hover:bg-copper-700",
-    "repair-maintenance": "bg-electric-600 hover:bg-electric-700",
+    "repair-maintenance": "bg-lime-600 hover:bg-lime-700",
     "electrical-consulting": "bg-green-600 hover:bg-green-700",
   };
 
