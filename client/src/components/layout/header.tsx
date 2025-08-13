@@ -365,7 +365,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center text-gray-700 hover:text-copper-600"
+                    className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-3 min-h-[60px] min-w-[60px] transition-all duration-200"
                   >
                     <User className="h-5 w-5" />
                     <span className="text-xs mt-1 hidden sm:block">
