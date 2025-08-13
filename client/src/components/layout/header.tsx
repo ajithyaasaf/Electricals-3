@@ -316,7 +316,7 @@ export function Header() {
                                   <SmartLink
                                     key={item.name}
                                     href={item.href}
-                                    className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-electric-blue-600 active:text-electric-blue-700 hover:bg-white active:bg-copper-25 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
+                                    className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-lime-600 active:text-lime-700 hover:bg-white active:bg-copper-25 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
                                     style={{ minHeight: "44px" }} // iOS minimum touch target
                                     onClick={() => setMobileMenuOpen(false)}
                                   >
@@ -340,7 +340,7 @@ export function Header() {
                                 <SmartLink
                                   key={item.name}
                                   href={item.href}
-                                  className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-electric-blue-600 active:text-electric-blue-700 hover:bg-copper-50 active:bg-copper-100 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
+                                  className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-lime-600 active:text-lime-700 hover:bg-copper-50 active:bg-copper-100 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
                                   style={{ minHeight: "44px" }} // iOS minimum touch target
                                   onClick={() => setMobileMenuOpen(false)}
                                 >

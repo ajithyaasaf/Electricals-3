@@ -15,7 +15,7 @@ export default function Landing() {
       description: "All our electricians are fully licensed, insured, and background-checked professionals."
     },
     {
-      icon: <Clock className="w-8 h-8 text-electric-blue-600" />,
+      icon: <Clock className="w-8 h-8 text-lime-600" />,
       title: "Fast Service",
       description: "Same-day service available for most electrical repairs and installations."
     },

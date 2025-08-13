@@ -75,9 +75,9 @@ Navigation Preferences: Enterprise-level navigation with smooth transitions, loa
 - **Routing**: Wouter
 - **State Management**: TanStack Query (React Query)
 - **UI Library**: Custom components built on Radix UI primitives, Shadcn/ui
-- **Styling**: Tailwind CSS with custom CopperBear brand colors (copper/electric-blue theme)
+- **Styling**: Tailwind CSS with custom CopperBear brand colors (copper/lime theme)
 - **Forms**: React Hook Form with Zod validation
-- **UI/UX Decisions**: Copper primary colors with electric blue accents, responsive design (mobile-first), WCAG 2.1 AA accessibility considerations, Amazon-style mobile navigation.
+- **UI/UX Decisions**: Copper primary colors with lime green accents, responsive design (mobile-first), WCAG 2.1 AA accessibility considerations, Amazon-style mobile navigation.
 
 ### Backend Architecture
 - **Runtime**: Node.js with Express.js
