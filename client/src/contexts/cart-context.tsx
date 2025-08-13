@@ -695,121 +695,37 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }, [cart]);
 
-  // Preserve cart data when user logs out (prevent repeated executions)
-  const preserveCartDataOnLogout = useCallback(async () => {
-    // Prevent repeated preservation calls
-    const preservationKey = `cart_preserved_${Date.now()}`;
-    const recentPreservation = localStorage.getItem('recent_cart_preservation');
-    if (recentPreservation && (Date.now() - parseInt(recentPreservation)) < 2000) {
-      console.log('[CART CONTEXT] ⏭️ Skipping cart preservation - recently executed');
+  // Clear cart data when user logs out (prevent repeated executions)
+  const clearCartOnLogout = useCallback(async () => {
+    // Prevent repeated clearing calls
+    const recentClearing = localStorage.getItem('recent_cart_clearing');
+    if (recentClearing && (Date.now() - parseInt(recentClearing)) < 2000) {
+      console.log('[CART CONTEXT] ⏭️ Skipping cart clearing - recently executed');
       return;
     }
     
-    console.log('[CART CONTEXT] 🔄 User logged out, preserving cart data...');
-    localStorage.setItem('recent_cart_preservation', Date.now().toString());
+    console.log('[CART CONTEXT] 🗑️ User logged out, clearing cart data...');
+    localStorage.setItem('recent_cart_clearing', Date.now().toString());
     
-    // Check if we have current cart items OR check if there are any existing guest items to preserve
-    const existingGuestCart = localStorage.getItem(GUEST_CART_KEY);
-    let hasExistingGuestItems = false;
+    // Clear the cart state
+    dispatch({ type: 'CLEAR_CART' });
     
-    try {
-      if (existingGuestCart) {
-        const parsed = JSON.parse(existingGuestCart);
-        hasExistingGuestItems = Array.isArray(parsed) && parsed.length > 0;
-      }
-    } catch (error) {
-      console.error('[CART CONTEXT] Error parsing existing guest cart:', error);
-    }
+    // Clear guest cart from localStorage
+    localStorage.removeItem(GUEST_CART_KEY);
     
-    // Use cart state as the primary source (more reliable than fetching during logout)
-    let cartToPreserve = cart || currentCartRef.current;
+    // Clear the guest cart state
+    setGuestCart([]);
     
-    console.log('[CART CONTEXT] 🔍 Primary cart source (state):', cart?.items?.length || 0, 'items');
-    console.log('[CART CONTEXT] 🔍 Fallback cart source (ref):', currentCartRef.current?.items?.length || 0, 'items');
+    // Clear current cart reference
+    currentCartRef.current = null;
     
-    console.log('[CART CONTEXT] 📦 Cart to preserve:', cartToPreserve?.items?.length || 0, 'items');
-    console.log('[CART CONTEXT] 🔍 Current cart ref:', currentCartRef.current?.items?.length || 0, 'items');
-    console.log('[CART CONTEXT] 🔍 Cart state:', cart?.items?.length || 0, 'items');
+    console.log('[CART CONTEXT] ✅ Cart cleared successfully on logout');
     
-    // If we have a current cart with items, convert it to guest cart format
-    if (cartToPreserve && cartToPreserve.items && cartToPreserve.items.length > 0) {
-      console.log('[CART CONTEXT] 📦 Converting authenticated cart to guest cart:', cartToPreserve.items.length, 'items');
-      
-      // Convert authenticated cart items to guest cart format with complete schema
-      const preservedGuestItems: GuestCartItem[] = cartToPreserve.items.map(item => ({
-        id: `preserved_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        productId: item.productId,
-        serviceId: item.serviceId,
-        quantity: item.quantity,
-        addedAt: Date.now(),
-        lastUpdated: Date.now(),
-        customizations: item.customizations || {},
-        notes: item.notes || '',
-        schemaVersion: CART_SCHEMA_VERSION,
-        conflictResolution: {
-          preferGuestQuantity: true,
-          preferGuestCustomizations: true
-        }
-      }));
-      
-      // Merge with any existing guest items to prevent overwriting
-      let finalGuestItems = preservedGuestItems;
-      if (hasExistingGuestItems) {
-        try {
-          const existingItems = JSON.parse(existingGuestCart!);
-          console.log('[CART CONTEXT] 🔗 Merging with existing guest items:', existingItems.length);
-          
-          // Add existing items that don't conflict with preserved items
-          for (const existingItem of existingItems) {
-            const conflictIndex = preservedGuestItems.findIndex(p => 
-              p.productId === existingItem.productId && p.serviceId === existingItem.serviceId
-            );
-            if (conflictIndex === -1) {
-              finalGuestItems.push(existingItem);
-            }
-          }
-        } catch (error) {
-          console.error('[CART CONTEXT] Error merging guest items:', error);
-        }
-      }
-      
-      // Save preserved items to localStorage immediately
-      try {
-        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(finalGuestItems));
-        console.log('[CART CONTEXT] 💾 Preserved cart saved to localStorage:', finalGuestItems);
-        
-        // Update guest cart state with enhanced items
-        const enhancedGuestItems = finalGuestItems.map(item => CartStorageManager.migrateGuestItem(item));
-        setGuestCart(enhancedGuestItems);
-        
-        // Load guest cart as Cart object for immediate display
-        await loadGuestCartAsCart();
-        
-        // Only show toast once for preservation
-        toast({
-          title: "Cart Preserved",
-          description: `${finalGuestItems.length} items saved for your next visit.`,
-        });
-        
-        console.log('[CART CONTEXT] ✅ Cart preservation completed successfully');
-      } catch (error) {
-        console.error('[CART CONTEXT] ❌ Error preserving cart data:', error);
-      }
-    } else if (hasExistingGuestItems) {
-      console.log('[CART CONTEXT] 🔄 No authenticated cart items but preserving existing guest items');
-      // Load existing guest cart without clearing it
-      await loadGuestCartAsCart();
-    } else {
-      console.log('[CART CONTEXT] ℹ️ No cart items to preserve on logout');
-      // Still load guest cart in case there were previous guest items
-      await loadGuestCartAsCart();
-    }
-    
-    // Clean up preservation flag after a short delay
+    // Clean up clearing flag after a short delay
     setTimeout(() => {
-      localStorage.removeItem('recent_cart_preservation');
+      localStorage.removeItem('recent_cart_clearing');
     }, 3000);
-  }, [cart, loadGuestCartAsCart, toast]);
+  }, []);
 
   // Migrate guest cart when user signs in - ALWAYS run on authentication change
   useEffect(() => {
@@ -963,7 +879,7 @@ export function CartProvider({ children }: CartProviderProps) {
       } else if (!isAuthenticated) {
         // When user logs out, preserve authenticated cart data as guest cart (run once)
         migrationTimeout = setTimeout(() => {
-          preserveCartDataOnLogout();
+          clearCartOnLogout();
         }, 100);
       }
     }
