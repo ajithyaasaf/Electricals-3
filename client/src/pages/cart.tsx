@@ -159,7 +159,10 @@ export default function Cart() {
               <Button 
                 variant="outline" 
                 size="sm"
-                onClick={signInWithGoogle}
+                onClick={() => {
+                  // Open auth modal instead of direct Google sign-in
+                  document.dispatchEvent(new CustomEvent('openAuth'));
+                }}
               >
                 Sign In
               </Button>

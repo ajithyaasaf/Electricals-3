@@ -203,9 +203,7 @@ export default function Checkout() {
         description: "You need to sign in to place an order. Your cart items will be saved.",
         variant: "default",
       });
-      setTimeout(() => {
-        signInWithGoogle();
-      }, 1000);
+      // Don't automatically call signInWithGoogle, let user choose
       return;
     }
 
@@ -294,7 +292,10 @@ export default function Checkout() {
                   variant="outline" 
                   size="sm" 
                   className="mt-2 text-blue-600 border-blue-300 hover:bg-blue-100 dark:text-blue-400 dark:border-blue-600 dark:hover:bg-blue-900/40"
-                  onClick={() => signInWithGoogle()}
+                  onClick={() => {
+                    // Show auth modal instead of direct Google sign-in
+                    document.dispatchEvent(new CustomEvent('openAuth'));
+                  }}
                 >
                   Sign In Now
                 </Button>

@@ -68,7 +68,7 @@ export default function Account() {
     email: "",
   });
 
-  // Redirect to login if not authenticated
+  // Redirect to home if not authenticated
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
       toast({
@@ -77,8 +77,8 @@ export default function Account() {
         variant: "destructive",
       });
       setTimeout(() => {
-        signInWithGoogle();
-      }, 1000);
+        window.location.href = '/';
+      }, 1500);
     }
   }, [isAuthenticated, authLoading, toast]);
 
