@@ -347,9 +347,14 @@ class CartStorageManager {
    * Clear guest cart and related data
    */
   static clearGuestCart(): void {
-    localStorage.removeItem(GUEST_CART_KEY);
-    localStorage.removeItem(MIGRATION_FLAG_KEY);
-    this.triggerCrossTabSync();
+    try {
+      localStorage.removeItem(GUEST_CART_KEY);
+      localStorage.removeItem(MIGRATION_FLAG_KEY);
+      this.triggerCrossTabSync();
+      console.log('[CART STORAGE] ✅ Guest cart cleared from localStorage');
+    } catch (error) {
+      console.error('[CART STORAGE] Error clearing guest cart:', error);
+    }
   }
 
   /**
@@ -1130,13 +1135,9 @@ export function CartProvider({ children }: CartProviderProps) {
         
         console.log('[CART CONTEXT] Updated guest cart atomically:', newCart);
         
-        // Immediately save to localStorage to prevent race conditions
-        try {
-          localStorage.setItem(GUEST_CART_KEY, JSON.stringify(newCart));
-          console.log('[CART CONTEXT] Guest cart saved to localStorage immediately');
-        } catch (error) {
-          console.error('[CART CONTEXT] Error saving guest cart to localStorage:', error);
-        }
+        // CRITICAL: Immediately save to localStorage using CartStorageManager
+        CartStorageManager.saveGuestCart(newCart, true); // Skip cross-tab sync to prevent loops
+        console.log('[CART CONTEXT] ✅ Guest cart add operation persisted to localStorage:', newCart.length, 'items');
         
         return newCart;
       });
@@ -1181,14 +1182,23 @@ export function CartProvider({ children }: CartProviderProps) {
         });
       }
     } else {
-      // Guest cart - immediate removal with instant cart object update
-      const newGuestCart = guestCart.filter(item => item.id !== itemId);
-      setGuestCart(newGuestCart);
+      // Guest mode - CRITICAL: Update both state and localStorage atomically
+      console.log('[CART CONTEXT] Removing item from guest cart:', itemId);
+      
+      // Update guest cart array with immediate localStorage sync
+      setGuestCart(prev => {
+        const updatedCart = prev.filter(item => item.id !== itemId);
+        console.log('[CART CONTEXT] Removed item from guest cart:', itemId);
+        
+        // CRITICAL: Immediately save to localStorage using CartStorageManager
+        CartStorageManager.saveGuestCart(updatedCart, true); // Skip cross-tab sync to prevent loops
+        console.log('[CART CONTEXT] ✅ Guest cart persisted to localStorage:', updatedCart.length, 'items');
+        
+        return updatedCart;
+      });
       
       // Immediately update the cart object as well for instant UI sync using reducer
       dispatch({ type: 'REMOVE_ITEM', payload: { itemId } });
-      
-      console.log('[CART CONTEXT] Removed item from guest cart:', itemId);
       
       toast({
         title: "Removed",
@@ -1227,12 +1237,17 @@ export function CartProvider({ children }: CartProviderProps) {
           description: "Quantity updated successfully",
         });
       } else {
-        // For guest cart, update localStorage synchronously
+        // For guest cart, update localStorage synchronously with immediate persistence
         setGuestCart(prev => {
           const updated = prev.map(item => 
-            item.id === itemId ? { ...item, quantity: finalQuantity } : item
+            item.id === itemId ? { ...item, quantity: finalQuantity, lastUpdated: Date.now() } : item
           );
           console.log('[CART CONTEXT] Processed guest quantity update:', { itemId, finalQuantity });
+          
+          // CRITICAL: Immediately save to localStorage
+          CartStorageManager.saveGuestCart(updated, true); // Skip cross-tab sync
+          console.log('[CART CONTEXT] ✅ Guest cart quantity update persisted to localStorage');
+          
           return updated;
         });
         await loadGuestCartAsCart();
@@ -1265,11 +1280,17 @@ export function CartProvider({ children }: CartProviderProps) {
 
     if (!isAuthenticated) {
       // For guest cart, also update localStorage synchronously
-      setGuestCart(prev => 
-        prev.map(item => 
-          item.id === itemId ? { ...item, quantity, addedAt: Date.now() } : item
-        )
-      );
+      setGuestCart(prev => {
+        const updated = prev.map(item => 
+          item.id === itemId ? { ...item, quantity, lastUpdated: Date.now() } : item
+        );
+        
+        // CRITICAL: Immediately persist to localStorage
+        CartStorageManager.saveGuestCart(updated, true); // Skip cross-tab sync
+        console.log('[CART CONTEXT] ✅ Guest cart optimistic update persisted to localStorage');
+        
+        return updated;
+      });
     }
 
     // Queue the update for processing with debouncing
@@ -1334,9 +1355,15 @@ export function CartProvider({ children }: CartProviderProps) {
         setIsLoading(false);
       }
     } else {
-      // Guest cart - immediate clear
+      // Guest mode - CRITICAL: Clear both state and localStorage atomically
+      console.log('[CART CONTEXT] Clearing guest cart completely');
+      
+      // Clear guest cart state
       setGuestCart([]);
-      localStorage.removeItem(GUEST_CART_KEY);
+      
+      // CRITICAL: Clear localStorage using CartStorageManager
+      CartStorageManager.clearGuestCart();
+      console.log('[CART CONTEXT] ✅ Guest cart cleared from localStorage');
       
       // Set cart to empty state immediately using reducer
       dispatch({ type: 'SET_CART', payload: {
