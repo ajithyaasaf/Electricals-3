@@ -406,8 +406,8 @@ export default function Home() {
                 <p className="text-sm text-gray-600">All our electricians are fully licensed and insured professionals</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center mb-3">
-                  <Clock className="text-lime-600 text-lg" />
+                <div className="w-12 h-12 bg-electric-100 rounded-full flex items-center justify-center mb-3">
+                  <Clock className="text-electric-600 text-lg" />
                 </div>
                 <h5 className="font-semibold text-gray-900 mb-1">Same-Day Service</h5>
                 <p className="text-sm text-gray-600">Available for most electrical repairs and installations</p>
@@ -455,8 +455,8 @@ export default function Home() {
             </Link>
 
             <Link href="/account?tab=saved" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-lime-200 transition-colors">
-                <Heart className="text-lime-600 w-6 h-6" />
+              <div className="w-12 h-12 bg-electric-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-electric-200 transition-colors">
+                <Heart className="text-electric-600 w-6 h-6" />
               </div>
               <h5 className="font-semibold text-gray-900 mb-1">Saved Items</h5>
               <p className="text-sm text-gray-600">Your wishlist and favorites</p>

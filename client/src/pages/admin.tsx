@@ -419,7 +419,7 @@ function AdminDashboard() {
                       <p className="text-sm font-medium text-gray-600">Total Orders</p>
                       <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
                     </div>
-                    <ShoppingCart className="w-8 h-8 text-lime-600" />
+                    <ShoppingCart className="w-8 h-8 text-electric-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -706,7 +706,7 @@ function AdminDashboard() {
                   <CardTitle>Services</CardTitle>
                   <Dialog open={serviceDialogOpen} onOpenChange={setServiceDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="bg-lime-600 hover:bg-lime-700">
+                      <Button className="bg-electric-600 hover:bg-electric-700">
                         <Plus className="w-4 h-4 mr-2" />
                         Add Service
                       </Button>
@@ -826,7 +826,7 @@ function AdminDashboard() {
                           <Button 
                             type="submit" 
                             disabled={createServiceMutation.isPending}
-                            className="w-full bg-lime-600 hover:bg-lime-700"
+                            className="w-full bg-electric-600 hover:bg-electric-700"
                           >
                             {createServiceMutation.isPending 
                               ? "Saving..." 

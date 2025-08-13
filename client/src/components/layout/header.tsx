@@ -316,7 +316,7 @@ export function Header() {
                                   <SmartLink
                                     key={item.name}
                                     href={item.href}
-                                    className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-lime-600 active:text-lime-700 hover:bg-white active:bg-copper-25 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
+                                    className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-electric-600 active:text-electric-700 hover:bg-white active:bg-copper-25 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
                                     style={{ minHeight: "44px" }} // iOS minimum touch target
                                     onClick={() => setMobileMenuOpen(false)}
                                   >
@@ -340,7 +340,7 @@ export function Header() {
                                 <SmartLink
                                   key={item.name}
                                   href={item.href}
-                                  className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-lime-600 active:text-lime-700 hover:bg-copper-50 active:bg-copper-100 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
+                                  className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-electric-600 active:text-electric-700 hover:bg-copper-50 active:bg-copper-100 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
                                   style={{ minHeight: "44px" }} // iOS minimum touch target
                                   onClick={() => setMobileMenuOpen(false)}
                                 >
@@ -422,7 +422,7 @@ export function Header() {
 
             {/* Cart */}
             <Button
-              className="flex items-center space-x-1 sm:space-x-2 bg-lime-600 text-graphite hover:bg-lime-700 active:bg-lime-800 relative h-10 sm:h-11 px-3 sm:px-4 touch-manipulation"
+              className="flex items-center space-x-1 sm:space-x-2 bg-electric-600 text-graphite hover:bg-electric-700 active:bg-electric-800 relative h-10 sm:h-11 px-3 sm:px-4 touch-manipulation"
               style={{ minHeight: "44px" }} // iOS minimum touch target
               onClick={() => setCartOpen(true)}
             >

@@ -143,7 +143,7 @@ export default function Services() {
         </div>
 
         {/* Service Features Banner */}
-        <div className="bg-gradient-to-r from-copper-50 to-lime-50 rounded-xl p-8 mb-8">
+        <div className="bg-gradient-to-r from-copper-50 to-electric-50 rounded-xl p-8 mb-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
             <div className="flex flex-col items-center">
               <div className="w-12 h-12 bg-copper-100 rounded-full flex items-center justify-center mb-3">
@@ -153,8 +153,8 @@ export default function Services() {
               <p className="text-sm text-gray-600">All our electricians are fully licensed and insured professionals</p>
             </div>
             <div className="flex flex-col items-center">
-              <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center mb-3">
-                <Clock className="text-lime-600 text-lg" />
+              <div className="w-12 h-12 bg-electric-100 rounded-full flex items-center justify-center mb-3">
+                <Clock className="text-electric-600 text-lg" />
               </div>
               <h5 className="font-semibold text-gray-900 mb-1">Same-Day Service</h5>
               <p className="text-sm text-gray-600">Available for most electrical repairs and installations</p>

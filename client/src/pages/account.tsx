@@ -549,7 +549,7 @@ export default function Account() {
                     <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No service bookings</h3>
                     <p className="text-gray-600 mb-4">Book a service to see your appointments here.</p>
-                    <Button asChild className="bg-lime-600 hover:bg-lime-700">
+                    <Button asChild className="bg-electric-600 hover:bg-electric-700">
                       <Link href="/services">Browse Services</Link>
                     </Button>
                   </div>

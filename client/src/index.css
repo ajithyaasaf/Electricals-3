@@ -73,7 +73,7 @@ input:focus {
   --primary-foreground: hsl(0, 0%, 98%);
   --secondary: hsl(60, 4.8%, 95.9%);
   --secondary-foreground: hsl(24, 9.8%, 10%);
-  --accent: hsl(82, 74%, 56%);
+  --accent: hsl(210, 100%, 58%);
   --accent-foreground: hsl(212, 45%, 12%);
   --destructive: hsl(0, 84.2%, 60.2%);
   --destructive-foreground: hsl(60, 9.1%, 97.8%);
@@ -92,17 +92,17 @@ input:focus {
   --copper-800: hsl(20, 51%, 28%);
   --copper-900: hsl(20, 51%, 21%);
   
-  /* Accent Lime colors - Updated to match prompt #A3E635 */
-  --lime-50: hsl(82, 74%, 97%);
-  --lime-100: hsl(82, 74%, 94%);
-  --lime-200: hsl(82, 74%, 87%);
-  --lime-300: hsl(82, 74%, 76%);
-  --lime-400: hsl(82, 74%, 66%);
-  --lime-500: hsl(82, 74%, 56%);
-  --lime-600: hsl(82, 74%, 49%);
-  --lime-700: hsl(82, 74%, 42%);
-  --lime-800: hsl(82, 74%, 35%);
-  --lime-900: hsl(82, 74%, 28%);
+  /* Accent Electric Blue - Professional and trustworthy for electrical industry */
+  --electric-50: hsl(210, 100%, 97%);
+  --electric-100: hsl(210, 100%, 94%);
+  --electric-200: hsl(210, 100%, 87%);
+  --electric-300: hsl(210, 100%, 78%);
+  --electric-400: hsl(210, 100%, 68%);
+  --electric-500: hsl(210, 100%, 58%);
+  --electric-600: hsl(210, 100%, 48%);
+  --electric-700: hsl(210, 100%, 38%);
+  --electric-800: hsl(210, 100%, 28%);
+  --electric-900: hsl(210, 100%, 18%);
   
   /* Charcoal and Graphite colors - From prompt */
   --charcoal: hsl(212, 30%, 17%);
@@ -125,7 +125,7 @@ input:focus {
   --primary-foreground: hsl(0, 0%, 98%);
   --secondary: hsl(240, 3.7%, 15.9%);
   --secondary-foreground: hsl(0, 0%, 98%);
-  --accent: hsl(82, 74%, 56%);
+  --accent: hsl(210, 100%, 58%);
   --accent-foreground: hsl(0, 0%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
   --destructive-foreground: hsl(0, 0%, 98%);
@@ -165,27 +165,27 @@ input:focus {
   .bg-copper-800 { background-color: var(--copper-800); }
   .bg-copper-900 { background-color: var(--copper-900); }
   
-  .text-lime-50 { color: var(--lime-50); }
-  .text-lime-100 { color: var(--lime-100); }
-  .text-lime-200 { color: var(--lime-200); }
-  .text-lime-300 { color: var(--lime-300); }
-  .text-lime-400 { color: var(--lime-400); }
-  .text-lime-500 { color: var(--lime-500); }
-  .text-lime-600 { color: var(--lime-600); }
-  .text-lime-700 { color: var(--lime-700); }
-  .text-lime-800 { color: var(--lime-800); }
-  .text-lime-900 { color: var(--lime-900); }
+  .text-electric-50 { color: var(--electric-50); }
+  .text-electric-100 { color: var(--electric-100); }
+  .text-electric-200 { color: var(--electric-200); }
+  .text-electric-300 { color: var(--electric-300); }
+  .text-electric-400 { color: var(--electric-400); }
+  .text-electric-500 { color: var(--electric-500); }
+  .text-electric-600 { color: var(--electric-600); }
+  .text-electric-700 { color: var(--electric-700); }
+  .text-electric-800 { color: var(--electric-800); }
+  .text-electric-900 { color: var(--electric-900); }
   
-  .bg-lime-50 { background-color: var(--lime-50); }
-  .bg-lime-100 { background-color: var(--lime-100); }
-  .bg-lime-200 { background-color: var(--lime-200); }
-  .bg-lime-300 { background-color: var(--lime-300); }
-  .bg-lime-400 { background-color: var(--lime-400); }
-  .bg-lime-500 { background-color: var(--lime-500); }
-  .bg-lime-600 { background-color: var(--lime-600); }
-  .bg-lime-700 { background-color: var(--lime-700); }
-  .bg-lime-800 { background-color: var(--lime-800); }
-  .bg-lime-900 { background-color: var(--lime-900); }
+  .bg-electric-50 { background-color: var(--electric-50); }
+  .bg-electric-100 { background-color: var(--electric-100); }
+  .bg-electric-200 { background-color: var(--electric-200); }
+  .bg-electric-300 { background-color: var(--electric-300); }
+  .bg-electric-400 { background-color: var(--electric-400); }
+  .bg-electric-500 { background-color: var(--electric-500); }
+  .bg-electric-600 { background-color: var(--electric-600); }
+  .bg-electric-700 { background-color: var(--electric-700); }
+  .bg-electric-800 { background-color: var(--electric-800); }
+  .bg-electric-900 { background-color: var(--electric-900); }
   
   .border-copper-50 { border-color: var(--copper-50); }
   .border-copper-100 { border-color: var(--copper-100); }
@@ -198,21 +198,21 @@ input:focus {
   .border-copper-800 { border-color: var(--copper-800); }
   .border-copper-900 { border-color: var(--copper-900); }
   
-  .border-lime-50 { border-color: var(--lime-50); }
-  .border-lime-100 { border-color: var(--lime-100); }
-  .border-lime-200 { border-color: var(--lime-200); }
-  .border-lime-300 { border-color: var(--lime-300); }
-  .border-lime-400 { border-color: var(--lime-400); }
-  .border-lime-500 { border-color: var(--lime-500); }
-  .border-lime-600 { border-color: var(--lime-600); }
-  .border-lime-700 { border-color: var(--lime-700); }
-  .border-lime-800 { border-color: var(--lime-800); }
-  .border-lime-900 { border-color: var(--lime-900); }
+  .border-electric-50 { border-color: var(--electric-50); }
+  .border-electric-100 { border-color: var(--electric-100); }
+  .border-electric-200 { border-color: var(--electric-200); }
+  .border-electric-300 { border-color: var(--electric-300); }
+  .border-electric-400 { border-color: var(--electric-400); }
+  .border-electric-500 { border-color: var(--electric-500); }
+  .border-electric-600 { border-color: var(--electric-600); }
+  .border-electric-700 { border-color: var(--electric-700); }
+  .border-electric-800 { border-color: var(--electric-800); }
+  .border-electric-900 { border-color: var(--electric-900); }
   
   .hover\:bg-copper-700:hover { background-color: var(--copper-700); }
-  .hover\:bg-lime-700:hover { background-color: var(--lime-700); }
+  .hover\:bg-electric-700:hover { background-color: var(--electric-700); }
   .hover\:text-copper-600:hover { color: var(--copper-600); }
-  .hover\:text-lime-600:hover { color: var(--lime-600); }
+  .hover\:text-electric-600:hover { color: var(--electric-600); }
   
   /* Charcoal and Graphite utilities */
   .text-charcoal { color: var(--charcoal); }
