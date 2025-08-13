@@ -688,7 +688,7 @@ export function registerCartRoutes(app: Express) {
       console.log(`[CART MIGRATION] 🔍 Final verification: ${finalCartItems.length} total items in database`);
 
       // Calculate conflicts for reporting
-      const conflicts = [];
+      const conflicts: any[] = [];
       const duplicateKeys = new Set();
       
       validatedGuestItems.forEach(guestItem => {

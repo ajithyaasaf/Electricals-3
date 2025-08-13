@@ -816,6 +816,11 @@ export function CartProvider({ children }: CartProviderProps) {
     let migrationTimeout: NodeJS.Timeout;
     
     const migrateGuestCart = async () => {
+      if (!isAuthenticated) {
+        console.log('[CART MIGRATION] ℹ️ User not authenticated, skipping migration');
+        return;
+      }
+
       // Always read current guest cart from localStorage for most up-to-date data
       const currentGuestCartData = localStorage.getItem(GUEST_CART_KEY);
       let currentGuestCart: GuestCartItem[] = [];
@@ -830,10 +835,15 @@ export function CartProvider({ children }: CartProviderProps) {
         localStorage.removeItem(GUEST_CART_KEY);
       }
       
-      if (!isAuthenticated) {
-        console.log('[CART MIGRATION] ℹ️ User not authenticated, skipping migration');
-        return;
+      // Also check current guest cart state as fallback
+      if (currentGuestCart.length === 0 && guestCart.length > 0) {
+        console.log('[CART MIGRATION] 📦 Using guest cart from state as fallback:', guestCart.length, 'items');
+        currentGuestCart = guestCart;
       }
+      
+      console.log('[CART MIGRATION] 🔍 Debug - localStorage items:', currentGuestCart.length);
+      console.log('[CART MIGRATION] 🔍 Debug - state items:', guestCart.length);
+      console.log('[CART MIGRATION] 🔍 Debug - localStorage raw:', currentGuestCartData);
       
       if (currentGuestCart.length === 0) {
         console.log('[CART MIGRATION] ℹ️ No guest cart items to migrate');

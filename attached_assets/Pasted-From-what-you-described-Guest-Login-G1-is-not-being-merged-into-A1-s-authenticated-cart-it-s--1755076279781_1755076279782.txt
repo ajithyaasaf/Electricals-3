@@ -1,0 +1,71 @@
+From what you described:
+
+Guest → Login: G1 is not being merged into A1’s authenticated cart — it’s being dropped.
+
+Login → Logout: The guest cart after logout is taking only the authenticated cart (A1) and overwriting the original guest cart (G1).
+
+What’s wrong
+Guest → Login
+
+You’re replacing the authenticated cart with the server’s existing cart instead of merging.
+
+Or your /api/cart/migrate is ignoring guestCart items because the merge logic is never actually called with the guest cart data.
+
+Login → Logout
+
+You’re always preserving the authenticated cart to guest cart format — which means the original guest cart is lost forever.
+
+This is expected only if your business rule says “after login, guest cart is discarded.”
+
+But your description says you want guest cart merged into auth cart, so the preserved version after logout should contain both sets of products.
+
+How to fix
+Guest → Login
+Client side:
+
+ts
+Copy
+Edit
+// When logging in
+const guestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+await fetch('/api/cart/migrate', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ guestItems: guestCart })
+});
+localStorage.removeItem('guestCart'); // only after success
+Server side /api/cart/migrate:
+
+ts
+Copy
+Edit
+export async function migrateCart(req, res) {
+  const { guestItems } = req.body;
+  const authCart = await getCartForUser(req.user.id); // Firestore or DB
+
+  const merged = mergeCarts(authCart.items, guestItems); // The function I gave earlier
+  await saveCartForUser(req.user.id, merged);
+
+  res.json({ items: merged });
+}
+Login → Logout
+ts
+Copy
+Edit
+function preserveCartOnLogout(authCart) {
+  const guestFormat = authCart.map(item => ({
+    id: `preserved_${Date.now()}_${Math.random()}`,
+    productId: item.productId,
+    serviceId: item.serviceId,
+    quantity: item.quantity,
+    addedAt: Date.now(),
+    customizations: item.customizations || {}
+  }));
+  localStorage.setItem('guestCart', JSON.stringify(guestFormat));
+  setCart({ items: guestFormat }); // update UI immediately
+}
+Key Senior Dev Notes
+After migration, G1 should exist in the authenticated cart. Then, when you log out, the preserved guest cart will contain G1 (plus any auth items added after login).
+
+If you don’t merge at login, logout will never bring G1 back — it’s already lost.
+
