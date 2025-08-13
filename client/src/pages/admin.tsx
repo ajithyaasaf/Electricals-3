@@ -354,7 +354,7 @@ function AdminDashboard() {
                 variant="outline"
                 size="sm"
                 onClick={handleLogout}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 border-copper-200 text-copper-600 hover:bg-copper-50 hover:text-copper-700"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -374,13 +374,43 @@ function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="products">Products</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
-            <TabsTrigger value="categories">Categories</TabsTrigger>
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="bookings">Bookings</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6 bg-copper-50 border-copper-200">
+            <TabsTrigger 
+              value="dashboard" 
+              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
+            >
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger 
+              value="products"
+              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
+            >
+              Products
+            </TabsTrigger>
+            <TabsTrigger 
+              value="services"
+              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
+            >
+              Services
+            </TabsTrigger>
+            <TabsTrigger 
+              value="categories"
+              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
+            >
+              Categories
+            </TabsTrigger>
+            <TabsTrigger 
+              value="orders"
+              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
+            >
+              Orders
+            </TabsTrigger>
+            <TabsTrigger 
+              value="bookings"
+              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
+            >
+              Bookings
+            </TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -395,7 +425,7 @@ function AdminDashboard() {
                         ₹{totalRevenue.toFixed(2)}
                       </p>
                     </div>
-                    <DollarSign className="w-8 h-8 text-green-600" />
+                    <DollarSign className="w-8 h-8 text-lime-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -419,7 +449,7 @@ function AdminDashboard() {
                       <p className="text-sm font-medium text-gray-600">Total Orders</p>
                       <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
                     </div>
-                    <ShoppingCart className="w-8 h-8 text-lime-600" />
+                    <ShoppingCart className="w-8 h-8 text-copper-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -431,7 +461,7 @@ function AdminDashboard() {
                       <p className="text-sm font-medium text-gray-600">Active Services</p>
                       <p className="text-2xl font-bold text-gray-900">{totalServices}</p>
                     </div>
-                    <Activity className="w-8 h-8 text-purple-600" />
+                    <Activity className="w-8 h-8 text-lime-500" />
                   </div>
                 </CardContent>
               </Card>
@@ -453,7 +483,7 @@ function AdminDashboard() {
                   ) : (
                     <div className="space-y-3">
                       {orders.slice(0, 5).map((order: any) => (
-                        <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={order.id} className="flex items-center justify-between p-3 bg-copper-50 rounded-lg">
                           <div>
                             <p className="font-medium">#{order.orderNumber}</p>
                             <p className="text-sm text-gray-600">
@@ -487,7 +517,7 @@ function AdminDashboard() {
                   ) : (
                     <div className="space-y-3">
                       {bookings.slice(0, 5).map((booking: any) => (
-                        <div key={booking.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div key={booking.id} className="flex items-center justify-between p-3 bg-copper-50 rounded-lg">
                           <div>
                             <p className="font-medium">#{booking.bookingNumber}</p>
                             <p className="text-sm text-gray-600">
@@ -514,7 +544,7 @@ function AdminDashboard() {
                   <CardTitle>Products</CardTitle>
                   <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="bg-copper-600 hover:bg-copper-700">
+                      <Button className="bg-copper-600 hover:bg-copper-700 text-white">
                         <Plus className="w-4 h-4 mr-2" />
                         Add Product
                       </Button>
@@ -634,7 +664,7 @@ function AdminDashboard() {
                           <Button 
                             type="submit" 
                             disabled={createProductMutation.isPending}
-                            className="w-full bg-copper-600 hover:bg-copper-700"
+                            className="w-full bg-copper-600 hover:bg-copper-700 text-white"
                           >
                             {createProductMutation.isPending 
                               ? "Saving..." 
@@ -706,7 +736,7 @@ function AdminDashboard() {
                   <CardTitle>Services</CardTitle>
                   <Dialog open={serviceDialogOpen} onOpenChange={setServiceDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="bg-lime-600 hover:bg-lime-700">
+                      <Button className="bg-lime-600 hover:bg-lime-700 text-white">
                         <Plus className="w-4 h-4 mr-2" />
                         Add Service
                       </Button>
@@ -826,7 +856,7 @@ function AdminDashboard() {
                           <Button 
                             type="submit" 
                             disabled={createServiceMutation.isPending}
-                            className="w-full bg-lime-600 hover:bg-lime-700"
+                            className="w-full bg-lime-600 hover:bg-lime-700 text-white"
                           >
                             {createServiceMutation.isPending 
                               ? "Saving..." 
@@ -900,7 +930,7 @@ function AdminDashboard() {
                   <CardTitle>Categories</CardTitle>
                   <Dialog open={categoryDialogOpen} onOpenChange={setCategoryDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="bg-green-600 hover:bg-green-700">
+                      <Button className="bg-lime-500 hover:bg-lime-600 text-white">
                         <Plus className="w-4 h-4 mr-2" />
                         Add Category
                       </Button>
@@ -957,7 +987,7 @@ function AdminDashboard() {
                           <Button 
                             type="submit" 
                             disabled={createCategoryMutation.isPending}
-                            className="w-full bg-green-600 hover:bg-green-700"
+                            className="w-full bg-lime-500 hover:bg-lime-600 text-white"
                           >
                             {createCategoryMutation.isPending ? "Creating..." : "Create Category"}
                           </Button>
