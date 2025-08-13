@@ -278,7 +278,7 @@ class CartStorageManager {
   /**
    * Save guest cart with metadata and schema versioning
    */
-  static saveGuestCart(items: GuestCartItem[]): void {
+  static saveGuestCart(items: GuestCartItem[], skipSync = false): void {
     try {
       const cartData: GuestCartData = {
         items: items.map(item => ({
@@ -293,8 +293,10 @@ class CartStorageManager {
 
       localStorage.setItem(GUEST_CART_KEY, JSON.stringify(cartData));
       
-      // Trigger cross-tab sync
-      this.triggerCrossTabSync();
+      // Trigger cross-tab sync only if not coming from sync event
+      if (!skipSync) {
+        this.triggerCrossTabSync();
+      }
     } catch (error) {
       console.error('[CART STORAGE] Error saving guest cart:', error);
     }
@@ -351,11 +353,17 @@ class CartStorageManager {
   }
 
   /**
-   * Trigger cross-tab synchronization
+   * Trigger cross-tab synchronization with debouncing to prevent loops
    */
+  private static lastSyncTrigger = 0;
   static triggerCrossTabSync(): void {
+    const now = Date.now();
+    if (now - this.lastSyncTrigger < 1000) { // Debounce for 1 second
+      return;
+    }
+    this.lastSyncTrigger = now;
     window.dispatchEvent(new CustomEvent(CROSS_TAB_SYNC_EVENT, {
-      detail: { timestamp: Date.now() }
+      detail: { timestamp: now }
     }));
   }
 
@@ -503,25 +511,31 @@ export function CartProvider({ children }: CartProviderProps) {
 
     loadGuestCart();
 
-    // Cross-tab synchronization listener
-    const handleCrossTabSync = () => {
+    // Cross-tab synchronization listener with loop prevention
+    const handleCrossTabSync = (e: CustomEvent) => {
+      const now = Date.now();
+      if (e.detail?.timestamp && now - e.detail.timestamp > 5000) {
+        return; // Ignore old events
+      }
       console.log('[CART CONTEXT] 📡 Cross-tab sync triggered, reloading guest cart');
       if (!isAuthenticated) {
         loadGuestCart();
       }
     };
 
-    window.addEventListener(CROSS_TAB_SYNC_EVENT, handleCrossTabSync);
-    window.addEventListener('storage', (e) => {
-      if (e.key === GUEST_CART_KEY && !isAuthenticated) {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === GUEST_CART_KEY && !isAuthenticated && e.newValue !== e.oldValue) {
         console.log('[CART CONTEXT] 🔄 Storage event detected, syncing cart');
         loadGuestCart();
       }
-    });
+    };
+
+    window.addEventListener(CROSS_TAB_SYNC_EVENT, handleCrossTabSync as EventListener);
+    window.addEventListener('storage', handleStorageChange);
 
     return () => {
-      window.removeEventListener(CROSS_TAB_SYNC_EVENT, handleCrossTabSync);
-      window.removeEventListener('storage', handleCrossTabSync);
+      window.removeEventListener(CROSS_TAB_SYNC_EVENT, handleCrossTabSync as EventListener);
+      window.removeEventListener('storage', handleStorageChange);
     };
   }, [isAuthenticated]);
 
@@ -716,14 +730,21 @@ export function CartProvider({ children }: CartProviderProps) {
     if (cartToPreserve && cartToPreserve.items && cartToPreserve.items.length > 0) {
       console.log('[CART CONTEXT] 📦 Converting authenticated cart to guest cart:', cartToPreserve.items.length, 'items');
       
-      // Convert authenticated cart items to guest cart format
+      // Convert authenticated cart items to guest cart format with complete schema
       const preservedGuestItems: GuestCartItem[] = cartToPreserve.items.map(item => ({
         id: `preserved_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         productId: item.productId,
         serviceId: item.serviceId,
         quantity: item.quantity,
         addedAt: Date.now(),
-        customizations: item.customizations
+        lastUpdated: Date.now(),
+        customizations: item.customizations || {},
+        notes: item.notes || '',
+        schemaVersion: CART_SCHEMA_VERSION,
+        conflictResolution: {
+          preferGuestQuantity: true,
+          preferGuestCustomizations: true
+        }
       }));
       
       // Merge with any existing guest items to prevent overwriting
@@ -1088,14 +1109,21 @@ export function CartProvider({ children }: CartProviderProps) {
               : item
           );
         } else {
-          // Add new item atomically
+          // Add new item atomically with complete schema
           const newItem: GuestCartItem = {
             id: optimisticItemId, // Use same ID for consistency
             productId,
             serviceId,
             quantity,
             addedAt: Date.now(),
-            customizations
+            lastUpdated: Date.now(),
+            customizations: customizations || {},
+            notes: '',
+            schemaVersion: CART_SCHEMA_VERSION,
+            conflictResolution: {
+              preferGuestQuantity: true,
+              preferGuestCustomizations: true
+            }
           };
           newCart = [...prev, newItem];
         }

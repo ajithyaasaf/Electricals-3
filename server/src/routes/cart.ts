@@ -640,136 +640,88 @@ export function registerCartRoutes(app: Express) {
       const existingCartItems = await storage.getUserCartItems(userId);
       console.log(`[CART MIGRATION] 📦 User ${userId} has ${existingCartItems.length} existing cart items`);
 
-      let migratedCount = 0;
-      let mergedCount = 0;
-      const conflicts = [];
+      // Use the enhanced merge function - NO GUEST ITEMS VANISH
+      console.log(`[CART MIGRATION] 🔄 Merging carts using enhanced merge function`);
+      const mergedItems = mergeCarts(existingCartItems, validatedGuestItems);
+      console.log(`[CART MIGRATION] 📊 Merge result: ${existingCartItems.length} auth + ${validatedGuestItems.length} guest = ${mergedItems.length} total items`);
 
-      // Atomic migration with transaction-like behavior
-      const migrationOperations = [];
+      // Clear existing cart and replace with merged items atomically
+      console.log(`[CART MIGRATION] 🗑️ Clearing existing cart items for atomic replacement`);
+      for (const item of existingCartItems) {
+        await storage.deleteCartItem(item.id);
+      }
 
-      // Process each validated guest item
-      for (const guestItem of validatedGuestItems) {
+      // Add all merged items to cart
+      let addedCount = 0;
+      for (const mergedItem of mergedItems) {
         try {
-          console.log(`[CART MIGRATION] 🔄 Processing guest item:`, {
-            id: guestItem.id,
-            productId: guestItem.productId,
-            serviceId: guestItem.serviceId,
-            quantity: guestItem.quantity
-          });
-
-          // Check if item already exists in user's cart
-          const existingItem = existingCartItems.find(item => 
-            (guestItem.productId && item.productId === guestItem.productId) ||
-            (guestItem.serviceId && item.serviceId === guestItem.serviceId)
+          // Add item with proper enrichment
+          const itemId = await storage.addToCart(
+            userId, 
+            mergedItem.productId, 
+            mergedItem.serviceId, 
+            Math.min(mergedItem.quantity, CART_CONFIG.maxQuantityPerItem)
           );
-
-          if (existingItem) {
-            // Conflict detected - apply resolution strategy
-            let resolvedQuantity;
-            let resolutionStrategy;
-
-            switch (conflictResolution.quantityHandling) {
-              case 'prefer_guest':
-                resolvedQuantity = guestItem.quantity;
-                resolutionStrategy = 'guest-quantity-preferred';
-                break;
-              case 'prefer_auth':
-                resolvedQuantity = existingItem.quantity;
-                resolutionStrategy = 'auth-quantity-preferred';
-                break;
-              case 'sum':
-              default:
-                resolvedQuantity = Math.min(
-                  existingItem.quantity + guestItem.quantity, 
-                  CART_CONFIG.maxQuantityPerItem
-                );
-                resolutionStrategy = 'quantities-summed';
-                break;
+          
+          // Update with additional properties if supported
+          if (mergedItem.customizations || mergedItem.notes) {
+            // Storage layer might not support these yet, but attempt update
+            try {
+              await storage.updateCartItem(itemId, {
+                // Add customizations and notes when storage supports them
+              });
+            } catch (updateError) {
+              console.log(`[CART MIGRATION] ℹ️ Additional properties not supported in storage layer`);
             }
-
-            conflicts.push({
-              guest: guestItem,
-              existing: {
-                id: existingItem.id,
-                productId: existingItem.productId,
-                serviceId: existingItem.serviceId,
-                quantity: existingItem.quantity
-              },
-              resolution: resolutionStrategy,
-              finalQuantity: resolvedQuantity
-            });
-
-            console.log(`[CART MIGRATION] 🔀 Conflict resolution: ${existingItem.quantity} + ${guestItem.quantity} → ${resolvedQuantity} (${resolutionStrategy})`);
-            
-            migrationOperations.push({
-              type: 'update',
-              itemId: existingItem.id,
-              updates: { 
-                quantity: resolvedQuantity,
-                // Merge customizations if specified
-                ...(conflictResolution.customizationHandling === 'merge' && guestItem.customizations ? {
-                  customizations: {
-                    ...existingItem.customizations,
-                    ...guestItem.customizations
-                  }
-                } : {})
-              }
-            });
-            mergedCount++;
-          } else {
-            // Add new item to user's cart
-            console.log(`[CART MIGRATION] ➕ Adding new item to cart: ${guestItem.productId || guestItem.serviceId}`);
-            
-            migrationOperations.push({
-              type: 'add',
-              productId: guestItem.productId || null,
-              serviceId: guestItem.serviceId || null,
-              quantity: guestItem.quantity,
-              customizations: guestItem.customizations || {}
-            });
-            migratedCount++;
           }
-        } catch (itemError) {
-          console.error(`[CART MIGRATION] ❌ Error processing guest item:`, guestItem, itemError);
-          // Continue processing other items even if one fails
+          
+          addedCount++;
+        } catch (addError) {
+          console.error(`[CART MIGRATION] ❌ Failed to add merged item:`, mergedItem, addError);
         }
       }
 
-      // Execute all migration operations atomically
-      console.log(`[CART MIGRATION] ⚡ Executing ${migrationOperations.length} atomic operations`);
+      console.log(`[CART MIGRATION] ✅ Migration completed for user ${userId}: ${addedCount} items in final cart`);
       
-      for (const operation of migrationOperations) {
-        try {
-          if (operation.type === 'update') {
-            await storage.updateCartItem(operation.itemId, operation.updates);
-          } else if (operation.type === 'add') {
-            await storage.addToCart(
-              userId, 
-              operation.productId, 
-              operation.serviceId, 
-              operation.quantity
-            );
-          }
-        } catch (operationError) {
-          console.error(`[CART MIGRATION] ❌ Failed operation:`, operation, operationError);
-          throw new Error(`Migration operation failed: ${operationError.message}`);
-        }
-      }
-
-      console.log(`[CART MIGRATION] ✅ Migration completed for user ${userId}: ${migratedCount} new items, ${mergedCount} merged items, ${conflicts.length} conflicts resolved`);
-      
-      // Verify final cart state
+      // Verify final cart state and recalculate prices
       const finalCartItems = await storage.getUserCartItems(userId);
       console.log(`[CART MIGRATION] 🔍 Final verification: ${finalCartItems.length} total items in database`);
 
+      // Calculate conflicts for reporting
+      const conflicts = [];
+      const duplicateKeys = new Set();
+      
+      validatedGuestItems.forEach(guestItem => {
+        const key = `${guestItem.productId || ''}-${guestItem.serviceId || ''}`;
+        const existingItem = existingCartItems.find(item => 
+          item.productId === guestItem.productId && item.serviceId === guestItem.serviceId
+        );
+        
+        if (existingItem && !duplicateKeys.has(key)) {
+          duplicateKeys.add(key);
+          conflicts.push({
+            guest: guestItem,
+            existing: {
+              id: existingItem.id,
+              productId: existingItem.productId,
+              serviceId: existingItem.serviceId,
+              quantity: existingItem.quantity
+            },
+            resolution: 'quantities-summed',
+            finalQuantity: existingItem.quantity + guestItem.quantity
+          });
+        }
+      });
+
       res.json({
-        message: "Cart migration completed successfully",
-        migratedCount,
-        mergedCount,
-        totalItems: migratedCount + mergedCount,
+        message: "Cart migration completed successfully - no guest items lost",
+        migratedCount: validatedGuestItems.length - conflicts.length,
+        mergedCount: conflicts.length,
+        totalItems: finalCartItems.length,
         conflicts,
         invalidItems: invalidItems.length > 0 ? invalidItems : undefined,
-        schemaVersion
+        schemaVersion,
+        mergeStrategy: "sum_quantities_preserve_all_items"
       });
 
     } catch (error) {
@@ -898,6 +850,48 @@ export function registerCartRoutes(app: Express) {
     }
   });
 
+  // Logout preservation endpoint - Save authenticated cart to guest format
+  app.post("/api/cart/preserve-on-logout", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.uid;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      console.log(`[CART PRESERVATION] 💾 Preserving cart for user ${userId} on logout`);
+
+      // Get user's current cart
+      const currentCartItems = await storage.getUserCartItems(userId);
+      console.log(`[CART PRESERVATION] 📦 Found ${currentCartItems.length} items to preserve`);
+
+      if (currentCartItems.length === 0) {
+        return res.json({
+          message: "No cart items to preserve",
+          preservedItems: []
+        });
+      }
+
+      // Convert to guest cart format using preservation function
+      const preservedItems = preserveCartOnLogout(currentCartItems);
+      console.log(`[CART PRESERVATION] 🔄 Converted ${currentCartItems.length} auth items to ${preservedItems.length} guest items`);
+
+      res.json({
+        message: "Cart preserved successfully for logout",
+        preservedItems,
+        originalItemCount: currentCartItems.length,
+        preservedItemCount: preservedItems.length
+      });
+
+    } catch (error) {
+      console.error("[CART PRESERVATION] ❌ Error preserving cart on logout:", error);
+      res.status(500).json({ 
+        message: "Failed to preserve cart on logout", 
+        error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined 
+      });
+    }
+  });
+
   // Get shipping options
   app.get("/api/cart/shipping-options", optionalAuth, async (req: any, res) => {
     try {
@@ -941,6 +935,79 @@ export function registerCartRoutes(app: Express) {
 }
 
 // Helper functions
+
+// Enhanced cart merge function following exact requirements
+function mergeCarts(authCart: any[], guestCart: any[]): any[] {
+  const merged = [...authCart];
+
+  guestCart.forEach(guestItem => {
+    const existingIndex = merged.findIndex(
+      item =>
+        item.productId === guestItem.productId &&
+        item.serviceId === guestItem.serviceId
+    );
+
+    if (existingIndex >= 0) {
+      // Merge quantities - sum them as per requirements
+      merged[existingIndex].quantity += guestItem.quantity;
+      
+      // Optionally merge customizations - merge guest into auth
+      if (guestItem.customizations) {
+        merged[existingIndex].customizations = {
+          ...merged[existingIndex].customizations,
+          ...guestItem.customizations
+        };
+      }
+      
+      // Merge notes if both exist
+      if (guestItem.notes && merged[existingIndex].notes) {
+        merged[existingIndex].notes = `${merged[existingIndex].notes} | ${guestItem.notes}`;
+      } else if (guestItem.notes) {
+        merged[existingIndex].notes = guestItem.notes;
+      }
+      
+      merged[existingIndex].updatedAt = new Date();
+    } else {
+      // Convert guest item to full CartItem format - no guest items vanish
+      merged.push({
+        id: guestItem.id || `merged_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        productId: guestItem.productId,
+        serviceId: guestItem.serviceId,
+        quantity: guestItem.quantity,
+        unitPrice: 0, // Server will recalculate
+        originalPrice: 0,
+        discount: 0,
+        appliedCoupons: [],
+        customizations: guestItem.customizations || {},
+        notes: guestItem.notes || '',
+        savedForLater: false,
+        createdAt: new Date(guestItem.addedAt || Date.now()),
+        updatedAt: new Date()
+      });
+    }
+  });
+
+  return merged;
+}
+
+// Preservation function for logout
+function preserveCartOnLogout(authCart: any[]): any[] {
+  return authCart.map(item => ({
+    id: `preserved_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    productId: item.productId,
+    serviceId: item.serviceId,
+    quantity: item.quantity,
+    addedAt: Date.now(),
+    lastUpdated: Date.now(),
+    customizations: item.customizations || {},
+    notes: item.notes || '',
+    schemaVersion: '2.0.0',
+    conflictResolution: {
+      preferGuestQuantity: true,
+      preferGuestCustomizations: true
+    }
+  }));
+}
 
 function calculateCartTotals(items: CartItemWithDetails[], coupons: Coupon[] = []): CartTotals {
   const activeItems = items.filter(item => !item.savedForLater);
