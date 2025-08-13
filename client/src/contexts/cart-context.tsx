@@ -5,15 +5,29 @@ import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import type { Cart, CartItem } from '@shared/cart-types';
 
-// Enhanced guest cart item interface
+// Enhanced guest cart item interface with schema versioning and conflict resolution
 export interface GuestCartItem {
   id: string;
   productId?: string;
   serviceId?: string;
   quantity: number;
   addedAt: number;
+  lastUpdated: number; // For expiry tracking and cross-tab sync
   customizations?: Record<string, any>;
   notes?: string;
+  schemaVersion: string; // For backward compatibility
+  conflictResolution?: {
+    preferGuestQuantity: boolean; // True to prefer guest quantity in conflicts
+    preferGuestCustomizations: boolean; // True to prefer guest customizations
+  };
+}
+
+// Guest cart wrapper with metadata
+export interface GuestCartData {
+  items: GuestCartItem[];
+  schemaVersion: string;
+  lastUpdated: number;
+  expiryHours: number; // Auto-cleanup threshold
 }
 
 // Cart reducer actions
@@ -203,12 +217,249 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// Storage keys
+// Storage keys and configuration
 const GUEST_CART_KEY = 'guestCart';
 const MIGRATION_FLAG_KEY = 'cartMigrated';
+const CART_SCHEMA_VERSION = '2.0.0';
+const CART_EXPIRY_HOURS = 72; // 3 days
+const CROSS_TAB_SYNC_EVENT = 'cartSync';
 
 interface CartProviderProps {
   children: ReactNode;
+}
+
+// Enhanced cart utility functions with improved data integrity
+class CartStorageManager {
+  /**
+   * Load guest cart with schema validation and expiry handling
+   */
+  static loadGuestCart(): GuestCartItem[] {
+    try {
+      const stored = localStorage.getItem(GUEST_CART_KEY);
+      if (!stored) return [];
+
+      const parsed = JSON.parse(stored);
+      
+      // Handle legacy format (array) or new format (object with metadata)
+      let cartData: GuestCartData;
+      if (Array.isArray(parsed)) {
+        // Legacy format - migrate to new structure
+        cartData = {
+          items: parsed.map(item => this.migrateGuestItem(item)),
+          schemaVersion: CART_SCHEMA_VERSION,
+          lastUpdated: Date.now(),
+          expiryHours: CART_EXPIRY_HOURS
+        };
+        this.saveGuestCart(cartData.items);
+      } else {
+        cartData = parsed;
+      }
+
+      // Check for expiry
+      if (this.isCartExpired(cartData)) {
+        console.log('[CART STORAGE] Cart expired, clearing data');
+        this.clearGuestCart();
+        return [];
+      }
+
+      // Validate and migrate items if needed
+      const validItems = cartData.items
+        .map(item => this.migrateGuestItem(item))
+        .filter(item => this.isValidGuestItem(item));
+
+      return validItems;
+    } catch (error) {
+      console.error('[CART STORAGE] Error loading guest cart:', error);
+      this.clearGuestCart();
+      return [];
+    }
+  }
+
+  /**
+   * Save guest cart with metadata and schema versioning
+   */
+  static saveGuestCart(items: GuestCartItem[]): void {
+    try {
+      const cartData: GuestCartData = {
+        items: items.map(item => ({
+          ...item,
+          lastUpdated: Date.now(),
+          schemaVersion: item.schemaVersion || CART_SCHEMA_VERSION
+        })),
+        schemaVersion: CART_SCHEMA_VERSION,
+        lastUpdated: Date.now(),
+        expiryHours: CART_EXPIRY_HOURS
+      };
+
+      localStorage.setItem(GUEST_CART_KEY, JSON.stringify(cartData));
+      
+      // Trigger cross-tab sync
+      this.triggerCrossTabSync();
+    } catch (error) {
+      console.error('[CART STORAGE] Error saving guest cart:', error);
+    }
+  }
+
+  /**
+   * Migrate legacy guest cart item to current schema
+   */
+  static migrateGuestItem(item: any): GuestCartItem {
+    return {
+      id: item.id || `migrated_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      productId: item.productId,
+      serviceId: item.serviceId,
+      quantity: item.quantity || 1,
+      addedAt: item.addedAt || Date.now(),
+      lastUpdated: item.lastUpdated || Date.now(),
+      customizations: item.customizations || {},
+      notes: item.notes || '',
+      schemaVersion: CART_SCHEMA_VERSION,
+      conflictResolution: item.conflictResolution || {
+        preferGuestQuantity: true,
+        preferGuestCustomizations: true
+      }
+    };
+  }
+
+  /**
+   * Validate guest cart item structure
+   */
+  static isValidGuestItem(item: any): boolean {
+    return !!(
+      item.id && 
+      (item.productId || item.serviceId) && 
+      typeof item.quantity === 'number' && 
+      item.quantity > 0
+    );
+  }
+
+  /**
+   * Check if cart data has expired
+   */
+  static isCartExpired(cartData: GuestCartData): boolean {
+    const expiryTime = cartData.lastUpdated + (cartData.expiryHours * 60 * 60 * 1000);
+    return Date.now() > expiryTime;
+  }
+
+  /**
+   * Clear guest cart and related data
+   */
+  static clearGuestCart(): void {
+    localStorage.removeItem(GUEST_CART_KEY);
+    localStorage.removeItem(MIGRATION_FLAG_KEY);
+    this.triggerCrossTabSync();
+  }
+
+  /**
+   * Trigger cross-tab synchronization
+   */
+  static triggerCrossTabSync(): void {
+    window.dispatchEvent(new CustomEvent(CROSS_TAB_SYNC_EVENT, {
+      detail: { timestamp: Date.now() }
+    }));
+  }
+
+  /**
+   * Atomic merge operation with conflict resolution
+   */
+  static mergeCartItems(
+    guestItems: GuestCartItem[], 
+    authItems: CartItem[]
+  ): { merged: CartItem[]; conflicts: Array<{ guest: GuestCartItem; auth: CartItem; resolution: string }> } {
+    const merged: CartItem[] = [...authItems];
+    const conflicts: Array<{ guest: GuestCartItem; auth: CartItem; resolution: string }> = [];
+
+    for (const guestItem of guestItems) {
+      const existingIndex = merged.findIndex(authItem => 
+        authItem.productId === guestItem.productId && 
+        authItem.serviceId === guestItem.serviceId
+      );
+
+      if (existingIndex >= 0) {
+        // Conflict detected - apply resolution rules
+        const authItem = merged[existingIndex];
+        const resolution = this.resolveCartConflict(guestItem, authItem);
+        
+        merged[existingIndex] = resolution.resolvedItem;
+        conflicts.push({
+          guest: guestItem,
+          auth: authItem,
+          resolution: resolution.strategy
+        });
+      } else {
+        // No conflict - add guest item as new cart item
+        const newCartItem: CartItem = {
+          id: guestItem.id,
+          productId: guestItem.productId,
+          serviceId: guestItem.serviceId,
+          quantity: guestItem.quantity,
+          unitPrice: 0, // Will be populated by server
+          originalPrice: 0,
+          discount: 0,
+          appliedCoupons: [],
+          customizations: guestItem.customizations || {},
+          notes: guestItem.notes || '',
+          savedForLater: false,
+          createdAt: new Date(guestItem.addedAt),
+          updatedAt: new Date(guestItem.lastUpdated)
+        };
+        merged.push(newCartItem);
+      }
+    }
+
+    return { merged, conflicts };
+  }
+
+  /**
+   * Resolve conflicts between guest and authenticated cart items
+   */
+  static resolveCartConflict(
+    guestItem: GuestCartItem, 
+    authItem: CartItem
+  ): { resolvedItem: CartItem; strategy: string } {
+    const prefs = guestItem.conflictResolution || {
+      preferGuestQuantity: true,
+      preferGuestCustomizations: true
+    };
+
+    let strategy = '';
+    const resolvedItem: CartItem = { ...authItem };
+
+    // Quantity resolution
+    if (prefs.preferGuestQuantity) {
+      resolvedItem.quantity = guestItem.quantity;
+      strategy += 'guest-qty ';
+    } else {
+      // Sum quantities for safety (most common expectation)
+      resolvedItem.quantity = authItem.quantity + guestItem.quantity;
+      strategy += 'sum-qty ';
+    }
+
+    // Customization resolution
+    if (prefs.preferGuestCustomizations && guestItem.customizations) {
+      resolvedItem.customizations = {
+        ...authItem.customizations,
+        ...guestItem.customizations
+      };
+      strategy += 'guest-custom ';
+    }
+
+    // Notes resolution - concatenate if both exist
+    if (guestItem.notes && authItem.notes) {
+      resolvedItem.notes = `${authItem.notes} | ${guestItem.notes}`;
+      strategy += 'concat-notes ';
+    } else if (guestItem.notes) {
+      resolvedItem.notes = guestItem.notes;
+      strategy += 'guest-notes ';
+    }
+
+    resolvedItem.updatedAt = new Date();
+
+    return { 
+      resolvedItem, 
+      strategy: strategy.trim() || 'auth-preferred' 
+    };
+  }
 }
 
 export function CartProvider({ children }: CartProviderProps) {
@@ -242,28 +493,39 @@ export function CartProvider({ children }: CartProviderProps) {
   }>>([]);
   const isProcessingAddOperations = useRef(false);
 
-  // Load guest cart from localStorage on mount
+  // Load guest cart from localStorage on mount with enhanced validation
   useEffect(() => {
     const loadGuestCart = () => {
-      try {
-        const stored = localStorage.getItem(GUEST_CART_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          const validCart = Array.isArray(parsed) ? parsed : [];
-          setGuestCart(validCart);
-          console.log('[CART CONTEXT] Loaded guest cart:', validCart);
-        }
-      } catch (error) {
-        console.error('[CART CONTEXT] Error loading guest cart:', error);
-        localStorage.removeItem(GUEST_CART_KEY);
-        setGuestCart([]);
-      }
+      const validCart = CartStorageManager.loadGuestCart();
+      setGuestCart(validCart);
+      console.log('[CART CONTEXT] 📖 Loading guest cart from localStorage:', validCart.length, 'items');
     };
 
     loadGuestCart();
-  }, []);
 
-  // Save guest cart to localStorage whenever it changes (debounced, but allow immediate writes)
+    // Cross-tab synchronization listener
+    const handleCrossTabSync = () => {
+      console.log('[CART CONTEXT] 📡 Cross-tab sync triggered, reloading guest cart');
+      if (!isAuthenticated) {
+        loadGuestCart();
+      }
+    };
+
+    window.addEventListener(CROSS_TAB_SYNC_EVENT, handleCrossTabSync);
+    window.addEventListener('storage', (e) => {
+      if (e.key === GUEST_CART_KEY && !isAuthenticated) {
+        console.log('[CART CONTEXT] 🔄 Storage event detected, syncing cart');
+        loadGuestCart();
+      }
+    });
+
+    return () => {
+      window.removeEventListener(CROSS_TAB_SYNC_EVENT, handleCrossTabSync);
+      window.removeEventListener('storage', handleCrossTabSync);
+    };
+  }, [isAuthenticated]);
+
+  // Save guest cart to localStorage with enhanced metadata and cross-tab sync
   useEffect(() => {
     // Skip if guest cart is empty or user is authenticated
     if (guestCart.length === 0 || isAuthenticated) {
@@ -276,11 +538,10 @@ export function CartProvider({ children }: CartProviderProps) {
     }
     
     // Debounce localStorage saves to prevent multiple rapid writes
-    // But this is secondary to the immediate saves in addItem
     saveGuestCartTimeoutRef.current = setTimeout(() => {
       try {
-        console.log('[CART CONTEXT] Debounced save of guest cart to localStorage:', guestCart);
-        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(guestCart));
+        console.log('[CART CONTEXT] 💾 Debounced save of guest cart with metadata:', guestCart.length, 'items');
+        CartStorageManager.saveGuestCart(guestCart);
       } catch (error) {
         console.error('[CART CONTEXT] Error saving guest cart:', error);
       }
@@ -332,21 +593,10 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }, []);
 
-  // Load guest cart as Cart object
+  // Load guest cart as Cart object with enhanced validation
   const loadGuestCartAsCart = useCallback(async () => {
-    // Always read from localStorage for most up-to-date data
-    const guestCartData = localStorage.getItem(GUEST_CART_KEY);
-    let currentGuestCart: GuestCartItem[] = [];
-    
-    try {
-      if (guestCartData) {
-        const parsed = JSON.parse(guestCartData);
-        currentGuestCart = Array.isArray(parsed) ? parsed : [];
-      }
-    } catch (error) {
-      console.error('[CART CONTEXT] Error parsing guest cart from localStorage:', error);
-      localStorage.removeItem(GUEST_CART_KEY);
-    }
+    // Use enhanced cart storage manager for robust loading
+    const currentGuestCart = CartStorageManager.loadGuestCart();
     
     console.log('[CART CONTEXT] 📖 Loading guest cart from localStorage:', currentGuestCart.length, 'items');
     
@@ -364,22 +614,22 @@ export function CartProvider({ children }: CartProviderProps) {
         sessionId: undefined,
         shippingAddress: undefined,
         expiresAt: undefined
-      } });
+      }});
       return;
     }
 
     setIsLoading(true);
     try {
       const response = await apiRequest('POST', '/api/cart/guest', {
-        items: currentGuestCart
+        items: currentGuestCart,
+        schemaVersion: CART_SCHEMA_VERSION
       });
       const cartData = await response.json();
       dispatch({ type: 'SET_CART', payload: cartData });
-      // Keep reference for logout preservation
       currentCartRef.current = cartData;
-      console.log('[CART CONTEXT] 📦 Loaded guest cart as Cart:', cartData);
+      console.log('[CART CONTEXT] 📦 Loaded guest cart as Cart with', cartData.items?.length || 0, 'items');
       
-      // Update guest cart state to match localStorage
+      // Sync guest cart state
       setGuestCart(currentGuestCart);
     } catch (error) {
       console.error('[CART CONTEXT] Error loading guest cart:', error);
@@ -502,8 +752,9 @@ export function CartProvider({ children }: CartProviderProps) {
         localStorage.setItem(GUEST_CART_KEY, JSON.stringify(finalGuestItems));
         console.log('[CART CONTEXT] 💾 Preserved cart saved to localStorage:', finalGuestItems);
         
-        // Update guest cart state
-        setGuestCart(finalGuestItems);
+        // Update guest cart state with enhanced items
+        const enhancedGuestItems = finalGuestItems.map(item => CartStorageManager.migrateGuestItem(item));
+        setGuestCart(enhancedGuestItems);
         
         // Load guest cart as Cart object for immediate display
         await loadGuestCartAsCart();
