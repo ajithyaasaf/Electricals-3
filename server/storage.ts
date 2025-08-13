@@ -37,6 +37,7 @@ export interface IStorage {
   createUser(data: CreateUser): Promise<string>;
   getUserById(id: string): Promise<User | null>;
   getUserByEmail(email: string): Promise<User | null>;
+  listUsers(): Promise<User[]>;
   updateUser(id: string, data: Partial<CreateUser>): Promise<void>;
   deleteUser(id: string): Promise<void>;
 
@@ -129,6 +130,10 @@ export class FirestoreStorage implements IStorage {
   async getUserByEmail(email: string): Promise<User | null> {
     const users = await userService.findByField('email', email, 1);
     return users[0] || null;
+  }
+
+  async listUsers(): Promise<User[]> {
+    return userService.getAll();
   }
 
   async updateUser(id: string, data: Partial<CreateUser>): Promise<void> {
