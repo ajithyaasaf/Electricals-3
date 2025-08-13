@@ -14,8 +14,6 @@ interface AuthenticatedRequest extends Request {
 }
 
 // Initialize Firebase Admin SDK with service account
-export let adminDb: admin.firestore.Firestore;
-
 export async function setupFirebaseAuth(app: Express) {
   try {
     // Parse service account key from environment
@@ -27,9 +25,6 @@ export async function setupFirebaseAuth(app: Express) {
         projectId: serviceAccountKey.project_id
       });
     }
-    
-    // Initialize adminDb after the app is initialized
-    adminDb = admin.firestore();
     
     console.log('🔐 Firebase Admin SDK initialized with service account');
     console.log('⚡ Perfect security + Fast performance enabled');
