@@ -8,6 +8,7 @@ Preferred communication style: Simple, everyday language.
 Navigation Preferences: Enterprise-level navigation with smooth transitions, loading states, and scroll restoration.
 
 ## Recent Changes (August 2025)
+- ✅ **Fixed Duplicate User Creation Bug** (August 13, 2025) - Resolved issue where users were being stored multiple times in Firestore by implementing specialized UserService with setDoc() instead of addDoc(), using Firebase UID as document ID to prevent duplicates
 - ✅ **Enhanced Product Filter UX** (August 12, 2025) - Redesigned filters with modern UX patterns: active filter badges, improved visual hierarchy, better mobile experience, clear interaction patterns, and enhanced price range controls
 - ✅ **Migration to Replit Environment Complete** (August 12, 2025) - Successfully migrated from Replit Agent to standard Replit environment with proper guest checkout flow
 - ✅ **Guest Checkout Implementation** (August 12, 2025) - Fixed routing and checkout page to allow guest users to access checkout, fill shipping information, and sign in before order completion

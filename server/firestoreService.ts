@@ -4,6 +4,7 @@ import {
   getDoc, 
   getDocs, 
   addDoc, 
+  setDoc,
   updateDoc, 
   deleteDoc, 
   query, 
@@ -71,7 +72,7 @@ export const convertFirestoreData = <T>(data: any): T => {
 
 // Generic CRUD operations
 export class FirestoreService<T, C> {
-  constructor(private collectionName: string) {}
+  constructor(protected collectionName: string) {}
 
   async create(data: C): Promise<string> {
     const now = new Date();
@@ -149,8 +150,45 @@ export class FirestoreService<T, C> {
   }
 }
 
+// Specialized User Service with Firebase UID as document ID
+export class UserService extends FirestoreService<User, CreateUser> {
+  constructor() {
+    super(COLLECTIONS.USERS);
+  }
+
+  // Override create to use Firebase UID as document ID (prevents duplicates)
+  async create(data: CreateUser): Promise<string> {
+    const { setDoc, doc } = await import('firebase/firestore');
+    const now = new Date();
+    const docData = {
+      ...data,
+      createdAt: Timestamp.fromDate(now),
+      updatedAt: Timestamp.fromDate(now),
+    };
+    
+    // Use the provided ID (Firebase UID) as the document ID
+    const docRef = doc(db, this.collectionName, data.id);
+    await setDoc(docRef, docData);
+    return data.id;
+  }
+
+  // Ensure getById uses the same logic
+  async getById(id: string): Promise<User | null> {
+    const { getDoc, doc } = await import('firebase/firestore');
+    const docRef = doc(db, this.collectionName, id);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = { id: docSnap.id, ...docSnap.data() };
+      return convertFirestoreData<User>(data);
+    }
+    
+    return null;
+  }
+}
+
 // Service instances
-export const userService = new FirestoreService<User, CreateUser>(COLLECTIONS.USERS);
+export const userService = new UserService();
 export const categoryService = new FirestoreService<Category, CreateCategory>(COLLECTIONS.CATEGORIES);
 export const productService = new FirestoreService<Product, CreateProduct>(COLLECTIONS.PRODUCTS);
 export const serviceService = new FirestoreService<Service, CreateService>(COLLECTIONS.SERVICES);

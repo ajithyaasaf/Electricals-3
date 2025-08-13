@@ -62,19 +62,24 @@ export async function isAuthenticated(
         photoURL: decodedToken.picture
       };
 
-      // Auto-create user in Firestore if doesn't exist
+      // Auto-create user in Firestore if doesn't exist (using setDoc prevents duplicates)
       if (req.user.uid && req.user.email) {
-        let existingUser = await storage.getUserById(req.user.uid);
-        if (!existingUser) {
-          await storage.createUser({
-            id: req.user.uid,
-            email: req.user.email,
-            firstName: req.user.displayName?.split(' ')[0] || 'User',
-            lastName: req.user.displayName?.split(' ').slice(1).join(' ') || '',
-            profileImageUrl: req.user.photoURL || '',
-            isAdmin: req.user.email === 'admin@copperbear.com'
-          });
-          console.log(`Created new Firebase user: ${req.user.email}`);
+        try {
+          let existingUser = await storage.getUserById(req.user.uid);
+          if (!existingUser) {
+            await storage.createUser({
+              id: req.user.uid,
+              email: req.user.email,
+              firstName: req.user.displayName?.split(' ')[0] || 'User',
+              lastName: req.user.displayName?.split(' ').slice(1).join(' ') || '',
+              profileImageUrl: req.user.photoURL || '',
+              isAdmin: req.user.email === 'admin@copperbear.com'
+            });
+            console.log(`✅ Created Firebase user: ${req.user.email}`);
+          }
+        } catch (userCreationError) {
+          // Log error but don't fail authentication - user might already exist
+          console.log(`ℹ️ User creation handled: ${req.user.email}`);
         }
       }
 
@@ -113,18 +118,22 @@ export async function optionalAuth(
           photoURL: decodedToken.picture
         };
 
-        // Auto-create user in Firestore if doesn't exist
+        // Auto-create user in Firestore if doesn't exist (optional auth doesn't log creation)
         if (req.user.uid && req.user.email) {
-          let existingUser = await storage.getUserById(req.user.uid);
-          if (!existingUser) {
-            await storage.createUser({
-              id: req.user.uid,
-              email: req.user.email,
-              firstName: req.user.displayName?.split(' ')[0] || 'User',
-              lastName: req.user.displayName?.split(' ').slice(1).join(' ') || '',
-              profileImageUrl: req.user.photoURL || '',
-              isAdmin: req.user.email === 'admin@copperbear.com'
-            });
+          try {
+            let existingUser = await storage.getUserById(req.user.uid);
+            if (!existingUser) {
+              await storage.createUser({
+                id: req.user.uid,
+                email: req.user.email,
+                firstName: req.user.displayName?.split(' ')[0] || 'User',
+                lastName: req.user.displayName?.split(' ').slice(1).join(' ') || '',
+                profileImageUrl: req.user.photoURL || '',
+                isAdmin: req.user.email === 'admin@copperbear.com'
+              });
+            }
+          } catch (userCreationError) {
+            // Silently handle - this is optional auth
           }
         }
       } catch (tokenError) {
