@@ -259,6 +259,15 @@ export default function Auth() {
                   </Button>
                 </div>
               </div>
+              
+              <Button 
+                type="submit" 
+                className="auth-button"
+                disabled={loading}
+                data-testid="button-signup-submit"
+              >
+                {loading ? "Creating Account..." : "SIGN UP"}
+              </Button>
             </form>
           </div>
 
@@ -320,6 +329,15 @@ export default function Auth() {
                 data-testid="button-forgot-password"
               >
                 Forgot Your Password?
+              </Button>
+              
+              <Button 
+                type="submit" 
+                className="auth-button"
+                disabled={loading}
+                data-testid="button-signin-submit"
+              >
+                {loading ? "Signing In..." : "SIGN IN"}
               </Button>
             </form>
           </div>
@@ -396,22 +414,6 @@ export default function Auth() {
                   data-testid="button-toggle-mode"
                 >
                   {!isSignUp ? "SIGN UP" : "SIGN IN"}
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="toggle-button auth-submit-button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (isSignUp) {
-                      signUpForm.handleSubmit(handleSignUp)();
-                    } else {
-                      signInForm.handleSubmit(handleSignIn)();
-                    }
-                  }}
-                  disabled={loading}
-                  data-testid="button-auth-submit"
-                >
-                  {loading ? (isSignUp ? "Creating Account..." : "Signing In...") : (isSignUp ? "SIGN UP" : "SIGN IN")}
                 </Button>
               </div>
             </div>
