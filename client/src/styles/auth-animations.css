@@ -185,12 +185,13 @@
   width: 200%;
   transform: translateX(0);
   transition: transform 0.6s ease-in-out;
-  border-radius: 80px 0 0 80px;
+  border-radius: 0 120px 120px 0;
+  overflow: hidden;
 }
 
 .auth-container.active .toggle {
   transform: translateX(50%);
-  border-radius: 0 80px 80px 0;
+  border-radius: 120px 0 0 120px;
 }
 
 .toggle-panel {
