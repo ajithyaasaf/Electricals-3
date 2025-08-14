@@ -224,68 +224,53 @@
 }
 
 .toggle-button {
-  border-radius: 20px;
-  border: 2px solid #ffffff;
-  background: transparent;
-  color: #ffffff;
-  font-size: 12px;
-  font-weight: bold;
-  padding: 12px 45px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
-  margin: 8px 0;
-  cursor: pointer;
-  width: auto;
-  min-width: 150px;
+  border-radius: 20px !important;
+  border: 2px solid #ffffff !important;
+  background: transparent !important;
+  color: #ffffff !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  padding: 12px 45px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  transition: all 0.3s ease !important;
+  margin: 8px 0 !important;
+  cursor: pointer !important;
+  width: auto !important;
+  min-width: 150px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  font-weight: bold !important;
+  box-shadow: none !important;
 }
 
 .toggle-button:hover:not(:disabled) {
-  background: #ffffff;
-  color: #b87333;
-  transform: translateY(-2px);
-  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.18);
+  background: #ffffff !important;
+  color: #b87333 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.18) !important;
+  text-shadow: none !important;
 }
 
 .toggle-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.auth-submit-button {
-  background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.8);
-  margin-top: 15px;
-}
-
-.auth-submit-button:hover:not(:disabled) {
-  background: #ffffff;
-  color: #b87333;
-  border: 2px solid #ffffff;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
 }
 
 .toggle h1 {
-  color: #ffffff;
-  font-size: 2rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  color: #ffffff !important;
+  font-size: 2rem !important;
+  font-weight: bold !important;
+  margin-bottom: 1rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
 }
 
 .toggle p {
-  color: #ffffff;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 1.5rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.toggle-button {
   color: #ffffff !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-  font-weight: bold;
+  font-size: 0.9rem !important;
+  line-height: 1.5 !important;
+  margin-bottom: 1.5rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
 }
 
 .toggle-panel h1 {
