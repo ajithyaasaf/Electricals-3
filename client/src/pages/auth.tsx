@@ -223,12 +223,14 @@ export default function Auth() {
                 </Button>
               </div>
               
-              <span className="text-sm text-gray-600 mb-4 block">or use your email for registration</span>
+              <p className="text-sm text-gray-600 mb-4 text-center">
+                or use your email for registration
+              </p>
               
               <div className="space-y-3 w-full">
                 <Input
                   {...signUpForm.register("firstName")}
-                  placeholder="Name"
+                  placeholder="Full Name"
                   className="auth-input"
                   data-testid="input-first-name"
                 />
@@ -347,9 +349,15 @@ export default function Auth() {
             <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="auth-form">
               <h1 className="text-3xl font-bold text-gray-800 mb-6">Reset Password</h1>
               
-              <p className="text-sm text-gray-600 mb-6 text-center">
-                Enter your email address and we'll send you a link to reset your password.
-              </p>
+              <div className="text-center mb-6">
+                <Mail className="h-16 w-16 text-copper-500 mx-auto mb-4" />
+                <p className="text-sm text-gray-600">
+                  Enter your email address and we'll send you a link to reset your password.
+                </p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Check your spam folder if you don't receive the email within a few minutes.
+                </p>
+              </div>
               
               <div className="space-y-4 w-full">
                 <div className="relative">
@@ -385,39 +393,72 @@ export default function Auth() {
             </form>
           </div>
 
-          {/* Toggle Container */}
-          <div className="toggle-container">
-            <div className="toggle">
-              <div className="toggle-panel toggle-left">
-                <h1>{isSignUp ? "Welcome Back!" : "Hello, Friend!"}</h1>
-                <p>
-                  {isSignUp ? "To keep connected with us please login with your personal info" : "Register with your personal details to access all CopperBear features"}
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="toggle-button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  data-testid="button-switch-mode"
-                >
-                  {isSignUp ? "SIGN IN" : "SIGN UP"}
-                </Button>
-              </div>
-              <div className="toggle-panel toggle-right">
-                <h1>{!isSignUp ? "Hello, Friend!" : "Welcome Back!"}</h1>
-                <p>
-                  {!isSignUp ? "Register with your personal details to access all CopperBear features" : "To keep connected with us please login with your personal info"}
-                </p>
-                <Button 
-                  variant="outline" 
-                  className="toggle-button"
-                  onClick={() => setIsSignUp(!isSignUp)}
-                  data-testid="button-toggle-mode"
-                >
-                  {!isSignUp ? "SIGN UP" : "SIGN IN"}
-                </Button>
+          {/* Toggle Container - Only show when not in forgot password mode */}
+          {!isForgotPassword && (
+            <div className="toggle-container">
+              <div className="toggle">
+                <div className="toggle-panel toggle-left">
+                  <h1>Welcome Back!</h1>
+                  <p>
+                    To keep connected with us please login with your personal info
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="toggle-button"
+                    onClick={() => setIsSignUp(false)}
+                    data-testid="button-switch-to-signin"
+                  >
+                    SIGN IN
+                  </Button>
+                </div>
+                <div className="toggle-panel toggle-right">
+                  <h1>Hello, Friend!</h1>
+                  <p>
+                    Register with your personal details to access all CopperBear features
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    className="toggle-button"
+                    onClick={() => setIsSignUp(true)}
+                    data-testid="button-switch-to-signup"
+                  >
+                    SIGN UP
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Forgot Password Info Panel */}
+          {isForgotPassword && (
+            <div className="forgot-info-panel">
+              <div className="forgot-info-content">
+                <div className="text-center">
+                  <Lock className="h-20 w-20 text-copper-500 mx-auto mb-6" />
+                  <h1 className="text-3xl font-bold text-white mb-4">Trouble Signing In?</h1>
+                  <p className="text-white/90 text-lg mb-6">
+                    Don't worry! It happens to the best of us.
+                  </p>
+                  <div className="space-y-3 text-white/80 text-sm">
+                    <p>✓ Enter your email address</p>
+                    <p>✓ Check your inbox for reset link</p>
+                    <p>✓ Create a new secure password</p>
+                    <p>✓ Sign in with your new password</p>
+                  </div>
+                  <div className="mt-8">
+                    <Button 
+                      variant="outline" 
+                      className="toggle-button"
+                      onClick={resetToSignIn}
+                      data-testid="button-back-to-auth"
+                    >
+                      BACK TO SIGN IN
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
