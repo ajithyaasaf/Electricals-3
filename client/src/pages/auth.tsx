@@ -385,10 +385,18 @@ export default function Auth() {
                 </Button>
               </div>
               <div className="toggle-panel toggle-right">
-                <h1>Hello, Friend!</h1>
+                <h1>{!isSignUp ? "Hello, Friend!" : "Welcome Back!"}</h1>
                 <p>
-                  Register with your personal details to access all CopperBear features
+                  {!isSignUp ? "Register with your personal details to access all CopperBear features" : "To keep connected with us please login with your personal info"}
                 </p>
+                <Button 
+                  variant="outline" 
+                  className="toggle-button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  data-testid="button-toggle-mode"
+                >
+                  {!isSignUp ? "SIGN UP" : "SIGN IN"}
+                </Button>
                 <Button 
                   type="submit" 
                   className="toggle-button auth-submit-button"
