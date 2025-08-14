@@ -226,41 +226,25 @@ export default function Auth() {
               <span className="text-sm text-gray-600 mb-4 block">or use your email for registration</span>
               
               <div className="space-y-3 w-full">
+                <Input
+                  {...signUpForm.register("firstName")}
+                  placeholder="Name"
+                  className="auth-input"
+                  data-testid="input-first-name"
+                />
+                <Input
+                  {...signUpForm.register("email")}
+                  type="email"
+                  placeholder="Email"
+                  className="auth-input"
+                  data-testid="input-signup-email"
+                />
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    {...signUpForm.register("firstName")}
-                    placeholder="First Name"
-                    className="auth-input pl-10"
-                    data-testid="input-first-name"
-                  />
-                </div>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    {...signUpForm.register("lastName")}
-                    placeholder="Last Name"
-                    className="auth-input pl-10"
-                    data-testid="input-last-name"
-                  />
-                </div>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    {...signUpForm.register("email")}
-                    type="email"
-                    placeholder="Email"
-                    className="auth-input pl-10"
-                    data-testid="input-signup-email"
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     {...signUpForm.register("password")}
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
-                    className="auth-input pl-10 pr-10"
+                    className="auth-input pr-10"
                     data-testid="input-signup-password"
                   />
                   <Button
@@ -275,15 +259,6 @@ export default function Auth() {
                   </Button>
                 </div>
               </div>
-              
-              <Button 
-                type="submit" 
-                className="auth-button"
-                disabled={loading}
-                data-testid="button-signup-submit"
-              >
-                {loading ? "Creating Account..." : "SIGN UP"}
-              </Button>
             </form>
           </div>
 
@@ -309,23 +284,19 @@ export default function Auth() {
               <span className="text-sm text-gray-600 mb-4 block">or use your email password</span>
               
               <div className="space-y-3 w-full">
+                <Input
+                  {...signInForm.register("email")}
+                  type="email"
+                  placeholder="Email"
+                  className="auth-input"
+                  data-testid="input-signin-email"
+                />
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <Input
-                    {...signInForm.register("email")}
-                    type="email"
-                    placeholder="Email"
-                    className="auth-input pl-10"
-                    data-testid="input-signin-email"
-                  />
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                   <Input
                     {...signInForm.register("password")}
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
-                    className="auth-input pl-10 pr-10"
+                    className="auth-input pr-10"
                     data-testid="input-signin-password"
                   />
                   <Button
@@ -349,15 +320,6 @@ export default function Auth() {
                 data-testid="button-forgot-password"
               >
                 Forgot Your Password?
-              </Button>
-              
-              <Button 
-                type="submit" 
-                className="auth-button"
-                disabled={loading}
-                data-testid="button-signin-submit"
-              >
-                {loading ? "Signing In..." : "SIGN IN"}
               </Button>
             </form>
           </div>
@@ -421,6 +383,18 @@ export default function Auth() {
                 >
                   Sign In
                 </Button>
+                <Button 
+                  type="submit" 
+                  className="toggle-button auth-submit-button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    signUpForm.handleSubmit(handleSignUp)();
+                  }}
+                  disabled={loading}
+                  data-testid="button-signup-submit"
+                >
+                  {loading ? "Creating Account..." : "SIGN UP"}
+                </Button>
               </div>
               <div className="toggle-panel toggle-right">
                 <h1>Hello, Friend!</h1>
@@ -434,6 +408,18 @@ export default function Auth() {
                   data-testid="button-switch-signup"
                 >
                   Sign Up
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="toggle-button auth-submit-button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    signInForm.handleSubmit(handleSignIn)();
+                  }}
+                  disabled={loading}
+                  data-testid="button-signin-submit"
+                >
+                  {loading ? "Signing In..." : "SIGN IN"}
                 </Button>
               </div>
             </div>

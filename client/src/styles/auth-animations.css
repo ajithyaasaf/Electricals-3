@@ -223,6 +223,65 @@
   transform: translateX(200%);
 }
 
+.toggle-button {
+  border-radius: 20px;
+  border: 2px solid #ffffff;
+  background: transparent;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px 45px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+  margin: 8px 0;
+  cursor: pointer;
+  width: auto;
+  min-width: 150px;
+}
+
+.toggle-button:hover:not(:disabled) {
+  background: #ffffff;
+  color: #b87333;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.18);
+}
+
+.toggle-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-submit-button {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  margin-top: 15px;
+}
+
+.auth-submit-button:hover:not(:disabled) {
+  background: #ffffff;
+  color: #b87333;
+  border: 2px solid #ffffff;
+}
+
+.toggle h1 {
+  color: #ffffff;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.toggle p {
+  color: #ffffff;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
 .toggle-panel h1 {
   font-weight: bold;
   margin-bottom: 15px;
