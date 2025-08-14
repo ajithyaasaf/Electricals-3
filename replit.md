@@ -1,126 +1,56 @@
 # CopperBear Electrical E-Commerce Platform
 
 ## Overview
-This is a full-stack e-commerce and service booking platform for CopperBear, an electrical products and services company. It replicates Amazon-like functionality for electrical products and professional electrical services. The platform aims to provide a modern, scalable solution for online sales and service management in the electrical industry.
+This project is a full-stack e-commerce and service booking platform for CopperBear, an electrical products and services company. It aims to provide Amazon-like functionality for electrical products and professional electrical services, offering a modern, scalable solution for online sales and service management in the electrical industry.
 
 ## User Preferences
 Preferred communication style: Simple, everyday language.
 Navigation Preferences: Enterprise-level navigation with smooth transitions, loading states, and scroll restoration.
 
-## Recent Changes (August 2025)
-- ✅ **AUTHENTICATION SYSTEM REDESIGN COMPLETE** (August 14, 2025) - Successfully replaced modal-based authentication with animated slide-in auth page. New /auth route features smooth animations, proper form submission buttons positioned on colored overlay panels with improved text visibility using shadows and proper contrast, eliminated duplicate buttons by restructuring overlay panels, and preserved all Firebase authentication functionality including Google Sign-In and password reset. Header updated to link to auth page instead of modal. Authentication buttons now correctly positioned on the moving colored overlay panels as requested.
-- ✅ **FINAL REPLIT MIGRATION COMPLETE** (August 13, 2025) - Successfully completed migration from Replit Agent to standard Replit environment. Fixed Account button hover effects to match Sign In button styling. All systems verified working: Express server running on port 5000, Firebase authentication and Firestore database connection established, cart system with cross-tab synchronization functioning, product catalog and API endpoints operational, and client-side React application loading properly with Vite development server.
-- ✅ **COMPLETED REPLIT MIGRATION** (August 13, 2025) - Successfully migrated CopperBear project from Replit Agent to standard Replit environment. All systems verified working: Express server running on port 5000, Firebase authentication and Firestore database connection established, cart system with cross-tab synchronization functioning, product catalog and API endpoints operational, and client-side React application loading properly with Vite development server.
-- ✅ **FIXED LOGOUT CART BEHAVIOR** (August 13, 2025) - Modified cart system to clear all cart data when user logs out instead of preserving it. Replaced preserveCartDataOnLogout function with clearCartOnLogout function that completely clears cart state, localStorage, and references on logout. This ensures users start fresh after logging out, with no cart items carried over.
-- ✅ **SUCCESSFUL MIGRATION TO REPLIT ENVIRONMENT** (August 13, 2025) - Completed full migration from Replit Agent to standard Replit environment. All systems verified working: Express server, Firebase integration, cart system with cross-tab sync, authentication flow, and product catalog. No architectural changes needed - existing codebase was already Replit-compatible.
-- ✅ **FIXED Critical Guest Cart localStorage Sync** (August 13, 2025) - Resolved critical bug where guest cart remove/clear operations updated React state but failed to persist to localStorage, causing items to reappear on page refresh. Enhanced all guest cart operations (add, remove, update, clear) to use CartStorageManager for atomic localStorage synchronization. Implemented "never trust UI state alone" principle where localStorage is the source of truth for guest carts.
-- ✅ **Enhanced Dual-State Cart System** (August 13, 2025) - Implemented comprehensive improvements including atomic migration operations, advanced conflict resolution with configurable strategies, schema versioning (2.0.0) for backward compatibility, cross-tab synchronization, cart expiry handling, and edge case management for account switching and rapid operations. Added robust server-side validation, batch operation processing, and enhanced logging for enterprise-grade reliability.
-- ✅ **Successfully Migrated to Replit Environment** (August 13, 2025) - Completed full migration from Replit Agent to standard Replit environment with comprehensive cart system analysis. Verified all components working: Firebase integration, enterprise cart system, guest/authenticated cart synchronization, and server-side operations
-- ✅ **Fixed Sign-Out Authentication Loop** (August 13, 2025) - Resolved issue where signing out would automatically trigger Google sign-in causing DOMAIN_NOT_AUTHORIZED error. Updated account page to redirect to home instead of auto-signing in, and replaced direct Google sign-in calls with auth modal triggers for better user experience
-- ✅ **Fixed Duplicate User Creation Bug** (August 13, 2025) - Resolved issue where users were being stored multiple times in Firestore by implementing specialized UserService with setDoc() instead of addDoc(), using Firebase UID as document ID to prevent duplicates
-- ✅ **Enhanced Product Filter UX** (August 12, 2025) - Redesigned filters with modern UX patterns: active filter badges, improved visual hierarchy, better mobile experience, clear interaction patterns, and enhanced price range controls
-- ✅ **Migration to Replit Environment Complete** (August 12, 2025) - Successfully migrated from Replit Agent to standard Replit environment with proper guest checkout flow
-- ✅ **Guest Checkout Implementation** (August 12, 2025) - Fixed routing and checkout page to allow guest users to access checkout, fill shipping information, and sign in before order completion
-- ✅ **Fixed 404 Checkout Error** - Resolved guest user routing issue where checkout was redirecting to 404, now allows guests to browse and complete forms before authentication
-- ✅ **Fixed Critical Cart Performance Issue** (August 12, 2025) - Resolved infinite loop in cart context that was causing excessive API calls every second, significantly improving performance and user experience  
-- ✅ **Fixed Bidirectional Cart Merging** - Resolved guest/authenticated cart sync issues with proper preservation logic
-- ✅ Fixed guest cart real-time updates - products now appear instantly without page refresh
-- ✅ Unified cart system using single CartContext for consistent state management
-- ✅ Enhanced cart functionality with immediate localStorage sync and instant UI updates 
-- ✅ Implemented enterprise-level navigation system with:
-  - Smart scroll restoration and position memory
-  - Loading progress indicators and smooth transitions 
-  - Route preloading for improved performance
-  - Professional breadcrumb navigation
-  - Enhanced user experience with proper loading states
-- ✅ Fixed category filtering in products API (supports both categoryId and category slug)
-- ✅ Database seeded with electrical products for all categories
-- ✅ All category pages now working properly (wiring-cables, tools-equipment, etc.)
-- ✅ Created modern "Why Choose CopperBear Electrical?" section with:
-  - Real-time Firebase integration for admin editing
-  - Responsive design (1-col mobile, 2-col md, 3-col lg)
-  - Accessibility compliant with ARIA labels and keyboard navigation
-  - Consistent styling without page-load animations (matches rest of website)
-  - Admin editor interface for live content management
-- ✅ **Folder Structure Optimization** (Latest Update):
-  - Organized all documentation files into `/docs` folder 
-  - Created domain-based server routes structure (`server/src/routes/`)
-  - Separated API routes by business domain (auth, products, categories, orders, services, cart, reviews, wishlist, admin)
-  - Removed duplicate route files and consolidated into organized structure
-  - Added comprehensive README.md with project overview and enterprise standards comparison
-  - Enhanced developer experience with clear folder structure guidelines
-  - Server successfully restructured and running with new organized routes
-- ✅ **Enterprise-Grade Shopping Cart System** (January 11-12, 2025):
-  - Built comprehensive cart architecture with real-time updates and modular design
-  - Advanced cart types system with coupons, discounts, and validation
-  - Enhanced cart service layer with client-side cart management
-  - Real-time cart updates with optimistic UI updates and error handling
-  - Guest cart support with session persistence and authenticated user migration
-  - Enterprise cart features: Save for later, special instructions, customizations
-  - Professional cart UI components with responsive design and accessibility
-  - Coupon management system with validation and discount calculations
-  - Cart sidebar integration with real-time item count and quick actions
-  - Comprehensive cart summary with shipping, tax, and discount calculations
-  - **Fixed quantity persistence issues** - optimistic updates now work correctly for logged-in users
-  - **Resolved server-side cart operation errors** - add/remove/update operations working properly
-  - **Unified cart behavior** - guest and authenticated modes now behave identically and reliably
-  - **Comprehensive debugging system** - detailed logging for cart operations and migration tracking
-  - **Fixed race conditions** - atomic operations prevent rapid-click overwrites in guest mode
-  - **Cart persistence across sessions** - authenticated cart items are preserved when logging out and remain visible as guest cart items
-  - **Enhanced migration system** - cart migration runs on every login, always reading current localStorage data
-  - **Debounced operations** - prevention of repeated cart operations and notifications
-
 ## System Architecture
 
-### Folder Structure (Scalable & Manageable)
-- **Root Level**: Clean with essential config files, documentation moved to `/docs`
-- **Client**: Feature-based organization with shared components, hooks, and utilities
-- **Server**: Domain-driven API routes (`/src/routes/`) separated by business concerns
-- **Shared**: Type definitions and schemas shared between client and server
-- **Documentation**: Centralized in `/docs` folder for easy reference
+### Folder Structure
+- **Root Level**: Essential config files, `/docs` for documentation.
+- **Client**: Feature-based organization with shared components, hooks, and utilities.
+- **Server**: Domain-driven API routes (`/src/routes/`) separated by business concerns.
+- **Shared**: Type definitions and schemas shared between client and server.
+- **Documentation**: Centralized in `/docs`.
 
 ### Frontend Architecture
-- **Framework**: React 18 with TypeScript, Vite
-- **Routing**: Wouter
-- **State Management**: TanStack Query (React Query)
-- **UI Library**: Custom components built on Radix UI primitives, Shadcn/ui
-- **Styling**: Tailwind CSS with custom CopperBear brand colors (copper/lime theme)
-- **Forms**: React Hook Form with Zod validation
-- **UI/UX Decisions**: Copper primary colors with lime green accents, responsive design (mobile-first), WCAG 2.1 AA accessibility considerations, Amazon-style mobile navigation.
+- **Framework**: React 18 with TypeScript, Vite.
+- **Routing**: Wouter.
+- **State Management**: TanStack Query (React Query).
+- **UI Library**: Custom components built on Radix UI primitives, Shadcn/ui.
+- **Styling**: Tailwind CSS with custom CopperBear brand colors (copper/lime theme), responsive design (mobile-first), WCAG 2.1 AA accessibility considerations, Amazon-style mobile navigation.
+- **Forms**: React Hook Form with Zod validation.
 
 ### Backend Architecture
-- **Runtime**: Node.js with Express.js
-- **Language**: TypeScript with ES modules
-- **Authentication**: Firebase Authentication with Google Sign-In, token-based session management
-- **API Design**: RESTful API with domain-based routes (auth, products, categories, orders, services, admin)
-- **Organization**: Clean separation of concerns with organized route handlers
+- **Runtime**: Node.js with Express.js.
+- **Language**: TypeScript with ES modules.
+- **Authentication**: Firebase Authentication with Google Sign-In, token-based session management.
+- **API Design**: RESTful API with domain-based routes (auth, products, categories, orders, services, admin).
 
 ### Data Storage Solutions
-- **Primary Database**: Firestore (Google Cloud NoSQL database)
-- **SDK**: Firebase SDK
-- **Schema Management**: TypeScript interfaces and Zod validation schemas
-- **Real-time**: Native Firestore real-time listeners
+- **Primary Database**: Firestore (Google Cloud NoSQL database).
+- **SDK**: Firebase SDK.
+- **Schema Management**: TypeScript interfaces and Zod validation schemas.
+- **Real-time**: Native Firestore real-time listeners.
 
 ### Authentication & Authorization
 - **Provider**: Firebase Authentication with Google Sign-In.
 - **Session Management**: Firebase Auth tokens with automatic refresh.
-- **User Roles**: Admin permissions based on specific email (admin@copperbear.com).
+- **User Roles**: Admin permissions based on specific email.
 - **Security**: Firebase secure authentication with redirect flow, pure Firebase token verification.
-- **Features**: Dedicated admin login system, guest cart functionality (localStorage persistence, migrates on sign-in), secure authentication modal.
+- **Features**: Dedicated admin login system, guest cart functionality (localStorage persistence, migrates on sign-in), secure authentication page with animated slide-in.
 
 ### Key Components
 - **Database Schema**: Users, Categories, Products, Services, Orders & Order Items, Service Bookings, Cart Items, Reviews, Wishlists.
-- **Enterprise Cart System**: 
-  - Enhanced cart types with coupons, discounts, and advanced validation
-  - Real-time cart service with optimistic updates and error handling
-  - Guest cart support with session persistence
-  - Professional cart UI components with save-for-later functionality
-  - Coupon management with validation and discount calculations
-  - Cart sidebar integration with real-time updates
+- **Enterprise Cart System**: Supports coupons, discounts, validation, real-time updates with optimistic UI, guest cart support with session persistence and authenticated user migration, "save for later", special instructions, and coupon management. Includes comprehensive debugging and race condition prevention.
 - **Frontend Pages**: Landing, Home, Products, Services, Product/Service Detail, Cart, Checkout, Account, Admin.
 - **Account Management**: Comprehensive dashboard with order history, bookings, saved items, payments, and security settings.
 - **Currency Localization**: All currency displays are in Indian Rupees (INR) with consistent formatting.
-- **Content Strategy**: Separate landing page (marketing-focused) vs home page (personalized) following e-commerce best practices.
+- **Content Strategy**: Separate marketing-focused landing page and personalized home page.
+- **UI/UX Decisions**: Copper primary colors with lime green accents, responsive design, WCAG 2.1 AA accessibility, Amazon-style mobile navigation, enterprise-level navigation system with smart scroll restoration, loading progress indicators, and route preloading.
 
 ### Data Flow
 - **Authentication Flow**: User login via Firebase Google Sign-In, Firebase handles OAuth, user state managed in Firebase Auth, frontend receives authenticated user data.
