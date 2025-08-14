@@ -371,29 +371,17 @@ export default function Auth() {
           <div className="toggle-container">
             <div className="toggle">
               <div className="toggle-panel toggle-left">
-                <h1>Welcome Back!</h1>
+                <h1>{isSignUp ? "Welcome Back!" : "Hello, Friend!"}</h1>
                 <p>
-                  Enter your personal details to access all CopperBear features
+                  {isSignUp ? "To keep connected with us please login with your personal info" : "Register with your personal details to access all CopperBear features"}
                 </p>
                 <Button 
                   variant="outline" 
                   className="toggle-button"
-                  onClick={() => setIsSignUp(false)}
-                  data-testid="button-switch-signin"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  data-testid="button-switch-mode"
                 >
-                  Sign In
-                </Button>
-                <Button 
-                  type="submit" 
-                  className="toggle-button auth-submit-button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    signUpForm.handleSubmit(handleSignUp)();
-                  }}
-                  disabled={loading}
-                  data-testid="button-signup-submit"
-                >
-                  {loading ? "Creating Account..." : "SIGN UP"}
+                  {isSignUp ? "SIGN IN" : "SIGN UP"}
                 </Button>
               </div>
               <div className="toggle-panel toggle-right">
@@ -402,24 +390,20 @@ export default function Auth() {
                   Register with your personal details to access all CopperBear features
                 </p>
                 <Button 
-                  variant="outline" 
-                  className="toggle-button"
-                  onClick={() => setIsSignUp(true)}
-                  data-testid="button-switch-signup"
-                >
-                  Sign Up
-                </Button>
-                <Button 
                   type="submit" 
                   className="toggle-button auth-submit-button"
                   onClick={(e) => {
                     e.preventDefault();
-                    signInForm.handleSubmit(handleSignIn)();
+                    if (isSignUp) {
+                      signUpForm.handleSubmit(handleSignUp)();
+                    } else {
+                      signInForm.handleSubmit(handleSignIn)();
+                    }
                   }}
                   disabled={loading}
-                  data-testid="button-signin-submit"
+                  data-testid="button-auth-submit"
                 >
-                  {loading ? "Signing In..." : "SIGN IN"}
+                  {loading ? (isSignUp ? "Creating Account..." : "Signing In...") : (isSignUp ? "SIGN UP" : "SIGN IN")}
                 </Button>
               </div>
             </div>
