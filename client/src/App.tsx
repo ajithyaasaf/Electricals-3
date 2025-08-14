@@ -21,6 +21,7 @@ import Cart from "@/pages/cart";
 import Checkout from "@/pages/checkout";
 import Account from "@/pages/account";
 import Admin from "@/pages/admin";
+import Auth from "@/pages/auth";
 
 function Router() {
   const { isAuthenticated, loading } = useFirebaseAuth();
@@ -40,6 +41,7 @@ function Router() {
       ) : !isAuthenticated ? (
         <>
           <Route path="/" component={Landing} />
+          <Route path="/auth" component={Auth} />
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/services" component={Services} />
@@ -52,6 +54,7 @@ function Router() {
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/auth" component={Auth} />
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
           <Route path="/services" component={Services} />

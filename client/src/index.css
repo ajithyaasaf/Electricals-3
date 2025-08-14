@@ -1,3 +1,6 @@
+/* Auth animations */
+@import './styles/auth-animations.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

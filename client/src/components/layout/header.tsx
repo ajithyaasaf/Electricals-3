@@ -23,7 +23,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { SearchBar } from "@/components/common/search-bar";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
-import { AuthModal } from "@/components/auth/auth-modal";
+
 import {
   Zap,
   User,
@@ -45,7 +45,7 @@ export function Header() {
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
+
   const [expandedSections, setExpandedSections] = useState<
     Record<string, boolean>
   >({});
@@ -202,7 +202,7 @@ export function Header() {
   };
 
   const handleSignIn = () => {
-    setAuthOpen(true);
+    setLocation("/auth");
   };
 
   const handleSignOut = async () => {
@@ -469,8 +469,7 @@ export function Header() {
         <div />
       </CartSidebar>
 
-      {/* Auth Modal */}
-      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
+
     </header>
   );
 }
