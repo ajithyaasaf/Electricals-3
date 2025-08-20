@@ -169,33 +169,68 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
   // Real-time Firestore listener setup
   useEffect(() => {
     if (!realtimePath || typeof window === 'undefined') return;
-
-    // TODO: Implement Firebase real-time listener
-    // Example implementation:
-    /*
-    import { doc, onSnapshot } from 'firebase/firestore';
-    import { db } from '@/lib/firebase';
     
-    const unsubscribe = onSnapshot(
-      doc(db, realtimePath), 
-      (docSnap) => {
-        if (docSnap.exists()) {
-          const firestoreData = docSnap.data() as WhyChooseData;
-          setData(prevData => ({ ...prevData, ...firestoreData }));
+    setIsLoading(true);
+
+    const initializeListener = async () => {
+      try {
+        const { doc, onSnapshot } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
+        
+        // Parse the realtime path - expecting format like 'siteContent/whyChooseSection'
+        const pathParts = realtimePath.split('/');
+        if (pathParts.length < 2) {
+          console.warn('[WHY CHOOSE] Invalid realtime path format:', realtimePath);
           setIsLoading(false);
+          return;
         }
-      },
-      (error) => {
-        console.error('Error listening to why-choose section:', error);
+        
+        const [collection, docId] = pathParts;
+        
+        console.log('[WHY CHOOSE] Setting up real-time listener for:', { collection, docId });
+        
+        const unsubscribe = onSnapshot(
+          doc(db, collection, docId), 
+          (docSnap) => {
+            if (docSnap.exists()) {
+              const firestoreData = docSnap.data() as WhyChooseData;
+              console.log('[WHY CHOOSE] Real-time update received:', firestoreData);
+              
+              setData(prevData => ({ 
+                ...prevData, 
+                ...firestoreData,
+                lastUpdated: new Date().toISOString()
+              }));
+            } else {
+              console.log('[WHY CHOOSE] Document does not exist, using defaults');
+            }
+            setIsLoading(false);
+          },
+          (error) => {
+            console.error('[WHY CHOOSE] Error listening to real-time updates:', error);
+            setIsLoading(false);
+          }
+        );
+
+        return unsubscribe;
+      } catch (error) {
+        console.error('[WHY CHOOSE] Failed to initialize Firebase listener:', error);
         setIsLoading(false);
       }
-    );
-
-    return () => unsubscribe();
-    */
+    };
     
-    // Placeholder for demo - remove when implementing real Firebase listener
-    setIsLoading(false);
+    let cleanup: (() => void) | undefined;
+    
+    initializeListener().then(unsubscribe => {
+      cleanup = unsubscribe;
+    });
+
+    return () => {
+      if (cleanup) {
+        cleanup();
+        console.log('[WHY CHOOSE] Real-time listener cleaned up');
+      }
+    };
   }, [realtimePath]);
 
   // Removed animations for consistency with rest of website

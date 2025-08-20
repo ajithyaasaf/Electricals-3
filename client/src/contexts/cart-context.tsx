@@ -206,6 +206,7 @@ interface CartContextType {
   addItem: (productId?: string, serviceId?: string, quantity?: number, customizations?: Record<string, any>) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
+  updateNotes: (itemId: string, notes: string) => Promise<void>;
   clearCart: () => Promise<void>;
   
   // Guest cart specific
@@ -1240,6 +1241,46 @@ export function CartProvider({ children }: CartProviderProps) {
     debounceTimersRef.current.set(itemId, newTimer);
   }, [isAuthenticated, processQuantityUpdate]);
 
+  // Update cart item notes
+  const updateNotes = useCallback(async (itemId: string, notes: string) => {
+    console.log('[CART CONTEXT] 📝 Updating item notes:', { itemId, notes: notes.substring(0, 50) + '...' });
+    
+    // Immediate optimistic update for both authenticated and guest users
+    dispatch({ type: 'OPTIMISTIC_UPDATE_ITEM', payload: { itemId, updates: { notes } } });
+    
+    if (isAuthenticated) {
+      try {
+        await apiRequest('PATCH', `/api/cart/items/${itemId}`, { notes });
+        console.log('[CART CONTEXT] ✅ Authenticated cart notes updated on server');
+      } catch (error) {
+        console.error('[CART CONTEXT] ❌ Error updating notes on server:', error);
+        // Reload cart to revert optimistic update
+        await loadAuthenticatedCart();
+        toast({
+          title: "Error",
+          description: "Failed to update notes",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // For guest cart, update localStorage
+      setGuestCart(prev => {
+        const updated = prev.map(item => 
+          item.id === itemId ? { ...item, notes, lastUpdated: Date.now() } : item
+        );
+        
+        // Persist to localStorage immediately
+        CartStorageManager.saveGuestCart(updated, true);
+        console.log('[CART CONTEXT] ✅ Guest cart notes updated in localStorage');
+        
+        return updated;
+      });
+      
+      // Reload guest cart to sync with server representation
+      await loadGuestCartAsCart();
+    }
+  }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, toast]);
+
   // Cleanup timers on unmount
   useEffect(() => {
     return () => {
@@ -1359,6 +1400,7 @@ export function CartProvider({ children }: CartProviderProps) {
     addItem,
     removeItem,
     updateQuantity,
+    updateNotes,
     clearCart,
     guestCart,
     refreshCart

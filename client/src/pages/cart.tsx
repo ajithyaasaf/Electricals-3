@@ -32,6 +32,7 @@ export default function Cart() {
     addItem,
     removeItem,
     updateQuantity,
+    updateNotes,
     clearCart
   } = useCartContext();
 
@@ -48,8 +49,7 @@ export default function Cart() {
 
   // Handle cart notes update  
   const handleUpdateNotes = async (itemId: string, notes: string) => {
-    // Note: Cart context doesn't have updateItem, so we'll log for now
-    console.log('Update notes:', itemId, notes);
+    await updateNotes(itemId, notes);
   };
 
   // Loading state

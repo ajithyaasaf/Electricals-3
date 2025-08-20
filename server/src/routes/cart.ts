@@ -839,7 +839,7 @@ export function registerCartRoutes(app: Express) {
         message: "Batch operations completed",
         processed: results.length,
         successful: results.filter(r => r.success).length,
-        errors: errors.length,
+        errorCount: errors.length,
         results,
         errors: errors.length > 0 ? errors : undefined
       });

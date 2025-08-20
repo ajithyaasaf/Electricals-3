@@ -202,45 +202,254 @@ export const wishlistService = new FirestoreService<WishlistItem, CreateWishlist
 // Specialized methods for complex queries
 export class ProductQueries {
   static async getFeatured(limitCount = 10): Promise<Product[]> {
-    const q = query(
-      collection(db, COLLECTIONS.PRODUCTS),
-      where('isFeatured', '==', true),
-      where('isActive', '==', true),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
-      const data = { id: doc.id, ...doc.data() };
-      return convertFirestoreData<Product>(data);
-    });
+    try {
+      // Try optimized query with compound indexes first
+      const q = query(
+        collection(db, COLLECTIONS.PRODUCTS),
+        where('isFeatured', '==', true),
+        where('isActive', '==', true),
+        where('stock', '>', 0), // Prioritize in-stock items
+        orderBy('stock', 'desc'),
+        orderBy('rating', 'desc'),
+        limit(limitCount)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const products = querySnapshot.docs.map(doc => {
+        const data = { id: doc.id, ...doc.data() };
+        return convertFirestoreData<Product>(data);
+      });
+      
+      console.log(`[PRODUCTS] ✅ Retrieved ${products.length} featured products with optimized query`);
+      return products;
+      
+    } catch (error) {
+      console.warn('[PRODUCTS] ⚠️ Optimized query failed, falling back to basic query:', error);
+      
+      // Fallback to basic query without compound indexes
+      const basicQuery = query(
+        collection(db, COLLECTIONS.PRODUCTS),
+        where('isFeatured', '==', true),
+        where('isActive', '==', true),
+        limit(limitCount * 2) // Get more for client-side sorting
+      );
+      
+      const querySnapshot = await getDocs(basicQuery);
+      const products = querySnapshot.docs.map(doc => {
+        const data = { id: doc.id, ...doc.data() };
+        return convertFirestoreData<Product>(data);
+      });
+      
+      // Client-side sorting with performance optimization
+      return products
+        .sort((a, b) => {
+          // Prioritize in-stock products
+          if (a.stock > 0 && b.stock === 0) return -1;
+          if (a.stock === 0 && b.stock > 0) return 1;
+          
+          // Then by rating (higher is better)
+          const ratingDiff = (b.rating || 0) - (a.rating || 0);
+          if (Math.abs(ratingDiff) > 0.1) return ratingDiff;
+          
+          // Finally by creation date (newer first)
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        })
+        .slice(0, limitCount);
+    }
   }
 
-  static async getByCategory(categoryId: string, limitCount = 50): Promise<Product[]> {
-    const q = query(
-      collection(db, COLLECTIONS.PRODUCTS),
-      where('categoryId', '==', categoryId),
-      where('isActive', '==', true),
-      orderBy('createdAt', 'desc'),
-      limit(limitCount)
-    );
-    
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => {
-      const data = { id: doc.id, ...doc.data() };
-      return convertFirestoreData<Product>(data);
-    });
+  static async getByCategory(categoryId: string, limitCount = 50, sortBy: 'newest' | 'price_asc' | 'price_desc' | 'rating' | 'featured' = 'newest'): Promise<Product[]> {
+    try {
+      let q;
+      
+      // Build optimized queries based on sort preference
+      switch (sortBy) {
+        case 'price_asc':
+          q = query(
+            collection(db, COLLECTIONS.PRODUCTS),
+            where('categoryId', '==', categoryId),
+            where('isActive', '==', true),
+            orderBy('price', 'asc'),
+            orderBy('rating', 'desc'),
+            limit(limitCount)
+          );
+          break;
+          
+        case 'price_desc':
+          q = query(
+            collection(db, COLLECTIONS.PRODUCTS),
+            where('categoryId', '==', categoryId),
+            where('isActive', '==', true),
+            orderBy('price', 'desc'),
+            orderBy('rating', 'desc'),
+            limit(limitCount)
+          );
+          break;
+          
+        case 'rating':
+          q = query(
+            collection(db, COLLECTIONS.PRODUCTS),
+            where('categoryId', '==', categoryId),
+            where('isActive', '==', true),
+            orderBy('rating', 'desc'),
+            orderBy('reviewCount', 'desc'),
+            limit(limitCount)
+          );
+          break;
+          
+        case 'featured':
+          q = query(
+            collection(db, COLLECTIONS.PRODUCTS),
+            where('categoryId', '==', categoryId),
+            where('isActive', '==', true),
+            where('isFeatured', '==', true),
+            orderBy('rating', 'desc'),
+            limit(limitCount)
+          );
+          break;
+          
+        case 'newest':
+        default:
+          q = query(
+            collection(db, COLLECTIONS.PRODUCTS),
+            where('categoryId', '==', categoryId),
+            where('isActive', '==', true),
+            orderBy('createdAt', 'desc'),
+            orderBy('rating', 'desc'),
+            limit(limitCount)
+          );
+          break;
+      }
+      
+      const querySnapshot = await getDocs(q);
+      const products = querySnapshot.docs.map(doc => {
+        const data = { id: doc.id, ...doc.data() };
+        return convertFirestoreData<Product>(data);
+      });
+      
+      console.log(`[PRODUCTS] ✅ Retrieved ${products.length} products for category ${categoryId} sorted by ${sortBy}`);
+      return products;
+      
+    } catch (error) {
+      console.warn(`[PRODUCTS] ⚠️ Optimized category query failed for ${sortBy}, falling back:`, error);
+      
+      // Fallback to basic query with client-side sorting
+      const basicQuery = query(
+        collection(db, COLLECTIONS.PRODUCTS),
+        where('categoryId', '==', categoryId),
+        where('isActive', '==', true),
+        limit(limitCount * 2) // Get more for sorting
+      );
+      
+      const querySnapshot = await getDocs(basicQuery);
+      const products = querySnapshot.docs.map(doc => {
+        const data = { id: doc.id, ...doc.data() };
+        return convertFirestoreData<Product>(data);
+      });
+      
+      // Client-side sorting as fallback
+      const sortedProducts = products.sort((a, b) => {
+        switch (sortBy) {
+          case 'price_asc':
+            return a.price - b.price;
+          case 'price_desc':
+            return b.price - a.price;
+          case 'rating':
+            return (b.rating || 0) - (a.rating || 0);
+          case 'featured':
+            if (a.isFeatured && !b.isFeatured) return -1;
+            if (!a.isFeatured && b.isFeatured) return 1;
+            return (b.rating || 0) - (a.rating || 0);
+          case 'newest':
+          default:
+            return b.createdAt.getTime() - a.createdAt.getTime();
+        }
+      });
+      
+      return sortedProducts.slice(0, limitCount);
+    }
   }
 
   static async search(searchTerm: string, limitCount = 50): Promise<Product[]> {
-    // Note: Firestore doesn't support full-text search natively
-    // This is a basic implementation - consider using Algolia or similar for production
+    if (!searchTerm || searchTerm.trim().length === 0) {
+      return this.getFeaturedProducts(limitCount);
+    }
+
+    const lowerSearchTerm = searchTerm.toLowerCase().trim();
+    
+    // Multiple parallel queries for better search coverage
+    const searchPromises = [
+      // Search by name prefix (most efficient with Firestore)
+      this.searchByNamePrefix(lowerSearchTerm, Math.ceil(limitCount / 3)),
+      // Search all active products for comprehensive matching
+      this.searchAllProducts(lowerSearchTerm, limitCount),
+      // Search by category if term might be a category
+      this.searchByCategory(lowerSearchTerm, Math.ceil(limitCount / 4))
+    ];
+
+    const [prefixResults, allResults, categoryResults] = await Promise.all(searchPromises);
+    
+    // Combine and deduplicate results with intelligent ranking
+    const combinedResults = new Map<string, { product: Product; score: number }>();
+    
+    // Score prefix matches highest (exact name matches)
+    prefixResults.forEach(product => {
+      const score = this.calculateSearchScore(product, lowerSearchTerm, 'prefix');
+      combinedResults.set(product.id, { product, score });
+    });
+    
+    // Add comprehensive search results with lower base score
+    allResults.forEach(product => {
+      if (!combinedResults.has(product.id)) {
+        const score = this.calculateSearchScore(product, lowerSearchTerm, 'comprehensive');
+        combinedResults.set(product.id, { product, score });
+      }
+    });
+    
+    // Add category matches with medium score
+    categoryResults.forEach(product => {
+      if (!combinedResults.has(product.id)) {
+        const score = this.calculateSearchScore(product, lowerSearchTerm, 'category');
+        combinedResults.set(product.id, { product, score });
+      }
+    });
+    
+    // Sort by score and return top results
+    return Array.from(combinedResults.values())
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limitCount)
+      .map(result => result.product);
+  }
+  
+  private static async searchByNamePrefix(searchTerm: string, limitCount: number): Promise<Product[]> {
+    // Firestore range query for name prefix matching
+    const endTerm = searchTerm + '\\uf8ff';
     const q = query(
       collection(db, COLLECTIONS.PRODUCTS),
       where('isActive', '==', true),
-      orderBy('name'),
+      where('searchableName', '>=', searchTerm),
+      where('searchableName', '<=', endTerm),
       limit(limitCount)
+    );
+    
+    try {
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => {
+        const data = { id: doc.id, ...doc.data() };
+        return convertFirestoreData<Product>(data);
+      });
+    } catch (error) {
+      // Fallback if searchableName field doesn't exist
+      console.warn('[SEARCH] searchableName field not indexed, falling back to basic search');
+      return [];
+    }
+  }
+  
+  private static async searchAllProducts(searchTerm: string, limitCount: number): Promise<Product[]> {
+    const q = query(
+      collection(db, COLLECTIONS.PRODUCTS),
+      where('isActive', '==', true),
+      limit(limitCount * 2) // Get more to filter client-side
     );
     
     const querySnapshot = await getDocs(q);
@@ -249,13 +458,91 @@ export class ProductQueries {
       return convertFirestoreData<Product>(data);
     });
 
-    // Client-side filtering for search term
-    const lowerSearchTerm = searchTerm.toLowerCase();
-    return products.filter(product => 
-      product.name.toLowerCase().includes(lowerSearchTerm) ||
-      product.description?.toLowerCase().includes(lowerSearchTerm) ||
-      product.shortDescription?.toLowerCase().includes(lowerSearchTerm)
-    );
+    // Enhanced client-side filtering with fuzzy matching
+    return products.filter(product => {
+      const name = product.name.toLowerCase();
+      const description = product.description?.toLowerCase() || '';
+      const shortDescription = product.shortDescription?.toLowerCase() || '';
+      const categoryId = product.categoryId?.toLowerCase() || '';
+      
+      // Exact matches get priority
+      if (name.includes(searchTerm) || 
+          description.includes(searchTerm) || 
+          shortDescription.includes(searchTerm)) {
+        return true;
+      }
+      
+      // Fuzzy word matching for better UX
+      const searchWords = searchTerm.split(' ').filter(word => word.length > 2);
+      const productText = `${name} ${description} ${shortDescription} ${categoryId}`;
+      
+      return searchWords.some(word => productText.includes(word));
+    }).slice(0, limitCount);
+  }
+  
+  private static async searchByCategory(searchTerm: string, limitCount: number): Promise<Product[]> {
+    try {
+      // Try to find matching category
+      const categoryQuery = query(
+        collection(db, COLLECTIONS.CATEGORIES),
+        where('isActive', '==', true)
+      );
+      
+      const categorySnapshot = await getDocs(categoryQuery);
+      const matchingCategories = categorySnapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(cat => (cat as any).name.toLowerCase().includes(searchTerm))
+        .map(cat => cat.id);
+      
+      if (matchingCategories.length === 0) {
+        return [];
+      }
+      
+      // Get products from matching categories
+      const productQuery = query(
+        collection(db, COLLECTIONS.PRODUCTS),
+        where('isActive', '==', true),
+        where('categoryId', 'in', matchingCategories.slice(0, 10)), // Firestore limit
+        limit(limitCount)
+      );
+      
+      const productSnapshot = await getDocs(productQuery);
+      return productSnapshot.docs.map(doc => {
+        const data = { id: doc.id, ...doc.data() };
+        return convertFirestoreData<Product>(data);
+      });
+    } catch (error) {
+      console.warn('[SEARCH] Category search failed:', error);
+      return [];
+    }
+  }
+  
+  private static calculateSearchScore(product: Product, searchTerm: string, matchType: 'prefix' | 'comprehensive' | 'category'): number {
+    let score = 0;
+    const name = product.name.toLowerCase();
+    const description = product.description?.toLowerCase() || '';
+    
+    // Base score by match type
+    switch (matchType) {
+      case 'prefix': score += 100; break;
+      case 'comprehensive': score += 50; break;
+      case 'category': score += 75; break;
+    }
+    
+    // Boost exact name matches
+    if (name === searchTerm) score += 200;
+    else if (name.startsWith(searchTerm)) score += 150;
+    else if (name.includes(searchTerm)) score += 100;
+    
+    // Boost popular/featured products
+    if (product.isFeatured) score += 25;
+    if (product.rating && product.rating > 4) score += 15;
+    if (product.stock && product.stock > 10) score += 10;
+    
+    // Penalize out of stock
+    if (product.stock === 0) score -= 50;
+    
+    return score;
   }
 
   static async getFeaturedProducts(limitCount = 20): Promise<Product[]> {
