@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { SmartLink } from "@/components/navigation/smart-link";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useCartContext } from "@/contexts/cart-context";
+import { useWishlist } from "@/contexts/wishlist-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,7 @@ import { useToast } from "@/hooks/use-toast";
 export function Header() {
   const { isAuthenticated, user, loading } = useFirebaseAuth();
   const { totalQuantity } = useCartContext();
+  const { totalItems: wishlistCount } = useWishlist();
   const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
@@ -62,7 +64,7 @@ export function Header() {
       items: [
         { name: "Your Account", href: "/account" },
         { name: "Order History", href: "/account/orders" },
-        { name: "Wish Lists", href: "/account/wishlist" },
+        { name: "Wish Lists", href: "/wishlist" },
         { name: "Help & Support", href: "/help" },
       ],
     },
@@ -410,15 +412,22 @@ export function Header() {
             )}
 
             {/* Wishlist */}
-            {isAuthenticated && (
+            <SmartLink href="/wishlist">
               <Button
                 variant="ghost"
-                className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-3 min-h-[60px] min-w-[60px] transition-all duration-200"
+                className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-3 min-h-[60px] min-w-[60px] transition-all duration-200 relative"
               >
                 <Heart className="h-5 w-5" />
                 <span className="text-xs mt-1 hidden sm:block">Wishlist</span>
+                {wishlistCount > 0 && (
+                  <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 hover:bg-red-600 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center p-0 min-w-[16px] sm:min-w-[20px]">
+                    <span className="text-[10px] sm:text-xs">
+                      {wishlistCount > 99 ? "99+" : wishlistCount}
+                    </span>
+                  </Badge>
+                )}
               </Button>
-            )}
+            </SmartLink>
 
             {/* Cart */}
             <Button

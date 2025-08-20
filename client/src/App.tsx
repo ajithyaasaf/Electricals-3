@@ -9,6 +9,7 @@ import { NavigationProgress } from "@/components/navigation/navigation-progress"
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { FirebaseRedirectHandler } from "@/components/auth/firebase-redirect-handler";
 import { CartProvider } from "@/contexts/cart-context";
+import { WishlistProvider } from "@/contexts/wishlist-context";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -22,6 +23,7 @@ import Checkout from "@/pages/checkout";
 import Account from "@/pages/account";
 import Admin from "@/pages/admin";
 import Auth from "@/pages/auth";
+import Wishlist from "@/pages/wishlist";
 
 function Router() {
   const { isAuthenticated, loading } = useFirebaseAuth();
@@ -47,6 +49,7 @@ function Router() {
           <Route path="/services" component={Services} />
           <Route path="/services/:slug" component={ServiceDetail} />
           <Route path="/cart" component={Cart} />
+          <Route path="/wishlist" component={Wishlist} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/account" component={Account} />
           <Route path="/admin" component={Admin} />
@@ -60,6 +63,7 @@ function Router() {
           <Route path="/services" component={Services} />
           <Route path="/services/:slug" component={ServiceDetail} />
           <Route path="/cart" component={Cart} />
+          <Route path="/wishlist" component={Wishlist} />
           <Route path="/checkout" component={Checkout} />
           <Route path="/account" component={Account} />
           <Route path="/admin" component={Admin} />
@@ -75,13 +79,15 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <CartProvider>
-          <TooltipProvider>
+          <WishlistProvider>
+            <TooltipProvider>
             <FirebaseRedirectHandler />
             <PerformanceMonitor />
             <NavigationProgress />
             <Toaster />
             <Router />
-          </TooltipProvider>
+            </TooltipProvider>
+          </WishlistProvider>
         </CartProvider>
       </QueryClientProvider>
     </ErrorBoundary>

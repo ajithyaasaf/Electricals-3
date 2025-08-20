@@ -7,6 +7,8 @@ import { LazyImage } from "@/components/ui/lazy-image";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useCartContext } from "@/contexts/cart-context";
+import { useWishlist } from "@/contexts/wishlist-context";
+import { WishlistButton } from "@/components/wishlist/wishlist-button";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice } from "@/lib/currency";
@@ -23,7 +25,6 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
   const { isAuthenticated } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [isWishlisted, setIsWishlisted] = useState(false);
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
@@ -45,65 +46,12 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
     },
   });
 
-  const toggleWishlistMutation = useMutation({
-    mutationFn: async () => {
-      if (isWishlisted) {
-        await apiRequest("DELETE", `/api/wishlist/${product.id}`);
-      } else {
-        await apiRequest("POST", "/api/wishlist", {
-          productId: product.id,
-        });
-      }
-    },
-    onSuccess: () => {
-      setIsWishlisted(!isWishlisted);
-      toast({
-        title: isWishlisted ? "Removed from wishlist" : "Added to wishlist",
-        description: `${product.name} has been ${isWishlisted ? "removed from" : "added to"} your wishlist.`,
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Please sign in",
-          description: "You need to sign in to manage your wishlist.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 1000);
-        return;
-      }
-      toast({
-        title: "Error",
-        description: "Failed to update wishlist.",
-        variant: "destructive",
-      });
-    },
-  });
-
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     // Allow both authenticated and guest users to add to cart
     addToCartMutation.mutate();
-  };
-
-  const handleToggleWishlist = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!isAuthenticated) {
-      toast({
-        title: "Please sign in",
-        description: "You need to sign in to manage your wishlist.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    toggleWishlistMutation.mutate();
   };
 
   const imageUrl = product.imageUrls?.[0] || "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
@@ -138,12 +86,16 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
           </div>
 
           {/* Wishlist Button */}
-          <button
-            onClick={handleToggleWishlist}
-            className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          >
-            <Heart className={`w-4 h-4 ${isWishlisted ? "text-red-500 fill-current" : "text-gray-400"}`} />
-          </button>
+          <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <WishlistButton
+              productId={product.id}
+              variant="icon"
+              size="sm"
+              addedFrom="listing_page"
+              showText={false}
+              className="bg-white shadow-md hover:shadow-lg"
+            />
+          </div>
         </div>
 
         <div className="p-4">
