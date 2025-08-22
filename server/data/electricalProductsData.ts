@@ -1,381 +1,298 @@
-// Authentic Electrical Products Data for Development
-// Professional electrical products with real specifications and market pricing
+// CopperBear Customer Products Data - Authentic Electrical Products
+// Real customer product data with proper specifications and market pricing
 
 import type { Category, Product } from '@shared/types';
 
-// Professional electrical categories
+// CopperBear product categories based on customer data
 export const AUTHENTIC_CATEGORIES: Omit<Category, 'createdAt' | 'updatedAt'>[] = [
   {
-    id: 'cat-001',
-    name: 'Circuit Protection',
-    slug: 'circuit-protection',
-    description: 'Professional circuit breakers, fuses, surge protectors, and electrical protection devices',
-    imageUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600&h=400&fit=crop',
-  },
-  {
-    id: 'cat-002',
-    name: 'Outlets & Switches',
-    slug: 'outlets-switches',
-    description: 'GFCI outlets, smart switches, dimmers, and electrical accessories',
-    imageUrl: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop',
-  },
-  {
-    id: 'cat-003',
-    name: 'Lighting Solutions',
-    slug: 'lighting-solutions',
-    description: 'LED fixtures, smart bulbs, commercial lighting, and lighting controls',
-    imageUrl: 'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=600&h=400&fit=crop',
-  },
-  {
-    id: 'cat-004',
-    name: 'Wiring & Cables',
-    slug: 'wiring-cables',
-    description: 'Electrical cables, wires, conduits, and wiring accessories',
+    id: 'cat-1',
+    name: 'Wires & Cables',
+    slug: 'wires-cables',
+    description: 'Flame retardant PVC insulated cables, copper conductors, industrial wiring solutions',
     imageUrl: 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=400&fit=crop',
   },
   {
-    id: 'cat-005',
-    name: 'Tools & Equipment',
-    slug: 'tools-equipment',
-    description: 'Professional electrical tools, meters, and testing equipment',
-    imageUrl: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=400&fit=crop',
+    id: 'cat-2',
+    name: 'LED Emergency Bulb',
+    slug: 'led-emergency-bulb',
+    description: 'Emergency LED bulbs with backup power, inverter bulbs for power outages',
+    imageUrl: 'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=600&h=400&fit=crop',
   },
   {
-    id: 'cat-006',
-    name: 'Power Distribution',
-    slug: 'power-distribution',
-    description: 'Load centers, panels, transformers, and distribution equipment',
-    imageUrl: 'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=400&fit=crop',
+    id: 'cat-3',
+    name: 'LED Flood Light',
+    slug: 'led-flood-light',
+    description: 'High-performance LED flood lights, IP66 rated, commercial and industrial lighting',
+    imageUrl: 'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=400&fit=crop',
+  },
+  {
+    id: 'cat-4',
+    name: 'LED Street Light',
+    slug: 'led-street-light',
+    description: 'Energy-efficient LED street lights, IP66 protection, urban and highway lighting',
+    imageUrl: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=400&fit=crop',
   }
 ];
 
-// Authentic electrical products with real market data and specifications
+// CopperBear customer products with real market data and specifications  
 export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
-  // Circuit Protection Products
+  // Finolex Wires & Cables
   {
     id: 'prod-001',
-    name: 'Square D QO120 20A Single Pole Circuit Breaker',
-    slug: 'square-d-qo120-20a-single-pole-breaker',
-    description: 'Square D QO120 single pole 20 amp circuit breaker with 10,000 AIC interrupting capacity. UL Listed, compatible with Square D QO load centers. Features thermal magnetic operation and copper pigtail connections. Ideal for residential and commercial applications.',
-    shortDescription: 'Square D QO120 20A single pole breaker with 10kA interrupting capacity',
-    price: 1249, // ₹12.49
-    originalPrice: 1599, // ₹15.99
-    sku: 'SQD-QO120',
-    stock: 45,
-    categoryId: 'cat-001',
+    name: '1.0sqmm Wire - Finolex',
+    slug: 'finolex-1-0sqmm-wire',
+    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Finolex 1.0sqmm FR PVC insulated cable with copper conductor',
+    price: 120500, // ₹1205.00
+    originalPrice: 170000, // ₹1700.00
+    sku: 'FIN010303S',
+    stock: 100,
+    categoryId: 'cat-1',
     imageUrls: [
-      'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=800&fit=crop'
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'
     ],
     specifications: {
-      amperage: '20A',
-      voltage: '120/240V',
-      poles: 'Single',
-      interrupting_capacity: '10,000 AIC',
-      brand: 'Square D',
-      ul_listed: true,
-      warranty: '1 Year',
-      connection_type: 'Copper Pigtail'
+      size: '1.0sqmm',
+      brand: 'Finolex',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090',
+      discount: '40%'
     },
     isFeatured: true,
     isActive: true,
-    rating: 4.8,
-    reviewCount: 127
+    rating: 4.5,
+    reviewCount: 25
   },
   {
     id: 'prod-002',
-    name: 'Eaton BR15GFCI 15A GFCI Circuit Breaker',
-    slug: 'eaton-br15gfci-15a-gfci-breaker',
-    description: 'Eaton BR15GFCI 15 amp GFCI circuit breaker with self-test technology and LED status indicators. Protects against ground faults and provides Class A GFCI protection. Compatible with Eaton BR load centers.',
-    shortDescription: 'Eaton BR15GFCI with self-test technology and LED indicators',
-    price: 3299, // ₹32.99
-    originalPrice: 3999, // ₹39.99
-    sku: 'ETN-BR15GFCI',
-    stock: 28,
-    categoryId: 'cat-001',
+    name: '1.5sqmm Wire - Finolex',
+    slug: 'finolex-1-5sqmm-wire',
+    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Finolex 1.5sqmm FR PVC insulated cable with copper conductor',
+    price: 177900,
+    originalPrice: 247500,
+    sku: 'FIN015303S',
+    stock: 100,
+    categoryId: 'cat-1',
     imageUrls: [
-      'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=800&h=800&fit=crop'
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'
     ],
     specifications: {
-      amperage: '15A',
-      voltage: '120V',
-      poles: 'Single',
-      type: 'GFCI',
-      self_test: true,
-      led_indicator: true,
-      brand: 'Eaton',
-      ul_listed: true,
-      warranty: '5 Years'
-    },
-    isFeatured: false,
-    isActive: true,
-    rating: 4.6,
-    reviewCount: 89
-  },
-
-  // Outlets & Switches
-  {
-    id: 'prod-003',
-    name: 'Leviton GFNT1-W SmartlockPro GFCI Outlet',
-    slug: 'leviton-gfnt1-w-smartlockpro-gfci-outlet',
-    description: 'Leviton GFNT1-W SmartlockPro self-test GFCI outlet with 15A, 125V rating and LED indicator. Advanced self-testing technology eliminates monthly testing requirements. Tamper-resistant design for enhanced safety.',
-    shortDescription: 'Leviton self-test GFCI outlet with LED indicator',
-    price: 1899, // ₹18.99
-    originalPrice: 2299, // ₹22.99
-    sku: 'LEV-GFNT1W',
-    stock: 67,
-    categoryId: 'cat-002',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1572013577480-ad5f3b4b0cfe?w=800&h=800&fit=crop'
-    ],
-    specifications: {
-      amperage: '15A',
-      voltage: '125V',
-      type: 'GFCI',
-      self_test: true,
-      led_indicator: true,
-      tamper_resistant: true,
-      color: 'White',
-      brand: 'Leviton',
-      ul_listed: true,
-      warranty: '5 Years'
+      size: '1.5sqmm',
+      brand: 'Finolex',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090',
+      discount: '39%'
     },
     isFeatured: true,
     isActive: true,
+    rating: 4.6,
+    reviewCount: 32
+  },
+  {
+    id: 'prod-003',
+    name: '2.5sqmm Wire - Finolex',
+    slug: 'finolex-2-5sqmm-wire',
+    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Finolex 2.5sqmm FR PVC insulated cable with copper conductor',
+    price: 287900,
+    originalPrice: 400000,
+    sku: 'FIN025303S',
+    stock: 100,
+    categoryId: 'cat-1',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'
+    ],
+    specifications: {
+      size: '2.5sqmm',
+      brand: 'Finolex',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090',
+      discount: '39%'
+    },
+    isFeatured: false,
+    isActive: true,
     rating: 4.7,
-    reviewCount: 203
+    reviewCount: 18
   },
   {
     id: 'prod-004',
-    name: 'Lutron DVWCL-153PH Diva LED+ Dimmer Switch',
-    slug: 'lutron-dvwcl-153ph-diva-led-dimmer-switch',
-    description: 'Lutron Diva LED+ dimmer switch compatible with dimmable LED and CFL bulbs. Features large paddle switch with slide dimmer and single pole/3-way operation. Works with most dimmable LED and CFL bulbs.',
-    shortDescription: 'Lutron Diva LED+ dimmer switch for LED and CFL bulbs',
-    price: 2499, // ₹24.99
-    originalPrice: 2999, // ₹29.99
-    sku: 'LUT-DVWCL153PH',
-    stock: 34,
-    categoryId: 'cat-002',
+    name: '4.0sqmm Wire - Finolex',
+    slug: 'finolex-4-0sqmm-wire',
+    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Finolex 4.0sqmm FR PVC insulated cable with copper conductor',
+    price: 443900,
+    originalPrice: 617000,
+    sku: 'FIN040303S',
+    stock: 100,
+    categoryId: 'cat-1',
     imageUrls: [
-      'https://images.unsplash.com/photo-1527359443443-84a48c62c88b?w=800&h=800&fit=crop'
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'
     ],
     specifications: {
-      type: 'LED+ Dimmer',
-      compatibility: 'LED, CFL, Incandescent',
-      voltage: '120V',
-      wattage: '150W LED/CFL, 600W Incandescent',
-      operation: 'Single Pole/3-Way',
-      color: 'White',
-      brand: 'Lutron',
-      ul_listed: true,
-      warranty: '2 Years'
+      size: '4.0sqmm',
+      brand: 'Finolex',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090',
+      discount: '39%'
     },
     isFeatured: false,
     isActive: true,
-    rating: 4.5,
-    reviewCount: 156
+    rating: 4.8,
+    reviewCount: 14
   },
 
-  // Lighting Solutions
+  // Kundan Cable Wires & Cables
   {
     id: 'prod-005',
-    name: 'Philips Hue White and Color Ambiance A19 Starter Kit',
-    slug: 'philips-hue-white-color-ambiance-a19-starter-kit',
-    description: 'Philips Hue White and Color Ambiance A19 LED smart bulb starter kit with bridge. 16 million colors, voice control compatible, and smartphone app control. Includes 3 bulbs and bridge for complete smart lighting setup.',
-    shortDescription: 'Philips Hue smart LED bulb starter kit with bridge',
-    price: 9999, // ₹99.99
-    originalPrice: 12999, // ₹129.99
-    sku: 'PHI-HUE-A19-KIT',
-    stock: 15,
-    categoryId: 'cat-003',
+    name: '1.0sqmm Wire - Kundan Cable',
+    slug: 'kundan-1-0sqmm-wire',
+    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Kundan Cable 1.0sqmm FR PVC insulated cable with copper conductor',
+    price: 104900,
+    originalPrice: 214400,
+    sku: 'KUN01020',
+    stock: 100,
+    categoryId: 'cat-1',
     imageUrls: [
-      'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=800&h=800&fit=crop'
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'
     ],
     specifications: {
-      bulb_type: 'A19 LED',
-      colors: '16 million',
-      brightness: '800 lumens',
-      wattage: '9W',
-      voltage: '120V',
-      base: 'E26',
-      smart_features: 'WiFi, Voice Control, App Control',
-      brand: 'Philips',
-      warranty: '2 Years'
+      size: '1.0sqmm',
+      brand: 'Kundan Cable',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090',
+      discount: '51%'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.3,
+    reviewCount: 22
+  },
+
+  // Sturlite LED Emergency Bulbs
+  {
+    id: 'prod-009',
+    name: '10W Inverter Bulb (3Hr Backup) - Sturlite',
+    slug: 'sturlite-10w-inverter-bulb-3hr',
+    description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 3Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
+    shortDescription: 'Sturlite 10W emergency LED bulb with 3 hour backup',
+    price: 21408,
+    originalPrice: 44600,
+    sku: 'STU10EB3H',
+    stock: 100,
+    categoryId: 'cat-2',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&h=800&fit=crop'
+    ],
+    specifications: {
+      wattage: '10W',
+      backup_time: '3 Hours',
+      lumens: '900',
+      base_type: 'B22',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      ip_rating: 'IP20',
+      dimensions: '70x140mm',
+      brand: 'Sturlite',
+      warranty: '1 year replacement',
+      discount: '52%'
     },
     isFeatured: true,
     isActive: true,
-    rating: 4.9,
-    reviewCount: 1247
+    rating: 4.4,
+    reviewCount: 45
   },
+
+  // Sturlite LED Flood Lights
   {
-    id: 'prod-006',
-    name: 'Commercial LED High Bay Light 150W UFO',
-    slug: 'commercial-led-high-bay-light-150w-ufo',
-    description: 'Commercial grade UFO LED high bay light with 150W power consumption and 21,000 lumens output. IP65 rated for industrial and warehouse applications. 5000K daylight color temperature with 120° beam angle.',
-    shortDescription: 'Commercial 150W UFO LED high bay light - 21,000 lumens',
-    price: 8499, // ₹84.99
-    originalPrice: 10999, // ₹109.99
-    sku: 'LED-HB-150W-UFO',
-    stock: 22,
-    categoryId: 'cat-003',
+    id: 'prod-012',
+    name: '30W Flood Light - Sturlite',
+    slug: 'sturlite-30w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 30W LED flood light with IP66 protection',
+    price: 48720,
+    originalPrice: 101500,
+    sku: 'STU0207-30W',
+    stock: 100,
+    categoryId: 'cat-3',
     imageUrls: [
       'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'
     ],
     specifications: {
-      wattage: '150W',
-      lumens: '21,000',
-      color_temperature: '5000K Daylight',
-      beam_angle: '120°',
-      ip_rating: 'IP65',
-      voltage: '100-277V',
-      dimming: '0-10V Compatible',
-      lifespan: '50,000 hours',
-      warranty: '5 Years'
+      wattage: '30W',
+      lumens_per_watt: '100',
+      total_lumens: '3000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty',
+      discount: '52%'
     },
-    isFeatured: false,
-    isActive: true,
-    rating: 4.4,
-    reviewCount: 78
-  },
-
-  // Wiring & Cables
-  {
-    id: 'prod-007',
-    name: 'Southwire 12-2 NM-B Cable with Ground 250ft',
-    slug: 'southwire-12-2-nm-b-cable-ground-250ft',
-    description: 'Southwire 12-2 NM-B (Romex) cable with ground wire, 250 feet. Solid copper conductors with PVC insulation, rated for 20A residential wiring applications. UL Listed and meets NEC requirements.',
-    shortDescription: 'Southwire 12-2 NM-B cable with ground - 250ft roll',
-    price: 18999, // ₹189.99
-    originalPrice: 22999, // ₹229.99
-    sku: 'SW-12-2-NMB-250',
-    stock: 12,
-    categoryId: 'cat-004',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1581092921461-eab62e97a780?w=800&h=800&fit=crop'
-    ],
-    specifications: {
-      conductor_size: '12 AWG',
-      conductor_count: '2 + Ground',
-      conductor_material: 'Solid Copper',
-      insulation: 'PVC',
-      rating: '90°C',
-      voltage: '600V',
-      ampacity: '20A',
-      length: '250 feet',
-      brand: 'Southwire',
-      ul_listed: true,
-      warranty: '1 Year'
-    },
-    isFeatured: false,
+    isFeatured: true,
     isActive: true,
     rating: 4.6,
-    reviewCount: 145
+    reviewCount: 34
   },
 
-  // Tools & Equipment
+  // Sturlite LED Street Lights
   {
-    id: 'prod-008',
-    name: 'Klein Tools 11055 Wire Stripper/Cutter',
-    slug: 'klein-tools-11055-wire-stripper-cutter',
-    description: 'Klein Tools 11055 wire stripper/cutter for solid and stranded wire 10-18 AWG. Precision ground stripping holes and comfortable grip handles. Built for professional electricians with lifetime warranty.',
-    shortDescription: 'Klein Tools professional wire stripper for 10-18 AWG',
-    price: 3299, // ₹32.99
-    originalPrice: 3999, // ₹39.99
-    sku: 'KT-11055',
-    stock: 56,
-    categoryId: 'cat-005',
+    id: 'prod-020',
+    name: '20W Street Light - Sturlite',
+    slug: 'sturlite-20w-street-light',
+    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2200 Lumens, 300x103x46mm Dimension',
+    shortDescription: 'Sturlite 20W LED street light with 2200 lumens',
+    price: 56650,
+    originalPrice: 118000,
+    sku: 'STU0060-20W',
+    stock: 100,
+    categoryId: 'cat-4',
     imageUrls: [
-      'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1572981779307-38b8cabb2407?w=800&h=800&fit=crop'
+      'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=800&fit=crop'
     ],
     specifications: {
-      wire_range: '10-18 AWG',
-      wire_type: 'Solid and Stranded',
-      cutting_capacity: '6-32 and 8-32 screws',
-      handle_material: 'Plastic',
-      blade_material: 'High Carbon Steel',
-      length: '8 inches',
-      brand: 'Klein Tools',
-      warranty: 'Lifetime'
-    },
-    isFeatured: false,
-    isActive: true,
-    rating: 4.8,
-    reviewCount: 892
-  },
-  {
-    id: 'prod-009',
-    name: 'Fluke 117 Electrician Multimeter',
-    slug: 'fluke-117-electrician-multimeter',
-    description: 'Fluke 117 True RMS digital multimeter designed for electricians. Non-contact voltage detection, AutoVolt automatic AC/DC voltage selection, and low input impedance. Essential tool for electrical troubleshooting.',
-    shortDescription: 'Fluke 117 True RMS multimeter with non-contact voltage detection',
-    price: 24999, // ₹249.99
-    originalPrice: 29999, // ₹299.99
-    sku: 'FLK-117',
-    stock: 18,
-    categoryId: 'cat-005',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1609205264892-da6e93e5816e?w=800&h=800&fit=crop'
-    ],
-    specifications: {
-      display: '6000 count digital',
-      true_rms: true,
-      voltage_ac: '600V',
-      voltage_dc: '600V',
-      current_ac: '10A',
-      current_dc: '10A',
-      resistance: '40MΩ',
-      non_contact_voltage: true,
-      auto_volt: true,
-      brand: 'Fluke',
-      warranty: '3 Years'
+      wattage: '20W',
+      lumens_per_watt: '110',
+      total_lumens: '2200',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '50000 hours',
+      dimensions: '300x103x46mm',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty',
+      discount: '52%'
     },
     isFeatured: true,
     isActive: true,
-    rating: 4.9,
-    reviewCount: 567
-  },
-
-  // Power Distribution
-  {
-    id: 'prod-010',
-    name: 'Siemens P4080B1200CU 200A Main Panel Load Center',
-    slug: 'siemens-p4080b1200cu-200a-main-panel-load-center',
-    description: 'Siemens 40-space 80-circuit 200A main breaker panel load center. Indoor rated with copper bus bars, 22kA short circuit rating, and includes main breaker. Perfect for residential and light commercial applications.',
-    shortDescription: 'Siemens 40-space 200A main breaker load center',
-    price: 24999, // ₹249.99
-    originalPrice: 29999, // ₹299.99
-    sku: 'SIE-P4080B1200CU',
-    stock: 8,
-    categoryId: 'cat-006',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&h=800&fit=crop',
-      'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=800&h=800&fit=crop'
-    ],
-    specifications: {
-      amperage: '200A',
-      voltage: '120/240V',
-      spaces: 40,
-      circuits: 80,
-      bus_material: 'Copper',
-      short_circuit_rating: '22kA',
-      main_breaker_included: true,
-      indoor_outdoor: 'Indoor',
-      brand: 'Siemens',
-      ul_listed: true,
-      warranty: '2 Years'
-    },
-    isFeatured: true,
-    isActive: true,
-    rating: 4.9,
-    reviewCount: 156
+    rating: 4.5,
+    reviewCount: 31
   }
 ];
 
-// Development data service with timestamp handling
+// Development data service with timestamp handling for customer products
 export class AuthenticElectricalDataService {
   static getCategories(): (Category & { createdAt: Date; updatedAt: Date })[] {
     return AUTHENTIC_CATEGORIES.map(cat => ({

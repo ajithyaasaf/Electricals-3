@@ -1,379 +1,785 @@
-// Comprehensive Electrical Products Database - Amazon-style
+// CopperBear Electrical Products Database - Customer Data
 import type { Product } from '@shared/types';
 
 export const ELECTRICAL_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
-  // Circuit Protection Category
+  // Wires & Cables - Finolex Brand
   {
     id: 'prod-001',
-    name: 'Square D 20A Single Pole Circuit Breaker',
-    slug: 'square-d-20a-single-pole-breaker',
-    description: 'Square D QO120 single pole 20 amp circuit breaker. UL Listed, 10,000 AIC interrupting capacity. Compatible with Square D QO load centers.',
-    shortDescription: 'Square D QO120 20A single pole breaker with 10kA interrupting capacity',
-    price: 1249,
-    originalPrice: 1599,
-    sku: 'SQD-QO120',
-    stock: 45,
+    name: '1.0sqmm Wire',
+    slug: 'finolex-1-0sqmm-wire',
+    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Finolex 1.0sqmm FR PVC insulated cable with copper conductor',
+    price: 120500, // ₹1205.00 in paise
+    originalPrice: 170000, // ₹1700.00 in paise
+    sku: 'FIN010303S',
+    stock: 100,
     categoryId: 'cat-1',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600&h=600',
-      'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=600'
-    ],
-    specifications: {
-      amperage: '20A',
-      voltage: '120/240V',
-      poles: 'Single',
-      interrupting_capacity: '10,000 AIC',
-      brand: 'Square D',
-      ul_listed: true,
-      warranty: '1 Year'
-    },
-    isFeatured: true,
-    isActive: true,
-    rating: 4.8,
-    reviewCount: 127
-  },
-  {
-    id: 'prod-002', 
-    name: 'Eaton 15A GFCI Circuit Breaker',
-    slug: 'eaton-15a-gfci-breaker',
-    description: 'Eaton BR15GFCI 15 amp GFCI circuit breaker. Self-test technology, LED status indicators. Protects against ground faults and arc faults.',
-    shortDescription: 'Eaton BR15GFCI with self-test technology and LED indicators',
-    price: 3299,
-    originalPrice: 3999,
-    sku: 'ETN-BR15GFCI',
-    stock: 28,
-    categoryId: 'cat-1',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600&h=600'
-    ],
-    specifications: {
-      amperage: '15A',
-      voltage: '120V',
-      poles: 'Single',
-      type: 'GFCI',
-      self_test: true,
-      led_indicator: true,
-      brand: 'Eaton',
-      ul_listed: true,
-      warranty: '5 Years'
-    },
-    isFeatured: false,
-    isActive: true,
-    rating: 4.6,
-    reviewCount: 89
-  },
-  {
-    id: 'prod-003',
-    name: 'Siemens 200A Main Panel Load Center',
-    slug: 'siemens-200a-main-panel',
-    description: 'Siemens 40-space 80-circuit 200A main breaker panel. Indoor rated, copper bus bars, 22kA short circuit rating. Includes main breaker.',
-    shortDescription: 'Siemens 40-space 200A main breaker load center',
-    price: 24999,
-    originalPrice: 29999,
-    sku: 'SIE-P4080B1200CU',
-    stock: 8,
-    categoryId: 'cat-5',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=600&h=600'
-    ],
-    specifications: {
-      amperage: '200A',
-      voltage: '120/240V',
-      spaces: 40,
-      circuits: 80,
-      bus_material: 'Copper',
-      short_circuit_rating: '22kA',
-      main_breaker_included: true,
-      brand: 'Siemens',
-      ul_listed: true,
-      warranty: '2 Years'
-    },
-    isFeatured: true,
-    isActive: true,
-    rating: 4.9,
-    reviewCount: 156
-  },
-
-  // Outlets & Switches Category
-  {
-    id: 'prod-004',
-    name: 'Leviton SmartlockPro GFCI Outlet',
-    slug: 'leviton-smartlockpro-gfci-outlet',
-    description: 'Leviton GFNT1-W SmartlockPro self-test GFCI outlet. 15A, 125V with LED indicator. Advanced self-testing technology eliminates monthly testing.',
-    shortDescription: 'Leviton self-test GFCI outlet with LED indicator',
-    price: 1899,
-    originalPrice: 2299,
-    sku: 'LEV-GFNT1W',
-    stock: 67,
-    categoryId: 'cat-3',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600'
-    ],
-    specifications: {
-      amperage: '15A',
-      voltage: '125V',  
-      type: 'GFCI',
-      self_test: true,
-      led_indicator: true,
-      tamper_resistant: true,
-      color: 'White',
-      brand: 'Leviton',
-      ul_listed: true,
-      warranty: '5 Years'
-    },
-    isFeatured: true,
-    isActive: true,
-    rating: 4.7,
-    reviewCount: 203
-  },
-  {
-    id: 'prod-005',
-    name: 'Lutron Caseta Smart Dimmer Switch',
-    slug: 'lutron-caseta-smart-dimmer',
-    description: 'Lutron PD-6WCL-WH Caseta wireless smart dimmer switch. Works with Alexa, Google Assistant, HomeKit. No neutral wire required.',
-    shortDescription: 'Lutron Caseta wireless smart dimmer with voice control',
-    price: 4199,
-    originalPrice: 4999,
-    sku: 'LUT-PD6WCLWH',
-    stock: 34,
-    categoryId: 'cat-8',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=600'
-    ],
-    specifications: {
-      load_type: 'LED/CFL/Incandescent',
-      wattage: '600W',
-      wireless: 'Clear Connect RF',
-      neutral_required: false,
-      voice_control: 'Alexa, Google, HomeKit',
-      color: 'White',
-      brand: 'Lutron',
-      ul_listed: true,
-      warranty: '3 Years'
-    },
-    isFeatured: false,
-    isActive: true,
-    rating: 4.5,
-    reviewCount: 412
-  },
-
-  // Wiring & Cables Category  
-  {
-    id: 'prod-006',
-    name: 'Southwire 12 AWG THHN Solid Copper Wire',
-    slug: 'southwire-12awg-thhn-copper-wire',
-    description: 'Southwire 500ft 12 AWG THHN solid copper building wire. 600V rated, heat and moisture resistant. Perfect for residential and commercial wiring.',
-    shortDescription: 'Southwire 500ft 12 AWG THHN solid copper wire',
-    price: 8999,
-    originalPrice: 10999,
-    sku: 'SW-12THHN500',
-    stock: 22,
-    categoryId: 'cat-2',
     imageUrls: [
       'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600'
     ],
     specifications: {
-      gauge: '12 AWG',
-      type: 'THHN',
-      conductor: 'Solid Copper',
-      length: '500 ft',
-      voltage: '600V',
-      temperature: '90°C',
-      insulation: 'PVC',
-      brand: 'Southwire',
-      ul_listed: true,
-      warranty: '25 Years'
+      size: '1.0sqmm',
+      brand: 'Finolex',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.5,
+    reviewCount: 25
+  },
+  {
+    id: 'prod-002',
+    name: '1.5sqmm Wire',
+    slug: 'finolex-1-5sqmm-wire',
+    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Finolex 1.5sqmm FR PVC insulated cable with copper conductor',
+    price: 177900, // ₹1779.00 in paise
+    originalPrice: 247500, // ₹2475.00 in paise
+    sku: 'FIN015303S',
+    stock: 100,
+    categoryId: 'cat-1',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600'
+    ],
+    specifications: {
+      size: '1.5sqmm',
+      brand: 'Finolex',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.6,
+    reviewCount: 32
+  },
+  {
+    id: 'prod-003',
+    name: '2.5sqmm Wire',
+    slug: 'finolex-2-5sqmm-wire',
+    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Finolex 2.5sqmm FR PVC insulated cable with copper conductor',
+    price: 287900, // ₹2879.00 in paise
+    originalPrice: 400000, // ₹4000.00 in paise
+    sku: 'FIN025303S',
+    stock: 100,
+    categoryId: 'cat-1',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600'
+    ],
+    specifications: {
+      size: '2.5sqmm',
+      brand: 'Finolex',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.7,
+    reviewCount: 18
+  },
+  {
+    id: 'prod-004',
+    name: '4.0sqmm Wire',
+    slug: 'finolex-4-0sqmm-wire',
+    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Finolex 4.0sqmm FR PVC insulated cable with copper conductor',
+    price: 443900, // ₹4439.00 in paise
+    originalPrice: 617000, // ₹6170.00 in paise
+    sku: 'FIN040303S',
+    stock: 100,
+    categoryId: 'cat-1',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600'
+    ],
+    specifications: {
+      size: '4.0sqmm',
+      brand: 'Finolex',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090'
     },
     isFeatured: false,
     isActive: true,
     rating: 4.8,
-    reviewCount: 78
-  },
-  {
-    id: 'prod-007',
-    name: 'Klein Tools Wire Strippers Multi-Tool',
-    slug: 'klein-wire-strippers-multi-tool',
-    description: 'Klein Tools 11061 wire strippers and crimpers. Strips 10-18 AWG solid and 12-20 AWG stranded wire. Crimps insulated and non-insulated terminals.',
-    shortDescription: 'Klein Tools wire strippers for 10-20 AWG wire',
-    price: 2899,
-    originalPrice: 3499,
-    sku: 'KLN-11061',
-    stock: 89,
-    categoryId: 'cat-6',
-    imageUrls: [
-      'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=600'
-    ],
-    specifications: {
-      wire_range_solid: '10-18 AWG',
-      wire_range_stranded: '12-20 AWG',
-      crimping: 'Insulated/Non-insulated terminals',
-      length: '8.25 inches',
-      handles: 'Journeyman comfort grips',
-      brand: 'Klein Tools',
-      made_in: 'USA',
-      warranty: 'Lifetime'
-    },
-    isFeatured: true,
-    isActive: true,
-    rating: 4.9,
-    reviewCount: 334
+    reviewCount: 14
   },
 
-  // Lighting Solutions Category
+  // Wires & Cables - Kundan Cable Brand
   {
-    id: 'prod-008',
-    name: 'Philips 4ft LED Shop Light',
-    slug: 'philips-4ft-led-shop-light',
-    description: 'Philips 40W 4ft LED shop light fixture. 4000 lumens, 5000K daylight, linkable design. Energy efficient replacement for fluorescent fixtures.',
-    shortDescription: 'Philips 40W LED shop light with 4000 lumens output',
-    price: 4599,
-    originalPrice: 5999,
-    sku: 'PHI-4FTLED40W',
-    stock: 56,
-    categoryId: 'cat-4',
+    id: 'prod-005',
+    name: '1.0sqmm Wire',
+    slug: 'kundan-1-0sqmm-wire',
+    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Kundan Cable 1.0sqmm FR PVC insulated cable with copper conductor',
+    price: 104900, // ₹1049.00 in paise
+    originalPrice: 214400, // ₹2144.00 in paise
+    sku: 'KUN01020',
+    stock: 100,
+    categoryId: 'cat-1',
     imageUrls: [
-      'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=600&h=600'
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600'
     ],
     specifications: {
-      wattage: '40W',
-      lumens: '4000',
-      color_temperature: '5000K Daylight',
-      length: '48 inches',
-      linkable: true,
-      mounting: 'Chain/Surface',
-      lifespan: '50,000 hours',
-      brand: 'Philips',
-      ul_listed: true,
-      warranty: '5 Years'
+      size: '1.0sqmm',
+      brand: 'Kundan Cable',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090'
     },
     isFeatured: false,
     isActive: true,
-    rating: 4.6,
-    reviewCount: 167
+    rating: 4.3,
+    reviewCount: 22
   },
   {
-    id: 'prod-009',
-    name: 'Cooper Emergency Exit Light',
-    slug: 'cooper-emergency-exit-light',
-    description: 'Cooper Lighting APX6R LED emergency exit sign. Red letters, battery backup, self-testing. Meets all code requirements for commercial buildings.',
-    shortDescription: 'Cooper LED emergency exit sign with battery backup',
-    price: 7899,
-    originalPrice: 9499,
-    sku: 'COO-APX6R',
-    stock: 31,
-    categoryId: 'cat-4',
+    id: 'prod-006',
+    name: '1.5sqmm Wire',
+    slug: 'kundan-1-5sqmm-wire',
+    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Kundan Cable 1.5sqmm FR PVC insulated cable with copper conductor',
+    price: 159900, // ₹1599.00 in paise
+    originalPrice: 326400, // ₹3264.00 in paise
+    sku: 'KUN01520',
+    stock: 100,
+    categoryId: 'cat-1',
     imageUrls: [
-      'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=600&h=600'
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600'
     ],
     specifications: {
-      type: 'Emergency Exit Sign',
-      led_type: 'High efficiency LED',
-      color: 'Red',
-      battery_backup: '90 minutes',
-      self_testing: true,
-      mounting: 'Wall/Ceiling',
-      brand: 'Cooper Lighting',
-      ul_listed: true,
-      warranty: '5 Years'
+      size: '1.5sqmm',
+      brand: 'Kundan Cable',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090'
     },
     isFeatured: false,
     isActive: true,
     rating: 4.4,
-    reviewCount: 92
+    reviewCount: 19
   },
-
-  // Tools & Equipment Category
   {
-    id: 'prod-010',
-    name: 'Fluke 117 Digital Multimeter',
-    slug: 'fluke-117-digital-multimeter',
-    description: 'Fluke 117 True RMS digital multimeter. Non-contact voltage detection, low input impedance, AutoVolt automatic AC/DC voltage selection.',
-    shortDescription: 'Fluke 117 True RMS multimeter with non-contact voltage detection',
-    price: 17999,
-    originalPrice: 21999,
-    sku: 'FLK-117',
-    stock: 18,
-    categoryId: 'cat-6',
+    id: 'prod-007',
+    name: '2.5sqmm Wire',
+    slug: 'kundan-2-5sqmm-wire',
+    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Kundan Cable 2.5sqmm FR PVC insulated cable with copper conductor',
+    price: 258100, // ₹2581.00 in paise
+    originalPrice: 526900, // ₹5269.00 in paise
+    sku: 'KUN02520',
+    stock: 100,
+    categoryId: 'cat-1',
     imageUrls: [
-      'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=600'
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600'
     ],
     specifications: {
-      display: '6000 count',
-      accuracy: '±0.5%',
-      voltage_range: '600V AC/DC',
-      current_range: '10A',
-      resistance: '40MΩ',
-      features: 'True RMS, Non-contact voltage',
-      safety_rating: 'CAT III 600V',
-      brand: 'Fluke',
-      warranty: '3 Years'
+      size: '2.5sqmm',
+      brand: 'Kundan Cable',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.5,
+    reviewCount: 16
+  },
+  {
+    id: 'prod-008',
+    name: '4.0sqmm Wire',
+    slug: 'kundan-4-0sqmm-wire',
+    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+    shortDescription: 'Kundan Cable 4.0sqmm FR PVC insulated cable with copper conductor',
+    price: 380900, // ₹3809.00 in paise
+    originalPrice: 777400, // ₹7774.00 in paise
+    sku: 'KUN04020',
+    stock: 100,
+    categoryId: 'cat-1',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=600&h=600'
+    ],
+    specifications: {
+      size: '4.0sqmm',
+      brand: 'Kundan Cable',
+      type: 'FR PVC Insulated',
+      conductor: 'Multistrand Copper',
+      core_type: 'Single Core Unsheathed',
+      unit: 'per coil',
+      hsn_code: '85446090'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.6,
+    reviewCount: 13
+  },
+
+  // LED Emergency Bulbs - Sturlite Brand
+  {
+    id: 'prod-009',
+    name: '10W Inverter Bulb (3Hr Backup)',
+    slug: 'sturlite-10w-inverter-bulb-3hr',
+    description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 3Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
+    shortDescription: 'Sturlite 10W emergency LED bulb with 3 hour backup',
+    price: 21408, // ₹214.08 in paise
+    originalPrice: 44600, // ₹446.00 in paise
+    sku: 'STU10EB3H',
+    stock: 100,
+    categoryId: 'cat-2',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '10W',
+      backup_time: '3 Hours',
+      lumens: '900',
+      base_type: 'B22',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      ip_rating: 'IP20',
+      dimensions: '70x140mm',
+      brand: 'Sturlite',
+      warranty: '1 year replacement'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.4,
+    reviewCount: 45
+  },
+  {
+    id: 'prod-010',
+    name: '10W Inverter Bulb (4Hr Backup)',
+    slug: 'sturlite-10w-inverter-bulb-4hr',
+    description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 4Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
+    shortDescription: 'Sturlite 10W emergency LED bulb with 4 hour backup',
+    price: 22320, // ₹223.20 in paise
+    originalPrice: 46500, // ₹465.00 in paise
+    sku: 'STU10EB4H',
+    stock: 100,
+    categoryId: 'cat-2',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '10W',
+      backup_time: '4 Hours',
+      lumens: '900',
+      base_type: 'B22',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      ip_rating: 'IP20',
+      dimensions: '70x140mm',
+      brand: 'Sturlite',
+      warranty: '1 year replacement'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.5,
+    reviewCount: 38
+  },
+  {
+    id: 'prod-011',
+    name: '10W Inverter Bulb (6Hr Backup)',
+    slug: 'sturlite-10w-inverter-bulb-6hr',
+    description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 6Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
+    shortDescription: 'Sturlite 10W emergency LED bulb with 6 hour backup',
+    price: 26640, // ₹266.40 in paise
+    originalPrice: 55500, // ₹555.00 in paise
+    sku: 'STU10EB6H',
+    stock: 100,
+    categoryId: 'cat-2',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '10W',
+      backup_time: '6 Hours',
+      lumens: '900',
+      base_type: 'B22',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      ip_rating: 'IP20',
+      dimensions: '70x140mm',
+      brand: 'Sturlite',
+      warranty: '1 year replacement'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.7,
+    reviewCount: 52
+  },
+
+  // LED Flood Lights - Sturlite Brand
+  {
+    id: 'prod-012',
+    name: '30W Flood Light',
+    slug: 'sturlite-30w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 30W LED flood light with IP66 protection',
+    price: 48720, // ₹487.20 in paise
+    originalPrice: 101500, // ₹1015.00 in paise
+    sku: 'STU0207-30W',
+    stock: 100,
+    categoryId: 'cat-3',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '30W',
+      lumens_per_watt: '100',
+      total_lumens: '3000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.6,
+    reviewCount: 34
+  },
+  {
+    id: 'prod-013',
+    name: '50W Flood Light',
+    slug: 'sturlite-50w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 50W LED flood light with IP66 protection',
+    price: 67200, // ₹672.00 in paise
+    originalPrice: 140000, // ₹1400.00 in paise
+    sku: 'STU0207-50W',
+    stock: 100,
+    categoryId: 'cat-3',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '50W',
+      lumens_per_watt: '100',
+      total_lumens: '5000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.7,
+    reviewCount: 28
+  },
+  {
+    id: 'prod-014',
+    name: '100W Flood Light',
+    slug: 'sturlite-100w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 100W LED flood light with IP66 protection',
+    price: 110160, // ₹1101.60 in paise
+    originalPrice: 229500, // ₹2295.00 in paise
+    sku: 'STU0207-100W',
+    stock: 100,
+    categoryId: 'cat-3',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '100W',
+      lumens_per_watt: '100',
+      total_lumens: '10000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.8,
+    reviewCount: 41
+  },
+  {
+    id: 'prod-015',
+    name: '150W Flood Light',
+    slug: 'sturlite-150w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 150W LED flood light with IP66 protection',
+    price: 185280, // ₹1852.80 in paise
+    originalPrice: 386000, // ₹3860.00 in paise
+    sku: 'STU0207-1500W',
+    stock: 100,
+    categoryId: 'cat-3',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '150W',
+      lumens_per_watt: '100',
+      total_lumens: '15000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.7,
+    reviewCount: 22
+  },
+  {
+    id: 'prod-016',
+    name: '200W Flood Light',
+    slug: 'sturlite-200w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 200W LED flood light with IP66 protection',
+    price: 223680, // ₹2236.80 in paise
+    originalPrice: 466000, // ₹4660.00 in paise
+    sku: 'STU0207-200W',
+    stock: 100,
+    categoryId: 'cat-3',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '200W',
+      lumens_per_watt: '100',
+      total_lumens: '20000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.8,
+    reviewCount: 19
+  },
+  {
+    id: 'prod-017',
+    name: '300W Flood Light',
+    slug: 'sturlite-300w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 300W LED flood light with IP66 protection',
+    price: 385200, // ₹3852.00 in paise
+    originalPrice: 802500, // ₹8025.00 in paise
+    sku: 'STU0207-300W',
+    stock: 100,
+    categoryId: 'cat-3',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '300W',
+      lumens_per_watt: '100',
+      total_lumens: '30000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
     },
     isFeatured: true,
     isActive: true,
     rating: 4.9,
-    reviewCount: 456
+    reviewCount: 15
   },
-
-  // Industrial Components Category
   {
-    id: 'prod-011',
-    name: 'Allen-Bradley Motor Starter',
-    slug: 'allen-bradley-motor-starter',
-    description: 'Allen-Bradley 509-COD-A2D motor starter. Size 1, 27A, 3-phase. NEMA rated with overload protection. Suitable for pumps, fans, and conveyors.',
-    shortDescription: 'Allen-Bradley Size 1 motor starter with overload protection',
-    price: 32999,
-    originalPrice: 38999,
-    sku: 'AB-509CODA2D',
-    stock: 12,
-    categoryId: 'cat-7',
+    id: 'prod-018',
+    name: '400W Flood Light',
+    slug: 'sturlite-400w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 400W LED flood light with IP66 protection',
+    price: 520800, // ₹5208.00 in paise
+    originalPrice: 1085000, // ₹10850.00 in paise
+    sku: 'STU0207-400W',
+    stock: 100,
+    categoryId: 'cat-3',
     imageUrls: [
-      'https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?w=600&h=600'
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600'
     ],
     specifications: {
-      size: 'NEMA Size 1',
-      amperage: '27A',
-      phases: '3-Phase',
-      voltage: '480V',
-      overload_protection: 'Thermal',
-      enclosure: 'Open',
-      brand: 'Allen-Bradley',
-      ul_listed: true,
-      warranty: '1 Year'
+      wattage: '400W',
+      lumens_per_watt: '100',
+      total_lumens: '40000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
     },
     isFeatured: false,
-    isActive: true,  
-    rating: 4.7,
-    reviewCount: 63
+    isActive: true,
+    rating: 4.9,
+    reviewCount: 12
   },
-
-  // Smart Home Category
   {
-    id: 'prod-012',
-    name: 'Ring Smart Doorbell Pro',
-    slug: 'ring-smart-doorbell-pro',
-    description: 'Ring Video Doorbell Pro with 1080HD video, advanced motion detection, and customizable privacy settings. Works with existing doorbell wiring.',
-    shortDescription: 'Ring Doorbell Pro with 1080HD video and motion detection',
-    price: 12999,
-    originalPrice: 16999,
-    sku: 'RNG-DBPRO',
-    stock: 43,
-    categoryId: 'cat-8',
+    id: 'prod-019',
+    name: '500W Flood Light',
+    slug: 'sturlite-500w-flood-light',
+    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+    shortDescription: 'Sturlite 500W LED flood light with IP66 protection',
+    price: 753600, // ₹7536.00 in paise
+    originalPrice: 1570000, // ₹15700.00 in paise
+    sku: 'STU0207-500W',
+    stock: 100,
+    categoryId: 'cat-3',
     imageUrls: [
-      'https://images.unsplash.com/photo-1558002038-1055907df827?w=600&h=600'
+      'https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=600&h=600'
     ],
     specifications: {
-      video_quality: '1080p HD',
-      field_of_view: '160° horizontal, 90° vertical',
-      night_vision: 'Infrared LED',
-      motion_detection: 'Advanced PIR',
-      connectivity: '2.4GHz/5GHz WiFi',
-      power: 'Hardwired',
-      brand: 'Ring',
-      warranty: '1 Year'
+      wattage: '500W',
+      lumens_per_watt: '100',
+      total_lumens: '50000',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '25000 hours',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
     },
     isFeatured: true,
     isActive: true,
-    rating: 4.3,
-    reviewCount: 1247
+    rating: 5.0,
+    reviewCount: 8
+  },
+
+  // LED Street Lights - Sturlite Brand
+  {
+    id: 'prod-020',
+    name: '20W Street Light',
+    slug: 'sturlite-20w-street-light',
+    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2200 Lumens, 300x103x46mm Dimension',
+    shortDescription: 'Sturlite 20W LED street light with 2200 lumens',
+    price: 56650, // ₹566.50 in paise
+    originalPrice: 118000, // ₹1180.00 in paise
+    sku: 'STU0060-20W',
+    stock: 100,
+    categoryId: 'cat-4',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '20W',
+      lumens_per_watt: '110',
+      total_lumens: '2200',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '50000 hours',
+      dimensions: '300x103x46mm',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.5,
+    reviewCount: 31
+  },
+  {
+    id: 'prod-021',
+    name: '24W Street Light',
+    slug: 'sturlite-24w-street-light',
+    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2640 Lumens, 300x103x46mm Dimension',
+    shortDescription: 'Sturlite 24W LED street light with 2640 lumens',
+    price: 58800, // ₹588.00 in paise
+    originalPrice: 122500, // ₹1225.00 in paise
+    sku: 'STU0060-24W',
+    stock: 100,
+    categoryId: 'cat-4',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '24W',
+      lumens_per_watt: '110',
+      total_lumens: '2640',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '50000 hours',
+      dimensions: '300x103x46mm',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.6,
+    reviewCount: 27
+  },
+  {
+    id: 'prod-022',
+    name: '30W Street Light',
+    slug: 'sturlite-30w-street-light',
+    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, Lumens 3300, 340x124x47mm dimension',
+    shortDescription: 'Sturlite 30W LED street light with 3300 lumens',
+    price: 75600, // ₹756.00 in paise
+    originalPrice: 157500, // ₹1575.00 in paise
+    sku: 'STU0060-30W',
+    stock: 100,
+    categoryId: 'cat-4',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '30W',
+      lumens_per_watt: '110',
+      total_lumens: '3300',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '50000 hours',
+      dimensions: '340x124x47mm',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.7,
+    reviewCount: 33
+  },
+  {
+    id: 'prod-023',
+    name: '36W Street Light',
+    slug: 'sturlite-36w-street-light',
+    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 3960 Lumens, 340x124x47mm Dimension',
+    shortDescription: 'Sturlite 36W LED street light with 3960 lumens',
+    price: 78240, // ₹782.40 in paise
+    originalPrice: 163000, // ₹1630.00 in paise
+    sku: 'STU0060-36W',
+    stock: 100,
+    categoryId: 'cat-4',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '36W',
+      lumens_per_watt: '110',
+      total_lumens: '3960',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '50000 hours',
+      dimensions: '340x124x47mm',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: false,
+    isActive: true,
+    rating: 4.6,
+    reviewCount: 24
+  },
+  {
+    id: 'prod-024',
+    name: '50W Street Light',
+    slug: 'sturlite-50w-street-light',
+    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 5500 Lumens, 391x145x50mm Dimension',
+    shortDescription: 'Sturlite 50W LED street light with 5500 lumens',
+    price: 95000, // ₹950.00 in paise
+    originalPrice: 198000, // ₹1980.00 in paise
+    sku: 'STU0060-50W',
+    stock: 100,
+    categoryId: 'cat-4',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '50W',
+      lumens_per_watt: '110',
+      total_lumens: '5500',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '50000 hours',
+      dimensions: '391x145x50mm',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.8,
+    reviewCount: 29
+  },
+  {
+    id: 'prod-025',
+    name: '72W Street Light',
+    slug: 'sturlite-72w-street-light',
+    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 7920 Lumens, 390x145x50mm Dimension',
+    shortDescription: 'Sturlite 72W LED street light with 7920 lumens',
+    price: 140400, // ₹1404.00 in paise
+    originalPrice: 292500, // ₹2925.00 in paise
+    sku: 'STU0060-72W',
+    stock: 100,
+    categoryId: 'cat-4',
+    imageUrls: [
+      'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=600&h=600'
+    ],
+    specifications: {
+      wattage: '72W',
+      lumens_per_watt: '110',
+      total_lumens: '7920',
+      ip_rating: 'IP66',
+      housing: 'ADC12 Diecast',
+      surge_protection: '6.0KV',
+      lifespan: '50000 hours',
+      dimensions: '390x145x50mm',
+      led_chip: 'SMD LED',
+      cri: '>80',
+      brand: 'Sturlite',
+      warranty: '2 year warranty'
+    },
+    isFeatured: true,
+    isActive: true,
+    rating: 4.9,
+    reviewCount: 21
   }
 ];
