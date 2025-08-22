@@ -430,10 +430,28 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   }, [loadWishlist]);
   
-  // Handle guest user wishlist
+  // Handle guest user wishlist - load guest data instead of clearing
   const handleGuestUserWishlist = useCallback(async () => {
     console.log('[WISHLIST CONTEXT] 🗑️ User logged out, clearing wishlist data...');
     dispatch({ type: 'CLEAR_WISHLIST' });
+    
+    // Load guest wishlist from localStorage after logout
+    try {
+      const guestData = GuestWishlistManager.load();
+      if (guestData.items.length > 0) {
+        console.log('[WISHLIST CONTEXT] 📦 Loading guest wishlist from localStorage:', guestData.items.length, 'items');
+        // Enrich guest items with current product/service data
+        const response = await apiRequest('POST', '/api/wishlist/unified', { guestWishlist: guestData.items });
+        const result = await response.json() as WishlistOperationResult;
+        
+        if (result.success && result.items) {
+          dispatch({ type: 'SET_WISHLIST', payload: result.items });
+        }
+      }
+    } catch (error) {
+      console.error('[WISHLIST CONTEXT] ❌ Error loading guest wishlist after logout:', error);
+    }
+    
     dispatch({ 
       type: 'SET_SYNC_STATUS', 
       payload: { 
@@ -525,30 +543,18 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated, user, toast, loadWishlist]);
   
   // Remove item from wishlist
-  const removeFromWishlist = useCallback(async (productId?: string, serviceId?: string): Promise<boolean> => {
+  const removeFromWishlist = useCallback(async (itemIdOrProductId?: string, serviceId?: string): Promise<boolean> => {
+    // Support both itemId (for authenticated) and productId/serviceId (for guest)
+    const productId = itemIdOrProductId;
     if (!isAuthenticated) {
       // Guest mode - remove from localStorage
       try {
-        const guestWishlist = getGuestWishlist();
-        const existingItemIndex = guestWishlist.findIndex(item => 
-          (productId && item.productId === productId) || 
-          (serviceId && item.serviceId === serviceId)
-        );
-        
-        if (existingItemIndex !== -1) {
-          guestWishlist.splice(existingItemIndex, 1);
-          setGuestWishlist(guestWishlist);
-          
-          // Update state
-          dispatch({ 
-            type: 'REMOVE_ITEM', 
-            payload: { 
-              itemId: guestWishlist[existingItemIndex].id 
-            } 
-          });
+        const success = GuestWishlistManager.removeItem(productId, serviceId);
+        if (success) {
+          // Reload wishlist to get updated data
+          await loadWishlist();
           return true;
         }
-        
         return false;
       } catch (error) {
         console.error('Error removing from guest wishlist:', error);
@@ -581,7 +587,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [isAuthenticated, state.items]);
+  }, [isAuthenticated, state.items, loadWishlist]);
   
   // Update wishlist item
   const updateWishlistItem = useCallback(async (
