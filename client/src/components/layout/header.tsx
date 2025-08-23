@@ -453,12 +453,12 @@ export function Header() {
         {/* Navigation Menu - Desktop */}
         {!isMobile && (
           <nav className="border-t border-gray-200 py-3">
-            <ul className="flex items-center space-x-4 lg:space-x-8 text-sm overflow-x-auto scrollbar-hide">
+            <ul className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 lg:space-x-6 xl:space-x-8 text-sm overflow-x-auto scrollbar-hide">
               {desktopNavigation.map((item) => (
                 <li key={item.name} className="flex-shrink-0">
                   <SmartLink
                     href={item.href}
-                    className={`whitespace-nowrap transition-colors px-2 py-1 rounded-md touch-manipulation ${
+                    className={`whitespace-nowrap transition-colors px-1 sm:px-2 py-1 rounded-md touch-manipulation text-xs sm:text-sm ${
                       item.name === "Today's Deals"
                         ? "text-copper-600 font-semibold bg-copper-50"
                         : "text-gray-700 hover:text-copper-600 hover:bg-copper-25 font-medium"
