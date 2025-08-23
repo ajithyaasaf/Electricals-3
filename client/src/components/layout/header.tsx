@@ -179,10 +179,16 @@ export function Header() {
     },
   ];
 
-  const desktopNavigation = [
+  // Priority navigation items - always visible
+  const priorityNavigation = [
     { name: "All Departments", href: "/products" },
     { name: "Circuit Breakers", href: "/products?category=circuit-breakers" },
     { name: "Wiring & Cables", href: "/products?category=wiring-cables" },
+    { name: "Today's Deals", href: "/products?featured=true" },
+  ];
+
+  // Secondary navigation items - shown based on screen size
+  const secondaryNavigation = [
     { name: "Electrical Tools", href: "/products?category=electrical-tools" },
     { name: "Panels & Boxes", href: "/products?category=panels-boxes" },
     {
@@ -193,7 +199,6 @@ export function Header() {
       name: "Professional Consulting",
       href: "/services?category=electrical-consulting",
     },
-    { name: "Today's Deals", href: "/products?featured=true" },
   ];
 
   const toggleSection = (sectionTitle: string) => {
@@ -453,8 +458,9 @@ export function Header() {
         {/* Navigation Menu - Desktop */}
         {!isMobile && (
           <nav className="border-t border-gray-200 py-3">
-            <ul className="flex items-center space-x-2 sm:space-x-3 md:space-x-4 lg:space-x-6 xl:space-x-8 text-sm overflow-x-auto scrollbar-hide">
-              {desktopNavigation.map((item) => (
+            <ul className="flex items-center space-x-2 md:space-x-3 lg:space-x-4 xl:space-x-6 text-sm overflow-x-auto scrollbar-hide">
+              {/* Priority items - always visible */}
+              {priorityNavigation.map((item) => (
                 <li key={item.name} className="flex-shrink-0">
                   <SmartLink
                     href={item.href}
@@ -468,6 +474,51 @@ export function Header() {
                   </SmartLink>
                 </li>
               ))}
+              
+              {/* Secondary items - shown on larger screens */}
+              {secondaryNavigation.slice(0, 2).map((item) => (
+                <li key={item.name} className="flex-shrink-0 hidden lg:block">
+                  <SmartLink
+                    href={item.href}
+                    className="whitespace-nowrap transition-colors px-1 sm:px-2 py-1 rounded-md touch-manipulation text-xs sm:text-sm text-gray-700 hover:text-copper-600 hover:bg-copper-25 font-medium"
+                  >
+                    {item.name}
+                  </SmartLink>
+                </li>
+              ))}
+              
+              {/* Services items - shown only on extra large screens */}
+              {secondaryNavigation.slice(2).map((item) => (
+                <li key={item.name} className="flex-shrink-0 hidden xl:block">
+                  <SmartLink
+                    href={item.href}
+                    className="whitespace-nowrap transition-colors px-1 sm:px-2 py-1 rounded-md touch-manipulation text-xs sm:text-sm text-gray-700 hover:text-copper-600 hover:bg-copper-25 font-medium"
+                  >
+                    {item.name}
+                  </SmartLink>
+                </li>
+              ))}
+              
+              {/* More dropdown for hidden items on smaller screens */}
+              <li className="flex-shrink-0 lg:hidden">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="px-1 sm:px-2 py-1 text-xs sm:text-sm text-gray-700 hover:text-copper-600 hover:bg-copper-25 font-medium">
+                      More
+                      <ChevronDown className="ml-1 h-3 w-3" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    {secondaryNavigation.map((item) => (
+                      <DropdownMenuItem key={item.name} asChild>
+                        <SmartLink href={item.href} className="w-full">
+                          {item.name}
+                        </SmartLink>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </li>
             </ul>
           </nav>
         )}
