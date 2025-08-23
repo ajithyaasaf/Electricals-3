@@ -57,9 +57,16 @@ export default function ProductDetail() {
   const [imageZoom, setImageZoom] = useState({ x: 0, y: 0, scale: 1 });
   const imageRef = useRef<HTMLImageElement>(null);
 
-  // Fetch product details
+  // Fetch product details by slug
   const { data: product, isLoading } = useQuery<Product>({
-    queryKey: ["/api/products", slug],
+    queryKey: ["/api/products/slug", slug],
+    queryFn: async () => {
+      const response = await fetch(`/api/products/slug/${slug}`);
+      if (!response.ok) {
+        throw new Error('Product not found');
+      }
+      return response.json();
+    }
   });
 
   // Fetch related products
