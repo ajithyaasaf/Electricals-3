@@ -312,8 +312,8 @@ export default function Products() {
     categoryId: filters.categoryId,
     search: debouncedSearch, // Use debounced search
     featured: filters.featured,
-    minPrice: debouncedMinPrice * 100, // Convert to paisa (backend format)
-    maxPrice: debouncedMaxPrice * 100, // Convert to paisa (backend format)
+    minPrice: debouncedMinPrice, // Send prices in rupees format
+    maxPrice: debouncedMaxPrice, // Send prices in rupees format
     sortBy: filters.sortBy,
     sortOrder: filters.sortOrder,
     limit: itemsPerPage,

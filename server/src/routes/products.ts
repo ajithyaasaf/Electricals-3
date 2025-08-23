@@ -41,7 +41,7 @@ export function registerProductRoutes(app: Express) {
           const price = parseFloat(product.price.toString());
           const withinRange = price >= minPriceNum && price <= maxPriceNum;
           if (!withinRange) {
-            console.log(`🚫 Product ${product.name} (₹${price/100}) excluded from range ₹${minPriceNum/100}-₹${maxPriceNum/100}`);
+            console.log(`🚫 Product ${product.name} (₹${price}) excluded from range ₹${minPriceNum}-₹${maxPriceNum}`);
           }
           return withinRange;
         });
