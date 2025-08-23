@@ -49,7 +49,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'FIN010303S',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png'],
     specifications: {
       size: '1.0sqmm',
       brand: 'Finolex',
@@ -76,7 +76,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'FIN015303S',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png'],
     specifications: {
       size: '1.5sqmm',
       brand: 'Finolex',
@@ -103,7 +103,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'FIN025303S',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png'],
     specifications: {
       size: '2.5sqmm',
       brand: 'Finolex',
@@ -130,7 +130,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'FIN040303S',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png'],
     specifications: {
       size: '4.0sqmm',
       brand: 'Finolex',
@@ -159,7 +159,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'KUN01020',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png'],
     specifications: {
       size: '1.0sqmm',
       brand: 'Kundan Cable',
@@ -186,7 +186,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'KUN01520',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png'],
     specifications: {
       size: '1.5sqmm',
       brand: 'Kundan Cable',
@@ -213,7 +213,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'KUN02520',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png'],
     specifications: {
       size: '2.5sqmm',
       brand: 'Kundan Cable',
@@ -240,7 +240,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'KUN04020',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png'],
     specifications: {
       size: '4.0sqmm',
       brand: 'Kundan Cable',
@@ -269,7 +269,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU10EB3H',
     stock: 100,
     categoryId: 'cat-2',
-    imageUrls: ['https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_emergency_inverter_bulb_deb60b8a.png'],
     specifications: {
       wattage: '10W',
       backup_time: '3 Hours',
@@ -299,7 +299,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU10EB4H',
     stock: 100,
     categoryId: 'cat-2',
-    imageUrls: ['https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_emergency_inverter_bulb_deb60b8a.png'],
     specifications: {
       wattage: '10W',
       backup_time: '4 Hours',
@@ -329,7 +329,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU10EB6H',
     stock: 100,
     categoryId: 'cat-2',
-    imageUrls: ['https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_emergency_inverter_bulb_deb60b8a.png'],
     specifications: {
       wattage: '10W',
       backup_time: '6 Hours',
@@ -361,7 +361,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-30W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_flood_light_fixture_41ed64f0.png'],
     specifications: {
       wattage: '30W',
       lumens_per_watt: '100',
@@ -392,7 +392,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-50W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_flood_light_fixture_41ed64f0.png'],
     specifications: {
       wattage: '50W',
       lumens_per_watt: '100',
@@ -423,7 +423,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-100W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_flood_light_fixture_41ed64f0.png'],
     specifications: {
       wattage: '100W',
       lumens_per_watt: '100',
@@ -454,7 +454,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-1500W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_flood_light_fixture_41ed64f0.png'],
     specifications: {
       wattage: '150W',
       lumens_per_watt: '100',
@@ -485,7 +485,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-200W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_flood_light_fixture_41ed64f0.png'],
     specifications: {
       wattage: '200W',
       lumens_per_watt: '100',
@@ -516,7 +516,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-300W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_flood_light_fixture_41ed64f0.png'],
     specifications: {
       wattage: '300W',
       lumens_per_watt: '100',
@@ -547,7 +547,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-400W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_flood_light_fixture_41ed64f0.png'],
     specifications: {
       wattage: '400W',
       lumens_per_watt: '100',
@@ -578,7 +578,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-500W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['https://images.unsplash.com/photo-1558618047-3c8c76ca7d13?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_flood_light_fixture_41ed64f0.png'],
     specifications: {
       wattage: '500W',
       lumens_per_watt: '100',
@@ -611,7 +611,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-20W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_street_light_fixture_4dde50e8.png'],
     specifications: {
       wattage: '20W',
       lumens_per_watt: '110',
@@ -643,7 +643,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-24W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_street_light_fixture_4dde50e8.png'],
     specifications: {
       wattage: '24W',
       lumens_per_watt: '110',
@@ -675,7 +675,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-30W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_street_light_fixture_4dde50e8.png'],
     specifications: {
       wattage: '30W',
       lumens_per_watt: '110',
@@ -707,7 +707,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-36W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_street_light_fixture_4dde50e8.png'],
     specifications: {
       wattage: '36W',
       lumens_per_watt: '110',
@@ -739,7 +739,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-50W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_street_light_fixture_4dde50e8.png'],
     specifications: {
       wattage: '50W',
       lumens_per_watt: '110',
@@ -771,7 +771,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-72W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=800&h=800&fit=crop'],
+    imageUrls: ['/assets/generated_images/LED_street_light_fixture_4dde50e8.png'],
     specifications: {
       wattage: '72W',
       lumens_per_watt: '110',
