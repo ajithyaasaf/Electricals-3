@@ -19,30 +19,32 @@ import { Star, Heart, ShoppingCart, Minus, Plus, Shield, Truck, RotateCcw, Arrow
 import { Link } from "wouter";
 import { ReviewList } from "@/components/reviews/review-list";
 import { ReviewForm } from "@/components/reviews/review-form";
+import type { Product } from "shared/types";
 
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { addItem } = useCartContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isAuthenticated } = useFirebaseAuth();
   
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   // Fetch product details
-  const { data: product, isLoading } = useQuery({
+  const { data: product, isLoading } = useQuery<Product>({
     queryKey: ["/api/products", slug],
   });
 
   // Fetch related products
-  const { data: relatedProducts } = useQuery({
+  const { data: relatedProducts } = useQuery<{ products: Product[] }>({
     queryKey: ["/api/products", { categoryId: product?.categoryId, limit: 4 }],
     enabled: !!product?.categoryId,
   });
 
   // Fetch reviews
-  const { data: reviews = [] } = useQuery({
+  const { data: reviews = [] } = useQuery<any[]>({
     queryKey: ["/api/reviews", { productId: product?.id }],
     enabled: !!product?.id,
   });
@@ -134,10 +136,10 @@ export default function ProductDetail() {
   }
 
   const images = product.imageUrls || ["https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800"];
-  const price = parseFloat(product.price);
-  const originalPrice = product.originalPrice ? parseFloat(product.originalPrice) : null;
+  const price = product.price;
+  const originalPrice = product.originalPrice;
   const hasDiscount = originalPrice && originalPrice > price;
-  const rating = parseFloat(product.rating || "0");
+  const rating = product.rating || 0;
   const reviewCount = product.reviewCount || 0;
 
   const handleAddToCart = () => {
@@ -184,7 +186,7 @@ export default function ProductDetail() {
             
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
-                {images.map((image, index) => (
+                {images.map((image: string, index: number) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
@@ -412,7 +414,7 @@ export default function ProductDetail() {
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
             <ProductGrid 
-              products={relatedProducts.products.filter(p => p.id !== product.id).slice(0, 4)} 
+              products={relatedProducts.products.filter(p => p.id !== product.id).slice(0, 4) as any} 
             />
           </div>
         )}
