@@ -44,8 +44,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'finolex-1-0sqmm-wire',
     description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Finolex 1.0sqmm FR PVC insulated cable with copper conductor',
-    price: 120500, // ₹1205.00
-    originalPrice: 170000, // ₹1700.00
+    price: 1205, // ₹1205.00
+    originalPrice: 1700, // ₹1700.00
     sku: 'FIN010303S',
     stock: 100,
     categoryId: 'cat-1',
@@ -71,8 +71,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'finolex-1-5sqmm-wire',
     description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Finolex 1.5sqmm FR PVC insulated cable with copper conductor',
-    price: 177900, // ₹1779.00
-    originalPrice: 247500, // ₹2475.00
+    price: 1779, // ₹1779.00
+    originalPrice: 2475, // ₹2475.00
     sku: 'FIN015303S',
     stock: 100,
     categoryId: 'cat-1',
@@ -98,8 +98,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'finolex-2-5sqmm-wire',
     description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Finolex 2.5sqmm FR PVC insulated cable with copper conductor',
-    price: 287900, // ₹2879.00
-    originalPrice: 400000, // ₹4000.00
+    price: 2879, // ₹2879.00
+    originalPrice: 4000, // ₹4000.00
     sku: 'FIN025303S',
     stock: 100,
     categoryId: 'cat-1',
@@ -125,8 +125,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'finolex-4-0sqmm-wire',
     description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Finolex 4.0sqmm FR PVC insulated cable with copper conductor',
-    price: 443900, // ₹4439.00
-    originalPrice: 617000, // ₹6170.00
+    price: 4439, // ₹4439.00
+    originalPrice: 6170, // ₹6170.00
     sku: 'FIN040303S',
     stock: 100,
     categoryId: 'cat-1',
@@ -154,8 +154,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'kundan-1-0sqmm-wire',
     description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Kundan Cable 1.0sqmm FR PVC insulated cable with copper conductor',
-    price: 104900, // ₹1049.00
-    originalPrice: 214400, // ₹2144.00
+    price: 1049, // ₹1049.00
+    originalPrice: 2144, // ₹2144.00
     sku: 'KUN01020',
     stock: 100,
     categoryId: 'cat-1',
@@ -181,8 +181,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'kundan-1-5sqmm-wire',
     description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Kundan Cable 1.5sqmm FR PVC insulated cable with copper conductor',
-    price: 159900, // ₹1599.00
-    originalPrice: 326400, // ₹3264.00
+    price: 1599, // ₹1599.00
+    originalPrice: 3264, // ₹3264.00
     sku: 'KUN01520',
     stock: 100,
     categoryId: 'cat-1',
@@ -208,8 +208,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'kundan-2-5sqmm-wire',
     description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Kundan Cable 2.5sqmm FR PVC insulated cable with copper conductor',
-    price: 258100, // ₹2581.00
-    originalPrice: 526900, // ₹5269.00
+    price: 2581, // ₹2581.00
+    originalPrice: 5269, // ₹5269.00
     sku: 'KUN02520',
     stock: 100,
     categoryId: 'cat-1',
@@ -235,8 +235,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'kundan-4-0sqmm-wire',
     description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Kundan Cable 4.0sqmm FR PVC insulated cable with copper conductor',
-    price: 380900, // ₹3809.00
-    originalPrice: 777400, // ₹7774.00
+    price: 3809, // ₹3809.00
+    originalPrice: 7774, // ₹7774.00
     sku: 'KUN04020',
     stock: 100,
     categoryId: 'cat-1',
@@ -264,8 +264,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-10w-inverter-bulb-3hr',
     description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 3Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
     shortDescription: 'Sturlite 10W emergency LED bulb with 3 hour backup',
-    price: 21408, // ₹214.08
-    originalPrice: 44600, // ₹446.00
+    price: 214.08, // ₹214.08
+    originalPrice: 446, // ₹446.00
     sku: 'STU10EB3H',
     stock: 100,
     categoryId: 'cat-2',
@@ -294,8 +294,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-10w-inverter-bulb-4hr',
     description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 4Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
     shortDescription: 'Sturlite 10W emergency LED bulb with 4 hour backup',
-    price: 22320, // ₹223.20
-    originalPrice: 46500, // ₹465.00
+    price: 223.2, // ₹223.20
+    originalPrice: 465, // ₹465.00
     sku: 'STU10EB4H',
     stock: 100,
     categoryId: 'cat-2',
@@ -324,8 +324,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-10w-inverter-bulb-6hr',
     description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 6Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
     shortDescription: 'Sturlite 10W emergency LED bulb with 6 hour backup',
-    price: 26640, // ₹266.40
-    originalPrice: 55500, // ₹555.00
+    price: 266.4, // ₹266.40
+    originalPrice: 555, // ₹555.00
     sku: 'STU10EB6H',
     stock: 100,
     categoryId: 'cat-2',
@@ -356,8 +356,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-30w-flood-light',
     description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
     shortDescription: 'Sturlite 30W LED flood light with IP66 protection',
-    price: 48720, // ₹487.20
-    originalPrice: 101500, // ₹1015.00
+    price: 487.2, // ₹487.20
+    originalPrice: 1015, // ₹1015.00
     sku: 'STU0207-30W',
     stock: 100,
     categoryId: 'cat-3',
@@ -387,8 +387,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-50w-flood-light',
     description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
     shortDescription: 'Sturlite 50W LED flood light with IP66 protection',
-    price: 67200, // ₹672.00
-    originalPrice: 140000, // ₹1400.00
+    price: 672, // ₹672.00
+    originalPrice: 1400, // ₹1400.00
     sku: 'STU0207-50W',
     stock: 100,
     categoryId: 'cat-3',
@@ -418,8 +418,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-100w-flood-light',
     description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
     shortDescription: 'Sturlite 100W LED flood light with IP66 protection',
-    price: 110160, // ₹1101.60
-    originalPrice: 229500, // ₹2295.00
+    price: 1101.6, // ₹1101.60
+    originalPrice: 2295, // ₹2295.00
     sku: 'STU0207-100W',
     stock: 100,
     categoryId: 'cat-3',
@@ -449,8 +449,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-150w-flood-light',
     description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
     shortDescription: 'Sturlite 150W LED flood light with IP66 protection',
-    price: 185280, // ₹1852.80
-    originalPrice: 386000, // ₹3860.00
+    price: 1852.8, // ₹1852.80
+    originalPrice: 3860, // ₹3860.00
     sku: 'STU0207-1500W',
     stock: 100,
     categoryId: 'cat-3',
@@ -480,8 +480,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-200w-flood-light',
     description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
     shortDescription: 'Sturlite 200W LED flood light with IP66 protection',
-    price: 223680, // ₹2236.80
-    originalPrice: 466000, // ₹4660.00
+    price: 2236.8, // ₹2236.80
+    originalPrice: 4660, // ₹4660.00
     sku: 'STU0207-200W',
     stock: 100,
     categoryId: 'cat-3',
@@ -511,8 +511,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-300w-flood-light',
     description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
     shortDescription: 'Sturlite 300W LED flood light with IP66 protection',
-    price: 385200, // ₹3852.00
-    originalPrice: 802500, // ₹8025.00
+    price: 3852, // ₹3852.00
+    originalPrice: 8025, // ₹8025.00
     sku: 'STU0207-300W',
     stock: 100,
     categoryId: 'cat-3',
@@ -542,8 +542,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-400w-flood-light',
     description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
     shortDescription: 'Sturlite 400W LED flood light with IP66 protection',
-    price: 520800, // ₹5208.00
-    originalPrice: 1085000, // ₹10850.00
+    price: 5208, // ₹5208.00
+    originalPrice: 10850, // ₹10850.00
     sku: 'STU0207-400W',
     stock: 100,
     categoryId: 'cat-3',
@@ -573,8 +573,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-500w-flood-light',
     description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
     shortDescription: 'Sturlite 500W LED flood light with IP66 protection',
-    price: 753600, // ₹7536.00
-    originalPrice: 1570000, // ₹15700.00
+    price: 7536, // ₹7536.00
+    originalPrice: 15700, // ₹15700.00
     sku: 'STU0207-500W',
     stock: 100,
     categoryId: 'cat-3',
@@ -606,8 +606,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-20w-street-light',
     description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2200 Lumens, 300x103x46mm Dimension',
     shortDescription: 'Sturlite 20W LED street light with 2200 lumens',
-    price: 56650, // ₹566.50
-    originalPrice: 118000, // ₹1180.00
+    price: 566.5, // ₹566.50
+    originalPrice: 1180, // ₹1180.00
     sku: 'STU0060-20W',
     stock: 100,
     categoryId: 'cat-4',
@@ -638,8 +638,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-24w-street-light',
     description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2640 Lumens, 300x103x46mm Dimension',
     shortDescription: 'Sturlite 24W LED street light with 2640 lumens',
-    price: 58800, // ₹588.00
-    originalPrice: 122500, // ₹1225.00
+    price: 588, // ₹588.00
+    originalPrice: 1225, // ₹1225.00
     sku: 'STU0060-24W',
     stock: 100,
     categoryId: 'cat-4',
@@ -670,8 +670,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-30w-street-light',
     description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, Lumens 3300, 340x124x47mm dimension',
     shortDescription: 'Sturlite 30W LED street light with 3300 lumens',
-    price: 75600, // ₹756.00
-    originalPrice: 157500, // ₹1575.00
+    price: 756, // ₹756.00
+    originalPrice: 1575, // ₹1575.00
     sku: 'STU0060-30W',
     stock: 100,
     categoryId: 'cat-4',
@@ -702,8 +702,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-36w-street-light',
     description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 3960 Lumens, 340x124x47mm Dimension',
     shortDescription: 'Sturlite 36W LED street light with 3960 lumens',
-    price: 78240, // ₹782.40
-    originalPrice: 163000, // ₹1630.00
+    price: 782.4, // ₹782.40
+    originalPrice: 1630, // ₹1630.00
     sku: 'STU0060-36W',
     stock: 100,
     categoryId: 'cat-4',
@@ -734,8 +734,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-50w-street-light',
     description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 5500 Lumens, 391x145x50mm Dimension',
     shortDescription: 'Sturlite 50W LED street light with 5500 lumens',
-    price: 95000, // ₹950.00
-    originalPrice: 198000, // ₹1980.00
+    price: 950, // ₹950.00
+    originalPrice: 1980, // ₹1980.00
     sku: 'STU0060-50W',
     stock: 100,
     categoryId: 'cat-4',
@@ -766,8 +766,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'sturlite-72w-street-light',
     description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 7920 Lumens, 3390x145x50mm Dimension',
     shortDescription: 'Sturlite 72W LED street light with 7920 lumens',
-    price: 140400, // ₹1404.00
-    originalPrice: 292500, // ₹2925.00
+    price: 1404, // ₹1404.00
+    originalPrice: 2925, // ₹2925.00
     sku: 'STU0060-72W',
     stock: 100,
     categoryId: 'cat-4',
