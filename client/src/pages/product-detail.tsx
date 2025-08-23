@@ -478,7 +478,7 @@ export default function ProductDetail() {
                       <span className="text-sm font-medium text-amber-800">{recentlyViewed * 4} people added this to cart today</span>
                     </div>
                   </div>
-                  <div className="text-xs text-amber-700 font-medium">🔥 Trending</div>
+                  <div className="text-xs text-amber-700 font-medium">Trending</div>
                 </div>
                 
                 {/* Satisfaction Guarantee */}
@@ -489,7 +489,7 @@ export default function ProductDetail() {
                     ))}
                   </div>
                   <span className="text-sm font-medium text-blue-800">98% Customer Satisfaction</span>
-                  <span className="text-xs text-blue-600">(Based on 10,000+ reviews)</span>
+                  <span className="text-xs text-blue-600">(Based on 300+ reviews)</span>
                 </div>
               </div>
             </div>
@@ -785,7 +785,6 @@ export default function ProductDetail() {
               <span className="font-medium">Someone from Mumbai</span> purchased this item
             </p>
           </div>
-          <p className="text-xs text-gray-500 mt-1">2 minutes ago</p>
         </div>
       </div>
 
