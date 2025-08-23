@@ -69,7 +69,7 @@ export default function Checkout() {
       state: "",
       zipCode: "",
     },
-    paymentMethod: "credit-card",
+    paymentMethod: "razorpay",
     sameAsShipping: true,
   });
 
@@ -157,7 +157,7 @@ export default function Checkout() {
     setFormData(prev => ({
       ...prev,
       [section]: {
-        ...prev[section],
+        ...(prev[section] as any),
         [field]: value,
       },
     }));
@@ -443,19 +443,6 @@ export default function Checkout() {
                         <div className="flex items-center space-x-2">
                           <input
                             type="radio"
-                            id="credit-card"
-                            name="paymentMethod"
-                            value="credit-card"
-                            checked={formData.paymentMethod === "credit-card"}
-                            onChange={(e) => updateRootField("paymentMethod", e.target.value)}
-                          />
-                          <label htmlFor="credit-card" className="text-sm font-medium">
-                            Credit/Debit Card
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <input
-                            type="radio"
                             id="razorpay"
                             name="paymentMethod"
                             value="razorpay"
@@ -463,9 +450,12 @@ export default function Checkout() {
                             onChange={(e) => updateRootField("paymentMethod", e.target.value)}
                           />
                           <label htmlFor="razorpay" className="text-sm font-medium">
-                            Razorpay (UPI, Cards, NetBanking)
+                            Razorpay (UPI, Cards, NetBanking, Wallets)
                           </label>
                         </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                          Pay securely using UPI, Credit/Debit Cards, Net Banking, or Digital Wallets
+                        </p>
                       </div>
                     </div>
 
@@ -516,7 +506,7 @@ export default function Checkout() {
                     <div>
                       <h3 className="font-medium mb-2">Payment Method</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {formData.paymentMethod === "credit-card" ? "Credit/Debit Card" : "Razorpay"}
+                        Razorpay (UPI, Cards, NetBanking, Wallets)
                       </p>
                     </div>
 
