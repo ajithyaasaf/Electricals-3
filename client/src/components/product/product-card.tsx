@@ -28,7 +28,7 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      await addItem(product.id);
+      await addItem(product.id.toString());
     },
     onSuccess: () => {
       toast({
@@ -88,7 +88,7 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
           {/* Wishlist Button */}
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <WishlistButton
-              productId={product.id}
+              productId={product.id.toString()}
               variant="icon"
               size="sm"
               addedFrom="listing_page"

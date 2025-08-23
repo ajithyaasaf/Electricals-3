@@ -44,8 +44,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'finolex-1-0sqmm-wire',
     description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Finolex 1.0sqmm FR PVC insulated cable with copper conductor',
-    price: 190000, // ₹1900.00
-    originalPrice: 270000, // ₹2700.00
+    price: 120500, // ₹1205.00
+    originalPrice: 170000, // ₹1700.00
     sku: 'FIN010303S',
     stock: 100,
     categoryId: 'cat-1',
@@ -58,7 +58,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       core_type: 'Single Core Unsheathed',
       unit: 'per coil',
       hsn_code: '85446090',
-      discount: '30%'
+      discount: '40%'
     },
     isFeatured: true,
     isActive: true,
@@ -71,8 +71,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'finolex-1-5sqmm-wire',
     description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Finolex 1.5sqmm FR PVC insulated cable with copper conductor',
-    price: 240000, // ₹2400.00
-    originalPrice: 340000, // ₹3400.00
+    price: 177900, // ₹1779.00
+    originalPrice: 247500, // ₹2475.00
     sku: 'FIN015303S',
     stock: 100,
     categoryId: 'cat-1',
@@ -85,7 +85,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       core_type: 'Single Core Unsheathed',
       unit: 'per coil',
       hsn_code: '85446090',
-      discount: '29%'
+      discount: '39%'
     },
     isFeatured: true,
     isActive: true,
@@ -98,8 +98,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'finolex-2-5sqmm-wire',
     description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Finolex 2.5sqmm FR PVC insulated cable with copper conductor',
-    price: 360000, // ₹3600.00
-    originalPrice: 510000, // ₹5100.00
+    price: 287900, // ₹2879.00
+    originalPrice: 400000, // ₹4000.00
     sku: 'FIN025303S',
     stock: 100,
     categoryId: 'cat-1',
@@ -112,7 +112,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       core_type: 'Single Core Unsheathed',
       unit: 'per coil',
       hsn_code: '85446090',
-      discount: '29%'
+      discount: '39%'
     },
     isFeatured: false,
     isActive: true,
@@ -125,8 +125,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'finolex-4-0sqmm-wire',
     description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Finolex 4.0sqmm FR PVC insulated cable with copper conductor',
-    price: 580000, // ₹5800.00
-    originalPrice: 820000, // ₹8200.00
+    price: 443900, // ₹4439.00
+    originalPrice: 617000, // ₹6170.00
     sku: 'FIN040303S',
     stock: 100,
     categoryId: 'cat-1',
@@ -139,7 +139,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       core_type: 'Single Core Unsheathed',
       unit: 'per coil',
       hsn_code: '85446090',
-      discount: '29%'
+      discount: '39%'
     },
     isFeatured: false,
     isActive: true,
@@ -154,8 +154,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'kundan-1-0sqmm-wire',
     description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Kundan Cable 1.0sqmm FR PVC insulated cable with copper conductor',
-    price: 170000, // ₹1700.00
-    originalPrice: 280000, // ₹2800.00
+    price: 104900, // ₹1049.00
+    originalPrice: 214400, // ₹2144.00
     sku: 'KUN01020',
     stock: 100,
     categoryId: 'cat-1',
@@ -168,7 +168,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       core_type: 'Single Core Unsheathed',
       unit: 'per coil',
       hsn_code: '85446090',
-      discount: '39%'
+      discount: '51%'
     },
     isFeatured: false,
     isActive: true,
@@ -181,8 +181,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'kundan-1-5sqmm-wire',
     description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Kundan Cable 1.5sqmm FR PVC insulated cable with copper conductor',
-    price: 220000, // ₹2200.00
-    originalPrice: 360000, // ₹3600.00
+    price: 159900, // ₹1599.00
+    originalPrice: 326400, // ₹3264.00
     sku: 'KUN01520',
     stock: 100,
     categoryId: 'cat-1',
@@ -195,7 +195,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       core_type: 'Single Core Unsheathed',
       unit: 'per coil',
       hsn_code: '85446090',
-      discount: '39%'
+      discount: '51%'
     },
     isFeatured: false,
     isActive: true,
@@ -208,8 +208,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'kundan-2-5sqmm-wire',
     description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Kundan Cable 2.5sqmm FR PVC insulated cable with copper conductor',
-    price: 320000, // ₹3200.00
-    originalPrice: 520000, // ₹5200.00
+    price: 258100, // ₹2581.00
+    originalPrice: 526900, // ₹5269.00
     sku: 'KUN02520',
     stock: 100,
     categoryId: 'cat-1',
@@ -222,7 +222,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       core_type: 'Single Core Unsheathed',
       unit: 'per coil',
       hsn_code: '85446090',
-      discount: '39%'
+      discount: '51%'
     },
     isFeatured: false,
     isActive: true,
@@ -235,8 +235,8 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     slug: 'kundan-4-0sqmm-wire',
     description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
     shortDescription: 'Kundan Cable 4.0sqmm FR PVC insulated cable with copper conductor',
-    price: 520000, // ₹5200.00
-    originalPrice: 850000, // ₹8500.00
+    price: 380900, // ₹3809.00
+    originalPrice: 777400, // ₹7774.00
     sku: 'KUN04020',
     stock: 100,
     categoryId: 'cat-1',
@@ -249,7 +249,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       core_type: 'Single Core Unsheathed',
       unit: 'per coil',
       hsn_code: '85446090',
-      discount: '39%'
+      discount: '51%'
     },
     isFeatured: false,
     isActive: true,
@@ -780,7 +780,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       housing: 'ADC12 Diecast',
       surge_protection: '6.0KV',
       lifespan: '50000 hours',
-      dimensions: '390x145x50mm',
+      dimensions: '3390x145x50mm',
       led_chip: 'SMD LED',
       cri: '>80',
       brand: 'Sturlite',
