@@ -824,9 +824,9 @@ export class AuthenticElectricalDataService {
     const searchTerm = query.toLowerCase();
     return this.getProducts().filter(product =>
       product.name.toLowerCase().includes(searchTerm) ||
-      product.description.toLowerCase().includes(searchTerm) ||
-      product.shortDescription.toLowerCase().includes(searchTerm) ||
-      product.sku.toLowerCase().includes(searchTerm) ||
+      (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+      (product.shortDescription && product.shortDescription.toLowerCase().includes(searchTerm)) ||
+      (product.sku && product.sku.toLowerCase().includes(searchTerm)) ||
       (product.specifications?.brand && 
        product.specifications.brand.toLowerCase().includes(searchTerm))
     );
