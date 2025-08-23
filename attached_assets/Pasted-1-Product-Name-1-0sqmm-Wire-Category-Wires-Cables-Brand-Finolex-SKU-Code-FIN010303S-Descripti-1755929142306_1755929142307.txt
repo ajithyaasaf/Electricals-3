@@ -1,0 +1,349 @@
+1.
+Product Name: 1.0sqmm Wire
+Category: Wires & Cables
+Brand: Finolex
+SKU/Code: FIN010303S
+Description: Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹1205
+MRP: ₹1700
+Discount: 40%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+2.
+Product Name: 1.5sqmm Wire
+Category: Wires & Cables
+Brand: Finolex
+SKU/Code: FIN015303S
+Description: Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹1779
+MRP: ₹2475
+Discount: 39%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+3.
+Product Name: 2.5sqmm Wire
+Category: Wires & Cables
+Brand: Finolex
+SKU/Code: FIN025303S
+Description: Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹2879
+MRP: ₹4000
+Discount: 39%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+4.
+Product Name: 4.0sqmm Wire
+Category: Wires & Cables
+Brand: Finolex
+SKU/Code: FIN040303S
+Description: Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹4439
+MRP: ₹6170
+Discount: 39%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+5.
+Product Name: 1.0sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN01020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹1049
+MRP: ₹2144
+Discount: 51%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+6.
+Product Name: 1.5sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN01520
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹1599
+MRP: ₹3026
+Discount: 47%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+7.
+Product Name: 2.5sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN02520
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹2499
+MRP: ₹4764
+Discount: 48%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+8.
+Product Name: 4.0sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN04020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹3799
+MRP: ₹7356
+Discount: 48%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+9.
+Product Name: 6.0sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN06020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹5899
+MRP: ₹11536
+Discount: 49%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+10.
+Product Name: 10sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN10020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹9499
+MRP: ₹17986
+Discount: 47%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+11.
+Product Name: 16sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN16020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹14999
+MRP: ₹27680
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+12.
+Product Name: 25sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN25020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹23999
+MRP: ₹43840
+Discount: 45%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+13.
+Product Name: 35sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN35020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹33999
+MRP: ₹62880
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+14.
+Product Name: 50sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN50020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹49999
+MRP: ₹92000
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+15.
+Product Name: 70sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN70020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹69999
+MRP: ₹129000
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+16.
+Product Name: 95sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN95020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹94999
+MRP: ₹172000
+Discount: 45%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+17.
+Product Name: 120sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN120020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹119999
+MRP: ₹220000
+Discount: 45%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+18.
+Product Name: 150sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN150020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹149999
+MRP: ₹276000
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+19.
+Product Name: 185sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN185020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹184999
+MRP: ₹340000
+Discount: 45%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+20.
+Product Name: 240sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN240020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹239999
+MRP: ₹440000
+Discount: 45%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+21.
+Product Name: 300sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN300020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹299999
+MRP: ₹550000
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+22.
+Product Name: 400sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN400020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹399999
+MRP: ₹740000
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+23.
+Product Name: 500sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN500020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹499999
+MRP: ₹920000
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+24.
+Product Name: 630sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN630020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹629999
+MRP: ₹1160000
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
+
+25.
+Product Name: 800sqmm Wire
+Category: Wires & Cables
+Brand: Kundan Cable
+SKU/Code: KUN800020
+Description: Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+Price: ₹799999
+MRP: ₹1480000
+Discount: 46%
+Stock Quantity: 100
+Unit: per coil
+Warranty: -
+HSN Code: 85446090
