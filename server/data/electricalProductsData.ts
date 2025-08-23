@@ -299,7 +299,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU10EB4H',
     stock: 100,
     categoryId: 'cat-2',
-    imageUrls: ['/assets/generated_images/10W_LED_bulb_3hr_backup_1111e2e3.png'],
+    imageUrls: ['/assets/generated_images/10W_LED_bulb_4hr_backup_528373f2.png'],
     specifications: {
       wattage: '10W',
       backup_time: '4 Hours',
@@ -329,7 +329,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU10EB6H',
     stock: 100,
     categoryId: 'cat-2',
-    imageUrls: ['/assets/generated_images/10W_LED_bulb_3hr_backup_1111e2e3.png'],
+    imageUrls: ['/assets/generated_images/10W_LED_bulb_6hr_backup_6d4bd097.png'],
     specifications: {
       wattage: '10W',
       backup_time: '6 Hours',
@@ -392,7 +392,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-50W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/30W_LED_flood_light_d574e668.png'],
+    imageUrls: ['/assets/generated_images/50W_LED_flood_light_8824c606.png'],
     specifications: {
       wattage: '50W',
       lumens_per_watt: '100',
@@ -423,7 +423,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-100W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/30W_LED_flood_light_d574e668.png'],
+    imageUrls: ['/assets/generated_images/100W_LED_flood_light_62c15ab6.png'],
     specifications: {
       wattage: '100W',
       lumens_per_watt: '100',
@@ -454,7 +454,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-1500W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/30W_LED_flood_light_d574e668.png'],
+    imageUrls: ['/assets/generated_images/150W_LED_flood_light_fc70c2fc.png'],
     specifications: {
       wattage: '150W',
       lumens_per_watt: '100',
@@ -485,7 +485,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-200W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/30W_LED_flood_light_d574e668.png'],
+    imageUrls: ['/assets/generated_images/200W_LED_flood_light_4041063d.png'],
     specifications: {
       wattage: '200W',
       lumens_per_watt: '100',
@@ -516,7 +516,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-300W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/30W_LED_flood_light_d574e668.png'],
+    imageUrls: ['/assets/generated_images/300W_LED_flood_light_6d01d272.png'],
     specifications: {
       wattage: '300W',
       lumens_per_watt: '100',
@@ -547,7 +547,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-400W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/30W_LED_flood_light_d574e668.png'],
+    imageUrls: ['/assets/generated_images/400W_LED_flood_light_056efa75.png'],
     specifications: {
       wattage: '400W',
       lumens_per_watt: '100',
@@ -578,7 +578,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-500W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/30W_LED_flood_light_d574e668.png'],
+    imageUrls: ['/assets/generated_images/500W_LED_flood_light_734fcfb1.png'],
     specifications: {
       wattage: '500W',
       lumens_per_watt: '100',
@@ -643,7 +643,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-24W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/20W_LED_street_light_94a1de3f.png'],
+    imageUrls: ['/assets/generated_images/24W_LED_street_light_ba14f815.png'],
     specifications: {
       wattage: '24W',
       lumens_per_watt: '110',
@@ -675,7 +675,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-30W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/20W_LED_street_light_94a1de3f.png'],
+    imageUrls: ['/assets/generated_images/30W_LED_street_light_64de54ed.png'],
     specifications: {
       wattage: '30W',
       lumens_per_watt: '110',
@@ -707,7 +707,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-36W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/20W_LED_street_light_94a1de3f.png'],
+    imageUrls: ['/assets/generated_images/36W_LED_street_light_5b6cdd43.png'],
     specifications: {
       wattage: '36W',
       lumens_per_watt: '110',
@@ -739,7 +739,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-50W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/20W_LED_street_light_94a1de3f.png'],
+    imageUrls: ['/assets/generated_images/50W_LED_street_light_373c186c.png'],
     specifications: {
       wattage: '50W',
       lumens_per_watt: '110',
@@ -771,7 +771,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-72W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/20W_LED_street_light_94a1de3f.png'],
+    imageUrls: ['/assets/generated_images/72W_LED_street_light_57476a42.png'],
     specifications: {
       wattage: '72W',
       lumens_per_watt: '110',
