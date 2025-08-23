@@ -147,7 +147,7 @@ const FilterContent = ({
               </Button>
             </Badge>
           )}
-          {(debouncedMinPrice > 0 || debouncedMaxPrice < 100000) && (
+          {(debouncedMinPrice > 0 || debouncedMaxPrice < 1000000) && (
             <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200">
               ₹{debouncedMinPrice.toLocaleString('en-IN')} - ₹{debouncedMaxPrice.toLocaleString('en-IN')}
               <Button
@@ -210,7 +210,7 @@ const FilterContent = ({
               setMinPriceString(min.toString());
               setMaxPriceString(max.toString());
             }}
-            max={100000}
+            max={1000000}
             step={500}
             className="w-full"
           />
@@ -280,7 +280,7 @@ export default function Products() {
     search: initialSearch,
     featured: initialFeatured,
     minPrice: 0,
-    maxPrice: 100000,
+    maxPrice: 1000000,
     sortBy: "newest",
     sortOrder: "desc"
   });
@@ -298,7 +298,7 @@ export default function Products() {
 
   // Convert strings to numbers for API calls only
   const minPriceNumber = minPriceString === "" ? 0 : parseInt(minPriceString) || 0;
-  const maxPriceNumber = maxPriceString === "" ? 100000 : parseInt(maxPriceString) || 100000;
+  const maxPriceNumber = maxPriceString === "" ? 1000000 : parseInt(maxPriceString) || 1000000;
 
   // Debounce search and price inputs to reduce API calls
   const debouncedSearch = useDebounce(filters.search, 300);
@@ -357,7 +357,7 @@ export default function Products() {
       search: "",
       featured: false,
       minPrice: 0,
-      maxPrice: 100000,
+      maxPrice: 1000000,
       sortBy: "newest",
       sortOrder: "desc"
     });
@@ -372,7 +372,7 @@ export default function Products() {
     if (filters.categoryId) count++;
     if (filters.search) count++;
     if (filters.featured) count++;
-    if (debouncedMinPrice > 0 || debouncedMaxPrice < 100000) count++;
+    if (debouncedMinPrice > 0 || debouncedMaxPrice < 1000000) count++;
     return count;
   }, [filters.categoryId, filters.search, filters.featured, debouncedMinPrice, debouncedMaxPrice]);
 
@@ -525,7 +525,7 @@ export default function Products() {
                           Featured
                         </Badge>
                       )}
-                      {(debouncedMinPrice > 0 || debouncedMaxPrice < 100000) && (
+                      {(debouncedMinPrice > 0 || debouncedMaxPrice < 1000000) && (
                         <Badge variant="secondary" className="bg-purple-100 text-purple-800">
                           Price Range
                         </Badge>
