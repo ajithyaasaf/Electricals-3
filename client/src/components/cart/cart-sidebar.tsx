@@ -226,7 +226,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
               </Button>
 
               <p className="text-xs text-gray-500 text-center pt-2">
-                Free shipping on orders over ₹8,300
+                Free shipping on orders over ₹10,000
               </p>
             </div>
           </div>

@@ -145,7 +145,11 @@ export function registerCartRoutes(app: Express) {
       // Enrich cart items with product/service details
       const enrichedItems: CartItemWithDetails[] = [];
       
+      console.log(`[CART] Processing ${cartItems.length} cart items for enrichment`);
+      
       for (const item of cartItems) {
+        console.log(`[CART] Processing item ${item.id} - ProductID: ${item.productId}, ServiceID: ${item.serviceId}`);
+        
         let enrichedItem: CartItemWithDetails = {
           ...item,
           unitPrice: item.unitPrice || 0,
@@ -161,8 +165,15 @@ export function registerCartRoutes(app: Express) {
           const product = await storage.getProductById(item.productId);
           if (product) {
             enrichedItem.product = product;
-            enrichedItem.unitPrice = enrichedItem.unitPrice || product.price;
-            enrichedItem.originalPrice = enrichedItem.originalPrice || (product.originalPrice || product.price);
+            // Always update prices from product data
+            enrichedItem.unitPrice = product.price;
+            enrichedItem.originalPrice = product.originalPrice || product.price;
+            // Calculate discount if original price is higher
+            if (product.originalPrice && product.originalPrice > product.price) {
+              enrichedItem.discount = product.originalPrice - product.price;
+            }
+          } else {
+            console.warn(`[CART] Product not found for ID: ${item.productId}`);
           }
         }
         
@@ -170,8 +181,10 @@ export function registerCartRoutes(app: Express) {
           const service = await storage.getServiceById(item.serviceId);
           if (service) {
             enrichedItem.service = service;
-            enrichedItem.unitPrice = enrichedItem.unitPrice || service.price;
-            enrichedItem.originalPrice = enrichedItem.originalPrice || service.price;
+            enrichedItem.unitPrice = service.price;
+            enrichedItem.originalPrice = service.price;
+          } else {
+            console.warn(`[CART] Service not found for ID: ${item.serviceId}`);
           }
         }
         
