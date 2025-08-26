@@ -396,8 +396,43 @@ export default function Checkout() {
                           <SelectTrigger>
                             <SelectValue placeholder="State" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="max-h-[200px] overflow-y-auto">
+                            <SelectItem value="AP">Andhra Pradesh</SelectItem>
+                            <SelectItem value="AR">Arunachal Pradesh</SelectItem>
+                            <SelectItem value="AS">Assam</SelectItem>
+                            <SelectItem value="BR">Bihar</SelectItem>
+                            <SelectItem value="CG">Chhattisgarh</SelectItem>
+                            <SelectItem value="GA">Goa</SelectItem>
+                            <SelectItem value="GJ">Gujarat</SelectItem>
+                            <SelectItem value="HR">Haryana</SelectItem>
+                            <SelectItem value="HP">Himachal Pradesh</SelectItem>
+                            <SelectItem value="JH">Jharkhand</SelectItem>
+                            <SelectItem value="KA">Karnataka</SelectItem>
+                            <SelectItem value="KL">Kerala</SelectItem>
+                            <SelectItem value="MP">Madhya Pradesh</SelectItem>
+                            <SelectItem value="MH">Maharashtra</SelectItem>
+                            <SelectItem value="MN">Manipur</SelectItem>
+                            <SelectItem value="ML">Meghalaya</SelectItem>
+                            <SelectItem value="MZ">Mizoram</SelectItem>
+                            <SelectItem value="NL">Nagaland</SelectItem>
+                            <SelectItem value="OR">Odisha</SelectItem>
+                            <SelectItem value="PB">Punjab</SelectItem>
+                            <SelectItem value="RJ">Rajasthan</SelectItem>
+                            <SelectItem value="SK">Sikkim</SelectItem>
                             <SelectItem value="TN">Tamil Nadu</SelectItem>
+                            <SelectItem value="TS">Telangana</SelectItem>
+                            <SelectItem value="TR">Tripura</SelectItem>
+                            <SelectItem value="UK">Uttarakhand</SelectItem>
+                            <SelectItem value="UP">Uttar Pradesh</SelectItem>
+                            <SelectItem value="WB">West Bengal</SelectItem>
+                            <SelectItem value="AN">Andaman and Nicobar Islands</SelectItem>
+                            <SelectItem value="CH">Chandigarh</SelectItem>
+                            <SelectItem value="DH">Dadra and Nagar Haveli and Daman and Diu</SelectItem>
+                            <SelectItem value="DL">Delhi</SelectItem>
+                            <SelectItem value="JK">Jammu and Kashmir</SelectItem>
+                            <SelectItem value="LA">Ladakh</SelectItem>
+                            <SelectItem value="LD">Lakshadweep</SelectItem>
+                            <SelectItem value="PY">Puducherry</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -462,7 +497,7 @@ export default function Checkout() {
                           </label>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                          Pay cash when your order is delivered. Available for Tamil Nadu. No additional charges.
+                          Pay cash when your order is delivered. Available across India. No additional charges.
                         </p>
                       </div>
                     </div>
