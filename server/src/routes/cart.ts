@@ -173,10 +173,15 @@ export function registerCartRoutes(app: Express) {
               enrichedItem.discount = product.originalPrice - product.price;
             }
           } else {
-            console.warn(`[CART] Product not found for ID: ${item.productId}, removing orphaned cart item`);
+            console.warn(`[CART] Product not found for ID: ${item.productId}, removing orphaned cart item ${item.id}`);
             // Remove orphaned cart items with invalid product IDs
             if (userId) {
-              await storage.deleteCartItem(item.id);
+              try {
+                await storage.deleteCartItem(item.id);
+                console.log(`[CART] Successfully deleted orphaned cart item ${item.id}`);
+              } catch (error) {
+                console.error(`[CART] Failed to delete orphaned cart item ${item.id}:`, error);
+              }
             }
             continue; // Skip this item
           }
@@ -189,10 +194,15 @@ export function registerCartRoutes(app: Express) {
             enrichedItem.unitPrice = service.price;
             enrichedItem.originalPrice = service.price;
           } else {
-            console.warn(`[CART] Service not found for ID: ${item.serviceId}, removing orphaned cart item`);
+            console.warn(`[CART] Service not found for ID: ${item.serviceId}, removing orphaned cart item ${item.id}`);
             // Remove orphaned cart items with invalid service IDs
             if (userId) {
-              await storage.deleteCartItem(item.id);
+              try {
+                await storage.deleteCartItem(item.id);
+                console.log(`[CART] Successfully deleted orphaned cart item ${item.id}`);
+              } catch (error) {
+                console.error(`[CART] Failed to delete orphaned cart item ${item.id}:`, error);
+              }
             }
             continue; // Skip this item
           }
@@ -983,6 +993,70 @@ export function registerCartRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching shipping options:", error);
       res.status(500).json({ message: "Failed to fetch shipping options" });
+    }
+  });
+
+  // Manual cart cleanup endpoint for removing orphaned items
+  app.post("/api/cart/cleanup", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.uid;
+      
+      if (!userId) {
+        return res.status(401).json({ message: "Authentication required" });
+      }
+
+      console.log(`[CART CLEANUP] Starting cleanup for user ${userId}`);
+      
+      // Get all cart items for user
+      const cartItems = await storage.getUserCartItems(userId);
+      console.log(`[CART CLEANUP] Found ${cartItems.length} cart items`);
+      
+      let deletedCount = 0;
+      
+      for (const item of cartItems) {
+        let shouldDelete = false;
+        
+        if (item.productId) {
+          const product = await storage.getProductById(item.productId);
+          if (!product) {
+            console.log(`[CART CLEANUP] Product not found for ID: ${item.productId}`);
+            shouldDelete = true;
+          }
+        }
+        
+        if (item.serviceId) {
+          const service = await storage.getServiceById(item.serviceId);
+          if (!service) {
+            console.log(`[CART CLEANUP] Service not found for ID: ${item.serviceId}`);
+            shouldDelete = true;
+          }
+        }
+        
+        if (shouldDelete) {
+          try {
+            await storage.deleteCartItem(item.id);
+            deletedCount++;
+            console.log(`[CART CLEANUP] Deleted orphaned cart item ${item.id}`);
+          } catch (error) {
+            console.error(`[CART CLEANUP] Failed to delete cart item ${item.id}:`, error);
+          }
+        }
+      }
+      
+      console.log(`[CART CLEANUP] Cleanup completed. Deleted ${deletedCount} orphaned items`);
+      
+      res.json({
+        message: "Cart cleanup completed",
+        deletedItems: deletedCount,
+        totalItems: cartItems.length
+      });
+      
+    } catch (error) {
+      console.error("[CART CLEANUP] Error during cleanup:", error);
+      res.status(500).json({ 
+        message: "Failed to cleanup cart", 
+        error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined 
+      });
     }
   });
 }
