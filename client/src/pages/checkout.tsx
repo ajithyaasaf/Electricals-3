@@ -149,8 +149,8 @@ export default function Checkout() {
     return total + (price * item.quantity);
   }, 0);
 
-  const shipping = subtotal > 8300 ? 0 : 1329;
-  const tax = subtotal * 0.08;
+  const shipping = subtotal >= 10000 ? 0 : 100; // ₹100 shipping for orders below ₹10,000
+  const tax = subtotal * 0.18; // 18% GST for India
   const total = subtotal + shipping + tax;
 
   const updateFormData = (section: keyof CheckoutFormData, field: string, value: any) => {
@@ -403,10 +403,7 @@ export default function Checkout() {
                             <SelectValue placeholder="State" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="CA">California</SelectItem>
-                            <SelectItem value="NY">New York</SelectItem>
-                            <SelectItem value="TX">Texas</SelectItem>
-                            <SelectItem value="FL">Florida</SelectItem>
+                            <SelectItem value="TN">Tamil Nadu</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -455,6 +452,23 @@ export default function Checkout() {
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
                           Pay securely using UPI, Credit/Debit Cards, Net Banking, or Digital Wallets
+                        </p>
+                        
+                        <div className="flex items-center space-x-2 mt-4">
+                          <input
+                            type="radio"
+                            id="cod"
+                            name="paymentMethod"
+                            value="cod"
+                            checked={formData.paymentMethod === "cod"}
+                            onChange={(e) => updateRootField("paymentMethod", e.target.value)}
+                          />
+                          <label htmlFor="cod" className="text-sm font-medium">
+                            Cash on Delivery (COD)
+                          </label>
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                          Pay cash when your order is delivered. Available for Tamil Nadu. No additional charges.
                         </p>
                       </div>
                     </div>
@@ -571,9 +585,9 @@ export default function Checkout() {
                   <span>{formatPrice(total)}</span>
                 </div>
                 
-                {subtotal < 8300 && (
+                {subtotal < 10000 && (
                   <div className="text-xs text-gray-500 mt-2">
-                    Add {formatPrice(8300 - subtotal)} more for free shipping!
+                    Add {formatPrice(10000 - subtotal)} more for free shipping!
                   </div>
                 )}
               </CardContent>

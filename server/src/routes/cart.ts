@@ -14,16 +14,29 @@ import {
 } from "@shared/cart-types";
 import type { Product, Service } from "@shared/types";
 
-// Cart configuration
+// Cart configuration - Updated based on client requirements
 const CART_CONFIG = {
   maxItemsPerCart: 50,
   maxQuantityPerItem: 99,
   minOrderAmount: 0,
   allowGuestCheckout: true,
   cartExpiryHours: 72,
-  freeShippingThreshold: 8300, // ₹8,300
-  standardShipping: 1329, // ₹13.29
-  taxRate: 0.08 // 8%
+  freeShippingThreshold: 10000, // ₹10,000 (updated per client requirement)
+  standardShipping: 0, // Will be calculated based on policy
+  taxRate: 0.18, // 18% GST for India
+  deliveryDays: { min: 1, max: 3 }, // 1-3 days delivery
+  serviceableStates: ['Tamil Nadu', 'TN'],
+  codConfig: {
+    enabled: true,
+    serviceableStates: ['Tamil Nadu', 'TN'],
+    additionalCharges: 0, // No COD charges
+    minOrderAmount: 0, // No minimum for COD
+    maxOrderAmount: null // No maximum for COD
+  },
+  returnPolicy: {
+    returnWindowDays: 7, // 5-7 working days
+    returnShippingChargePercent: 2.5 // 2.5% of return product value
+  }
 };
 
 // Helper function to enrich guest cart items
@@ -892,40 +905,57 @@ export function registerCartRoutes(app: Express) {
     }
   });
 
-  // Get shipping options
+  // Get shipping options - Updated per client requirements
   app.get("/api/cart/shipping-options", optionalAuth, async (req: any, res) => {
     try {
+      const { state = '', orderValue = 0 } = req.query;
+      const isServiceableState = CART_CONFIG.serviceableStates.includes(state);
+      
+      if (!isServiceableState) {
+        return res.json({
+          message: "Delivery not available in your area. We currently deliver only to Tamil Nadu.",
+          options: []
+        });
+      }
+
       const shippingOptions = [
         {
           id: 'standard',
           name: 'Standard Delivery',
-          description: '5-7 business days',
-          price: CART_CONFIG.standardShipping,
-          estimatedDays: 7,
+          description: '1-3 business days',
+          price: orderValue >= CART_CONFIG.freeShippingThreshold ? 0 : 100, // ₹100 for orders below ₹10k
+          estimatedDays: CART_CONFIG.deliveryDays.max,
           isDefault: true,
-          minOrderAmount: 0
+          minOrderAmount: 0,
+          serviceableStates: CART_CONFIG.serviceableStates
         },
         {
-          id: 'express',
-          name: 'Express Delivery',
-          description: '2-3 business days',
-          price: 2658, // ₹26.58
-          estimatedDays: 3,
+          id: 'cod',
+          name: 'Cash on Delivery',
+          description: '1-3 business days, Pay at delivery',
+          price: orderValue >= CART_CONFIG.freeShippingThreshold ? 0 : 100,
+          estimatedDays: CART_CONFIG.deliveryDays.max,
           isDefault: false,
-          minOrderAmount: 0
-        },
-        {
-          id: 'free',
-          name: 'Free Delivery',
-          description: '7-10 business days',
-          price: 0,
-          estimatedDays: 10,
-          isDefault: false,
-          minOrderAmount: CART_CONFIG.freeShippingThreshold
+          minOrderAmount: CART_CONFIG.codConfig.minOrderAmount,
+          maxOrderAmount: CART_CONFIG.codConfig.maxOrderAmount,
+          additionalCharges: CART_CONFIG.codConfig.additionalCharges,
+          serviceableStates: CART_CONFIG.codConfig.serviceableStates
         }
       ];
 
-      res.json(shippingOptions);
+      // Add free shipping notice
+      if (orderValue < CART_CONFIG.freeShippingThreshold) {
+        shippingOptions.forEach((option: any) => {
+          option.freeShippingNotice = `Free delivery on orders above ₹${CART_CONFIG.freeShippingThreshold.toLocaleString()}`;
+        });
+      }
+
+      res.json({
+        options: shippingOptions,
+        freeShippingThreshold: CART_CONFIG.freeShippingThreshold,
+        isServiceableState,
+        returnPolicy: CART_CONFIG.returnPolicy
+      });
       
     } catch (error) {
       console.error("Error fetching shipping options:", error);
@@ -1036,7 +1066,7 @@ function calculateCartTotals(items: CartItemWithDetails[], coupons: Coupon[] = [
     }
   });
 
-  const shipping = subtotal > CART_CONFIG.freeShippingThreshold ? 0 : CART_CONFIG.standardShipping;
+  const shipping = subtotal >= CART_CONFIG.freeShippingThreshold ? 0 : 100; // ₹100 shipping for orders below ₹10,000
   const tax = (subtotal - discount) * CART_CONFIG.taxRate;
   const total = subtotal - discount + shipping + tax;
   const savings = discount;

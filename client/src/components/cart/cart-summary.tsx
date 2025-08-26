@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatPrice } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
+import { POLICY_TEXT } from '@/lib/constants';
 import type { CartTotals, ShippingOption } from '@shared/cart-types';
 
 interface CartSummaryProps {
@@ -48,8 +49,8 @@ export function CartSummary({
     setCouponCode('');
   };
 
-  // Calculate free shipping progress
-  const freeShippingThreshold = 8300; // ₹8,300
+  // Calculate free shipping progress - Updated per client requirements
+  const freeShippingThreshold = 10000; // ₹10,000
   const progressToFreeShipping = Math.min((totals.subtotal / freeShippingThreshold) * 100, 100);
   const amountForFreeShipping = Math.max(freeShippingThreshold - totals.subtotal, 0);
 
@@ -194,6 +195,17 @@ export function CartSummary({
                 )}
               </Button>
             </div>
+          </div>
+        </div>
+
+        {/* Policy Information */}
+        <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
+          <h4 className="text-sm font-medium text-blue-900">Shipping & Returns</h4>
+          <div className="text-xs text-blue-800 space-y-1">
+            <div>• Free delivery on orders above ₹10,000</div>
+            <div>• Delivery in 1-3 business days (Tamil Nadu only)</div>
+            <div>• Returns: 5-7 days, 2.5% return shipping charge</div>
+            <div>• COD available (Tamil Nadu, no extra charges)</div>
           </div>
         </div>
 
