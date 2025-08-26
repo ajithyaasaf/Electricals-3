@@ -287,7 +287,7 @@ export default function Cart() {
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span>Free shipping on orders over ₹8,300</span>
+                    <span>Free shipping on orders over ₹10,000</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />

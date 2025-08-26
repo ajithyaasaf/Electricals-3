@@ -69,7 +69,7 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Fast Delivery</h3>
               <p className="text-sm text-gray-600">
-                Free shipping on orders over ₹8,300 with quick delivery options
+                Free shipping on orders over ₹10,000 with quick delivery options
               </p>
             </CardContent>
           </Card>
