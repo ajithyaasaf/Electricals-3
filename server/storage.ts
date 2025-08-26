@@ -177,7 +177,16 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getProductById(id: string): Promise<Product | null> {
-    return productService.getById(id);
+    const product = await productService.getById(id);
+    if (!product) {
+      // Fallback: search in all products if direct lookup fails
+      const allProducts = await this.getAllProducts();
+      const foundProduct = allProducts.find(p => p.id === id);
+      if (foundProduct) {
+        return foundProduct;
+      }
+    }
+    return product;
   }
 
   async getAllProducts(): Promise<Product[]> {
