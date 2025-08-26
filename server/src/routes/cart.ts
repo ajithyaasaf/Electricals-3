@@ -173,7 +173,12 @@ export function registerCartRoutes(app: Express) {
               enrichedItem.discount = product.originalPrice - product.price;
             }
           } else {
-            console.warn(`[CART] Product not found for ID: ${item.productId}`);
+            console.warn(`[CART] Product not found for ID: ${item.productId}, removing orphaned cart item`);
+            // Remove orphaned cart items with invalid product IDs
+            if (userId) {
+              await storage.deleteCartItem(item.id);
+            }
+            continue; // Skip this item
           }
         }
         
@@ -184,7 +189,12 @@ export function registerCartRoutes(app: Express) {
             enrichedItem.unitPrice = service.price;
             enrichedItem.originalPrice = service.price;
           } else {
-            console.warn(`[CART] Service not found for ID: ${item.serviceId}`);
+            console.warn(`[CART] Service not found for ID: ${item.serviceId}, removing orphaned cart item`);
+            // Remove orphaned cart items with invalid service IDs
+            if (userId) {
+              await storage.deleteCartItem(item.id);
+            }
+            continue; // Skip this item
           }
         }
         
