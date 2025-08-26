@@ -420,7 +420,7 @@ export default function Account() {
                         <div className="flex items-center justify-between mb-4">
                           <div>
                             <h3 className="font-semibold text-gray-900">
-                              Order #{order.orderNumber}
+                              Order #{order.id?.substring(0, 8).toUpperCase()}
                             </h3>
                             <p className="text-sm text-gray-600">
                               Placed on {new Date(order.createdAt!).toLocaleDateString()}
@@ -431,7 +431,7 @@ export default function Account() {
                               {getStatusIcon(order.status)}
                               <span className="capitalize">{order.status}</span>
                             </Badge>
-                            <p className="font-semibold">{formatPrice(parseFloat(order.totalAmount))}</p>
+                            <p className="font-semibold">{formatPrice(order.total || 0)}</p>
                           </div>
                         </div>
                         
