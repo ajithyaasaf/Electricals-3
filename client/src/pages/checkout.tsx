@@ -209,19 +209,13 @@ export default function Checkout() {
 
     if (validateStep(1) && validateStep(2)) {
       const orderData = {
-        total: total.toFixed(2),
-        subtotal: subtotal.toFixed(2),
-        tax: tax.toFixed(2),
-        shippingCost: shipping.toFixed(2),
-        shippingAddress: formData.shippingAddress,
-        billingAddress: formData.sameAsShipping ? formData.shippingAddress : formData.billingAddress,
+        total: total,
+        shippingAddress: {
+          ...formData.shippingAddress,
+          country: "India"
+        },
         paymentMethod: formData.paymentMethod,
-        status: "pending",
-        items: cartItems.map((item: any) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: parseFloat(item.product?.price || "0"),
-        })),
+        status: "pending"
       };
       
       createOrderMutation.mutate(orderData);
@@ -536,7 +530,7 @@ export default function Checkout() {
                         disabled={createOrderMutation.isPending}
                         className="bg-green-600 hover:bg-green-700"
                       >
-                        {createOrderMutation.isPending ? "Processing..." : `Place Order ($${total.toFixed(2)})`}
+                        {createOrderMutation.isPending ? "Processing..." : `Place Order (${formatPrice(total)})`}
                       </Button>
                     </div>
                   </CardContent>
