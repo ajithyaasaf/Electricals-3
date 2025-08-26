@@ -27,13 +27,18 @@ export function registerOrderRoutes(app: Express) {
   // Create order
   app.post("/api/orders", isAuthenticated, async (req: any, res) => {
     try {
+      console.log("[DEBUG] req.user:", req.user);
       const userId = req.user?.uid;
+      console.log("[DEBUG] userId:", userId);
       
       if (!userId) {
         return res.status(401).json({ message: "User not authenticated" });
       }
       
+      console.log("[DEBUG] Order request body:", req.body);
       const orderData = { ...req.body, userId };
+      console.log("[DEBUG] Order data before validation:", orderData);
+      
       const validatedOrderData = CreateOrderSchema.parse(orderData);
       
       const orderId = await storage.createOrder(validatedOrderData);

@@ -414,117 +414,52 @@ export default function Account() {
                     ))}
                   </div>
                 ) : (orders as any[]).length > 0 ? (
-                  <div className="space-y-6">
+                  <div className="space-y-4">
                     {(orders as any[]).map((order: OrderWithItems) => (
-                      <div key={order.id} className="bg-white rounded-xl border shadow-sm hover:shadow-md transition-shadow">
-                        {/* Order Header */}
-                        <div className="p-6 border-b">
-                          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-2">
-                                <h3 className="font-bold text-lg text-gray-900">
-                                  Order #{order.orderNumber || String(order.id).substring(0, 8).toUpperCase()}
-                                </h3>
-                                <Badge className={`${getStatusColor(order.status, "order")} flex items-center gap-1.5`}>
-                                  {getStatusIcon(order.status)}
-                                  <span className="capitalize font-medium">{order.status}</span>
-                                </Badge>
-                              </div>
-                              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600">
-                                <div className="flex items-center gap-1.5">
-                                  <Calendar className="w-4 h-4" />
-                                  <span>Placed on {new Date(order.createdAt!).toLocaleDateString('en-IN', {
-                                    year: 'numeric',
-                                    month: 'long', 
-                                    day: 'numeric'
-                                  })}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5">
-                                  <Package className="w-4 h-4" />
-                                  <span>{order.items?.length || 0} {order.items?.length === 1 ? 'item' : 'items'}</span>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-bold text-gray-900">{formatPrice(Number(order.totalAmount) || 0)}</p>
-                              <p className="text-sm text-gray-600 mt-1">Total amount</p>
-                            </div>
+                      <div key={order.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-4">
+                          <div>
+                            <h3 className="font-semibold text-gray-900">
+                              Order #{order.id?.substring(0, 8).toUpperCase()}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              Placed on {new Date(order.createdAt!).toLocaleDateString()}
+                            </p>
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            <Badge className={`${getStatusColor(order.status, "order")} flex items-center space-x-1`}>
+                              {getStatusIcon(order.status)}
+                              <span className="capitalize">{order.status}</span>
+                            </Badge>
+                            <p className="font-semibold">{formatPrice(order.total || 0)}</p>
                           </div>
                         </div>
-
-                        {/* Order Items */}
+                        
                         {order.items && order.items.length > 0 && (
-                          <div className="p-6">
-                            <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                              <Package className="w-4 h-4" />
-                              Items in this order
-                            </h4>
-                            <div className="space-y-4">
-                              {order.items.map((item) => (
-                                <div key={item.id} className="flex items-start gap-4 p-4 bg-gray-50 rounded-lg">
-                                  <img
-                                    src={item.product?.imageUrls?.[0] || "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100"}
-                                    alt={item.product?.name || "Product"}
-                                    className="w-16 h-16 object-cover rounded-lg border"
-                                  />
-                                  <div className="flex-1 min-w-0">
-                                    <h5 className="font-medium text-gray-900 mb-1 line-clamp-2">
-                                      {item.product?.name || 'Product name not available'}
-                                    </h5>
-                                    <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                                      <span>Quantity: {item.quantity}</span>
-                                      <span>•</span>
-                                      <span>Price: {formatPrice(parseFloat(item.price))}</span>
-                                    </div>
-                                    <p className="text-sm font-medium text-gray-900">
-                                      Subtotal: {formatPrice(parseFloat(item.price) * item.quantity)}
-                                    </p>
-                                  </div>
-                                  <div className="text-right">
-                                    <Button size="sm" variant="outline" className="mb-2">
-                                      <Eye className="w-4 h-4 mr-1" />
-                                      View Item
-                                    </Button>
-                                  </div>
+                          <div className="space-y-2">
+                            {order.items.slice(0, 2).map((item) => (
+                              <div key={item.id} className="flex items-center space-x-3">
+                                <img
+                                  src={item.product?.imageUrls?.[0] || "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100"}
+                                  alt={item.product?.name || "Product"}
+                                  className="w-12 h-12 object-cover rounded"
+                                />
+                                <div className="flex-1">
+                                  <p className="text-sm font-medium">{item.product?.name}</p>
+                                  <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
                                 </div>
-                              ))}
-                            </div>
+                                <p className="text-sm font-medium">
+                                  {formatPrice(parseFloat(item.price))}
+                                </p>
+                              </div>
+                            ))}
+                            {order.items.length > 2 && (
+                              <p className="text-sm text-gray-600 mt-2">
+                                +{order.items.length - 2} more items
+                              </p>
+                            )}
                           </div>
                         )}
-
-                        {/* Order Actions */}
-                        <div className="px-6 py-4 bg-gray-50 rounded-b-xl border-t">
-                          <div className="flex flex-wrap items-center justify-between gap-3">
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Truck className="w-4 h-4" />
-                              <span>
-                                {order.status === 'pending' && 'Order is being processed'}
-                                {order.status === 'processing' && 'Order is being prepared'}
-                                {order.status === 'shipped' && 'Order is on its way'}
-                                {order.status === 'delivered' && 'Order has been delivered'}
-                                {order.status === 'cancelled' && 'Order was cancelled'}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button size="sm" variant="outline">
-                                <FileText className="w-4 h-4 mr-1" />
-                                Order Details
-                              </Button>
-                              {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                                <Button size="sm" variant="outline">
-                                  <Truck className="w-4 h-4 mr-1" />
-                                  Track Order
-                                </Button>
-                              )}
-                              {order.status === 'delivered' && (
-                                <Button size="sm" variant="outline">
-                                  <Download className="w-4 h-4 mr-1" />
-                                  Download Invoice
-                                </Button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
                       </div>
                     ))}
                   </div>

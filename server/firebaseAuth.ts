@@ -43,15 +43,20 @@ export async function isAuthenticated(
 ) {
   try {
     const authorization = req.headers.authorization;
+    console.log("[DEBUG] Authorization header:", authorization);
+    
     if (!authorization || !authorization.startsWith('Bearer ')) {
+      console.log("[DEBUG] No valid authorization header found");
       return res.status(401).json({ message: 'Unauthorized - Firebase token required' });
     }
 
     const token = authorization.split('Bearer ')[1];
+    console.log("[DEBUG] Extracted token length:", token?.length);
     
     try {
       // Firebase Admin SDK: Verify real ID token from client
       const decodedToken = await admin.auth().verifyIdToken(token);
+      console.log("[DEBUG] Token verified successfully, uid:", decodedToken.uid);
       
       req.user = {
         uid: decodedToken.uid,
