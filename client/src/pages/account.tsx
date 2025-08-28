@@ -673,7 +673,7 @@ export default function Account() {
                         <p className="text-sm text-gray-600">January 15, 2024</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">$249.99</p>
+                        <p className="font-medium">₹18,749</p>
                         <Button variant="ghost" size="sm">
                           <Download className="w-4 h-4 mr-1" />
                           Invoice
@@ -687,7 +687,7 @@ export default function Account() {
                         <p className="text-sm text-gray-600">December 8, 2023</p>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium">$156.50</p>
+                        <p className="font-medium">₹11,738</p>
                         <Button variant="ghost" size="sm">
                           <Download className="w-4 h-4 mr-1" />
                           Invoice
