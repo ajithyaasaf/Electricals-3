@@ -34,7 +34,15 @@ import {
   Activity,
   LogOut,
   Shield,
-  ExternalLink
+  ExternalLink,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Truck,
+  Package2,
+  X,
+  Eye,
+  Printer
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -108,6 +116,27 @@ function AdminDashboard() {
 
   const { data: bookingsData = [], isLoading: bookingsLoading } = useQuery({
     queryKey: ["/api/bookings"],
+  });
+
+  // Analytics data
+  const { data: inventoryData, isLoading: inventoryLoading } = useQuery({
+    queryKey: ["/api/analytics/inventory"],
+    enabled: activeTab === "analytics" || activeTab === "dashboard"
+  });
+
+  const { data: revenueData, isLoading: revenueLoading } = useQuery({
+    queryKey: ["/api/analytics/revenue"],
+    enabled: activeTab === "analytics" || activeTab === "dashboard"
+  });
+
+  const { data: topProductsData, isLoading: topProductsLoading } = useQuery({
+    queryKey: ["/api/analytics/top-products"],
+    enabled: activeTab === "analytics" || activeTab === "dashboard"
+  });
+
+  const { data: customerData, isLoading: customerLoading } = useQuery({
+    queryKey: ["/api/analytics/customers"],
+    enabled: activeTab === "analytics" || activeTab === "dashboard"
   });
 
   // Extract arrays for easier access
@@ -374,12 +403,18 @@ function AdminDashboard() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-6 bg-copper-50 border-copper-200">
+          <TabsList className="grid w-full grid-cols-7 bg-copper-50 border-copper-200">
             <TabsTrigger 
               value="dashboard" 
               className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
             >
               Dashboard
+            </TabsTrigger>
+            <TabsTrigger 
+              value="analytics"
+              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
+            >
+              Analytics
             </TabsTrigger>
             <TabsTrigger 
               value="products"
@@ -534,6 +569,202 @@ function AdminDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {/* Analytics Overview Cards */}
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {revenueLoading ? (
+                          <Skeleton className="w-20 h-8" />
+                        ) : (
+                          `₹${revenueData?.totalRevenue ? (revenueData.totalRevenue / 12).toFixed(0) : '0'}`
+                        )}
+                      </p>
+                      {!revenueLoading && revenueData?.revenueGrowth && (
+                        <p className="text-sm text-lime-600">+{revenueData.revenueGrowth}% from last month</p>
+                      )}
+                    </div>
+                    <BarChart3 className="w-8 h-8 text-lime-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Fast Selling</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {inventoryLoading ? (
+                          <Skeleton className="w-16 h-8" />
+                        ) : (
+                          inventoryData?.fastSelling?.length || 0
+                        )}
+                      </p>
+                      <p className="text-sm text-gray-500">products</p>
+                    </div>
+                    <TrendingUp className="w-8 h-8 text-lime-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Slow Moving</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {inventoryLoading ? (
+                          <Skeleton className="w-16 h-8" />
+                        ) : (
+                          inventoryData?.slowSelling?.length || 0
+                        )}
+                      </p>
+                      <p className="text-sm text-gray-500">products</p>
+                    </div>
+                    <AlertTriangle className="w-8 h-8 text-amber-500" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Customer Repeat Rate</p>
+                      <p className="text-2xl font-bold text-gray-900">
+                        {customerLoading ? (
+                          <Skeleton className="w-20 h-8" />
+                        ) : (
+                          `${customerData?.repeatRate?.toFixed(1) || 0}%`
+                        )}
+                      </p>
+                      <p className="text-sm text-gray-500">returning customers</p>
+                    </div>
+                    <Users className="w-8 h-8 text-copper-600" />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Analytics Charts and Tables */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+              {/* Inventory Tracking */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Inventory Performance</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {inventoryLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="w-full h-12" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium text-lime-600 mb-2">Fast Selling Products</h4>
+                        {inventoryData?.fastSelling?.slice(0, 3).map((product: any) => (
+                          <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span className="text-sm font-medium">{product.name}</span>
+                            <div className="text-right">
+                              <span className="text-xs text-gray-500">{product.totalSold} sold</span>
+                              <div className="text-xs text-lime-600">{product.salesVelocity.toFixed(1)}/day</div>
+                            </div>
+                          </div>
+                        )) || <p className="text-sm text-gray-500">No fast-selling products</p>}
+                      </div>
+                      
+                      <div className="pt-4">
+                        <h4 className="font-medium text-amber-600 mb-2">Slow Moving Stock</h4>
+                        {inventoryData?.slowSelling?.slice(0, 3).map((product: any) => (
+                          <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
+                            <span className="text-sm font-medium">{product.name}</span>
+                            <div className="text-right">
+                              <span className="text-xs text-gray-500">Stock: {product.stock}</span>
+                              <div className="text-xs text-amber-600">{product.salesVelocity.toFixed(1)}/day</div>
+                            </div>
+                          </div>
+                        )) || <p className="text-sm text-gray-500">All products moving well</p>}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Top Products */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Top Revenue Products</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {topProductsLoading ? (
+                    <div className="space-y-4">
+                      {[...Array(5)].map((_, i) => (
+                        <Skeleton key={i} className="w-full h-12" />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {topProductsData?.topByRevenue?.slice(0, 5).map((product: any, index: number) => (
+                        <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
+                          <div>
+                            <span className="text-sm font-medium">#{index + 1} {product.name}</span>
+                            <div className="text-xs text-gray-500">{product.totalQuantitySold} units sold</div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm font-bold text-lime-600">₹{product.totalRevenue.toFixed(0)}</span>
+                          </div>
+                        </div>
+                      )) || <p className="text-sm text-gray-500">No sales data available</p>}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Customer Analytics */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Customer Insights</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {customerLoading ? (
+                  <div className="grid grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                      <Skeleton key={i} className="w-full h-16" />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-copper-600">{customerData?.totalCustomers || 0}</p>
+                      <p className="text-sm text-gray-600">Total Customers</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-lime-600">{customerData?.repeatCustomers || 0}</p>
+                      <p className="text-sm text-gray-600">Repeat Customers</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-600">₹{customerData?.avgCustomerValue?.toFixed(0) || 0}</p>
+                      <p className="text-sm text-gray-600">Avg Customer Value</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-gray-600">{customerData?.avgOrdersPerCustomer?.toFixed(1) || 0}</p>
+                      <p className="text-sm text-gray-600">Avg Orders/Customer</p>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Products Tab */}

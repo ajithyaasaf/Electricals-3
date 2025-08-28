@@ -88,6 +88,7 @@ export interface IStorage {
   createOrderItem(data: CreateOrderItem): Promise<string>;
   getOrderItemById(id: string): Promise<OrderItem | null>;
   getOrderItems(orderId: string): Promise<OrderItem[]>;
+  getAllOrderItems(): Promise<OrderItem[]>;
   updateOrderItem(id: string, data: Partial<CreateOrderItem>): Promise<void>;
   deleteOrderItem(id: string): Promise<void>;
 
@@ -329,6 +330,10 @@ export class FirestoreStorage implements IStorage {
 
   async getOrderItems(orderId: string): Promise<OrderItem[]> {
     return OrderQueries.getOrderItems(orderId);
+  }
+
+  async getAllOrderItems(): Promise<OrderItem[]> {
+    return orderItemService.getAll(1000);
   }
 
   async updateOrderItem(id: string, data: Partial<CreateOrderItem>): Promise<void> {

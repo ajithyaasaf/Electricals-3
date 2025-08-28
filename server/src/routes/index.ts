@@ -8,6 +8,7 @@ import { registerAdminRoutes } from "./admin";
 import { registerCartRoutes } from "./cart";
 import { registerReviewRoutes } from "./reviews";
 import { registerWishlistRoutes } from "./wishlist";
+import { registerAnalyticsRoutes } from "./analytics";
 import { setupFirebaseAuth } from "../../firebaseAuth";
 
 export async function registerAllRoutes(app: Express) {
@@ -32,5 +33,6 @@ export async function registerAllRoutes(app: Express) {
   registerCartRoutes(app);
   registerReviewRoutes(app);
   registerWishlistRoutes(app);
+  registerAnalyticsRoutes(app);
   registerAdminRoutes(app);
 }
