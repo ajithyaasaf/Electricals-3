@@ -491,7 +491,7 @@ function AdminDashboard() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
+                            <p className="font-medium">₹{parseFloat(order.total || order.totalAmount || 0).toFixed(2)}</p>
                             <Badge variant="outline" className="text-xs">
                               {order.status}
                             </Badge>
@@ -1059,7 +1059,7 @@ function AdminDashboard() {
                           <TableCell>
                             {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
                           </TableCell>
-                          <TableCell>₹{parseFloat(order.totalAmount).toFixed(2)}</TableCell>
+                          <TableCell>₹{parseFloat(order.total || order.totalAmount || 0).toFixed(2)}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="capitalize">
                               {order.status}
