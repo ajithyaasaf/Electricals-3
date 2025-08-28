@@ -13,6 +13,25 @@ export function registerOrderRoutes(app: Express) {
       let orders;
       if (user?.isAdmin) {
         orders = await storage.getAllOrders();
+        // Enrich orders with customer information for admin view
+        const enrichedOrders = await Promise.all(
+          orders.map(async (order: any) => {
+            try {
+              const customer = await storage.getUserById(order.userId);
+              return {
+                ...order,
+                customerName: customer ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email || 'Unknown Customer' : 'Unknown Customer'
+              };
+            } catch (error) {
+              console.error(`Error fetching customer data for order ${order.id}:`, error);
+              return {
+                ...order,
+                customerName: 'Unknown Customer'
+              };
+            }
+          })
+        );
+        orders = enrichedOrders;
       } else {
         orders = await storage.getUserOrders(userId);
       }

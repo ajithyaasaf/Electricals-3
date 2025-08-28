@@ -1057,7 +1057,7 @@ function AdminDashboard() {
                         <TableRow key={order.id}>
                           <TableCell className="font-medium">#{order.id.slice(-8)}</TableCell>
                           <TableCell>
-                            {order.userId || 'N/A'}
+                            {order.customerName || 'N/A'}
                           </TableCell>
                           <TableCell>₹{parseFloat(order.total || 0).toFixed(2)}</TableCell>
                           <TableCell>
