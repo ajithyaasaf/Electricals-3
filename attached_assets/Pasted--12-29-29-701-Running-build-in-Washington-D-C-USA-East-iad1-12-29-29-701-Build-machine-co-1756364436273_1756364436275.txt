@@ -1,0 +1,58 @@
+[12:29:29.701] Running build in Washington, D.C., USA (East) – iad1
+[12:29:29.701] Build machine configuration: 2 cores, 8 GB
+[12:29:29.724] Cloning github.com/ajithyaasaf/Electricals-3 (Branch: main, Commit: c51d16c)
+[12:29:29.957] Previous build caches not available
+[12:29:31.597] Cloning completed: 1.873s
+[12:29:31.996] Running "vercel build"
+[12:29:32.405] Vercel CLI 46.0.5
+[12:29:33.165] > Installing Builder: @vercel/node@3.2.20
+[12:29:45.287] Running "install" command: `npm install`...
+[12:30:11.861] 
+[12:30:11.861] added 721 packages, and audited 722 packages in 26s
+[12:30:11.862] 
+[12:30:11.862] 81 packages are looking for funding
+[12:30:11.862]   run `npm fund` for details
+[12:30:11.883] 
+[12:30:11.884] 12 vulnerabilities (3 low, 7 moderate, 2 high)
+[12:30:11.884] 
+[12:30:11.885] To address issues that do not require attention, run:
+[12:30:11.885]   npm audit fix
+[12:30:11.885] 
+[12:30:11.885] To address all issues (including breaking changes), run:
+[12:30:11.886]   npm audit fix --force
+[12:30:11.886] 
+[12:30:11.886] Run `npm audit` for details.
+[12:30:12.213] 
+[12:30:12.213] > rest-express@1.0.0 build
+[12:30:12.213] > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+[12:30:12.214] 
+[12:30:12.484] [36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[12:30:12.534] transforming...
+[12:30:12.801] Browserslist: browsers data (caniuse-lite) is 10 months old. Please run:
+[12:30:12.801]   npx update-browserslist-db@latest
+[12:30:12.802]   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+[12:30:21.131] [32m✓[39m 2648 modules transformed.
+[12:30:21.693] rendering chunks...
+[12:30:22.005] [1m[33m[plugin:vite:reporter][39m[22m [33m[plugin vite:reporter] 
+[12:30:22.005] (!) /vercel/path0/client/src/lib/firebase.ts is dynamically imported by /vercel/path0/client/src/components/common/why-choose-section.tsx but also statically imported by /vercel/path0/client/src/components/admin/admin-login.tsx, /vercel/path0/client/src/components/auth/firebase-redirect-handler.tsx, /vercel/path0/client/src/components/layout/header.tsx, /vercel/path0/client/src/hooks/useAdminAuth.tsx, /vercel/path0/client/src/hooks/useFirebaseAuth.tsx, /vercel/path0/client/src/lib/queryClient.ts, /vercel/path0/client/src/pages/account.tsx, /vercel/path0/client/src/pages/auth.tsx, dynamic import will not move module into another chunk.
+[12:30:22.006] [39m
+[12:30:22.042] computing gzip size...
+[12:30:22.252] [2m../dist/public/[22m[32mindex.html                                                      [39m[1m[2m    0.63 kB[22m[1m[22m[2m │ gzip:   0.39 kB[22m
+[12:30:22.253] [2m../dist/public/[22m[2massets/[22m[32mTamil_man_professional_headshot_eaccc571-IMjOKIuY.png    [39m[1m[2m1,418.19 kB[22m[1m[22m
+[12:30:22.257] [2m../dist/public/[22m[2massets/[22m[32mTamil_woman_professional_headshot_47292604-C8wxHrqZ.png  [39m[1m[2m1,432.06 kB[22m[1m[22m
+[12:30:22.257] [2m../dist/public/[22m[2massets/[22m[32mTamil_man_casual_headshot_689dc8d0-BvFSOUN2.png          [39m[1m[2m1,442.24 kB[22m[1m[22m
+[12:30:22.257] [2m../dist/public/[22m[2massets/[22m[35mindex-F26LgHzM.css                                       [39m[1m[2m  113.69 kB[22m[1m[22m[2m │ gzip:  18.52 kB[22m
+[12:30:22.258] [2m../dist/public/[22m[2massets/[22m[36mindex.esm-C-lSFNC9.js                                    [39m[1m[2m  275.78 kB[22m[1m[22m[2m │ gzip:  69.37 kB[22m
+[12:30:22.258] [2m../dist/public/[22m[2massets/[22m[36mindex-D_47WNSZ.js                                        [39m[1m[33m1,006.62 kB[39m[22m[2m │ gzip: 268.15 kB[22m
+[12:30:22.259] [32m✓ built in 9.75s[39m
+[12:30:22.260] [33m
+[12:30:22.260] (!) Some chunks are larger than 500 kB after minification. Consider:
+[12:30:22.260] - Using dynamic import() to code-split the application
+[12:30:22.260] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[12:30:22.262] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[12:30:22.319] 
+[12:30:22.319]   dist/index.js  139.0kb
+[12:30:22.319] 
+[12:30:22.320] ⚡ Done in 16ms
+[12:30:22.367] Error: Found invalid Node.js Version: "22.x". Please set Node.js Version to 20.x in your Project Settings to use Node.js 20.
+[12:30:22.368] Learn More: http://vercel.link/node-version
