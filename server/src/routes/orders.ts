@@ -14,13 +14,18 @@ export function registerOrderRoutes(app: Express) {
       if (user?.isAdmin) {
         orders = await storage.getAllOrders();
         // Enrich orders with customer information for admin view
+        console.log(`[DEBUG] Enriching ${orders.length} orders with customer data`);
         const enrichedOrders = await Promise.all(
           orders.map(async (order: any) => {
             try {
+              console.log(`[DEBUG] Fetching customer data for order ${order.id}, userId: ${order.userId}`);
               const customer = await storage.getUserById(order.userId);
+              console.log(`[DEBUG] Customer data:`, customer);
+              const customerName = customer ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email || 'Unknown Customer' : 'Unknown Customer';
+              console.log(`[DEBUG] Generated customer name:`, customerName);
               return {
                 ...order,
-                customerName: customer ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email || 'Unknown Customer' : 'Unknown Customer'
+                customerName
               };
             } catch (error) {
               console.error(`Error fetching customer data for order ${order.id}:`, error);
@@ -31,6 +36,7 @@ export function registerOrderRoutes(app: Express) {
             }
           })
         );
+        console.log(`[DEBUG] Enriched orders:`, enrichedOrders.map(o => ({ id: o.id, customerName: o.customerName })));
         orders = enrichedOrders;
       } else {
         orders = await storage.getUserOrders(userId);
