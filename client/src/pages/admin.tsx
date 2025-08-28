@@ -485,9 +485,9 @@ function AdminDashboard() {
                       {orders.slice(0, 5).map((order: any) => (
                         <div key={order.id} className="flex items-center justify-between p-3 bg-copper-50 rounded-lg">
                           <div>
-                            <p className="font-medium">#{order.orderNumber}</p>
+                            <p className="font-medium">#{order.id.slice(-8)}</p>
                             <p className="text-sm text-gray-600">
-                              {new Date(order.createdAt).toLocaleDateString()}
+                              {order.customerName || 'Unknown'} • {new Date(order.createdAt).toLocaleDateString()}
                             </p>
                           </div>
                           <div className="text-right">
