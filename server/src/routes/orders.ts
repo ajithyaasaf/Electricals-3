@@ -25,7 +25,7 @@ export function registerOrderRoutes(app: Express) {
               if (customer) {
                 // Try to build a proper name
                 const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
-                if (fullName && fullName !== 'User' && fullName !== 'User ') {
+                if (fullName && fullName !== 'User') {
                   customerName = fullName;
                 } else {
                   // Fall back to email username (part before @)
