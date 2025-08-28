@@ -21,7 +21,17 @@ export function registerOrderRoutes(app: Express) {
               console.log(`[DEBUG] Fetching customer data for order ${order.id}, userId: ${order.userId}`);
               const customer = await storage.getUserById(order.userId);
               console.log(`[DEBUG] Customer data:`, customer);
-              const customerName = customer ? `${customer.firstName || ''} ${customer.lastName || ''}`.trim() || customer.email || 'Unknown Customer' : 'Unknown Customer';
+              let customerName = 'Unknown Customer';
+              if (customer) {
+                // Try to build a proper name
+                const fullName = `${customer.firstName || ''} ${customer.lastName || ''}`.trim();
+                if (fullName && fullName !== 'User' && fullName !== 'User ') {
+                  customerName = fullName;
+                } else {
+                  // Fall back to email username (part before @)
+                  customerName = customer.email ? customer.email.split('@')[0] : 'Unknown Customer';
+                }
+              }
               console.log(`[DEBUG] Generated customer name:`, customerName);
               return {
                 ...order,
