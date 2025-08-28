@@ -536,7 +536,7 @@ export default function Account() {
                           {booking.totalAmount && (
                             <div className="flex items-center space-x-2">
                               <span className="font-medium">
-                                ${parseFloat(booking.totalAmount).toFixed(2)}
+                                ₹{parseFloat(booking.totalAmount).toFixed(2)}
                               </span>
                             </div>
                           )}
