@@ -1055,11 +1055,11 @@ function AdminDashboard() {
                     <TableBody>
                       {orders.map((order: any) => (
                         <TableRow key={order.id}>
-                          <TableCell className="font-medium">#{order.orderNumber}</TableCell>
+                          <TableCell className="font-medium">#{order.id.slice(-8)}</TableCell>
                           <TableCell>
-                            {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
+                            {order.userId || 'N/A'}
                           </TableCell>
-                          <TableCell>₹{parseFloat(order.totalAmount).toFixed(2)}</TableCell>
+                          <TableCell>₹{parseFloat(order.total || 0).toFixed(2)}</TableCell>
                           <TableCell>
                             <Badge variant="outline" className="capitalize">
                               {order.status}
