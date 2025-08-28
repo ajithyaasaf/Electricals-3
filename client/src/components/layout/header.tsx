@@ -35,6 +35,7 @@ import {
   ChevronRight,
   ChevronDown,
 } from "lucide-react";
+import logoUrl from "@assets/Logo_1756366077120.png";
 import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOutUser } from "@/lib/firebase";
@@ -243,17 +244,11 @@ export function Header() {
         <div className="flex items-center justify-between py-3 sm:py-4">
           {/* Logo */}
           <SmartLink href="/" className="flex items-center space-x-2 flex-shrink-0">
-            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-copper-500 to-copper-600 rounded-lg flex items-center justify-center">
-              <Zap className="text-white text-base sm:text-lg" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-bold text-copper-700 truncate">
-                CopperBear
-              </h1>
-              <p className="text-xs text-gray-600 hidden sm:block">
-                Electrical Solutions
-              </p>
-            </div>
+            <img 
+              src={logoUrl} 
+              alt="CopperBear Logo" 
+              className="h-8 sm:h-12 w-auto object-contain"
+            />
           </SmartLink>
 
           {/* Search Bar - Desktop */}

@@ -1,6 +1,7 @@
 import { Link } from "wouter";
 import { Zap, CreditCard } from "lucide-react";
 import { SiVisa, SiMastercard, SiAmericanexpress, SiPaypal } from "react-icons/si";
+import logoUrl from "@assets/Logo_1756366077120.png";
 import { COMPANY_INFO, CONTACT_INFO } from "@/lib/constants";
 
 export function Footer() {
@@ -45,13 +46,11 @@ export function Footer() {
           {/* Company Info */}
           <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-r from-copper-500 to-copper-600 rounded-lg flex items-center justify-center">
-                <Zap className="text-white text-lg" />
-              </div>
-              <div>
-                <h4 className="text-xl font-bold text-copper-400">CopperBear</h4>
-                <p className="text-xs text-gray-400">Electrical Solutions</p>
-              </div>
+              <img 
+                src={logoUrl} 
+                alt="CopperBear Logo" 
+                className="h-10 w-auto object-contain"
+              />
             </div>
             <p className="text-gray-400 mb-4 text-sm">{COMPANY_INFO.description}</p>
             
