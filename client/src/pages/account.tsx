@@ -285,7 +285,7 @@ export default function Account() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-gray-900">
-                  ₹{(orders as any[]).reduce((sum: number, order: any) => sum + parseFloat(order.total || order.totalAmount || 0), 0).toFixed(2)}
+                  ${(orders as any[]).reduce((sum: number, order: any) => sum + parseFloat(order.totalAmount || 0), 0).toFixed(2)}
                 </p>
                 <p className="text-sm text-gray-600">Total Spent</p>
               </div>
@@ -533,10 +533,10 @@ export default function Account() {
                               </span>
                             </div>
                           )}
-                          {(booking.total || booking.totalAmount) && (
+                          {booking.totalAmount && (
                             <div className="flex items-center space-x-2">
                               <span className="font-medium">
-                                ₹{parseFloat(booking.total || booking.totalAmount || 0).toFixed(2)}
+                                ₹{parseFloat(booking.totalAmount).toFixed(2)}
                               </span>
                             </div>
                           )}

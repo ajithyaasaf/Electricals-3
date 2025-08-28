@@ -82,7 +82,6 @@ export interface IStorage {
   getUserOrders(userId: string): Promise<Order[]>;
   getAllOrders(): Promise<Order[]>;
   updateOrder(id: string, data: Partial<CreateOrder>): Promise<void>;
-  updateOrder(id: string, data: Partial<CreateOrder>): Promise<void>;
   deleteOrder(id: string): Promise<void>;
 
   // Order Item operations

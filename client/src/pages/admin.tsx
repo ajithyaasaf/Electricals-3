@@ -29,14 +29,12 @@ import {
   Edit,
   Trash2,
   BarChart3,
+
   TrendingUp,
   Activity,
   LogOut,
   Shield,
-  ExternalLink,
-  Eye,
-  Truck,
-  CheckCircle
+  ExternalLink
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -90,8 +88,6 @@ function AdminDashboard() {
   const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
   const [categoryDialogOpen, setCategoryDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
-  const [viewingOrder, setViewingOrder] = useState<any>(null);
-  const [orderViewOpen, setOrderViewOpen] = useState(false);
 
   // Fetch data with proper typing
   const { data: productsData = { products: [], total: 0 }, isLoading: productsLoading } = useQuery({
@@ -271,38 +267,6 @@ function AdminDashboard() {
         variant: "destructive",
       });
     }
-  };
-
-  // Handle order status update
-  const updateOrderStatusMutation = useMutation({
-    mutationFn: async ({ orderId, status }: { orderId: string; status: string }) => {
-      const response = await apiRequest("PATCH", `/api/orders/${orderId}/status`, { status });
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      toast({
-        title: "Order status updated",
-        description: "The order status has been successfully updated.",
-      });
-    },
-    onError: (error) => {
-      console.error("Error updating order status:", error);
-      toast({
-        title: "Update failed",
-        description: "Failed to update order status. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleStatusUpdate = (orderId: string, newStatus: string) => {
-    updateOrderStatusMutation.mutate({ orderId, status: newStatus });
-  };
-
-  const handleViewOrder = (order: any) => {
-    setViewingOrder(order);
-    setOrderViewOpen(true);
   };
 
   // Calculate dashboard stats
@@ -527,7 +491,7 @@ function AdminDashboard() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">₹{parseFloat(order.total || order.totalAmount || 0).toFixed(2)}</p>
+                            <p className="font-medium">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
                             <Badge variant="outline" className="text-xs">
                               {order.status}
                             </Badge>
@@ -1083,65 +1047,26 @@ function AdminDashboard() {
                       <TableRow>
                         <TableHead>Order #</TableHead>
                         <TableHead>Customer</TableHead>
-                        <TableHead>Contact</TableHead>
                         <TableHead>Total</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Date</TableHead>
-                        <TableHead>Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {orders.map((order: any) => (
                         <TableRow key={order.id}>
-                          <TableCell className="font-medium">
-                            {order.orderNumber || `#${order.id.slice(-8)}`}
-                          </TableCell>
+                          <TableCell className="font-medium">#{order.orderNumber}</TableCell>
                           <TableCell>
-                            <div>
-                              <p className="font-medium">
-                                {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
-                              </p>
-                              <p className="text-sm text-gray-500">
-                                {order.shippingAddress?.city}, {order.shippingAddress?.state}
-                              </p>
-                            </div>
+                            {order.shippingAddress?.firstName} {order.shippingAddress?.lastName}
                           </TableCell>
+                          <TableCell>₹{parseFloat(order.totalAmount).toFixed(2)}</TableCell>
                           <TableCell>
-                            <div className="text-sm">
-                              <p>{order.shippingAddress?.email}</p>
-                              <p className="text-gray-500">{order.shippingAddress?.phone}</p>
-                            </div>
-                          </TableCell>
-                          <TableCell>₹{parseFloat(order.total || order.totalAmount || 0).toFixed(2)}</TableCell>
-                          <TableCell>
-                            <Select 
-                              value={order.status} 
-                              onValueChange={(newStatus) => handleStatusUpdate(order.id, newStatus)}
-                            >
-                              <SelectTrigger className="w-32">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="processing">Processing</SelectItem>
-                                <SelectItem value="shipped">Shipped</SelectItem>
-                                <SelectItem value="delivered">Delivered</SelectItem>
-                                <SelectItem value="cancelled">Cancelled</SelectItem>
-                              </SelectContent>
-                            </Select>
+                            <Badge variant="outline" className="capitalize">
+                              {order.status}
+                            </Badge>
                           </TableCell>
                           <TableCell>
                             {new Date(order.createdAt).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleViewOrder(order)}
-                              className="mr-2"
-                            >
-                              View
-                            </Button>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -1151,108 +1076,6 @@ function AdminDashboard() {
               </CardContent>
             </Card>
           </TabsContent>
-
-          {/* Order Detail Dialog */}
-          <Dialog open={orderViewOpen} onOpenChange={setOrderViewOpen}>
-            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Order Details</DialogTitle>
-              </DialogHeader>
-              {viewingOrder && (
-                <div className="space-y-6">
-                  {/* Order Header */}
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-semibold">
-                        {viewingOrder.orderNumber || `#${viewingOrder.id.slice(-8)}`}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Placed on {new Date(viewingOrder.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="capitalize">
-                      {viewingOrder.status}
-                    </Badge>
-                  </div>
-
-                  {/* Customer Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-sm">Customer Information</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <p><strong>Name:</strong> {viewingOrder.shippingAddress?.firstName} {viewingOrder.shippingAddress?.lastName}</p>
-                        <p><strong>Email:</strong> {viewingOrder.shippingAddress?.email}</p>
-                        <p><strong>Phone:</strong> {viewingOrder.shippingAddress?.phone}</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader>
-                        <CardTitle className="text-sm">Shipping Address</CardTitle>
-                      </CardHeader>
-                      <CardContent className="space-y-2">
-                        <p>{viewingOrder.shippingAddress?.street}</p>
-                        <p>{viewingOrder.shippingAddress?.city}, {viewingOrder.shippingAddress?.state}</p>
-                        <p>{viewingOrder.shippingAddress?.zipCode}</p>
-                        <p>{viewingOrder.shippingAddress?.country}</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* Order Summary */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Order Summary</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <p><strong>Total Amount:</strong></p>
-                          <p><strong>Payment Method:</strong> {viewingOrder.paymentMethod}</p>
-                          <p><strong>Payment Status:</strong> {viewingOrder.paymentStatus}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold">₹{parseFloat(viewingOrder.total || 0).toFixed(2)}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Status Update */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-sm">Update Order Status</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex items-center space-x-4">
-                        <Label>Status:</Label>
-                        <Select 
-                          value={viewingOrder.status} 
-                          onValueChange={(newStatus) => {
-                            handleStatusUpdate(viewingOrder.id, newStatus);
-                            setViewingOrder({...viewingOrder, status: newStatus});
-                          }}
-                        >
-                          <SelectTrigger className="w-48">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="processing">Processing</SelectItem>
-                            <SelectItem value="shipped">Shipped</SelectItem>
-                            <SelectItem value="delivered">Delivered</SelectItem>
-                            <SelectItem value="cancelled">Cancelled</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-            </DialogContent>
-          </Dialog>
 
           {/* Bookings Tab */}
           <TabsContent value="bookings" className="mt-6">

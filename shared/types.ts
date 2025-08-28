@@ -122,15 +122,10 @@ export type CreateCartItem = z.infer<typeof CreateCartItemSchema>;
 // Order types
 export const OrderSchema = z.object({
   id: z.string(),
-  orderNumber: z.string(),
   userId: z.string(),
   status: z.enum(['pending', 'processing', 'shipped', 'delivered', 'cancelled']).default('pending'),
   total: z.number(),
   shippingAddress: z.object({
-    firstName: z.string(),
-    lastName: z.string(),
-    email: z.string(),
-    phone: z.string(),
     street: z.string(),
     city: z.string(),
     state: z.string(),
@@ -145,7 +140,6 @@ export const OrderSchema = z.object({
 
 export const CreateOrderSchema = OrderSchema.omit({ 
   id: true,
-  orderNumber: true,
   createdAt: true, 
   updatedAt: true 
 });
