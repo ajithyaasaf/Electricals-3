@@ -1,27 +1,33 @@
 import { Star } from "lucide-react";
+import tamilWomanImg from '@assets/generated_images/Tamil_woman_professional_headshot_47292604.png';
+import tamilManImg from '@assets/generated_images/Tamil_man_professional_headshot_eaccc571.png';
+import tamilManCasualImg from '@assets/generated_images/Tamil_man_casual_headshot_689dc8d0.png';
 
 export function Testimonials() {
   const testimonials = [
     {
       id: 1,
-      name: "Sarah Johnson",
+      name: "Priya Lakshmi",
       role: "Residential Customer",
       rating: 5,
-      comment: "Excellent service! The electrician was professional, knowledgeable, and completed the panel upgrade efficiently. High-quality products and fair pricing."
+      comment: "Excellent service! The electrician was professional, knowledgeable, and completed the panel upgrade efficiently. High-quality products and fair pricing.",
+      image: tamilWomanImg
     },
     {
       id: 2,
-      name: "Mike Chen",
+      name: "Rajesh Kumar",
       role: "Commercial Contractor",
       rating: 5,
-      comment: "CopperBear has been our go-to for all electrical supplies and services. Their products are top-notch and the technical support is outstanding."
+      comment: "CopperBear has been our go-to for all electrical supplies and services. Their products are top-notch and the technical support is outstanding.",
+      image: tamilManImg
     },
     {
       id: 3,
-      name: "David Rodriguez",
+      name: "Murugan Selvam",
       role: "Maintenance Manager",
       rating: 5,
-      comment: "Fast shipping, competitive prices, and excellent customer service. The online ordering system is user-friendly and the products always arrive as described."
+      comment: "Fast shipping, competitive prices, and excellent customer service. The online ordering system is user-friendly and the products always arrive as described.",
+      image: tamilManCasualImg
     }
   ];
 
@@ -43,7 +49,11 @@ export function Testimonials() {
               </div>
               <p className="text-gray-600 mb-6">"{testimonial.comment}"</p>
               <div className="flex items-center">
-                <div className="w-12 h-12 bg-gray-300 rounded-full mr-4"></div>
+                <img 
+                  src={testimonial.image} 
+                  alt={testimonial.name}
+                  className="w-12 h-12 rounded-full mr-4 object-cover"
+                />
                 <div>
                   <p className="font-semibold text-gray-900">{testimonial.name}</p>
                   <p className="text-sm text-gray-600">{testimonial.role}</p>
