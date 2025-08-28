@@ -41,7 +41,11 @@ export function registerOrderRoutes(app: Express) {
       
       const validatedOrderData = CreateOrderSchema.parse(orderData);
       
-      const orderId = await storage.createOrder(validatedOrderData);
+      // Generate order number
+      const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+      const orderWithNumber = { ...validatedOrderData, orderNumber };
+      
+      const orderId = await storage.createOrder(orderWithNumber);
       const order = await storage.getOrderById(orderId);
       res.json(order);
     } catch (error) {
@@ -69,6 +73,33 @@ export function registerOrderRoutes(app: Express) {
     } catch (error) {
       console.error("Error fetching order:", error);
       res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  // Update order status (admin only)
+  app.patch("/api/orders/:id/status", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.uid;
+      const user = await storage.getUserById(userId);
+      
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+      
+      const { status } = req.body;
+      const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
+      
+      if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      
+      await storage.updateOrder(req.params.id, { status });
+      const updatedOrder = await storage.getOrderById(req.params.id);
+      
+      res.json(updatedOrder);
+    } catch (error) {
+      console.error("Error updating order status:", error);
+      res.status(500).json({ message: "Failed to update order status" });
     }
   });
 }
