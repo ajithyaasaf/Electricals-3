@@ -29,7 +29,7 @@ import {
   Edit,
   Trash2,
   BarChart3,
-  DollarSign,
+
   TrendingUp,
   Activity,
   LogOut,
@@ -425,7 +425,7 @@ function AdminDashboard() {
                         ₹{totalRevenue.toFixed(2)}
                       </p>
                     </div>
-                    <DollarSign className="w-8 h-8 text-lime-600" />
+                    <TrendingUp className="w-8 h-8 text-lime-600" />
                   </div>
                 </CardContent>
               </Card>
