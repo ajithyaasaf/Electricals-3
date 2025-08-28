@@ -491,7 +491,7 @@ function AdminDashboard() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-medium">₹{parseFloat(order.totalAmount).toFixed(2)}</p>
+                            <p className="font-medium">₹{parseFloat(order.total).toFixed(2)}</p>
                             <Badge variant="outline" className="text-xs">
                               {order.status}
                             </Badge>
