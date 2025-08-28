@@ -17,8 +17,5 @@
       "src": "/(.*)",
       "dest": "/client/index.html"
     }
-  ],
-  "engines": {
-    "node": "20.x"
-  }
+  ]
 }
