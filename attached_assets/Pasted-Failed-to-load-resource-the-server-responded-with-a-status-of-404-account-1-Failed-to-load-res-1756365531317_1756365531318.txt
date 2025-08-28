@@ -1,0 +1,66 @@
+Failed to load resource: the server responded with a status of 404 ()
+/account:1  Failed to load resource: the server responded with a status of 404 ()
+/services:1  Failed to load resource: the server responded with a status of 404 ()
+index-CsTztMT_.js:1892 LCP: 1468
+/api/categories:1  Failed to load resource: the server responded with a status of 404 ()
+index-CsTztMT_.js:1892 FID: 1.1999999955296516
+/api/categories:1  Failed to load resource: the server responded with a status of 404 ()
+index-CsTztMT_.js:1936 🔍 PriceInputs component mounted
+/api/categories:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?featured=false&minPrice=0&maxPrice=1000000&sortBy=newest&sortOrder=desc&limit=20&offset=0:1  Failed to load resource: the server responded with a status of 404 ()
+/api/categories:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?featured=false&minPrice=0&maxPrice=1000000&sortBy=newest&sortOrder=desc&limit=20&offset=0:1  Failed to load resource: the server responded with a status of 404 ()
+/api/categories:1  Failed to load resource: the server responded with a status of 404 ()
+index-CsTztMT_.js:1936 🚮 PriceInputs component unmounted
+6The resource <URL> was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally.
+index-CsTztMT_.js:1892 [WISHLIST CONTEXT] 👤 User authenticated, loading wishlist...
+index-CsTztMT_.js:1892 [CART CONTEXT] 📖 Loading guest cart from localStorage: 0 items
+/api/wishlist:1  Failed to load resource: the server responded with a status of 404 ()
+/api/recommendations/trending:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?bestsellers=true&limit=12:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?featured=true&limit=8:1  Failed to load resource: the server responded with a status of 404 ()
+/api/deals?limit=4:1  Failed to load resource: the server responded with a status of 404 ()
+/api/services?limit=3:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?trending=true&limit=12:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?new=true&limit=12:1  Failed to load resource: the server responded with a status of 404 ()
+index-CsTztMT_.js:1892 CLS: 0.0002389600882790024
+index-CsTztMT_.js:1892 [WISHLIST CONTEXT] ❌ Error loading wishlist: Error: 404: The page could not be found
+
+NOT_FOUND
+
+bom1::2r5gq-1756365431735-a8cc7eb71408
+
+    at cC (index-CsTztMT_.js:1577:2548)
+    at async He (index-CsTztMT_.js:1577:2964)
+    at async index-CsTztMT_.js:1892:86430
+    at async index-CsTztMT_.js:1892:87443
+(anonymous) @ index-CsTztMT_.js:1892
+/api/recommendations/personalized:1  Failed to load resource: the server responded with a status of 404 ()
+index-CsTztMT_.js:1892 [CART MIGRATION] 🔍 Debug - localStorage items: 0
+index-CsTztMT_.js:1892 [CART MIGRATION] 🔍 Debug - state items: 0
+index-CsTztMT_.js:1892 [CART MIGRATION] 🔍 Debug - localStorage raw: null
+index-CsTztMT_.js:1892 [CART MIGRATION] ℹ️ No guest cart items to migrate
+index-CsTztMT_.js:1892 [CART MIGRATION] 🔄 Loading authenticated cart directly...
+/api/cart:1  Failed to load resource: the server responded with a status of 404 ()
+index-CsTztMT_.js:1892 [CART CONTEXT] ❌ Error loading authenticated cart: Error: 404: The page could not be found
+
+NOT_FOUND
+
+bom1::qbwln-1756365431913-5aa57fff770a
+
+    at cC (index-CsTztMT_.js:1577:2548)
+    at async He (index-CsTztMT_.js:1577:2964)
+    at async O (index-CsTztMT_.js:1892:71883)
+O @ index-CsTztMT_.js:1892
+index-CsTztMT_.js:1936 [WHY CHOOSE] Setting up real-time listener for: Object
+index-CsTztMT_.js:1936 [WHY CHOOSE] Failed to initialize Firebase listener: FirebaseError: Expected first argument to collection() to be a CollectionReference, a DocumentReference or FirebaseFirestore
+y @ index-CsTztMT_.js:1936
+index-CsTztMT_.js:1892 CLS: 0.5805613623525263
+/api/services?limit=3:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?bestsellers=true&limit=12:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?featured=true&limit=8:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?trending=true&limit=12:1  Failed to load resource: the server responded with a status of 404 ()
+/api/recommendations/trending:1  Failed to load resource: the server responded with a status of 404 ()
+/api/deals?limit=4:1  Failed to load resource: the server responded with a status of 404 ()
+/api/products?new=true&limit=12:1  Failed to load resource: the server responded with a status of 404 ()
+/api/recommendations/personalized:1  
