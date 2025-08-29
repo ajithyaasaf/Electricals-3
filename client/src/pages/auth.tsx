@@ -230,9 +230,15 @@ export default function Auth() {
               <div className="space-y-3 w-full">
                 <Input
                   {...signUpForm.register("firstName")}
-                  placeholder="Full Name"
+                  placeholder="First Name"
                   className="auth-input"
                   data-testid="input-first-name"
+                />
+                <Input
+                  {...signUpForm.register("lastName")}
+                  placeholder="Last Name"
+                  className="auth-input"
+                  data-testid="input-last-name"
                 />
                 <Input
                   {...signUpForm.register("email")}
