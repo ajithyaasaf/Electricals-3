@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { SmartLink } from '@/components/navigation/smart-link';
 import { ChevronLeft, ChevronRight, Zap, Shield, Wrench, Tag, Clock, Star } from 'lucide-react';
@@ -107,6 +107,27 @@ export function BannerSlider({
   const [isPaused, setIsPaused] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
+  const nextSlide = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
+    setTimeout(() => setIsTransitioning(false), 600);
+  }, [isTransitioning]);
+
+  const prevSlide = useCallback(() => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
+    setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
+    setTimeout(() => setIsTransitioning(false), 600);
+  }, [isTransitioning]);
+
+  const goToSlide = useCallback((index: number) => {
+    if (isTransitioning || index === currentSlide) return;
+    setIsTransitioning(true);
+    setCurrentSlide(index);
+    setTimeout(() => setIsTransitioning(false), 600);
+  }, [isTransitioning, currentSlide]);
+
   // Auto-play functionality
   useEffect(() => {
     if (!isPaused && autoPlayInterval > 0 && !isTransitioning) {
@@ -115,28 +136,7 @@ export function BannerSlider({
       }, autoPlayInterval);
       return () => clearInterval(interval);
     }
-  }, [isPaused, autoPlayInterval, isTransitioning]);
-
-  const nextSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
-    setTimeout(() => setIsTransitioning(false), 600);
-  };
-
-  const prevSlide = () => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
-    setTimeout(() => setIsTransitioning(false), 600);
-  };
-
-  const goToSlide = (index: number) => {
-    if (isTransitioning || index === currentSlide) return;
-    setIsTransitioning(true);
-    setCurrentSlide(index);
-    setTimeout(() => setIsTransitioning(false), 600);
-  };
+  }, [isPaused, autoPlayInterval, isTransitioning, nextSlide]);
 
   const currentBanner = bannerSlides[currentSlide];
 
