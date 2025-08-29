@@ -50,7 +50,7 @@ export default function Landing() {
       <Header />
       
       {/* Hero Banner Slider - Amazon/Flipkart Style */}
-      <div className="bg-gray-50 py-6 px-4 md:px-6 lg:px-8">
+      <div className="bg-gray-50 py-8 px-4 md:px-6 lg:px-8">
         <BannerSlider 
           autoPlayInterval={5000}
           showControls={true}

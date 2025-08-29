@@ -133,7 +133,7 @@ export function BannerSlider({
 
   return (
     <section 
-      className="relative h-[400px] md:h-[500px] overflow-hidden rounded-xl mx-auto max-w-7xl shadow-2xl"
+      className="relative h-[400px] md:h-[500px] overflow-hidden rounded-lg mx-auto max-w-7xl shadow-sm"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       data-testid="banner-slider"
