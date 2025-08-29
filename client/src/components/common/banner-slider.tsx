@@ -143,7 +143,7 @@ export function BannerSlider({
         className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out transform"
         style={{ backgroundImage: `url('${currentBanner.backgroundImage}')` }}
       >
-        <div className={`absolute inset-0 bg-gradient-to-r ${currentBanner.backgroundColor} opacity-90 transition-opacity duration-700 ease-in-out`}></div>
+        <div className={`absolute inset-0 bg-gradient-to-r ${currentBanner.backgroundColor} opacity-60 transition-opacity duration-700 ease-in-out`}></div>
       </div>
 
       {/* Content */}
