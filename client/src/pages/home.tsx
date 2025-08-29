@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/common/hero-section";
+import { BannerSlider } from "@/components/common/banner-slider";
 import { Testimonials } from "@/components/common/testimonials";
 import { HorizontalProductSection } from "@/components/common/horizontal-product-section";
 import { DealsBanner } from "@/components/common/deals-banner";
@@ -233,7 +234,16 @@ export default function Home() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
-      {/* Hero Section */}
+      {/* Hero Banner Slider - Amazon/Flipkart Style */}
+      <div className="bg-gray-50 py-6">
+        <BannerSlider 
+          autoPlayInterval={5000}
+          showControls={true}
+          showDots={true}
+        />
+      </div>
+
+      {/* Original Hero Section */}
       <HeroSection />
 
       {/* Recently Viewed - Only show for returning users */}
