@@ -332,9 +332,11 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .auth-container {
-    border-radius: 20px;
+    border-radius: 15px;
     min-height: 600px;
     flex-direction: column;
+    margin: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1);
   }
 
   .form-container {
@@ -379,8 +381,9 @@
     width: 100%;
     left: 0;
     height: auto;
-    min-height: 100px;
+    min-height: 120px;
     transform: none !important;
+    border-radius: 0 0 15px 15px;
   }
 
   .auth-container.forgot-mode .toggle-container {
@@ -393,11 +396,12 @@
     height: 100%;
     transform: none !important;
     background: linear-gradient(135deg, #b87333, #d4af37);
+    border-radius: 0 0 15px 15px;
   }
 
   .toggle-panel {
     width: 100%;
-    padding: 20px;
+    padding: 25px 20px;
     position: relative;
     transform: none !important;
   }
@@ -415,25 +419,94 @@
   }
 
   .auth-form {
-    padding: 30px;
-    min-height: 400px;
+    padding: 35px 25px;
+    min-height: 450px;
+  }
+
+  .auth-input {
+    margin: 10px 0;
+    padding: 14px 16px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .auth-button {
+    padding: 14px 20px;
+    font-size: 13px;
+    margin-top: 20px;
+    border-radius: 25px;
+  }
+
+  .social-icon {
+    height: 45px;
+    width: 45px;
   }
 }
 
 @media (max-width: 480px) {
+  .auth-container {
+    margin: 5px;
+    border-radius: 12px;
+    min-height: 580px;
+  }
+
   .auth-form {
-    padding: 20px;
+    padding: 25px 20px;
+    min-height: 420px;
   }
 
   .toggle-panel {
-    padding: 15px;
+    padding: 20px 15px;
   }
 
   .toggle-panel h1 {
-    font-size: 20px;
+    font-size: 18px;
+    margin-bottom: 10px;
   }
 
   .toggle-panel p {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 15px;
+  }
+
+  .auth-input {
+    margin: 8px 0;
+    padding: 12px 14px;
     font-size: 13px;
+  }
+
+  .auth-button {
+    padding: 12px 18px;
+    font-size: 12px;
+  }
+
+  .toggle-button {
+    padding: 10px 25px !important;
+    font-size: 11px !important;
+    min-width: 120px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-form {
+    padding: 20px 15px;
+  }
+
+  .toggle-panel {
+    padding: 15px 10px;
+  }
+
+  .auth-input {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .toggle-panel h1 {
+    font-size: 16px;
+  }
+
+  .toggle-panel p {
+    font-size: 11px;
   }
 }

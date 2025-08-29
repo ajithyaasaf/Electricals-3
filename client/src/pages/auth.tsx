@@ -186,8 +186,8 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-4xl px-2 sm:px-4">
         {/* Back to Home Button */}
         <div className="mb-6">
           <Link href="/" data-testid="link-back-home">
