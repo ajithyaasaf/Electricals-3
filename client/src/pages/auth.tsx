@@ -228,43 +228,63 @@ export default function Auth() {
               </p>
               
               <div className="space-y-3 w-full">
-                <Input
-                  {...signUpForm.register("firstName")}
-                  placeholder="First Name"
-                  className="auth-input"
-                  data-testid="input-first-name"
-                />
-                <Input
-                  {...signUpForm.register("lastName")}
-                  placeholder="Last Name"
-                  className="auth-input"
-                  data-testid="input-last-name"
-                />
-                <Input
-                  {...signUpForm.register("email")}
-                  type="email"
-                  placeholder="Email"
-                  className="auth-input"
-                  data-testid="input-signup-email"
-                />
-                <div className="relative">
+                <div>
                   <Input
-                    {...signUpForm.register("password")}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    className="auth-input pr-10"
-                    data-testid="input-signup-password"
+                    {...signUpForm.register("firstName")}
+                    placeholder="First Name"
+                    className="auth-input"
+                    data-testid="input-first-name"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
-                    onClick={() => setShowPassword(!showPassword)}
-                    data-testid="button-toggle-signup-password"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+                  {signUpForm.formState.errors.firstName && (
+                    <p className="text-sm text-red-600 mt-1">{signUpForm.formState.errors.firstName.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Input
+                    {...signUpForm.register("lastName")}
+                    placeholder="Last Name"
+                    className="auth-input"
+                    data-testid="input-last-name"
+                  />
+                  {signUpForm.formState.errors.lastName && (
+                    <p className="text-sm text-red-600 mt-1">{signUpForm.formState.errors.lastName.message}</p>
+                  )}
+                </div>
+                <div>
+                  <Input
+                    {...signUpForm.register("email")}
+                    type="email"
+                    placeholder="Email"
+                    className="auth-input"
+                    data-testid="input-signup-email"
+                  />
+                  {signUpForm.formState.errors.email && (
+                    <p className="text-sm text-red-600 mt-1">{signUpForm.formState.errors.email.message}</p>
+                  )}
+                </div>
+                <div>
+                  <div className="relative">
+                    <Input
+                      {...signUpForm.register("password")}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      className="auth-input pr-10"
+                      data-testid="input-signup-password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                      data-testid="button-toggle-signup-password"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {signUpForm.formState.errors.password && (
+                    <p className="text-sm text-red-600 mt-1">{signUpForm.formState.errors.password.message}</p>
+                  )}
                 </div>
               </div>
               
@@ -301,31 +321,41 @@ export default function Auth() {
               <span className="text-sm text-gray-600 mb-4 block">or use your email password</span>
               
               <div className="space-y-3 w-full">
-                <Input
-                  {...signInForm.register("email")}
-                  type="email"
-                  placeholder="Email"
-                  className="auth-input"
-                  data-testid="input-signin-email"
-                />
-                <div className="relative">
+                <div>
                   <Input
-                    {...signInForm.register("password")}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    className="auth-input pr-10"
-                    data-testid="input-signin-password"
+                    {...signInForm.register("email")}
+                    type="email"
+                    placeholder="Email"
+                    className="auth-input"
+                    data-testid="input-signin-email"
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
-                    onClick={() => setShowPassword(!showPassword)}
-                    data-testid="button-toggle-signin-password"
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
+                  {signInForm.formState.errors.email && (
+                    <p className="text-sm text-red-600 mt-1">{signInForm.formState.errors.email.message}</p>
+                  )}
+                </div>
+                <div>
+                  <div className="relative">
+                    <Input
+                      {...signInForm.register("password")}
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Password"
+                      className="auth-input pr-10"
+                      data-testid="input-signin-password"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0 text-gray-500 hover:text-gray-700"
+                      onClick={() => setShowPassword(!showPassword)}
+                      data-testid="button-toggle-signin-password"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                  {signInForm.formState.errors.password && (
+                    <p className="text-sm text-red-600 mt-1">{signInForm.formState.errors.password.message}</p>
+                  )}
                 </div>
               </div>
               
