@@ -105,27 +105,37 @@ export function BannerSlider({
 }: BannerSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   // Auto-play functionality
   useEffect(() => {
-    if (!isPaused && autoPlayInterval > 0) {
+    if (!isPaused && autoPlayInterval > 0 && !isTransitioning) {
       const interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
+        nextSlide();
       }, autoPlayInterval);
       return () => clearInterval(interval);
     }
-  }, [currentSlide, isPaused, autoPlayInterval]);
+  }, [isPaused, autoPlayInterval, isTransitioning]);
 
   const nextSlide = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
+    setTimeout(() => setIsTransitioning(false), 600);
   };
 
   const prevSlide = () => {
+    if (isTransitioning) return;
+    setIsTransitioning(true);
     setCurrentSlide((prev) => (prev - 1 + bannerSlides.length) % bannerSlides.length);
+    setTimeout(() => setIsTransitioning(false), 600);
   };
 
   const goToSlide = (index: number) => {
+    if (isTransitioning || index === currentSlide) return;
+    setIsTransitioning(true);
     setCurrentSlide(index);
+    setTimeout(() => setIsTransitioning(false), 600);
   };
 
   const currentBanner = bannerSlides[currentSlide];
@@ -139,10 +149,10 @@ export function BannerSlider({
     >
       {/* Background with overlay */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out"
+        className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out transform"
         style={{ backgroundImage: `url('${currentBanner.backgroundImage}')` }}
       >
-        <div className={`absolute inset-0 bg-gradient-to-r ${currentBanner.backgroundColor} opacity-90`}></div>
+        <div className={`absolute inset-0 bg-gradient-to-r ${currentBanner.backgroundColor} opacity-90 transition-opacity duration-700 ease-in-out`}></div>
       </div>
 
       {/* Content */}
@@ -150,7 +160,7 @@ export function BannerSlider({
         <div className="max-w-7xl mx-auto px-6 md:px-8 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Text Content */}
-            <div className={`${currentBanner.textColor} space-y-4 md:space-y-6`}>
+            <div className={`${currentBanner.textColor} space-y-4 md:space-y-6 transition-all duration-700 ease-in-out transform ${isTransitioning ? 'opacity-0 translate-x-4' : 'opacity-100 translate-x-0'}`}>
               {/* Badge */}
               {currentBanner.badge && (
                 <div className="flex items-center gap-2">
@@ -210,7 +220,7 @@ export function BannerSlider({
 
             {/* Visual Element - Product Showcase or Icon */}
             <div className="hidden lg:flex justify-center items-center">
-              <div className="text-white/30 text-9xl">
+              <div className={`text-white/30 text-9xl transition-all duration-700 ease-in-out transform ${isTransitioning ? 'opacity-0 scale-95 rotate-12' : 'opacity-100 scale-100 rotate-0'}`}>
                 {currentBanner.icon}
               </div>
             </div>
@@ -223,20 +233,22 @@ export function BannerSlider({
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm p-3 rounded-full transition-all duration-200 group"
+            disabled={isTransitioning}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm p-3 rounded-full transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
             data-testid="banner-prev-button"
             aria-label="Previous slide"
           >
-            <ChevronLeft className="w-6 h-6 text-white group-hover:text-white" />
+            <ChevronLeft className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-200" />
           </button>
 
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 backdrop-blur-sm p-3 rounded-full transition-all duration-200 group"
+            disabled={isTransitioning}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm p-3 rounded-full transition-all duration-300 group disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl"
             data-testid="banner-next-button"
             aria-label="Next slide"
           >
-            <ChevronRight className="w-6 h-6 text-white group-hover:text-white" />
+            <ChevronRight className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-200" />
           </button>
         </>
       )}
@@ -248,10 +260,11 @@ export function BannerSlider({
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              disabled={isTransitioning}
+              className={`w-3 h-3 rounded-full transition-all duration-300 disabled:cursor-not-allowed ${
                 index === currentSlide 
-                  ? 'bg-white scale-125' 
-                  : 'bg-white/50 hover:bg-white/70'
+                  ? 'bg-white scale-125 shadow-lg' 
+                  : 'bg-white/50 hover:bg-white/70 hover:scale-110'
               }`}
               data-testid={`banner-dot-${index}`}
               aria-label={`Go to slide ${index + 1}`}

@@ -1,6 +1,7 @@
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/common/hero-section";
+import { BannerSlider } from "@/components/common/banner-slider";
 import { Testimonials } from "@/components/common/testimonials";
 import WhyChooseSection from "@/components/common/why-choose-section";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,15 @@ export default function Landing() {
     <div className="min-h-screen bg-gray-50">
       <Header />
       
+      {/* Hero Banner Slider - Amazon/Flipkart Style */}
+      <div className="bg-gray-50 py-6">
+        <BannerSlider 
+          autoPlayInterval={5000}
+          showControls={true}
+          showDots={true}
+        />
+      </div>
+
       {/* Hero Section */}
       <HeroSection />
 
