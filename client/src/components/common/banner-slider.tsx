@@ -29,7 +29,7 @@ const bannerSlides: BannerSlide[] = [
     description: 'Premium electrical tools, circuit breakers, and safety equipment at unbeatable prices. Limited time offer!',
     ctaText: 'Shop Sale Now',
     ctaLink: '/products?sale=true',
-    backgroundImage: '/assets/generated_images/Electrical_megastore_sale_banner_7e83386a.png',
+    backgroundImage: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400',
     backgroundColor: 'from-red-600 to-orange-600',
     textColor: 'text-white',
     discount: '50% OFF',
@@ -45,7 +45,7 @@ const bannerSlides: BannerSlide[] = [
     description: 'Transform your home with smart switches, outlets, and automation systems. Professional installation available.',
     ctaText: 'Explore Smart Solutions',
     ctaLink: '/products?category=smart-home',
-    backgroundImage: '/assets/generated_images/Smart_home_electrical_banner_98c775b6.png',
+    backgroundImage: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400',
     backgroundColor: 'from-blue-600 to-purple-600',
     textColor: 'text-white',
     badge: 'Trending',
@@ -58,7 +58,7 @@ const bannerSlides: BannerSlide[] = [
     description: 'Same-day electrical installation and repair services. All work comes with warranty protection.',
     ctaText: 'Book Service Now',
     ctaLink: '/services',
-    backgroundImage: '/assets/generated_images/Electrician_services_banner_3560a23f.png',
+    backgroundImage: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400',
     backgroundColor: 'from-green-600 to-teal-600',
     textColor: 'text-white',
     badge: 'Same Day',
@@ -71,7 +71,7 @@ const bannerSlides: BannerSlide[] = [
     description: 'Protect your property with professional-grade safety equipment. Circuit breakers, GFCI outlets, and more.',
     ctaText: 'Shop Safety Equipment',
     ctaLink: '/products?category=safety-protection',
-    backgroundImage: '/assets/generated_images/Electrical_safety_equipment_banner_06b0b679.png',
+    backgroundImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400',
     backgroundColor: 'from-yellow-500 to-orange-500',
     textColor: 'text-white',
     badge: 'Essential',
@@ -84,7 +84,7 @@ const bannerSlides: BannerSlide[] = [
     description: 'Special wholesale pricing for contractors and professionals. Volume discounts and priority delivery available.',
     ctaText: 'Get Wholesale Pricing',
     ctaLink: '/wholesale',
-    backgroundImage: '/assets/generated_images/Contractor_wholesale_banner_3b7204a4.png',
+    backgroundImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=400',
     backgroundColor: 'from-copper-600 to-amber-600',
     textColor: 'text-white',
     badge: 'Wholesale',
@@ -143,6 +143,7 @@ export function BannerSlider({
         className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out transform"
         style={{ backgroundImage: `url('${currentBanner.backgroundImage}')` }}
       >
+        <div className={`absolute inset-0 bg-gradient-to-r ${currentBanner.backgroundColor} opacity-60 transition-opacity duration-700 ease-in-out`}></div>
       </div>
 
       {/* Content */}
