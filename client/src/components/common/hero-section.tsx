@@ -13,11 +13,9 @@ export function HeroSection() {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=600')`,
+                backgroundImage: `url('/assets/generated_images/CopperBear_electrical_store_front_af656a6d.png')`,
               }}
             >
-              {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
             </div>
 
             {/* Store Front Content */}
@@ -76,7 +74,7 @@ export function HeroSection() {
               <div
                 className="absolute right-0 top-0 w-full h-full bg-cover bg-center opacity-30"
                 style={{
-                  backgroundImage: `url('https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300')`,
+                  backgroundImage: `url('/assets/generated_images/Electrical_safety_equipment_banner_06b0b679.png')`,
                 }}
               ></div>
 
@@ -107,7 +105,7 @@ export function HeroSection() {
               <div
                 className="absolute right-0 top-0 w-full h-full bg-cover bg-center opacity-40"
                 style={{
-                  backgroundImage: `url('https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300')`,
+                  backgroundImage: `url('/assets/generated_images/Smart_home_electrical_banner_98c775b6.png')`,
                 }}
               ></div>
 
