@@ -13,7 +13,7 @@ export function HeroSection() {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url('/assets/generated_images/Electrical_store_interior_607a5835.png')`,
+                backgroundImage: `url('/assets/generated_images/Clean_electrical_store_exterior_e3edfd35.png')`,
               }}
             >
               {/* Dark Overlay */}
