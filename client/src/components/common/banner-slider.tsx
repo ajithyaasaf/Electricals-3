@@ -133,14 +133,14 @@ export function BannerSlider({
 
   return (
     <section 
-      className="relative h-[400px] md:h-[500px] overflow-hidden rounded-lg mx-auto max-w-7xl shadow-sm"
+      className="relative h-[300px] sm:h-[400px] md:h-[450px] lg:h-[500px] xl:h-[550px] overflow-hidden rounded-lg mx-auto max-w-7xl shadow-sm w-full"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       data-testid="banner-slider"
     >
       {/* Background with overlay */}
       <div
-        className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out transform"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 ease-in-out transform w-full h-full"
         style={{ backgroundImage: `url('${currentBanner.backgroundImage}')` }}
       >
       </div>
