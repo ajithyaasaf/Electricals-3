@@ -31,17 +31,17 @@ export default function Landing() {
     {
       name: "Circuit Breakers",
       description: "Professional-grade circuit breakers from top manufacturers",
-      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200"
+      image: "/assets/generated_images/Circuit_breakers_electrical_panel_ed1b7697.png"
     },
     {
       name: "Electrical Tools", 
       description: "High-quality tools for electrical professionals and DIY enthusiasts",
-      image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200"
+      image: "/assets/generated_images/Professional_electrical_tools_collection_b4db75d8.png"
     },
     {
       name: "Wiring & Cables",
       description: "Complete selection of electrical wiring and cables for all applications",
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200"
+      image: "/assets/generated_images/Electrical_wiring_cables_display_daea59ed.png"
     }
   ];
 
