@@ -143,81 +143,8 @@ export function BannerSlider({
         className="absolute inset-0 bg-cover bg-center transition-all duration-700 ease-in-out transform"
         style={{ backgroundImage: `url('${currentBanner.backgroundImage}')` }}
       >
-        <div className={`absolute inset-0 bg-gradient-to-r ${currentBanner.backgroundColor} opacity-60 transition-opacity duration-700 ease-in-out`}></div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 h-full flex items-center">
-        <div className="max-w-7xl mx-auto px-6 md:px-8 w-full">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            {/* Text Content */}
-            <div className={`${currentBanner.textColor} space-y-4 md:space-y-6 transition-all duration-500 ease-in-out`}>
-              {/* Badge */}
-              {currentBanner.badge && (
-                <div className="flex items-center gap-2">
-                  {currentBanner.icon}
-                  <span className="bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-sm font-semibold border border-white/30">
-                    {currentBanner.badge}
-                  </span>
-                </div>
-              )}
-
-              {/* Main Title */}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                {currentBanner.title}
-              </h1>
-
-              {/* Subtitle */}
-              <h2 className="text-xl md:text-2xl font-semibold text-white/90">
-                {currentBanner.subtitle}
-              </h2>
-
-              {/* Description */}
-              <p className="text-lg text-white/80 max-w-lg leading-relaxed">
-                {currentBanner.description}
-              </p>
-
-              {/* Pricing (if available) */}
-              {currentBanner.originalPrice && currentBanner.salePrice && (
-                <div className="flex items-center gap-4">
-                  <span className="text-3xl font-bold text-yellow-300">
-                    {formatPrice(currentBanner.salePrice)}
-                  </span>
-                  <span className="text-xl text-white/60 line-through">
-                    {formatPrice(currentBanner.originalPrice)}
-                  </span>
-                  {currentBanner.discount && (
-                    <span className="bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-bold">
-                      {currentBanner.discount}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* CTA Button */}
-              <div className="pt-4">
-                <Button 
-                  asChild 
-                  size="lg"
-                  className="bg-white hover:bg-gray-100 text-black font-bold px-8 py-4 text-lg rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
-                  data-testid="banner-cta-button"
-                >
-                  <SmartLink href={currentBanner.ctaLink}>
-                    {currentBanner.ctaText}
-                  </SmartLink>
-                </Button>
-              </div>
-            </div>
-
-            {/* Visual Element - Product Showcase or Icon */}
-            <div className="hidden lg:flex justify-center items-center">
-              <div className="text-white/30 text-9xl transition-all duration-500 ease-in-out">
-                {currentBanner.icon}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* Navigation Controls */}
       {showControls && (
