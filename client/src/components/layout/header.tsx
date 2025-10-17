@@ -234,7 +234,7 @@ export function Header() {
       {/* Top announcement bar */}
       <div className="bg-copper-700 text-white text-center py-2 text-sm">
         <span>
-          Free shipping on electrical products over ₹1000 | Professional
+          Free shipping on electrical products over ₹10,000 | Professional
           installation services available
         </span>
       </div>
