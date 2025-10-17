@@ -87,6 +87,40 @@ type ProductFormData = z.infer<typeof productSchema>;
 type ServiceFormData = z.infer<typeof serviceSchema>;
 type CategoryFormData = z.infer<typeof categorySchema>;
 
+// Analytics types
+interface InventoryAnalytics {
+  totalProducts: number;
+  fastSelling: any[];
+  mediumSelling: any[];
+  slowSelling: any[];
+  allProducts: any[];
+}
+
+interface RevenueAnalytics {
+  monthlyData: any[];
+  totalRevenue: number;
+  totalOrders: number;
+  averageMonthlyRevenue: number;
+  revenueGrowth: number;
+}
+
+interface TopProductsAnalytics {
+  topByRevenue: any[];
+  topByQuantity: any[];
+  totalProductsWithSales: number;
+  totalRevenue: number;
+}
+
+interface CustomerAnalytics {
+  totalCustomers: number;
+  oneTimeCustomers: number;
+  repeatCustomers: number;
+  repeatRate: number;
+  avgOrdersPerCustomer: number;
+  avgCustomerValue: number;
+  topCustomers: any[];
+}
+
 function AdminDashboard() {
   const { adminUser, adminSignOut } = useAdminAuth();
   const { toast } = useToast();
@@ -119,22 +153,22 @@ function AdminDashboard() {
   });
 
   // Analytics data
-  const { data: inventoryData, isLoading: inventoryLoading } = useQuery({
+  const { data: inventoryData, isLoading: inventoryLoading } = useQuery<InventoryAnalytics>({
     queryKey: ["/api/analytics/inventory"],
     enabled: activeTab === "analytics" || activeTab === "dashboard"
   });
 
-  const { data: revenueData, isLoading: revenueLoading } = useQuery({
+  const { data: revenueData, isLoading: revenueLoading } = useQuery<RevenueAnalytics>({
     queryKey: ["/api/analytics/revenue"],
     enabled: activeTab === "analytics" || activeTab === "dashboard"
   });
 
-  const { data: topProductsData, isLoading: topProductsLoading } = useQuery({
+  const { data: topProductsData, isLoading: topProductsLoading } = useQuery<TopProductsAnalytics>({
     queryKey: ["/api/analytics/top-products"],
     enabled: activeTab === "analytics" || activeTab === "dashboard"
   });
 
-  const { data: customerData, isLoading: customerLoading } = useQuery({
+  const { data: customerData, isLoading: customerLoading } = useQuery<CustomerAnalytics>({
     queryKey: ["/api/analytics/customers"],
     enabled: activeTab === "analytics" || activeTab === "dashboard"
   });
