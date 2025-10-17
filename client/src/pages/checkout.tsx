@@ -548,7 +548,9 @@ export default function Checkout() {
                     <div>
                       <h3 className="font-medium mb-2">Payment Method</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-300">
-                        Razorpay (UPI, Cards, NetBanking, Wallets)
+                        {formData.paymentMethod === "razorpay" 
+                          ? "Razorpay (UPI, Cards, NetBanking, Wallets)"
+                          : "Cash on Delivery (COD)"}
                       </p>
                     </div>
 
