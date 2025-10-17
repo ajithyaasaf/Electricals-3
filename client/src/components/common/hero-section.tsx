@@ -44,15 +44,20 @@ export function HeroSection() {
                 <div className="text-left max-w-4xl">
                   {/* Main Headline */}
                   <h1 className="text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 leading-tight">
-                    Tamilnadu's <span className="text-yellow-400">Biggest</span>
+                    India's <span className="text-yellow-400">Premier</span>
                     <br />
                     <span className="text-white">Electrical Megastore</span>
                   </h1>
 
-                  {/* Location */}
-                  <div className="flex items-center text-gray-200 text-lg mb-8">
-                    <MapPin className="w-5 h-5 mr-2 text-yellow-400" />
-                    Now in Madurai.
+                  {/* Location - Pan India Coverage */}
+                  <div className="space-y-2 mb-8">
+                    <div className="flex items-center text-gray-200 text-lg">
+                      <MapPin className="w-5 h-5 mr-2 text-yellow-400" />
+                      <span className="font-semibold">Based in Madurai, Tamil Nadu</span>
+                    </div>
+                    <p className="text-gray-300 text-sm ml-7">
+                      Delivering across Tamil Nadu & North India • Delhi • Jaipur • Lucknow • All Major Cities
+                    </p>
                   </div>
 
                   {/* CTA Button */}

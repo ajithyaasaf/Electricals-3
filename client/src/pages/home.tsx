@@ -22,9 +22,13 @@ import { CATEGORIES } from "@/lib/constants";
 import { getOptimizedImageUrl } from "@/lib/performance";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { formatPrice } from "@/lib/currency";
+import { useSEO } from "@/hooks/use-seo";
 
 export default function Home() {
   const { user } = useFirebaseAuth();
+  
+  // SEO optimization for homepage
+  useSEO();
 
   // Fetch featured products
   const { data: productsData, isLoading: productsLoading } = useQuery({

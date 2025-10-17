@@ -19,6 +19,7 @@ import { useDebounce } from "@/hooks/use-debounce";
 import { SearchInput } from "@/components/common/search-input";
 import { useProducts, useCategories } from "@/features/products/hooks/useProducts";
 import { useEnterpriseNavigation } from "@/hooks/use-enterprise-navigation";
+import { useSEO, useCategorySEO } from "@/hooks/use-seo";
 import type { ProductFilters } from "@/features/products/types";
 
 // Minimal isolated inputs with debugging - moved outside main component
@@ -273,6 +274,9 @@ export default function Products() {
   const initialCategory = urlParams.get("category") || "";
   const initialSearch = urlParams.get("search") || "";
   const initialFeatured = urlParams.get("featured") === "true";
+  
+  // SEO optimization for products page
+  useSEO();
   
   // Filter state
   const [filters, setFilters] = useState<ProductFilters>({

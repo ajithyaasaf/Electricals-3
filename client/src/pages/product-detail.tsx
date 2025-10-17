@@ -38,6 +38,7 @@ import {
 import { Link } from "wouter";
 import { ReviewList } from "@/components/reviews/review-list";
 import { ReviewForm } from "@/components/reviews/review-form";
+import { useProductSEO } from "@/hooks/use-seo";
 import type { Product } from "shared/types";
 
 export default function ProductDetail() {
@@ -80,6 +81,9 @@ export default function ProductDetail() {
     queryKey: ["/api/reviews", { productId: product?.id }],
     enabled: !!product?.id,
   });
+
+  // SEO optimization for product detail page
+  useProductSEO(product);
 
   // Advanced UX: Track product views and stock urgency
   useEffect(() => {
