@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,7 @@ export default function Checkout() {
   const { cart } = useCartContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   const [formData, setFormData] = useState<CheckoutFormData>({
     shippingAddress: {
@@ -286,10 +287,8 @@ export default function Checkout() {
                   variant="outline" 
                   size="sm" 
                   className="mt-2 text-blue-600 border-blue-300 hover:bg-blue-100 dark:text-blue-400 dark:border-blue-600 dark:hover:bg-blue-900/40"
-                  onClick={() => {
-                    // Show auth modal instead of direct Google sign-in
-                    document.dispatchEvent(new CustomEvent('openAuth'));
-                  }}
+                  onClick={() => setLocation('/auth')}
+                  data-testid="button-sign-in-checkout"
                 >
                   Sign In Now
                 </Button>
