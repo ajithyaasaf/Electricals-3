@@ -66,15 +66,19 @@ input:focus {
 
 :root {
   /* ============================================================================
-     🎨 BRAND COLORS - CHANGE ONLY THESE 2 VALUES TO REBRAND ENTIRE SITE!
+     🎨 BRAND COLORS - CENTRALIZED COLOR SYSTEM
      ============================================================================ 
-     Primary (Dark Teal):   #046e7b
-     Secondary (Light Teal): #00adbb
+     PRIMARY Color (Dark Teal):   #046e7b → HSL(187, 94%, 25%)
+     SECONDARY Color (Light Teal): #00adbb → HSL(184, 100%, 37%)
      
-     To change the entire color scheme:
-     1. Replace #046e7b with your new primary color
-     2. Replace #00adbb with your new secondary color  
-     3. All shades below will automatically work with the new colors!
+     To rebrand with new colors:
+     1. Convert your primary hex color to HSL (use: https://htmlcolors.com/hex-to-hsl)
+     2. Update all --teal-* variables below (keep relative lightness: 97%, 92%, 82%...)
+     3. Convert your secondary hex color to HSL
+     4. Update all --teal-light-* variables below (keep relative lightness values)
+     5. Update the base H/S/L values in the sections below
+     
+     💡 TIP: Use an HSL color generator to create consistent shade scales
      ============================================================================ */
   
   /* Core brand color scales - Based on primary #046e7b (Dark Teal) */
@@ -109,40 +113,40 @@ input:focus {
   --teal-light-800: 184 100% 18%;
   --teal-light-900: 184 100% 12%;  /* Darkest */
   
-  /* Semantic tokens - Use these in your app */
-  --background: hsl(0, 0%, 100%);
-  --foreground: hsl(187, 14%, 15%);
-  --muted: hsl(186, 10%, 95%);
-  --muted-foreground: hsl(186, 8%, 45%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(187, 14%, 15%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(187, 14%, 15%);
-  --border: hsl(186, 10%, 88%);
-  --input: hsl(186, 10%, 88%);
+  /* Semantic tokens - Use these in your app (raw HSL format for Tailwind) */
+  --background: 0 0% 100%;
+  --foreground: 187 14% 15%;
+  --muted: 186 10% 95%;
+  --muted-foreground: 186 8% 45%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 187 14% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 187 14% 15%;
+  --border: 186 10% 88%;
+  --input: 186 10% 88%;
   
   /* Primary = Dark Teal (#046e7b) */
   --primary: var(--teal-500);
-  --primary-foreground: hsl(0, 0%, 98%);
+  --primary-foreground: 0 0% 98%;
   
   /* Secondary = UI backgrounds */
-  --secondary: hsl(186, 10%, 95%);
-  --secondary-foreground: hsl(187, 14%, 15%);
+  --secondary: 186 10% 95%;
+  --secondary-foreground: 187 14% 15%;
   
   /* Accent = Light Teal (#00adbb) */
   --accent: var(--teal-light-500);
-  --accent-foreground: hsl(0, 0%, 98%);
+  --accent-foreground: 0 0% 98%;
   
   /* Other UI tokens */
-  --destructive: hsl(0, 84.2%, 60.2%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(187, 14%, 15%);
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 187 14% 15%;
   --radius: 0.5rem;
   
-  /* Neutral colors for various UI elements */
-  --charcoal: hsl(187, 30%, 17%);
-  --graphite: hsl(187, 45%, 12%);
-  --off-white: hsl(186, 20%, 98%);
+  /* Neutral colors for various UI elements (raw HSL format) */
+  --charcoal: 187 30% 17%;
+  --graphite: 187 45% 12%;
+  --off-white: 186 20% 98%;
   
   /* Legacy copper/lime aliases - map to teal colors for backward compatibility */
   --copper-50: var(--teal-50);
@@ -169,25 +173,25 @@ input:focus {
 }
 
 .dark {
-  --background: hsl(187, 30%, 8%);
-  --foreground: hsl(0, 0%, 98%);
-  --muted: hsl(187, 20%, 15%);
-  --muted-foreground: hsl(186, 10%, 65%);
-  --popover: hsl(187, 30%, 8%);
-  --popover-foreground: hsl(0, 0%, 98%);
-  --card: hsl(187, 25%, 10%);
-  --card-foreground: hsl(0, 0%, 98%);
-  --border: hsl(187, 20%, 18%);
-  --input: hsl(187, 20%, 18%);
+  --background: 187 30% 8%;
+  --foreground: 0 0% 98%;
+  --muted: 187 20% 15%;
+  --muted-foreground: 186 10% 65%;
+  --popover: 187 30% 8%;
+  --popover-foreground: 0 0% 98%;
+  --card: 187 25% 10%;
+  --card-foreground: 0 0% 98%;
+  --border: 187 20% 18%;
+  --input: 187 20% 18%;
   --primary: 187 94% 30%;
-  --primary-foreground: hsl(0, 0%, 98%);
-  --secondary: hsl(187, 20%, 15%);
-  --secondary-foreground: hsl(0, 0%, 98%);
+  --primary-foreground: 0 0% 98%;
+  --secondary: 187 20% 15%;
+  --secondary-foreground: 0 0% 98%;
   --accent: 184 100% 45%;
-  --accent-foreground: hsl(0, 0%, 98%);
-  --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(0, 0%, 98%);
-  --ring: hsl(186, 30%, 70%);
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 186 30% 70%;
 }
 
 @layer base {
@@ -347,12 +351,12 @@ input:focus {
   .hover\:text-teal-light-600:hover { color: hsl(var(--teal-light-600)); }
   
   /* Charcoal and Graphite utilities */
-  .text-charcoal { color: var(--charcoal); }
-  .text-graphite { color: var(--graphite); }
-  .text-off-white { color: var(--off-white); }
-  .bg-charcoal { background-color: var(--charcoal); }
-  .bg-graphite { background-color: var(--graphite); }
-  .bg-off-white { background-color: var(--off-white); }
+  .text-charcoal { color: hsl(var(--charcoal)); }
+  .text-graphite { color: hsl(var(--graphite)); }
+  .text-off-white { color: hsl(var(--off-white)); }
+  .bg-charcoal { background-color: hsl(var(--charcoal)); }
+  .bg-graphite { background-color: hsl(var(--graphite)); }
+  .bg-off-white { background-color: hsl(var(--off-white)); }
   
   /* Scrollbar utilities */
   .scrollbar-hide {
