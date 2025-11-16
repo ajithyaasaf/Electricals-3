@@ -1,7 +1,6 @@
 import { SmartLink } from "@/components/navigation/smart-link";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
-import heroBackground from "@assets/3_1763326187973.png";
 
 export function HeroSection() {
   return (
@@ -9,17 +8,7 @@ export function HeroSection() {
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
           {/* Left Main Content - Store Image with Overlay */}
-          <div className="lg:col-span-2 relative min-h-[450px] rounded-lg overflow-hidden">
-            {/* Background Image */}
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{
-                backgroundImage: `url(${heroBackground})`,
-              }}
-            >
-              {/* Dark Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-40"></div>
-            </div>
+          <div className="lg:col-span-2 relative min-h-[450px] rounded-lg overflow-hidden bg-gradient-to-r from-slate-800 to-slate-900">
 
             {/* Store Front Content */}
             <div className="relative z-10 h-full flex items-center">
