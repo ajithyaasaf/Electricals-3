@@ -151,20 +151,18 @@ export function BannerSlider({
         <>
           <button
             onClick={handlePrevSlide}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur-sm p-4 rounded-full transition-all duration-200 group shadow-lg hover:shadow-xl z-20"
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur-sm p-4 rounded-full transition-all duration-200 group shadow-lg hover:shadow-xl z-20 border-2 border-white/30"
             data-testid="banner-prev-button"
             aria-label="Previous slide"
-            style={{ border: '2px solid rgba(255,255,255,0.3)' }}
           >
             <ChevronLeft className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-200" />
           </button>
 
           <button
             onClick={handleNextSlide}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur-sm p-4 rounded-full transition-all duration-200 group shadow-lg hover:shadow-xl z-20"
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 backdrop-blur-sm p-4 rounded-full transition-all duration-200 group shadow-lg hover:shadow-xl z-20 border-2 border-white/30"
             data-testid="banner-next-button"
             aria-label="Next slide"
-            style={{ border: '2px solid rgba(255,255,255,0.3)' }}
           >
             <ChevronRight className="w-6 h-6 text-white group-hover:scale-110 transition-transform duration-200" />
           </button>
