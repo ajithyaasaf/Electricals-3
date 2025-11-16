@@ -48,13 +48,13 @@ export function registerAdminRoutes(app: Express) {
 
 
 
-  // Placeholder image endpoint
+  // Placeholder image endpoint - using teal theme colors
   app.get("/api/placeholder/:width/:height", (req, res) => {
     const { width, height } = req.params;
     const svg = `
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-        <rect width="100%" height="100%" fill="#f3f4f6"/>
-        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="16" fill="#6b7280" text-anchor="middle" dy=".3em">
+        <rect width="100%" height="100%" fill="hsl(187, 94%, 97%)"/>
+        <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="16" fill="hsl(187, 94%, 25%)" text-anchor="middle" dy=".3em">
           ${width} × ${height}
         </text>
       </svg>
