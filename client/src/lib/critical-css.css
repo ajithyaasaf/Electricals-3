@@ -10,8 +10,8 @@ html, body {
 
 /* Header styles */
 .header {
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
   position: sticky;
   top: 0;
   z-index: 50;
@@ -20,7 +20,7 @@ html, body {
 /* Hero section critical styles */
 .hero-section {
   min-height: 500px;
-  background: white;
+  background: hsl(var(--background));
   padding: 2rem 0;
 }
 
@@ -47,8 +47,8 @@ html, body {
 
 /* Button critical styles */
 .btn-primary {
-  background-color: #fbbf24;
-  color: #000;
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
   padding: 1rem 2rem;
   border-radius: 0.5rem;
   font-weight: 600;
@@ -60,12 +60,12 @@ html, body {
 }
 
 .btn-primary:hover {
-  background-color: #f59e0b;
+  background-color: hsl(var(--teal-light-600));
 }
 
 /* Loading states */
 .skeleton {
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--border)) 50%, hsl(var(--muted)) 75%);
   background-size: 200% 100%;
   animation: loading 1.5s infinite;
 }
@@ -109,13 +109,12 @@ h1 {
   padding: 0 1rem;
 }
 
-/* Basic color variables */
+/* Basic color variables - These reference the main index.css variables */
 :root {
-  --copper-500: hsl(20, 60%, 35%);
-  --copper-600: hsl(20, 65%, 30%);
-  --yellow-400: #fbbf24;
-  --yellow-500: #f59e0b;
-  --gray-50: #f9fafb;
-  --gray-900: #111827;
-  --white: #ffffff;
+  --critical-primary: var(--teal-500);
+  --critical-accent: var(--teal-light-500);
+  --critical-background: var(--background);
+  --critical-foreground: var(--foreground);
+  --critical-muted: var(--muted);
+  --critical-border: var(--border);
 }
