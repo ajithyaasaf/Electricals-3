@@ -40,11 +40,14 @@ export class FirestoreSeeder {
     console.log(`📦 Total products to seed: ${AUTHENTIC_PRODUCTS.length}`);
 
     // Map category slugs to IDs for CopperBear products
+    // Updated category mapping for new navigation structure
     const categoryMap: Record<string, string> = {
       'wires-cables': categoryIds[0],
-      'led-emergency-bulb': categoryIds[1],
-      'led-flood-light': categoryIds[2],
-      'led-street-light': categoryIds[3]
+      'switch-sockets': categoryIds[1],
+      'electric-accessories': categoryIds[2],
+      'electrical-pipes-fittings': categoryIds[3],
+      'distribution-box': categoryIds[4],
+      'led-bulb-fittings': categoryIds[5]
     };
 
     // Process products in batches of 25 (well within Firestore's 500 limit)
@@ -63,15 +66,12 @@ export class FirestoreSeeder {
         if (product.sku?.includes('FIN') || product.sku?.includes('KUN')) {
           // Finolex and Kundan Cable products go to Wires & Cables
           categoryId = categoryMap['wires-cables'];
-        } else if (product.sku?.includes('STU') && product.name.includes('Inverter')) {
-          // Sturlite Inverter Bulbs go to LED Emergency Bulb
-          categoryId = categoryMap['led-emergency-bulb'];
-        } else if (product.sku?.includes('STU0207')) {
-          // Sturlite Flood Lights go to LED Flood Light
-          categoryId = categoryMap['led-flood-light'];
-        } else if (product.sku?.includes('STU0060')) {
-          // Sturlite Street Lights go to LED Street Light
-          categoryId = categoryMap['led-street-light'];
+        } else if (product.sku?.includes('STU') && (product.name.includes('Inverter') || product.name.includes('LED') || product.name.includes('Flood') || product.name.includes('Street'))) {
+          // All Sturlite LED products go to LED Bulb & Fittings
+          categoryId = categoryMap['led-bulb-fittings'];
+        } else {
+          // Default to LED Bulb & Fittings for any other products
+          categoryId = categoryMap['led-bulb-fittings'];
         }
 
         console.log(`🔧 Processing product ${i + index + 1}: ${product.name} (${product.sku}) -> Category: ${categoryId}`);
