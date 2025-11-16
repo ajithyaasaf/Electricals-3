@@ -71,14 +71,29 @@ input:focus {
      PRIMARY Color (Dark Teal):   #046e7b → HSL(187, 94%, 25%)
      SECONDARY Color (Light Teal): #00adbb → HSL(184, 100%, 37%)
      
-     To rebrand with new colors:
-     1. Convert your primary hex color to HSL (use: https://htmlcolors.com/hex-to-hsl)
-     2. Update all --teal-* variables below (keep relative lightness: 97%, 92%, 82%...)
-     3. Convert your secondary hex color to HSL
-     4. Update all --teal-light-* variables below (keep relative lightness values)
-     5. Update the base H/S/L values in the sections below
+     📋 REBRAND CHECKLIST - To change brand colors:
      
-     💡 TIP: Use an HSL color generator to create consistent shade scales
+     1. THIS FILE (index.css):
+        - Convert your primary hex to HSL (https://htmlcolors.com/hex-to-hsl)
+        - Update all --teal-* variables (lines ~89-98) with new HSL values
+        - Update all --teal-light-* variables (lines ~105-114) with secondary HSL
+        - Update semantic tokens (--primary, --accent) if needed
+     
+     2. CRITICAL CSS (client/src/lib/critical-css.css):
+        - Check --critical-* variables (reference this file's variables)
+        - Verify above-the-fold colors are correct
+     
+     3. COMPONENT GRADIENTS:
+        - Search for hardcoded Tailwind gradients: from-red-*, from-blue-*, etc.
+        - Replace with teal-based gradients for brand consistency
+        - Common files: banner-slider.tsx, hero-section.tsx, product-detail.tsx
+     
+     4. TAILWIND CONFIG (tailwind.config.ts):
+        - Already configured to reference these CSS variables
+        - No changes needed unless adding new color tokens
+     
+     💡 TIP: Use HSL color generator for consistent shade scales (50-900)
+     ⚠️  NOTE: All variables must use raw "H S% L%" format (not hsl() wrapper)
      ============================================================================ */
   
   /* Core brand color scales - Based on primary #046e7b (Dark Teal) */
