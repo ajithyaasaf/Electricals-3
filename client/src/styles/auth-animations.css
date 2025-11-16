@@ -1,6 +1,6 @@
 /* Auth Animation Styles */
 .auth-container {
-  background-color: #fff;
+  background-color: hsl(var(--background));
   border-radius: 30px;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   position: relative;
@@ -76,7 +76,7 @@
 }
 
 .auth-form {
-  background-color: #ffffff;
+  background-color: hsl(var(--background));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,7 +88,7 @@
 }
 
 .auth-input {
-  background-color: #eee;
+  background-color: hsl(var(--muted));
   border: none;
   margin: 8px 0;
   padding: 12px 15px;
@@ -100,15 +100,15 @@
 }
 
 .auth-input:focus {
-  background-color: #ddd;
-  box-shadow: 0 0 0 2px rgba(184, 115, 51, 0.2);
+  background-color: hsl(var(--border));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
 }
 
 .auth-button {
   border-radius: 20px;
-  border: 1px solid #b87333;
-  background: linear-gradient(45deg, #b87333, #d4af37);
-  color: #ffffff;
+  border: 1px solid hsl(var(--primary));
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
+  color: hsl(var(--primary-foreground));
   font-size: 12px;
   font-weight: bold;
   padding: 12px 45px;
@@ -120,7 +120,7 @@
 }
 
 .auth-button:hover {
-  background: linear-gradient(45deg, #d4af37, #b87333);
+  background: linear-gradient(45deg, hsl(var(--accent)), hsl(var(--primary)));
   transform: translateY(-2px);
   box-shadow: 0 7px 14px rgba(0, 0, 0, 0.18);
 }
@@ -139,7 +139,7 @@
 }
 
 .social-icon {
-  border: 1px solid #ddd;
+  border: 1px solid hsl(var(--border));
   border-radius: 50%;
   display: inline-flex;
   justify-content: center;
@@ -148,11 +148,11 @@
   height: 40px;
   width: 40px;
   transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-  background: white;
+  background: hsl(var(--background));
 }
 
 .social-icon:hover:not(:disabled) {
-  background: #f5f5f5;
+  background: hsl(var(--muted));
   transform: translateY(-2px);
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
@@ -179,8 +179,8 @@
 }
 
 .toggle {
-  background: linear-gradient(to right, #b87333, #d4af37);
-  color: #ffffff;
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
+  color: hsl(var(--primary-foreground));
   position: relative;
   left: -100%;
   height: 100%;
@@ -232,7 +232,7 @@
   right: 0;
   width: 50%;
   height: 100%;
-  background: linear-gradient(to right, #b87333, #d4af37);
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -251,9 +251,9 @@
 
 .toggle-button {
   border-radius: 20px !important;
-  border: 2px solid #ffffff !important;
+  border: 2px solid hsl(var(--primary-foreground)) !important;
   background: transparent !important;
-  color: #ffffff !important;
+  color: hsl(var(--primary-foreground)) !important;
   font-size: 12px !important;
   font-weight: bold !important;
   padding: 12px 45px !important;
@@ -270,8 +270,8 @@
 }
 
 .toggle-button:hover:not(:disabled) {
-  background: #ffffff !important;
-  color: #b87333 !important;
+  background: hsl(var(--primary-foreground)) !important;
+  color: hsl(var(--primary)) !important;
   transform: translateY(-2px) !important;
   box-shadow: 0 7px 14px rgba(0, 0, 0, 0.18) !important;
   text-shadow: none !important;
@@ -284,7 +284,7 @@
 }
 
 .toggle h1 {
-  color: #ffffff !important;
+  color: hsl(var(--primary-foreground)) !important;
   font-size: 2rem !important;
   font-weight: bold !important;
   margin-bottom: 1rem !important;
@@ -292,7 +292,7 @@
 }
 
 .toggle p {
-  color: #ffffff !important;
+  color: hsl(var(--primary-foreground)) !important;
   font-size: 0.9rem !important;
   line-height: 1.5 !important;
   margin-bottom: 1.5rem !important;
@@ -315,9 +315,9 @@
 
 .toggle-button {
   background: transparent;
-  border: 2px solid #ffffff;
+  border: 2px solid hsl(var(--primary-foreground));
   border-radius: 20px;
-  color: #ffffff;
+  color: hsl(var(--primary-foreground));
   font-size: 12px;
   font-weight: bold;
   padding: 12px 45px;
@@ -327,8 +327,8 @@
 }
 
 .toggle-button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: hsl(var(--primary-foreground) / 0.1);
+  color: hsl(var(--primary-foreground));
   transform: translateY(-2px);
 }
 
@@ -399,7 +399,7 @@
     width: 100%;
     height: 100%;
     transform: none !important;
-    background: linear-gradient(135deg, #b87333, #d4af37);
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     border-radius: 0 0 15px 15px;
   }
 
