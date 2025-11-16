@@ -15,7 +15,7 @@
   },
   "headers": [
     {
-      "source": "/api/(.*)",
+      "source": "/api/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -40,7 +40,7 @@
       ]
     },
     {
-      "source": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp))",
+      "source": "/:file*.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|webp)",
       "headers": [
         {
           "key": "Cache-Control",
