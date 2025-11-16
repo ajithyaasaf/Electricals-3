@@ -61,15 +61,15 @@ export function ServiceCard({ service, showCategory = false }: ServiceCardProps)
   const duration = service.duration ? `${Math.floor(service.duration / 60)}h ${service.duration % 60}m` : null;
 
   const categoryColors = {
-    "installation-services": "from-copper-50 to-copper-100",
-    "repair-maintenance": "from-lime-50 to-lime-100", 
-    "electrical-consulting": "from-green-50 to-green-100",
+    "installation-services": "from-teal-50 to-teal-100",
+    "repair-maintenance": "from-teal-light-50 to-teal-light-100", 
+    "electrical-consulting": "from-teal-50 to-teal-light-50",
   };
 
   const buttonColors = {
-    "installation-services": "bg-copper-600 hover:bg-copper-700",
-    "repair-maintenance": "bg-lime-600 hover:bg-lime-700",
-    "electrical-consulting": "bg-green-600 hover:bg-green-700",
+    "installation-services": "bg-teal-600 hover:bg-teal-700",
+    "repair-maintenance": "bg-teal-light-600 hover:bg-teal-light-700",
+    "electrical-consulting": "bg-teal-600 hover:bg-teal-700",
   };
 
   const categorySlug = service.category?.slug || "installation-services";
@@ -108,7 +108,7 @@ export function ServiceCard({ service, showCategory = false }: ServiceCardProps)
         <div className="flex items-center justify-between mb-4">
           {rating > 0 && (
             <div className="flex items-center">
-              <div className="flex text-yellow-400 text-sm">
+              <div className="flex text-teal-light-500 text-sm">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}

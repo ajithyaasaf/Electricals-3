@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { SmartLink } from '@/components/navigation/smart-link';
 import { ChevronLeft, ChevronRight, Zap, Shield, Wrench, Tag, Clock, Star } from 'lucide-react';
 import { formatPrice } from '@/lib/currency';
+import banner1 from '@assets/2_1763324658277.png';
+import banner2 from '@assets/1_1763324666642.png';
 
 interface BannerSlide {
   id: string;
@@ -29,8 +31,8 @@ const bannerSlides: BannerSlide[] = [
     description: 'Premium electrical tools, circuit breakers, and safety equipment at unbeatable prices. Limited time offer!',
     ctaText: 'Shop Sale Now',
     ctaLink: '/products?sale=true',
-    backgroundImage: '/assets/generated_images/Electrical_megastore_sale_banner_7e83386a.png',
-    backgroundColor: 'from-red-600 to-orange-600',
+    backgroundImage: banner1,
+    backgroundColor: 'from-teal-600 to-teal-light-600',
     textColor: 'text-white',
     discount: '50% OFF',
     originalPrice: 24999,
@@ -45,8 +47,8 @@ const bannerSlides: BannerSlide[] = [
     description: 'Transform your home with smart switches, outlets, and automation systems. Professional installation available.',
     ctaText: 'Explore Smart Solutions',
     ctaLink: '/products?category=smart-home',
-    backgroundImage: '/assets/generated_images/Smart_home_electrical_banner_98c775b6.png',
-    backgroundColor: 'from-blue-600 to-purple-600',
+    backgroundImage: banner2,
+    backgroundColor: 'from-teal-700 to-teal-500',
     textColor: 'text-white',
     badge: 'Trending',
     icon: <Zap className="w-6 h-6" />
@@ -58,8 +60,8 @@ const bannerSlides: BannerSlide[] = [
     description: 'Same-day electrical installation and repair services. All work comes with warranty protection.',
     ctaText: 'Book Service Now',
     ctaLink: '/services',
-    backgroundImage: '/assets/generated_images/Electrician_services_banner_3560a23f.png',
-    backgroundColor: 'from-green-600 to-teal-600',
+    backgroundImage: banner1,
+    backgroundColor: 'from-teal-light-600 to-teal-600',
     textColor: 'text-white',
     badge: 'Same Day',
     icon: <Wrench className="w-6 h-6" />
@@ -71,8 +73,8 @@ const bannerSlides: BannerSlide[] = [
     description: 'Protect your property with professional-grade safety equipment. Circuit breakers, GFCI outlets, and more.',
     ctaText: 'Shop Safety Equipment',
     ctaLink: '/products?category=safety-protection',
-    backgroundImage: '/assets/generated_images/Electrical_safety_equipment_banner_06b0b679.png',
-    backgroundColor: 'from-yellow-500 to-orange-500',
+    backgroundImage: banner2,
+    backgroundColor: 'from-teal-500 to-teal-light-500',
     textColor: 'text-white',
     badge: 'Essential',
     icon: <Shield className="w-6 h-6" />
@@ -84,8 +86,8 @@ const bannerSlides: BannerSlide[] = [
     description: 'Special wholesale pricing for contractors and professionals. Volume discounts and priority delivery available.',
     ctaText: 'Get Wholesale Pricing',
     ctaLink: '/wholesale',
-    backgroundImage: '/assets/generated_images/Contractor_wholesale_banner_3b7204a4.png',
-    backgroundColor: 'from-copper-600 to-amber-600',
+    backgroundImage: banner1,
+    backgroundColor: 'from-teal-600 to-teal-light-500',
     textColor: 'text-white',
     badge: 'Wholesale',
     icon: <Star className="w-6 h-6" />

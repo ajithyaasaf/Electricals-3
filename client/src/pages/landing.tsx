@@ -11,17 +11,17 @@ import { Zap, Shield, Clock, Star, ArrowRight, Users, Award, MapPin } from "luci
 export default function Landing() {
   const features = [
     {
-      icon: <Shield className="w-8 h-8 text-copper-600" />,
+      icon: <Shield className="w-8 h-8 text-teal-600" />,
       title: "Licensed & Insured",
       description: "All our electricians are fully licensed, insured, and background-checked professionals."
     },
     {
-      icon: <Clock className="w-8 h-8 text-lime-600" />,
+      icon: <Clock className="w-8 h-8 text-teal-light-600" />,
       title: "Fast Service",
       description: "Same-day service available for most electrical repairs and installations."
     },
     {
-      icon: <Star className="w-8 h-8 text-green-600" />,
+      icon: <Star className="w-8 h-8 text-teal-600" />,
       title: "Quality Guaranteed",
       description: "Premium electrical products with manufacturer warranties and professional installation."
     }
@@ -140,7 +140,7 @@ export default function Landing() {
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
                   <p className="text-gray-600 mb-4">{product.description}</p>
-                  <Link href="/products" className="text-copper-600 hover:text-copper-700 font-medium inline-flex items-center">
+                  <Link href="/products" className="text-teal-600 hover:text-teal-700 font-medium inline-flex items-center">
                     Shop Now <ArrowRight className="w-4 h-4 ml-1" />
                   </Link>
                 </div>
@@ -149,7 +149,7 @@ export default function Landing() {
           </div>
 
           <div className="text-center">
-            <Button asChild size="lg" className="bg-copper-600 hover:bg-copper-700 text-white">
+            <Button asChild size="lg" className="bg-teal-600 hover:bg-teal-700 text-white">
               <Link href="/products">Browse All Products</Link>
             </Button>
           </div>
@@ -157,18 +157,18 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-copper-700">
+      <section className="py-16 bg-teal-700">
         <div className="max-w-7xl mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to Get Started?
           </h2>
-          <p className="text-xl text-copper-100 mb-8 max-w-2xl mx-auto">
+          <p className="text-xl text-teal-100 mb-8 max-w-2xl mx-auto">
             Sign in to access our full catalog, get personalized recommendations, and book professional services.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg" 
-              className="bg-white text-copper-700 hover:bg-gray-100"
+              className="bg-white text-teal-700 hover:bg-gray-100"
               onClick={() => window.location.href = "/api/login"}
             >
               Sign In to Shop
@@ -177,7 +177,7 @@ export default function Landing() {
               asChild 
               size="lg" 
               variant="outline" 
-              className="border-white text-white bg-transparent hover:bg-white hover:text-copper-700 font-medium"
+              className="border-white text-white bg-transparent hover:bg-white hover:text-teal-700 font-medium"
             >
               <Link href="/services">Book a Service</Link>
             </Button>

@@ -77,13 +77,13 @@ export function HorizontalProductSection({
           <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h2>
             {dealBadge && (
-              <span className="bg-yellow-400 text-black px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
+              <span className="bg-teal-600 text-white px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium">
                 {dealBadge}
               </span>
             )}
           </div>
           {viewAllLink && (
-            <Link href={viewAllLink} className="text-copper-600 hover:text-copper-700 font-medium text-sm self-start sm:self-auto">
+            <Link href={viewAllLink} className="text-teal-600 hover:text-teal-700 font-medium text-sm self-start sm:self-auto">
               See all →
             </Link>
           )}
@@ -138,7 +138,7 @@ export function HorizontalProductSection({
                         fallback="/api/placeholder/200/160"
                       />
                       {product.originalPrice && product.originalPrice > product.price && (
-                        <div className="absolute top-2 left-2 bg-yellow-400 text-black px-2 py-1 rounded text-xs font-medium shadow-sm">
+                        <div className="absolute top-2 left-2 bg-teal-600 text-white px-2 py-1 rounded text-xs font-medium shadow-sm">
                           {calculateDiscount(product.originalPrice, product.price)}% OFF
                         </div>
                       )}
@@ -155,7 +155,7 @@ export function HorizontalProductSection({
 
                     {/* Product Info */}
                     <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-copper-600 transition-colors leading-tight">
+                      <h3 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-teal-600 transition-colors leading-tight">
                         {product.name}
                       </h3>
                       
@@ -165,7 +165,7 @@ export function HorizontalProductSection({
                             {[...Array(5)].map((_, i) => (
                               <span 
                                 key={i}
-                                className={`text-xs ${i < product.rating! ? 'text-yellow-400' : 'text-gray-300'}`}
+                                className={`text-xs ${i < product.rating! ? 'text-teal-500' : 'text-gray-300'}`}
                               >
                                 ★
                               </span>
@@ -188,7 +188,7 @@ export function HorizontalProductSection({
                             )}
                           </div>
                           {product.originalPrice && product.originalPrice > product.price && (
-                            <div className="text-xs text-green-600 font-medium">
+                            <div className="text-xs text-teal-light-600 font-medium">
                               {formatSavings(product.originalPrice, product.price)}
                             </div>
                           )}
@@ -198,7 +198,7 @@ export function HorizontalProductSection({
                       <div className="flex items-center justify-between">
                         <p className="text-xs text-gray-500 capitalize">{product.category}</p>
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <div className="text-xs text-copper-600 font-medium">View →</div>
+                          <div className="text-xs text-teal-600 font-medium">View →</div>
                         </div>
                       </div>
                     </div>

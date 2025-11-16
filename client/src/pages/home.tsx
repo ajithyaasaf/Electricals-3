@@ -259,95 +259,6 @@ export default function Home() {
       {/* Visual Category Cards - Amazon Style */}
       <VisualCategoryCards categories={visualCategories} />
 
-      {/* Amazon-style Deals Section */}
-      <section className="bg-white py-6">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-3 mb-6">
-            <Tag className="w-6 h-6 text-yellow-500" />
-            <h2 className="text-2xl font-bold text-gray-900">Today's Deals</h2>
-            <span className="bg-yellow-400 text-black px-3 py-1 rounded-full text-sm font-medium">Limited Time</span>
-          </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* Main Featured Deal */}
-            <div className="lg:col-span-2">
-              <div className="relative bg-gradient-to-r from-yellow-50 to-amber-50 rounded-xl p-6 border border-yellow-200">
-                <div className="absolute top-4 left-4 z-10">
-                  <span className="bg-yellow-400 text-black px-3 py-1 text-sm font-bold rounded">30% OFF</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                  <div className="space-y-4">
-                    <h3 className="text-2xl font-bold text-gray-900">Professional Electrical Tool Kit</h3>
-                    <p className="text-gray-600">Complete 50-piece electrician tool set with case</p>
-                    <div className="flex items-center gap-3">
-                      <span className="text-3xl font-bold text-yellow-600">{formatPrice(17499)}</span>
-                      <span className="text-lg text-gray-500 line-through">{formatPrice(24999)}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-amber-600">
-                      <Clock className="w-4 h-4" />
-                      <span className="font-medium">Ends in 2h 45m</span>
-                    </div>
-                    <Button className="bg-yellow-400 hover:bg-yellow-500 text-black font-medium">Shop Deal Now</Button>
-                  </div>
-                  <div>
-                    <LazyImage
-                      src={getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 300, 200)}
-                      alt="Professional Tool Kit"
-                      className="w-full h-48 object-cover rounded-lg"
-                      fallback="/api/placeholder/300/200"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* Smaller Deals */}
-            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="relative mb-3">
-                  <LazyImage
-                    src={getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 128)}
-                    alt="Smart Circuit Breaker" 
-                    className="w-full h-32 object-cover rounded-md"
-                    fallback="/api/placeholder/200/128"
-                  />
-                  <span className="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded">25% OFF</span>
-                </div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-2">Smart Circuit Breaker</h4>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-yellow-600">{formatPrice(5624)}</span>
-                  <span className="text-sm text-gray-500 line-through">{formatPrice(7499)}</span>
-                </div>
-              </div>
-              
-              <div className="bg-white border border-gray-200 rounded-lg p-4">
-                <div className="relative mb-3">
-                  <LazyImage
-                    src={getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 128)}
-                    alt="LED Work Lights"
-                    className="w-full h-32 object-cover rounded-md"
-                    fallback="/api/placeholder/200/128"
-                  />
-                  <span className="absolute top-2 left-2 bg-yellow-400 text-black text-xs px-2 py-1 rounded">40% OFF</span>
-                </div>
-                <h4 className="text-sm font-semibold text-gray-900 mb-2">LED Work Light Set</h4>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg font-bold text-yellow-600">{formatPrice(3999)}</span>
-                  <span className="text-sm text-gray-500 line-through">{formatPrice(6649)}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="text-center mt-6">
-            <Link href="/deals" className="inline-flex items-center gap-2 text-copper-600 hover:text-copper-700 font-medium">
-              <Zap className="w-4 h-4" />
-              View All Deals & Offers
-            </Link>
-          </div>
-        </div>
-      </section>
-
       {/* Best Sellers - Horizontal Scrolling */}
       <HorizontalProductSection
         title="Best Sellers in Electrical"
@@ -413,29 +324,29 @@ export default function Home() {
           <div className="mt-12 bg-gray-50 rounded-xl p-8">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-copper-100 rounded-full flex items-center justify-center mb-3">
-                  <Tag className="text-copper-600 text-lg" />
+                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-3">
+                  <Tag className="text-teal-600 text-lg" />
                 </div>
                 <h5 className="font-semibold text-gray-900 mb-1">Licensed & Insured</h5>
                 <p className="text-sm text-gray-600">All our electricians are fully licensed and insured professionals</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center mb-3">
-                  <Clock className="text-lime-600 text-lg" />
+                <div className="w-12 h-12 bg-teal-light-100 rounded-full flex items-center justify-center mb-3">
+                  <Clock className="text-teal-light-600 text-lg" />
                 </div>
                 <h5 className="font-semibold text-gray-900 mb-1">Same-Day Service</h5>
                 <p className="text-sm text-gray-600">Available for most electrical repairs and installations</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-3">
-                  <Shield className="text-green-600 text-lg" />
+                <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mb-3">
+                  <Shield className="text-teal-600 text-lg" />
                 </div>
                 <h5 className="font-semibold text-gray-900 mb-1">Warranty Included</h5>
                 <p className="text-sm text-gray-600">All work comes with our comprehensive warranty protection</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mb-3">
-                  <Phone className="text-orange-600 text-lg" />
+                <div className="w-12 h-12 bg-teal-light-100 rounded-full flex items-center justify-center mb-3">
+                  <Phone className="text-teal-light-600 text-lg" />
                 </div>
                 <h5 className="font-semibold text-gray-900 mb-1">24/7 Support</h5>
                 <p className="text-sm text-gray-600">Round-the-clock customer support for your electrical needs</p>
@@ -461,32 +372,32 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Link href="/account" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-copper-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-copper-200 transition-colors">
-                <User className="text-copper-600 w-6 h-6" />
+              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-200 transition-colors">
+                <User className="text-teal-600 w-6 h-6" />
               </div>
               <h5 className="font-semibold text-gray-900 mb-1">My Orders</h5>
               <p className="text-sm text-gray-600">Track your recent purchases</p>
             </Link>
 
             <Link href="/account?tab=saved" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-lime-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-lime-200 transition-colors">
-                <Heart className="text-lime-600 w-6 h-6" />
+              <div className="w-12 h-12 bg-teal-light-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-light-200 transition-colors">
+                <Heart className="text-teal-light-600 w-6 h-6" />
               </div>
               <h5 className="font-semibold text-gray-900 mb-1">Saved Items</h5>
               <p className="text-sm text-gray-600">Your wishlist and favorites</p>
             </Link>
 
             <Link href="/services" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 transition-colors">
-                <Calendar className="text-green-600 w-6 h-6" />
+              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-200 transition-colors">
+                <Calendar className="text-teal-600 w-6 h-6" />
               </div>
               <h5 className="font-semibold text-gray-900 mb-1">Book Service</h5>
               <p className="text-sm text-gray-600">Schedule electrical work</p>
             </Link>
 
             <Link href="/account?tab=settings" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-200 transition-colors">
-                <Settings className="text-orange-600 w-6 h-6" />
+              <div className="w-12 h-12 bg-teal-light-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-light-200 transition-colors">
+                <Settings className="text-teal-light-600 w-6 h-6" />
               </div>
               <h5 className="font-semibold text-gray-900 mb-1">Account Settings</h5>
               <p className="text-sm text-gray-600">Manage your preferences</p>
