@@ -1,6 +1,7 @@
 import { SmartLink } from "@/components/navigation/smart-link";
 import { Button } from "@/components/ui/button";
 import { MapPin } from "lucide-react";
+import heroBackground from "@assets/3_1763326187973.png";
 
 export function HeroSection() {
   return (
@@ -13,7 +14,7 @@ export function HeroSection() {
             <div
               className="absolute inset-0 bg-cover bg-center"
               style={{
-                backgroundImage: `url('/assets/generated_images/Clean_electrical_warehouse_interior_8c54656e.png')`,
+                backgroundImage: `url(${heroBackground})`,
               }}
             >
               {/* Dark Overlay */}
