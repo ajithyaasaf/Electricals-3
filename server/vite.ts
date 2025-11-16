@@ -41,6 +41,9 @@ export async function setupVite(app: Express, server: Server) {
   });
 
   app.use(vite.middlewares);
+  
+  app.use(express.static(path.resolve(import.meta.dirname, "..", "public")));
+  
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
 
