@@ -70,103 +70,15 @@ export function Header() {
       ],
     },
     {
-      title: "Electrical Components",
+      title: "Electrical Products",
       expandable: true,
       items: [
-        {
-          name: "Circuit Breakers & Panels",
-          href: "/products?category=circuit-breakers",
-        },
-        {
-          name: "Switches & Outlets",
-          href: "/products?category=switches-outlets",
-        },
-        { name: "Wiring & Conduits", href: "/products?category=wiring-cables" },
-        {
-          name: "Transformers & Motors",
-          href: "/products?category=transformers-motors",
-        },
-        {
-          name: "Electrical Meters",
-          href: "/products?category=electrical-meters",
-        },
-        {
-          name: "Fuses & Protection",
-          href: "/products?category=fuses-protection",
-        },
-      ],
-    },
-    {
-      title: "Tools & Equipment",
-      expandable: true,
-      items: [
-        { name: "Hand Tools", href: "/products?category=hand-tools" },
-        { name: "Power Tools", href: "/products?category=power-tools" },
-        {
-          name: "Testing Equipment",
-          href: "/products?category=testing-equipment",
-        },
-        { name: "Safety Gear", href: "/products?category=safety-gear" },
-        { name: "Tool Storage", href: "/products?category=tool-storage" },
-      ],
-    },
-    {
-      title: "Lighting Solutions",
-      expandable: true,
-      items: [
-        { name: "LED Fixtures", href: "/products?category=led-fixtures" },
-        {
-          name: "Commercial Lighting",
-          href: "/products?category=commercial-lighting",
-        },
-        {
-          name: "Outdoor Lighting",
-          href: "/products?category=outdoor-lighting",
-        },
-        { name: "Smart Lighting", href: "/products?category=smart-lighting" },
-        {
-          name: "Emergency Lighting",
-          href: "/products?category=emergency-lighting",
-        },
-      ],
-    },
-    {
-      title: "Installation Services",
-      expandable: true,
-      items: [
-        {
-          name: "Residential Wiring",
-          href: "/services?category=residential-wiring",
-        },
-        {
-          name: "Commercial Projects",
-          href: "/services?category=commercial-projects",
-        },
-        {
-          name: "Emergency Repairs",
-          href: "/services?category=emergency-repairs",
-        },
-        {
-          name: "Inspections & Consulting",
-          href: "/services?category=inspections-consulting",
-        },
-        { name: "Code Compliance", href: "/services?category=code-compliance" },
-      ],
-    },
-    {
-      title: "Shop by Project",
-      expandable: true,
-      items: [
-        {
-          name: "New Construction",
-          href: "/products?project=new-construction",
-        },
-        { name: "Home Renovation", href: "/products?project=renovation" },
-        { name: "Maintenance & Repair", href: "/products?project=maintenance" },
-        {
-          name: "Industrial Applications",
-          href: "/products?project=industrial",
-        },
+        { name: "Wires and Cables", href: "/products?category=wires-cables" },
+        { name: "Switch and Sockets", href: "/products?category=switch-sockets" },
+        { name: "Electric Accessories", href: "/products?category=electric-accessories" },
+        { name: "Electrical Pipes and Fittings", href: "/products?category=electrical-pipes-fittings" },
+        { name: "Distribution Box", href: "/products?category=distribution-box" },
+        { name: "Led Bulb and Fittings", href: "/products?category=led-bulb-fittings" },
       ],
     },
     {
@@ -182,24 +94,18 @@ export function Header() {
 
   // Priority navigation items - always visible
   const priorityNavigation = [
-    { name: "All Departments", href: "/products" },
-    { name: "Circuit Breakers", href: "/products?category=circuit-breakers" },
-    { name: "Wiring & Cables", href: "/products?category=wiring-cables" },
+    { name: "All Products", href: "/products" },
+    { name: "Wires and Cables", href: "/products?category=wires-cables" },
+    { name: "Switch and Sockets", href: "/products?category=switch-sockets" },
     { name: "Today's Deals", href: "/products?featured=true" },
   ];
 
   // Secondary navigation items - shown based on screen size
   const secondaryNavigation = [
-    { name: "Electrical Tools", href: "/products?category=electrical-tools" },
-    { name: "Panels & Boxes", href: "/products?category=panels-boxes" },
-    {
-      name: "Installation Services",
-      href: "/services?category=installation-services",
-    },
-    {
-      name: "Professional Consulting",
-      href: "/services?category=electrical-consulting",
-    },
+    { name: "Electric Accessories", href: "/products?category=electric-accessories" },
+    { name: "Electrical Pipes and Fittings", href: "/products?category=electrical-pipes-fittings" },
+    { name: "Distribution Box", href: "/products?category=distribution-box" },
+    { name: "Led Bulb and Fittings", href: "/products?category=led-bulb-fittings" },
   ];
 
   const toggleSection = (sectionTitle: string) => {
