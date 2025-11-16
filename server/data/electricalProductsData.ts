@@ -49,7 +49,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'FIN010303S',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['/assets/generated_images/Finolex_1.0sqmm_wire_coil_f94ee200.png'],
+    imageUrls: ['/products/finolex-wire.jpg'],
     specifications: {
       size: '1.0sqmm',
       brand: 'Finolex',
@@ -76,7 +76,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'FIN015303S',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['/assets/generated_images/Finolex_1.5sqmm_wire_coil_a7fc7d9a.png'],
+    imageUrls: ['/products/finolex-wire.jpg'],
     specifications: {
       size: '1.5sqmm',
       brand: 'Finolex',
@@ -103,7 +103,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'FIN025303S',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['/assets/generated_images/Finolex_2.5sqmm_wire_coil_072a94ff.png'],
+    imageUrls: ['/products/finolex-wire.jpg'],
     specifications: {
       size: '2.5sqmm',
       brand: 'Finolex',
@@ -130,7 +130,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'FIN040303S',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['/assets/generated_images/Finolex_4.0sqmm_wire_coil_f166eb3d.png'],
+    imageUrls: ['/products/finolex-wire.jpg'],
     specifications: {
       size: '4.0sqmm',
       brand: 'Finolex',
@@ -159,7 +159,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'KUN01020',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['/assets/generated_images/Kundan_1.0sqmm_wire_coil_2f38691c.png'],
+    imageUrls: ['/products/kundan-wire.jpg'],
     specifications: {
       size: '1.0sqmm',
       brand: 'Kundan Cable',
@@ -186,7 +186,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'KUN01520',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['/assets/generated_images/Kundan_1.5sqmm_wire_coil_8683b271.png'],
+    imageUrls: ['/products/kundan-wire.jpg'],
     specifications: {
       size: '1.5sqmm',
       brand: 'Kundan Cable',
@@ -213,7 +213,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'KUN02520',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['/assets/generated_images/Kundan_2.5sqmm_wire_coil_15b50902.png'],
+    imageUrls: ['/products/kundan-wire.jpg'],
     specifications: {
       size: '2.5sqmm',
       brand: 'Kundan Cable',
@@ -240,7 +240,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'KUN04020',
     stock: 100,
     categoryId: 'cat-1',
-    imageUrls: ['/assets/generated_images/Kundan_4.0sqmm_wire_coil_953b4220.png'],
+    imageUrls: ['/products/kundan-wire.jpg'],
     specifications: {
       size: '4.0sqmm',
       brand: 'Kundan Cable',
@@ -269,7 +269,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU10EB3H',
     stock: 100,
     categoryId: 'cat-2',
-    imageUrls: ['/assets/generated_images/10W_LED_bulb_3hr_backup_1111e2e3.png'],
+    imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
     specifications: {
       wattage: '10W',
       backup_time: '3 Hours',
@@ -299,7 +299,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU10EB4H',
     stock: 100,
     categoryId: 'cat-2',
-    imageUrls: ['/assets/generated_images/10W_LED_bulb_4hr_backup_528373f2.png'],
+    imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
     specifications: {
       wattage: '10W',
       backup_time: '4 Hours',
@@ -329,7 +329,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU10EB6H',
     stock: 100,
     categoryId: 'cat-2',
-    imageUrls: ['/assets/generated_images/10W_LED_bulb_6hr_backup_6d4bd097.png'],
+    imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
     specifications: {
       wattage: '10W',
       backup_time: '6 Hours',
@@ -361,7 +361,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-30W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/30W_LED_flood_light_d574e668.png'],
+    imageUrls: ['/products/sturlite-flood-30w.jpg'],
     specifications: {
       wattage: '30W',
       lumens_per_watt: '100',
@@ -392,7 +392,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-50W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/50W_LED_flood_light_8824c606.png'],
+    imageUrls: ['/products/sturlite-flood-50w.jpg'],
     specifications: {
       wattage: '50W',
       lumens_per_watt: '100',
@@ -423,7 +423,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-100W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/100W_LED_flood_light_62c15ab6.png'],
+    imageUrls: ['/products/sturlite-flood-100w.jpg'],
     specifications: {
       wattage: '100W',
       lumens_per_watt: '100',
@@ -454,7 +454,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-1500W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/150W_LED_flood_light_fc70c2fc.png'],
+    imageUrls: ['/products/sturlite-flood-150w.jpg'],
     specifications: {
       wattage: '150W',
       lumens_per_watt: '100',
@@ -485,7 +485,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-200W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/200W_LED_flood_light_4041063d.png'],
+    imageUrls: ['/products/sturlite-flood-200w.jpg'],
     specifications: {
       wattage: '200W',
       lumens_per_watt: '100',
@@ -516,7 +516,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-300W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/300W_LED_flood_light_6d01d272.png'],
+    imageUrls: ['/products/sturlite-flood-300w-500w.png'],
     specifications: {
       wattage: '300W',
       lumens_per_watt: '100',
@@ -547,7 +547,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-400W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/400W_LED_flood_light_056efa75.png'],
+    imageUrls: ['/products/sturlite-flood-300w-500w.png'],
     specifications: {
       wattage: '400W',
       lumens_per_watt: '100',
@@ -578,7 +578,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0207-500W',
     stock: 100,
     categoryId: 'cat-3',
-    imageUrls: ['/assets/generated_images/500W_LED_flood_light_734fcfb1.png'],
+    imageUrls: ['/products/sturlite-flood-300w-500w.png'],
     specifications: {
       wattage: '500W',
       lumens_per_watt: '100',
@@ -611,7 +611,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-20W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/20W_LED_street_light_94a1de3f.png'],
+    imageUrls: ['/products/sturlite-street-20w.jpg'],
     specifications: {
       wattage: '20W',
       lumens_per_watt: '110',
@@ -643,7 +643,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-24W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/24W_LED_street_light_ba14f815.png'],
+    imageUrls: ['/products/sturlite-street-24w.jpg'],
     specifications: {
       wattage: '24W',
       lumens_per_watt: '110',
@@ -675,7 +675,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-30W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/30W_LED_street_light_64de54ed.png'],
+    imageUrls: ['/products/sturlite-street-30w.jpg'],
     specifications: {
       wattage: '30W',
       lumens_per_watt: '110',
@@ -707,7 +707,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-36W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/36W_LED_street_light_5b6cdd43.png'],
+    imageUrls: ['/products/sturlite-street-36w.jpg'],
     specifications: {
       wattage: '36W',
       lumens_per_watt: '110',
@@ -739,7 +739,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-50W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/50W_LED_street_light_373c186c.png'],
+    imageUrls: ['/products/sturlite-street-50w.jpg'],
     specifications: {
       wattage: '50W',
       lumens_per_watt: '110',
@@ -771,7 +771,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     sku: 'STU0060-72W',
     stock: 100,
     categoryId: 'cat-4',
-    imageUrls: ['/assets/generated_images/72W_LED_street_light_57476a42.png'],
+    imageUrls: ['/products/sturlite-street-72w.png'],
     specifications: {
       wattage: '72W',
       lumens_per_watt: '110',
