@@ -313,22 +313,16 @@ export default function Products() {
       }
     }
 
-    // Check if any filter needs updating
-    const needsUpdate = 
-      filters.categoryId !== categoryId ||
-      filters.search !== urlSearch ||
-      filters.featured !== urlFeatured;
-
-    if (needsUpdate) {
-      syncOriginRef.current = 'url';
-      setFilters(prev => ({
-        ...prev,
-        categoryId,
-        search: urlSearch,
-        featured: urlFeatured
-      }));
-    }
-  }, [categories, urlCategory, urlSearch, urlFeatured, filters.categoryId, filters.search, filters.featured]);
+    // Only sync from URL, don't compare with current filter state
+    // This prevents loops when user clicks X to remove filters
+    syncOriginRef.current = 'url';
+    setFilters(prev => ({
+      ...prev,
+      categoryId,
+      search: urlSearch,
+      featured: urlFeatured
+    }));
+  }, [categories, urlCategory, urlSearch, urlFeatured]);
 
   // Reset sync origin after URL updates complete
   useEffect(() => {
