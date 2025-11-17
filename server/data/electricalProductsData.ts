@@ -240,7 +240,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 446, // ₹446.00
     sku: 'STU10EB3H',
     stock: 100,
-    categoryId: 'cat-2',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
     specifications: {
       wattage: '10W',
@@ -270,7 +270,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 465, // ₹465.00
     sku: 'STU10EB4H',
     stock: 100,
-    categoryId: 'cat-2',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
     specifications: {
       wattage: '10W',
@@ -300,7 +300,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 555, // ₹555.00
     sku: 'STU10EB6H',
     stock: 100,
-    categoryId: 'cat-2',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
     specifications: {
       wattage: '10W',
@@ -332,7 +332,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 1015, // ₹1015.00
     sku: 'STU0207-30W',
     stock: 100,
-    categoryId: 'cat-3',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-flood-30w.jpg'],
     specifications: {
       wattage: '30W',
@@ -363,7 +363,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 1400, // ₹1400.00
     sku: 'STU0207-50W',
     stock: 100,
-    categoryId: 'cat-3',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-flood-50w.jpg'],
     specifications: {
       wattage: '50W',
@@ -394,7 +394,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 2295, // ₹2295.00
     sku: 'STU0207-100W',
     stock: 100,
-    categoryId: 'cat-3',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-flood-100w.jpg'],
     specifications: {
       wattage: '100W',
@@ -425,7 +425,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 3860, // ₹3860.00
     sku: 'STU0207-1500W',
     stock: 100,
-    categoryId: 'cat-3',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-flood-150w.jpg'],
     specifications: {
       wattage: '150W',
@@ -456,7 +456,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 4660, // ₹4660.00
     sku: 'STU0207-200W',
     stock: 100,
-    categoryId: 'cat-3',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-flood-200w.jpg'],
     specifications: {
       wattage: '200W',
@@ -487,7 +487,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 8025, // ₹8025.00
     sku: 'STU0207-300W',
     stock: 100,
-    categoryId: 'cat-3',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-flood-300w-500w.png'],
     specifications: {
       wattage: '300W',
@@ -518,7 +518,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 10850, // ₹10850.00
     sku: 'STU0207-400W',
     stock: 100,
-    categoryId: 'cat-3',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-flood-300w-500w.png'],
     specifications: {
       wattage: '400W',
@@ -549,7 +549,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 15700, // ₹15700.00
     sku: 'STU0207-500W',
     stock: 100,
-    categoryId: 'cat-3',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-flood-300w-500w.png'],
     specifications: {
       wattage: '500W',
@@ -582,7 +582,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 1180, // ₹1180.00
     sku: 'STU0060-20W',
     stock: 100,
-    categoryId: 'cat-4',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-street-20w.jpg'],
     specifications: {
       wattage: '20W',
@@ -614,7 +614,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 1225, // ₹1225.00
     sku: 'STU0060-24W',
     stock: 100,
-    categoryId: 'cat-4',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-street-24w.jpg'],
     specifications: {
       wattage: '24W',
@@ -646,7 +646,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 1575, // ₹1575.00
     sku: 'STU0060-30W',
     stock: 100,
-    categoryId: 'cat-4',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-street-30w.jpg'],
     specifications: {
       wattage: '30W',
@@ -678,7 +678,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 1630, // ₹1630.00
     sku: 'STU0060-36W',
     stock: 100,
-    categoryId: 'cat-4',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-street-36w.jpg'],
     specifications: {
       wattage: '36W',
@@ -710,7 +710,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 1980, // ₹1980.00
     sku: 'STU0060-50W',
     stock: 100,
-    categoryId: 'cat-4',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-street-50w.jpg'],
     specifications: {
       wattage: '50W',
@@ -742,7 +742,7 @@ export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
     originalPrice: 2925, // ₹2925.00
     sku: 'STU0060-72W',
     stock: 100,
-    categoryId: 'cat-4',
+    categoryId: 'cat-6',
     imageUrls: ['/products/sturlite-street-72w.png'],
     specifications: {
       wattage: '72W',

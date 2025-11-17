@@ -21,13 +21,15 @@ export class FirestoreSeeder {
     const categoryIds: string[] = [];
 
     AUTHENTIC_CATEGORIES.forEach((category, index) => {
-      const docRef = doc(collection(db, COLLECTIONS.CATEGORIES));
+      // Use the category ID from the data instead of auto-generating
+      const docRef = doc(db, COLLECTIONS.CATEGORIES, category.id);
       batch.set(docRef, {
         ...category,
         createdAt: new Date(),
         updatedAt: new Date()
       });
-      categoryIds.push(docRef.id);
+      categoryIds.push(category.id);
+      console.log(`📁 Creating category: ${category.name} with ID: ${category.id}`);
     });
 
     await batch.commit();
@@ -39,17 +41,6 @@ export class FirestoreSeeder {
     console.log('🌱 Seeding products to Firestore...');
     console.log(`📦 Total products to seed: ${AUTHENTIC_PRODUCTS.length}`);
 
-    // Map category slugs to IDs for CopperBear products
-    // Updated category mapping for new navigation structure
-    const categoryMap: Record<string, string> = {
-      'wires-cables': categoryIds[0],
-      'switch-sockets': categoryIds[1],
-      'electric-accessories': categoryIds[2],
-      'electrical-pipes-fittings': categoryIds[3],
-      'distribution-box': categoryIds[4],
-      'led-bulb-fittings': categoryIds[5]
-    };
-
     // Process products in batches of 25 (well within Firestore's 500 limit)
     const batchSize = 25;
     const totalProducts = AUTHENTIC_PRODUCTS.length;
@@ -59,26 +50,15 @@ export class FirestoreSeeder {
       const batchProducts = AUTHENTIC_PRODUCTS.slice(i, i + batchSize);
       
       batchProducts.forEach((product, index) => {
-        const docRef = doc(collection(db, COLLECTIONS.PRODUCTS));
+        // Use the product ID from the data instead of auto-generating
+        const docRef = doc(db, COLLECTIONS.PRODUCTS, product.id);
         
-        // Map products to correct categories based on customer data
-        let categoryId = '';
-        if (product.sku?.includes('FIN') || product.sku?.includes('KUN')) {
-          // Finolex and Kundan Cable products go to Wires & Cables
-          categoryId = categoryMap['wires-cables'];
-        } else if (product.sku?.includes('STU') && (product.name.includes('Inverter') || product.name.includes('LED') || product.name.includes('Flood') || product.name.includes('Street'))) {
-          // All Sturlite LED products go to LED Bulb & Fittings
-          categoryId = categoryMap['led-bulb-fittings'];
-        } else {
-          // Default to LED Bulb & Fittings for any other products
-          categoryId = categoryMap['led-bulb-fittings'];
-        }
-
-        console.log(`🔧 Processing product ${i + index + 1}: ${product.name} (${product.sku}) -> Category: ${categoryId}`);
+        // Use the categoryId from the product data itself
+        // Products already have correct categoryIds assigned in electricalProductsData.ts
+        console.log(`🔧 Processing product ${i + index + 1}: ${product.name} (${product.sku}) -> Category: ${product.categoryId}`);
 
         batch.set(docRef, {
           ...product,
-          categoryId,
           createdAt: new Date(),
           updatedAt: new Date()
         });

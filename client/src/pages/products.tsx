@@ -269,20 +269,23 @@ export default function Products() {
   // Enable enterprise navigation features
   const { navigationState } = useEnterpriseNavigation();
   
-  // Parse URL parameters
+  // Parse URL parameters - these update reactively
   const urlParams = new URLSearchParams(searchParams);
-  const initialCategory = urlParams.get("category") || "";
-  const initialSearch = urlParams.get("search") || "";
-  const initialFeatured = urlParams.get("featured") === "true";
+  const urlCategory = urlParams.get("category") || "";
+  const urlSearch = urlParams.get("search") || "";
+  const urlFeatured = urlParams.get("featured") === "true";
   
   // SEO optimization for products page
   useSEO();
   
-  // Filter state
+  // Fetch categories using custom hook FIRST
+  const { data: categories = [] } = useCategories();
+  
+  // Filter state - will be synchronized with URL
   const [filters, setFilters] = useState<ProductFilters>({
-    categoryId: initialCategory ? CATEGORIES.find(c => c.slug === initialCategory)?.id : undefined,
-    search: initialSearch,
-    featured: initialFeatured,
+    categoryId: undefined,
+    search: urlSearch,
+    featured: urlFeatured,
     minPrice: 0,
     maxPrice: 1000000,
     sortBy: "newest",
@@ -293,8 +296,49 @@ export default function Products() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const itemsPerPage = 20;
 
-  // Fetch categories using custom hook
-  const { data: categories = [] } = useCategories();
+  // Track origin of filter changes to prevent loops
+  const syncOriginRef = useRef<'url' | 'filters' | null>(null);
+
+  // Consolidated URL→filters synchronization
+  useEffect(() => {
+    // Wait for categories to load before syncing category filter
+    if (categories.length === 0) return;
+    
+    // Derive complete filter state from URL
+    let categoryId: string | undefined = undefined;
+    if (urlCategory) {
+      const category = categories.find(c => c.slug === urlCategory);
+      if (category) {
+        categoryId = category.id;
+      }
+    }
+
+    // Check if any filter needs updating
+    const needsUpdate = 
+      filters.categoryId !== categoryId ||
+      filters.search !== urlSearch ||
+      filters.featured !== urlFeatured;
+
+    if (needsUpdate) {
+      syncOriginRef.current = 'url';
+      setFilters(prev => ({
+        ...prev,
+        categoryId,
+        search: urlSearch,
+        featured: urlFeatured
+      }));
+    }
+  }, [categories, urlCategory, urlSearch, urlFeatured, filters.categoryId, filters.search, filters.featured]);
+
+  // Reset sync origin after URL updates complete
+  useEffect(() => {
+    if (syncOriginRef.current !== null) {
+      const timer = setTimeout(() => {
+        syncOriginRef.current = null;
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  });
 
   // Keep price values as strings to prevent input focus loss
   const [minPriceString, setMinPriceString] = useState("");
@@ -327,8 +371,15 @@ export default function Products() {
   // Fetch products using custom hook
   const { data: productsData, isLoading } = useProducts(queryParams);
 
-  // Update URL when filters change
+  // Update URL when filters change (but only from user actions, not URL sync)
   useEffect(() => {
+    // Don't update URL if the change came from URL sync
+    if (syncOriginRef.current === 'url' || categories.length === 0) {
+      return;
+    }
+
+    syncOriginRef.current = 'filters';
+    
     const params = new URLSearchParams();
     
     if (filters.search) params.set("search", filters.search);
@@ -340,7 +391,9 @@ export default function Products() {
     
     const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
     setLocation(newUrl, { replace: true });
-  }, [filters, categories, setLocation]);
+    
+    // Will be reset to null in next render
+  }, [filters.search, filters.categoryId, filters.featured, categories, setLocation]);
 
   const updateFilter = (key: string, value: any) => {
     // Store current scroll position to prevent jumping
@@ -356,6 +409,7 @@ export default function Products() {
   };
 
   const clearFilters = () => {
+    // Update filter state
     setFilters({
       categoryId: undefined,
       search: "",
@@ -365,7 +419,12 @@ export default function Products() {
       sortBy: "newest",
       sortOrder: "desc"
     });
+    setMinPriceString("");
+    setMaxPriceString("");
     setCurrentPage(1);
+    
+    // Also clear URL immediately to handle case when categories aren't ready
+    setLocation('/products', { replace: true });
   };
 
   const totalPages = Math.ceil((productsData?.total || 0) / itemsPerPage);

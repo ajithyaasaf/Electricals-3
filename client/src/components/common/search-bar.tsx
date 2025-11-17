@@ -14,8 +14,6 @@ export function SearchBar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!searchQuery.trim() && selectedCategory === "all") return;
-
     const params = new URLSearchParams();
     
     if (searchQuery.trim()) {
@@ -26,20 +24,37 @@ export function SearchBar() {
       params.set("category", selectedCategory);
     }
 
-    setLocation(`/products?${params.toString()}`);
+    const queryString = params.toString();
+    setLocation(queryString ? `/products?${queryString}` : '/products');
+  };
+
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
+    if (value !== "all" && !searchQuery.trim()) {
+      const params = new URLSearchParams();
+      params.set("category", value);
+      setLocation(`/products?${params.toString()}`);
+    }
   };
 
   return (
-    <form onSubmit={handleSearch} className="relative">
+    <form onSubmit={handleSearch} className="relative" data-testid="search-bar-form">
       <div className="flex">
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-36 rounded-r-none border-r-0 bg-gray-100">
+        <Select value={selectedCategory} onValueChange={handleCategoryChange}>
+          <SelectTrigger 
+            className="w-36 rounded-r-none border-r-0 bg-gray-100"
+            data-testid="select-category"
+          >
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Electrical</SelectItem>
             {CATEGORIES.map((category) => (
-              <SelectItem key={category.slug} value={category.slug}>
+              <SelectItem 
+                key={category.slug} 
+                value={category.slug}
+                data-testid={`category-option-${category.slug}`}
+              >
                 {category.name}
               </SelectItem>
             ))}
@@ -52,11 +67,13 @@ export function SearchBar() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="flex-1 rounded-none border-l-0 border-r-0 focus:ring-0 focus:ring-offset-0"
+          data-testid="input-search"
         />
         
         <Button 
           type="submit"
           className="rounded-l-none bg-copper-600 hover:bg-copper-700 text-white"
+          data-testid="button-search"
         >
           <Search className="h-4 w-4" />
         </Button>

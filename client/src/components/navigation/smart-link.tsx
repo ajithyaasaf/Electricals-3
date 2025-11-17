@@ -32,11 +32,18 @@ export const SmartLink = forwardRef<HTMLAnchorElement, SmartLinkProps>(
       (href.includes('?') && location.includes(href.split('?')[0]));
     
     const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
+      // Don't prevent default for normal clicks - let wouter handle it
+      // Only prevent for special cases like middle-click or modified clicks
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
+        return;
+      }
+      
       e.preventDefault();
       
       // Call original onClick if provided
       if (onClick) {
         onClick(e);
+        if (e.defaultPrevented) return; // If custom onClick prevented, don't navigate
       }
       
       // Use enterprise navigation
