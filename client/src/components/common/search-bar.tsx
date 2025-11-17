@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useEffect } from "react";
+import { useLocation, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,8 +8,19 @@ import { CATEGORIES } from "@/lib/constants";
 
 export function SearchBar() {
   const [, setLocation] = useLocation();
+  const searchParams = useSearch();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+
+  // Sync state with URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(searchParams);
+    const urlCategory = urlParams.get("category") || "all";
+    const urlSearch = urlParams.get("search") || "";
+    
+    setSelectedCategory(urlCategory);
+    setSearchQuery(urlSearch);
+  }, [searchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,11 +41,21 @@ export function SearchBar() {
 
   const handleCategoryChange = (value: string) => {
     setSelectedCategory(value);
-    if (value !== "all" && !searchQuery.trim()) {
-      const params = new URLSearchParams();
-      params.set("category", value);
-      setLocation(`/products?${params.toString()}`);
+    
+    const params = new URLSearchParams();
+    
+    // Add search query if present
+    if (searchQuery.trim()) {
+      params.set("search", searchQuery);
     }
+    
+    // Add category if not "all"
+    if (value !== "all") {
+      params.set("category", value);
+    }
+    
+    const queryString = params.toString();
+    setLocation(queryString ? `/products?${queryString}` : '/products');
   };
 
   return (
