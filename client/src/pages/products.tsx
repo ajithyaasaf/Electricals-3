@@ -110,58 +110,68 @@ const FilterContent = ({
         </div>
         <div className="flex flex-wrap gap-2">
           {filters.categoryId && (
-            <Badge variant="secondary" className="bg-copper-100 text-copper-800 hover:bg-copper-200">
+            <Badge variant="secondary" className="bg-copper-100 text-copper-800 hover:bg-copper-200 inline-flex items-center gap-1">
               {categories.find(c => c.id === filters.categoryId)?.name}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => updateFilter("categoryId", undefined)}
-                className="ml-1 h-auto p-0 hover:bg-transparent"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateFilter("categoryId", undefined);
+                }}
+                className="ml-1 hover:bg-copper-300 rounded-full p-0.5 transition-colors"
+                data-testid="button-remove-category-filter"
               >
                 <X className="h-3 w-3" />
-              </Button>
+              </button>
             </Badge>
           )}
           {filters.search && (
-            <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
+            <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200 inline-flex items-center gap-1">
               Search: "{filters.search}"
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => updateFilter("search", "")}
-                className="ml-1 h-auto p-0 hover:bg-transparent"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateFilter("search", "");
+                }}
+                className="ml-1 hover:bg-blue-300 rounded-full p-0.5 transition-colors"
+                data-testid="button-remove-search-filter"
               >
                 <X className="h-3 w-3" />
-              </Button>
+              </button>
             </Badge>
           )}
           {filters.featured && (
-            <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200">
+            <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-200 inline-flex items-center gap-1">
               Featured Only
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => updateFilter("featured", false)}
-                className="ml-1 h-auto p-0 hover:bg-transparent"
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updateFilter("featured", false);
+                }}
+                className="ml-1 hover:bg-green-300 rounded-full p-0.5 transition-colors"
+                data-testid="button-remove-featured-filter"
               >
                 <X className="h-3 w-3" />
-              </Button>
+              </button>
             </Badge>
           )}
           {(debouncedMinPrice > 0 || debouncedMaxPrice < 1000000) && (
-            <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200">
+            <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200 inline-flex items-center gap-1">
               ₹{debouncedMinPrice.toLocaleString('en-IN')} - ₹{debouncedMaxPrice.toLocaleString('en-IN')}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
                   setMinPriceString("");
                   setMaxPriceString("");
                 }}
-                className="ml-1 h-auto p-0 hover:bg-transparent"
+                className="ml-1 hover:bg-purple-300 rounded-full p-0.5 transition-colors"
+                data-testid="button-remove-price-filter"
               >
                 <X className="h-3 w-3" />
-              </Button>
+              </button>
             </Badge>
           )}
         </div>
@@ -455,8 +465,9 @@ export default function Products() {
           {/* Sidebar Filters - Desktop */}
           {!isMobile && (
             <div className="lg:w-72 flex-shrink-0">
-              <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-24">
-                <div className="flex items-center justify-between mb-6">
+              <div className="bg-white rounded-lg shadow-sm border sticky top-24 overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 7rem)' }}>
+                {/* Fixed Header */}
+                <div className="flex items-center justify-between p-6 pb-4 border-b bg-white">
                   <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
                   {activeFiltersCount > 0 && (
                     <Badge 
@@ -467,19 +478,23 @@ export default function Products() {
                     </Badge>
                   )}
                 </div>
-                <FilterContent 
-                  filters={filters}
-                  categories={categories}
-                  activeFiltersCount={activeFiltersCount}
-                  debouncedMinPrice={debouncedMinPrice}
-                  debouncedMaxPrice={debouncedMaxPrice}
-                  updateFilter={updateFilter}
-                  clearFilters={clearFilters}
-                  setMinPriceString={setMinPriceString}
-                  setMaxPriceString={setMaxPriceString}
-                  minPriceNumber={minPriceNumber}
-                  maxPriceNumber={maxPriceNumber}
-                />
+                
+                {/* Scrollable Filter Content */}
+                <div className="overflow-y-auto overflow-x-hidden p-6 pt-4 flex-1 scrollbar-modern">
+                  <FilterContent 
+                    filters={filters}
+                    categories={categories}
+                    activeFiltersCount={activeFiltersCount}
+                    debouncedMinPrice={debouncedMinPrice}
+                    debouncedMaxPrice={debouncedMaxPrice}
+                    updateFilter={updateFilter}
+                    clearFilters={clearFilters}
+                    setMinPriceString={setMinPriceString}
+                    setMaxPriceString={setMaxPriceString}
+                    minPriceNumber={minPriceNumber}
+                    maxPriceNumber={maxPriceNumber}
+                  />
+                </div>
               </div>
             </div>
           )}

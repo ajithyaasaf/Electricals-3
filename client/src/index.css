@@ -404,4 +404,58 @@ input:focus {
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
   }
+  
+  /* Ultra-modern minimalist scrollbar */
+  .scrollbar-modern {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
+  }
+  
+  .scrollbar-modern:hover {
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  }
+  
+  /* WebKit browsers (Chrome, Safari, Edge) - Ultra thin 3px */
+  .scrollbar-modern::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  
+  .scrollbar-modern::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 4px 0;
+  }
+  
+  .scrollbar-modern::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+    transition: background 0.3s ease;
+  }
+  
+  .scrollbar-modern:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+  }
+  
+  .scrollbar-modern::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Dark mode scrollbar */
+  .dark .scrollbar-modern:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+  
+  .dark .scrollbar-modern:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .scrollbar-modern::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+  
+  /* Smooth scroll */
+  .scrollbar-modern {
+    scroll-behavior: smooth;
+  }
 }
