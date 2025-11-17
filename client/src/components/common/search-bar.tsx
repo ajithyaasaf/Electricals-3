@@ -14,19 +14,19 @@ export function SearchBar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!searchQuery.trim()) return;
+    if (!searchQuery.trim() && selectedCategory === "all") return;
 
     const params = new URLSearchParams();
-    params.set("search", searchQuery);
+    
+    if (searchQuery.trim()) {
+      params.set("search", searchQuery);
+    }
     
     if (selectedCategory !== "all") {
       params.set("category", selectedCategory);
     }
 
-    const isService = CATEGORIES.find(cat => cat.slug === selectedCategory)?.slug.includes("services");
-    const basePath = isService ? "/services" : "/products";
-    
-    setLocation(`${basePath}?${params.toString()}`);
+    setLocation(`/products?${params.toString()}`);
   };
 
   return (

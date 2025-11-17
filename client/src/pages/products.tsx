@@ -619,7 +619,10 @@ export default function Products() {
                   <Button
                     variant="outline"
                     disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(currentPage - 1)}
+                    onClick={() => {
+                      setCurrentPage(currentPage - 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                   >
                     Previous
                   </Button>
@@ -631,7 +634,10 @@ export default function Products() {
                         <Button
                           key={page}
                           variant={currentPage === page ? "default" : "outline"}
-                          onClick={() => setCurrentPage(page)}
+                          onClick={() => {
+                            setCurrentPage(page);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
                           className="w-10"
                         >
                           {page}
@@ -646,7 +652,10 @@ export default function Products() {
                   <Button
                     variant="outline"
                     disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(currentPage + 1)}
+                    onClick={() => {
+                      setCurrentPage(currentPage + 1);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
                   >
                     Next
                   </Button>

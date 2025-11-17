@@ -395,7 +395,7 @@ export default function Checkout() {
                           <SelectTrigger>
                             <SelectValue placeholder="State" />
                           </SelectTrigger>
-                          <SelectContent className="max-h-[200px] overflow-y-auto">
+                          <SelectContent position="popper" className="max-h-[300px] overflow-y-auto" sideOffset={4}>
                             <SelectItem value="AP">Andhra Pradesh</SelectItem>
                             <SelectItem value="AR">Arunachal Pradesh</SelectItem>
                             <SelectItem value="AS">Assam</SelectItem>

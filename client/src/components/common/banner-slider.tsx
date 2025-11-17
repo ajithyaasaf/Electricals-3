@@ -107,6 +107,26 @@ export function BannerSlider({
 }: BannerSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
+
+  // Preload all banner images on component mount
+  useEffect(() => {
+    const imagePromises = bannerSlides.map((slide) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = slide.backgroundImage;
+      });
+    });
+
+    Promise.all(imagePromises)
+      .then(() => setImagesLoaded(true))
+      .catch((error) => {
+        console.error('Error preloading banner images:', error);
+        setImagesLoaded(true);
+      });
+  }, []);
 
   // Simple navigation functions
   const handleNextSlide = () => {
@@ -123,13 +143,13 @@ export function BannerSlider({
 
   // Auto-play functionality
   useEffect(() => {
-    if (!isPaused && autoPlayInterval > 0) {
+    if (!isPaused && autoPlayInterval > 0 && imagesLoaded) {
       const interval = setInterval(() => {
         setCurrentSlide((prev) => (prev + 1) % bannerSlides.length);
       }, autoPlayInterval);
       return () => clearInterval(interval);
     }
-  }, [isPaused, autoPlayInterval]);
+  }, [isPaused, autoPlayInterval, imagesLoaded]);
 
   const currentBanner = bannerSlides[currentSlide];
 
@@ -140,9 +160,16 @@ export function BannerSlider({
       onMouseLeave={() => setIsPaused(false)}
       data-testid="banner-slider"
     >
+      {/* Loading skeleton while images load */}
+      {!imagesLoaded && (
+        <div className="absolute inset-0 bg-gradient-to-r from-teal-600 to-teal-500 animate-pulse" />
+      )}
+      
       {/* Background with overlay */}
       <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 ease-in-out transform w-full h-full"
+        className={`absolute inset-0 bg-cover bg-center bg-no-repeat transition-all duration-700 ease-in-out transform w-full h-full ${
+          !imagesLoaded ? 'opacity-0' : 'opacity-100'
+        }`}
         style={{ backgroundImage: `url('${currentBanner.backgroundImage}')` }}
       >
       </div>
