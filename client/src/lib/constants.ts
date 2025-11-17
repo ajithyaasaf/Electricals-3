@@ -19,7 +19,7 @@ export const BOOKING_STATUSES = {
 };
 
 export const CONTACT_INFO = {
-  phone: "(555) 123-4567",
+  phone: "+91 80987 27452",
   email: "support@copperbear.com",
   address: "Madurai, Tamil Nadu",
 };
