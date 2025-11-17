@@ -34,6 +34,7 @@ import {
   X,
   ChevronRight,
   ChevronDown,
+  Search,
 } from "lucide-react";
 import logoUrl from "@assets/Logo_1756366077120.png";
 import { CATEGORIES } from "@/lib/constants";
@@ -136,54 +137,70 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 overflow-hidden">
       {/* Top announcement bar */}
-      <div className="bg-copper-700 text-white text-center py-2 text-sm">
-        <span>
+      <div className="bg-copper-700 text-white text-center py-2 text-sm px-2">
+        <span className="text-xs sm:text-sm truncate block">
           Free shipping on electrical products over ₹10,000 | Professional
           installation services available
         </span>
       </div>
 
       {/* Main header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between py-3 sm:py-4">
+      <div className="w-full px-2 sm:px-4 lg:px-6 overflow-hidden">
+        <div className="flex items-center justify-between py-2 sm:py-3 gap-1 sm:gap-2">
           {/* Logo */}
-          <SmartLink href="/" className="flex items-center space-x-2 flex-shrink-0">
+          <SmartLink href="/" className="flex items-center flex-shrink-0 min-w-0">
             <img 
               src={logoUrl} 
               alt="CopperBear Logo" 
-              className="h-8 sm:h-12 w-auto object-contain"
+              className="h-8 sm:h-10 w-auto object-contain"
             />
           </SmartLink>
 
           {/* Search Bar - Desktop */}
           {!isMobile && (
-            <div className="flex-1 max-w-2xl mx-4 lg:mx-8">
+            <div className="flex-1 max-w-2xl mx-2 lg:mx-4 min-w-0">
               <SearchBar />
             </div>
           )}
 
           {/* Account & Cart */}
-          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
-            {/* Mobile Menu Toggle */}
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+            {/* Mobile Search & Menu */}
             {isMobile && (
-              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-                <SheetTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-10 w-10 sm:h-11 sm:w-11 touch-manipulation flex-shrink-0"
-                    style={{ minHeight: "44px", minWidth: "44px" }}
-                    data-testid="button-mobile-menu"
+              <>
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 flex-shrink-0"
+                      data-testid="button-mobile-search"
+                    >
+                      <Search className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="top" className="h-auto p-4">
+                    <SearchBar />
+                  </SheetContent>
+                </Sheet>
+                
+                <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                  <SheetTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 flex-shrink-0"
+                      data-testid="button-mobile-menu"
+                    >
+                      <Menu className="h-5 w-5" />
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent
+                    side="left"
+                    className="w-[85vw] max-w-sm p-0 overflow-y-auto"
                   >
-                    <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent
-                  side="left"
-                  className="w-full max-w-sm sm:max-w-md p-0 overflow-hidden"
-                >
                   {/* Header */}
                   <div className="bg-copper-700 text-white p-4 sm:p-6">
                     <div className="flex items-center space-x-2">
@@ -198,25 +215,45 @@ export function Header() {
 
                   {/* Amazon-style Navigation */}
                   <div className="flex-1 overflow-y-auto overscroll-contain">
+                    {/* Quick Access Categories - Tile Grid */}
+                    <div className="p-4 bg-white">
+                      <h3 className="text-sm font-semibold text-copper-800 mb-3">Shop by Category</h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {CATEGORIES.slice(0, 6).map((category) => (
+                          <SmartLink
+                            key={category.id}
+                            href={`/products?category=${category.slug}`}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-2 p-3 bg-copper-50 hover:bg-copper-100 rounded-md border border-copper-200 transition-colors"
+                            data-testid={`category-tile-${category.slug}`}
+                          >
+                            <Zap className="h-4 w-4 text-copper-600 flex-shrink-0" />
+                            <span className="text-xs font-medium text-copper-800 line-clamp-2">{category.name}</span>
+                          </SmartLink>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Navigation Sections */}
                     {mobileNavigation.map((section) => (
                       <div
                         key={section.title}
-                        className="border-b border-copper-200"
+                        className="border-t border-copper-200"
                       >
                         {section.expandable ? (
                           <>
                             <button
                               onClick={() => toggleSection(section.title)}
-                              className="w-full flex items-center justify-between p-4 sm:p-5 text-left font-semibold text-copper-800 hover:bg-copper-50 active:bg-copper-100 transition-colors touch-manipulation"
-                              style={{ minHeight: "44px" }} // iOS minimum touch target
+                              className="w-full flex items-center justify-between p-4 text-left font-semibold text-copper-800 hover:bg-copper-50 active:bg-copper-100 transition-colors"
+                              data-testid={`section-toggle-${section.title}`}
                             >
-                              <span className="text-sm sm:text-base truncate pr-2">
+                              <span className="text-sm truncate pr-2">
                                 {section.title}
                               </span>
                               {expandedSections[section.title] ? (
-                                <ChevronDown className="h-5 w-5 text-copper-600 flex-shrink-0" />
+                                <ChevronDown className="h-4 w-4 text-copper-600 flex-shrink-0" />
                               ) : (
-                                <ChevronRight className="h-5 w-5 text-copper-600 flex-shrink-0" />
+                                <ChevronRight className="h-4 w-4 text-copper-600 flex-shrink-0" />
                               )}
                             </button>
                             {expandedSections[section.title] && (
@@ -225,13 +262,11 @@ export function Header() {
                                   <SmartLink
                                     key={item.name}
                                     href={item.href}
-                                    className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-lime-600 active:text-lime-700 hover:bg-white active:bg-copper-25 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
-                                    style={{ minHeight: "44px" }} // iOS minimum touch target
+                                    className="block px-6 py-3 text-sm text-copper-700 hover:text-lime-600 hover:bg-white transition-colors border-b border-copper-200 last:border-b-0"
                                     onClick={() => setMobileMenuOpen(false)}
+                                    data-testid={`nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                                   >
-                                    <span className="block truncate">
-                                      {item.name}
-                                    </span>
+                                    {item.name}
                                   </SmartLink>
                                 ))}
                               </div>
@@ -239,23 +274,19 @@ export function Header() {
                           </>
                         ) : (
                           <>
-                            <div className="p-4 sm:p-5 font-semibold text-copper-800 bg-copper-100">
-                              <span className="text-sm sm:text-base truncate">
-                                {section.title}
-                              </span>
+                            <div className="p-4 font-semibold text-copper-800 bg-copper-100">
+                              <span className="text-sm">{section.title}</span>
                             </div>
                             <div>
                               {section.items.map((item) => (
                                 <SmartLink
                                   key={item.name}
                                   href={item.href}
-                                  className="block px-6 sm:px-8 py-3 sm:py-4 text-sm text-copper-700 hover:text-lime-600 active:text-lime-700 hover:bg-copper-50 active:bg-copper-100 transition-colors border-b border-copper-200 last:border-b-0 touch-manipulation"
-                                  style={{ minHeight: "44px" }} // iOS minimum touch target
+                                  className="block px-6 py-3 text-sm text-copper-700 hover:text-lime-600 hover:bg-copper-50 transition-colors border-b border-copper-200 last:border-b-0"
                                   onClick={() => setMobileMenuOpen(false)}
+                                  data-testid={`nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                                 >
-                                  <span className="block truncate">
-                                    {item.name}
-                                  </span>
+                                  {item.name}
                                 </SmartLink>
                               ))}
                             </div>
@@ -266,6 +297,7 @@ export function Header() {
                   </div>
                 </SheetContent>
               </Sheet>
+            </>
             )}
 
             {/* User Menu */}
