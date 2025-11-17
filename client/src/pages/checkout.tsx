@@ -6,7 +6,6 @@ import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,6 +19,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice } from "@/lib/currency";
 import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle } from "lucide-react";
+import { StateSelector } from "@/components/common/state-selector";
 
 interface CheckoutFormData {
   shippingAddress: {
@@ -384,56 +384,16 @@ export default function Checkout() {
                           value={formData.shippingAddress.city}
                           onChange={(e) => updateFormData("shippingAddress", "city", e.target.value)}
                           required
+                          data-testid="input-city"
                         />
                       </div>
                       <div>
                         <Label htmlFor="state">State *</Label>
-                        <Select
+                        <StateSelector
                           value={formData.shippingAddress.state}
                           onValueChange={(value) => updateFormData("shippingAddress", "state", value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="State" />
-                          </SelectTrigger>
-                          <SelectContent position="popper" className="max-h-[300px] overflow-y-auto" sideOffset={4}>
-                            <SelectItem value="AP">Andhra Pradesh</SelectItem>
-                            <SelectItem value="AR">Arunachal Pradesh</SelectItem>
-                            <SelectItem value="AS">Assam</SelectItem>
-                            <SelectItem value="BR">Bihar</SelectItem>
-                            <SelectItem value="CG">Chhattisgarh</SelectItem>
-                            <SelectItem value="GA">Goa</SelectItem>
-                            <SelectItem value="GJ">Gujarat</SelectItem>
-                            <SelectItem value="HR">Haryana</SelectItem>
-                            <SelectItem value="HP">Himachal Pradesh</SelectItem>
-                            <SelectItem value="JH">Jharkhand</SelectItem>
-                            <SelectItem value="KA">Karnataka</SelectItem>
-                            <SelectItem value="KL">Kerala</SelectItem>
-                            <SelectItem value="MP">Madhya Pradesh</SelectItem>
-                            <SelectItem value="MH">Maharashtra</SelectItem>
-                            <SelectItem value="MN">Manipur</SelectItem>
-                            <SelectItem value="ML">Meghalaya</SelectItem>
-                            <SelectItem value="MZ">Mizoram</SelectItem>
-                            <SelectItem value="NL">Nagaland</SelectItem>
-                            <SelectItem value="OR">Odisha</SelectItem>
-                            <SelectItem value="PB">Punjab</SelectItem>
-                            <SelectItem value="RJ">Rajasthan</SelectItem>
-                            <SelectItem value="SK">Sikkim</SelectItem>
-                            <SelectItem value="TN">Tamil Nadu</SelectItem>
-                            <SelectItem value="TS">Telangana</SelectItem>
-                            <SelectItem value="TR">Tripura</SelectItem>
-                            <SelectItem value="UK">Uttarakhand</SelectItem>
-                            <SelectItem value="UP">Uttar Pradesh</SelectItem>
-                            <SelectItem value="WB">West Bengal</SelectItem>
-                            <SelectItem value="AN">Andaman and Nicobar Islands</SelectItem>
-                            <SelectItem value="CH">Chandigarh</SelectItem>
-                            <SelectItem value="DH">Dadra and Nagar Haveli and Daman and Diu</SelectItem>
-                            <SelectItem value="DL">Delhi</SelectItem>
-                            <SelectItem value="JK">Jammu and Kashmir</SelectItem>
-                            <SelectItem value="LA">Ladakh</SelectItem>
-                            <SelectItem value="LD">Lakshadweep</SelectItem>
-                            <SelectItem value="PY">Puducherry</SelectItem>
-                          </SelectContent>
-                        </Select>
+                          placeholder="Select state..."
+                        />
                       </div>
                       <div>
                         <Label htmlFor="zipCode">ZIP Code *</Label>
@@ -442,6 +402,7 @@ export default function Checkout() {
                           value={formData.shippingAddress.zipCode}
                           onChange={(e) => updateFormData("shippingAddress", "zipCode", e.target.value)}
                           required
+                          data-testid="input-zipcode"
                         />
                       </div>
                     </div>
