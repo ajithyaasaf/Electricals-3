@@ -50,7 +50,7 @@ export function Footer() {
               <img 
                 src={logoUrl} 
                 alt="CopperBear Logo" 
-                className="h-10 w-auto object-contain"
+                className="h-14 w-auto object-contain"
               />
             </div>
             <p className="text-gray-400 mb-4 text-sm">{COMPANY_INFO.description}</p>
