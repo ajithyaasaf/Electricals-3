@@ -165,7 +165,7 @@ export function Header() {
           )}
 
           {/* Account & Cart */}
-          <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
             {/* Mobile Menu Toggle */}
             {isMobile && (
               <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
@@ -173,8 +173,9 @@ export function Header() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-10 w-10 sm:h-11 sm:w-11 touch-manipulation"
-                    style={{ minHeight: "44px", minWidth: "44px" }} // iOS minimum touch target
+                    className="h-10 w-10 sm:h-11 sm:w-11 touch-manipulation flex-shrink-0"
+                    style={{ minHeight: "44px", minWidth: "44px" }}
+                    data-testid="button-mobile-menu"
                   >
                     <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
                   </Button>
@@ -318,12 +319,13 @@ export function Header() {
             )}
 
             {/* Wishlist */}
-            <SmartLink href="/wishlist">
+            <SmartLink href="/wishlist" className="flex-shrink-0">
               <Button
                 variant="ghost"
-                className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-3 min-h-[60px] min-w-[60px] transition-all duration-200 relative"
+                className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-2 sm:p-3 min-h-[44px] min-w-[44px] sm:min-h-[60px] sm:min-w-[60px] transition-all duration-200 relative"
+                data-testid="button-wishlist"
               >
-                <Heart className="h-5 w-5" />
+                <Heart className="h-5 w-5 flex-shrink-0" />
                 <span className="text-xs mt-1 hidden sm:block">Wishlist</span>
                 {wishlistCount > 0 && (
                   <Badge className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 hover:bg-red-600 text-white text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center p-0 min-w-[16px] sm:min-w-[20px]">
@@ -337,12 +339,13 @@ export function Header() {
 
             {/* Cart */}
             <Button
-              className="flex items-center space-x-1 sm:space-x-2 bg-lime-600 text-graphite hover:bg-lime-700 active:bg-lime-800 relative h-10 sm:h-11 px-3 sm:px-4 touch-manipulation"
-              style={{ minHeight: "44px" }} // iOS minimum touch target
+              className="flex items-center gap-1 sm:gap-2 bg-lime-600 text-graphite hover:bg-lime-700 active:bg-lime-800 relative h-10 sm:h-11 px-2 sm:px-4 touch-manipulation flex-shrink-0"
+              style={{ minHeight: "44px" }}
               onClick={() => setCartOpen(true)}
+              data-testid="button-cart"
             >
-              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" />
-              <span className="text-xs sm:text-sm font-medium hidden xs:block">
+              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+              <span className="text-xs sm:text-sm font-medium hidden sm:inline">
                 Cart
               </span>
               {cartCount > 0 && (

@@ -377,40 +377,28 @@ export default function ProductDetail() {
                 )}
               </div>
 
-              {/* Enhanced Stock Status with Urgency */}
+              {/* Stock Status */}
               <div className="mb-6">
                 {product.stock && product.stock > 0 ? (
-                  <div className="space-y-2">
-                    <div className="flex items-center space-x-2">
-                      <p className="text-green-600 font-medium">
-                        ✓ In Stock ({product.stock} available)
-                      </p>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
+                        In Stock
+                      </Badge>
                       {stockUrgency && (
-                        <div className="flex items-center space-x-1 bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium animate-pulse">
-                          <Clock className="w-3 h-3" />
-                          <span>Only {product.stock} left!</span>
-                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          Only {product.stock} left
+                        </span>
                       )}
                     </div>
 
-                    {/* Stock Progress Bar */}
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-500 ${
-                          stockUrgency ? "bg-red-500" : "bg-green-500"
-                        }`}
-                        style={{
-                          width: `${Math.min((product.stock / 20) * 100, 100)}%`,
-                        }}
-                      ></div>
-                    </div>
-
-                    {/* Delivery Estimate */}
+                    {/* Delivery Options */}
                     <button
                       onClick={() =>
                         setShowDeliveryEstimate(!showDeliveryEstimate)
                       }
-                      className="flex items-center space-x-1 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      data-testid="button-delivery-options"
                     >
                       <Truck className="w-4 h-4" />
                       <span>Check delivery options</span>
@@ -420,25 +408,21 @@ export default function ProductDetail() {
                     </button>
 
                     {showDeliveryEstimate && (
-                      <div className="bg-blue-50 p-3 rounded-lg text-sm space-y-1 animate-in slide-in-from-top-2 duration-200">
-                        <p className="flex justify-between">
-                          <span>Standard Delivery:</span>
+                      <div className="bg-blue-50 p-4 rounded-md text-sm space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Standard Delivery:</span>
                           <span className="font-medium">3-5 business days</span>
-                        </p>
-                        <p className="flex justify-between">
-                          <span>Express Delivery:</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-muted-foreground">Express Delivery:</span>
                           <span className="font-medium">1-2 business days</span>
-                        </p>
-                        <p className="flex justify-between">
-                          <span>Same Day (Mumbai):</span>
-                          <span className="font-medium">Order by 2 PM</span>
-                        </p>
+                        </div>
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-red-600 font-medium">✗ Out of Stock</p>
+                    <Badge variant="destructive">Out of Stock</Badge>
                     <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
                       Notify me when available
                     </button>
