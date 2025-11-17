@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Zap, CreditCard, MapPin } from "lucide-react";
 import { SiVisa, SiMastercard, SiAmericanexpress, SiPaypal } from "react-icons/si";
 import { SiPaytm } from "react-icons/si";
-import logoUrl from "@assets/Logo_1756366077120.png";
+import logoUrl from "@assets/Logo_1763402801870.png";
 import { COMPANY_INFO, CONTACT_INFO, BUSINESS_POLICIES } from "@/lib/constants";
 
 export function Footer() {
@@ -133,22 +133,24 @@ export function Footer() {
               <MapPin className="w-5 h-5 text-yellow-400 mr-2" />
               <h5 className="text-lg font-semibold">We Deliver Across India</h5>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
               <div>
                 <p className="text-copper-400 font-semibold mb-2">Primary Hub</p>
                 <p className="text-gray-400">{BUSINESS_POLICIES.serviceAreas.primary}</p>
                 <p className="text-xs text-gray-500 mt-1">1-3 Days Delivery</p>
               </div>
               <div>
-                <p className="text-blue-400 font-semibold mb-2">Tamil Nadu & South India</p>
+                <p className="text-blue-400 font-semibold mb-2">Tamil Nadu</p>
                 <p className="text-gray-400 text-xs leading-relaxed">{BUSINESS_POLICIES.serviceAreas.secondary}</p>
                 <p className="text-xs text-gray-500 mt-1">2-5 Days Delivery</p>
               </div>
+              {/* North India Coverage - Commented out as per client request
               <div>
                 <p className="text-purple-400 font-semibold mb-2">North India Coverage</p>
                 <p className="text-gray-400 text-xs leading-relaxed">{BUSINESS_POLICIES.serviceAreas.northIndia}</p>
                 <p className="text-xs text-gray-500 mt-1">3-7 Days Delivery</p>
               </div>
+              */}
             </div>
             <p className="text-xs text-gray-500 mt-4">
               <strong className="text-gray-400">{BUSINESS_POLICIES.serviceAreas.coverage}</strong> - Free shipping on orders above ₹10,000
@@ -157,18 +159,27 @@ export function Footer() {
         </div>
 
         {/* Bottom Section */}
-        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6 text-sm text-gray-400">
             <p>&copy; {currentYear} CopperBear Electrical Solutions. All rights reserved.</p>
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
               {legalLinks.map((link) => (
                 <Link key={link.name} href={link.href} className="hover:text-white transition-colors">
                   {link.name}
                 </Link>
               ))}
+              <a 
+                href="https://godivatech.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="hover:text-white transition-colors"
+                data-testid="link-godiva-tech"
+              >
+                Designed and developed by Godiva Tech
+              </a>
             </div>
           </div>
-          <div className="flex items-center space-x-4 mt-4 md:mt-0">
+          <div className="flex items-center space-x-4 flex-shrink-0">
             <span className="text-sm text-gray-400">We Accept:</span>
             <div className="flex space-x-3 text-2xl text-gray-400">
               <SiPaytm className="w-8 h-6" title="UPI" />

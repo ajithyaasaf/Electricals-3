@@ -36,7 +36,7 @@ import {
   ChevronDown,
   Search,
 } from "lucide-react";
-import logoUrl from "@assets/Logo_1756366077120.png";
+import logoUrl from "@assets/Logo_1763402801870.png";
 import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOutUser } from "@/lib/firebase";
@@ -371,12 +371,12 @@ export function Header() {
 
             {/* Cart */}
             <Button
-              className="flex items-center gap-1 sm:gap-2 bg-lime-600 text-graphite hover:bg-lime-700 active:bg-lime-800 relative h-10 sm:h-11 px-2 sm:px-4 touch-manipulation flex-shrink-0"
+              className="flex items-center gap-1 sm:gap-2 bg-lime-600 text-graphite hover:bg-lime-700 active:bg-lime-800 relative h-10 sm:h-11 px-3 sm:px-4 touch-manipulation flex-shrink-0"
               style={{ minHeight: "44px" }}
               onClick={() => setCartOpen(true)}
               data-testid="button-cart"
             >
-              <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
+              <ShoppingCart className="h-5 w-5 sm:h-6 sm:w-6 flex-shrink-0" />
               <span className="text-xs sm:text-sm font-medium hidden sm:inline">
                 Cart
               </span>

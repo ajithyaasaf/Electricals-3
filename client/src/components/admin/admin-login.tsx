@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { Shield, Eye, EyeOff, ArrowLeft } from "lucide-react";
-import logoUrl from "@assets/Logo_1756366077120.png";
+import logoUrl from "@assets/Logo_1763402801870.png";
 
 const adminLoginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),

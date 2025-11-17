@@ -21,7 +21,7 @@ export const BOOKING_STATUSES = {
 export const CONTACT_INFO = {
   phone: "(555) 123-4567",
   email: "support@copperbear.com",
-  address: "123 Electric Avenue, Power City, PC 12345",
+  address: "Madurai, Tamil Nadu",
 };
 
 // Business Policies Configuration - Pan-India Delivery (Madurai Hub → Tamil Nadu → North India)
