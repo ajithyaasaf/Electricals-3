@@ -1,0 +1,208 @@
+
+Render blocking requests Est savings of 350 ms
+Requests are blocking the page's initial render, which may delay LCP. Deferring or inlining can move these network requests out of the critical path.LCPFCPUnscored
+URL
+Transfer Size
+Duration
+copperbear.in 1st party
+20.0 KiB 80 ms
+/assets/index-BMG2KUWP.css(www.copperbear.in)
+20.0 KiB
+80 ms
+replit.com
+2.6 KiB 200 ms
+…js/replit-dev-banner.js(replit.com)
+2.6 KiB
+200 ms
+Google Fonts cdn
+1.4 KiB 230 ms
+/css2?family=…(fonts.googleapis.com)
+1.4 KiB
+230 ms
+Forced reflow
+A forced reflow occurs when JavaScript queries geometric properties (such as offsetWidth) after styles have been invalidated by a change to the DOM state. This can result in poor performance. Learn more about forced reflows and possible mitigations.Unscored
+Source
+Total reflow time
+[unattributed]
+36 ms
+Network dependency tree
+Avoid chaining critical requests by reducing the length of chains, reducing the download size of resources, or deferring the download of unnecessary resources to improve page load.LCPUnscored
+Maximum critical path latency: 468 ms
+Initial Navigation
+https://www.copperbear.in - 41 ms, 1.58 KiB
+/assets/index-DdZPHTv8.js(www.copperbear.in) - 154 ms, 274.76 KiB
+/assets/index-BMG2KUWP.css(www.copperbear.in) - 71 ms, 19.96 KiB
+/css2?family=…(fonts.googleapis.com) - 75 ms, 1.40 KiB
+…v20/UcCo3FwrK….woff2(fonts.gstatic.com) - 468 ms, 131.36 KiB
+…v20/UcCo3FwrK….woff2(fonts.gstatic.com) - 279 ms, 72.10 KiB
+…js/replit-dev-banner.js(replit.com) - 61 ms, 2.63 KiB
+
+
+
+
+Diagnostics
+Reduce unused JavaScript Est savings of 168 KiB
+Reduce unused JavaScript and defer loading scripts until they are required to decrease bytes consumed by network activity. Learn how to reduce unused JavaScript.LCPFCPUnscored
+URL
+Transfer Size
+Est Savings
+copperbear.in 1st party
+274.0 KiB 168.0 KiB
+/assets/index-DdZPHTv8.js(www.copperbear.in)
+274.0 KiB
+168.0 KiB
+Reduce unused CSS Est savings of 16 KiB
+Reduce unused rules from stylesheets and defer CSS not used for above-the-fold content to decrease bytes consumed by network activity. Learn how to reduce unused CSS.LCPFCPUnscored
+URL
+Transfer Size
+Est Savings
+copperbear.in 1st party
+19.3 KiB 15.7 KiB
+/assets/index-BMG2KUWP.css(www.copperbear.in)
+19.3 KiB
+15.7 KiB
+Image elements do not have explicit width and height
+Avoid enormous network payloads Total size was 7,573 KiB
+
+
+
+
+ARIA
+Elements with an ARIA [role] that require children to contain a specific [role] are missing some or all of those required children.
+Some ARIA parent roles must contain specific child roles to perform their intended accessibility functions. Learn more about roles and required children elements.
+Failing Elements
+Trusted Experts Licensed & insured professionals 98% Customer satisfaction Fa…
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" role="grid" aria-label="CopperBear features and benefits">
+Trusted Experts Licensed & insured professionals 98% Customer satisfaction
+<div role="gridcell">
+Fast Response Same-day service available 2hr Response time
+<div role="gridcell">
+Quality Work Guaranteed workmanship 100% Work guaranteed
+<div role="gridcell">
+[role]s are not contained by their required parent element
+Some ARIA child roles must be contained by specific parent roles to properly perform their intended accessibility functions. Learn more about ARIA roles and required parent element.
+Failing Elements
+Trusted Experts Licensed & insured professionals 98% Customer satisfaction
+<div role="gridcell">
+Fast Response Same-day service available 2hr Response time
+<div role="gridcell">
+Quality Work Guaranteed workmanship 100% Work guaranteed
+<div role="gridcell">
+Experienced Team 15+ years in electrical 15+ Years experience
+<div role="gridcell">
+Local Business Serving your community 1000+ Projects completed
+<div role="gridcell">
+Modern Solutions Latest electrical technology 5⭐ Google rating
+<div role="gridcell">
+These are opportunities to improve the usage of ARIA in your application which may enhance the experience for users of assistive technology, like a screen reader.
+Names and labels
+Buttons do not have an accessible name
+When a button doesn't have an accessible name, screen readers announce it as "button", making it unusable for users who rely on screen readers. Learn how to make buttons more accessible.
+Failing Elements
+All Electrical
+<button type="button" role="combobox" aria-controls="radix-:r0:" aria-expanded="false" aria-autocomplete="none" dir="ltr" data-state="closed" class="flex h-10 items-center justify-between rounded-md border border-input px-3…" data-testid="select-category">
+div.relative > form.relative > div.flex > button.inline-flex
+<button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md…" type="submit" data-testid="button-search">
+These are opportunities to improve the semantics of the controls in your application. This may enhance the experience for users of assistive technology, like a screen reader.
+Best practices
+[user-scalable="no"] is used in the <meta name="viewport"> element or the [maximum-scale] attribute is less than 5.
+Disabling zooming is problematic for users with low vision who rely on screen magnification to properly see the contents of a web page. Learn more about the viewport meta tag.
+Failing Elements
+head > meta
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+Document does not have a main landmark.
+One main landmark helps screen reader users navigate a web page. Learn more about landmarks.
+Failing Elements
+html
+<html lang="en">
+Identical links have the same purpose.
+These items highlight common accessibility best practices.
+Contrast
+Background and foreground colors do not have a sufficient contrast ratio.
+Low-contrast text is difficult or impossible for many users to read. Learn how to provide sufficient color contrast.
+Failing Elements
+Cart
+<span class="text-xs sm:text-sm font-medium hidden sm:inline">
+Cart
+<button class="justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offse…" data-testid="button-cart" style="min-height: 44px;">
+15+ years serving homeowners and businesses
+<span class="text-muted-foreground leading-relaxed">
+Why CopperBear is Your Trusted Electrical Partner 15+ years serving homeowners …
+<section class="py-16 bg-background bg-white" aria-labelledby="why-choose-heading" data-testid="why-choose-section">
+Licensed, insured professionals you can trust
+<span class="text-muted-foreground leading-relaxed">
+Why CopperBear is Your Trusted Electrical Partner 15+ years serving homeowners …
+<section class="py-16 bg-background bg-white" aria-labelledby="why-choose-heading" data-testid="why-choose-section">
+24/7 emergency service - we're always here
+<span class="text-muted-foreground leading-relaxed">
+Why CopperBear is Your Trusted Electrical Partner 15+ years serving homeowners …
+<section class="py-16 bg-background bg-white" aria-labelledby="why-choose-heading" data-testid="why-choose-section">
+Licensed & insured professionals
+<p id="feature-benefit-trusted-experts" class="text-sm text-muted-foreground mb-3 line-clamp-2">
+Trusted Experts Licensed & insured professionals 98% Customer satisfaction
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-trusted-experts" aria-describedby="feature-benefit-trusted-experts" data-testid="feature-card-trusted-experts">
+Customer satisfaction
+<div class="text-xs text-muted-foreground" data-testid="stat-label-trusted-experts">
+Trusted Experts Licensed & insured professionals 98% Customer satisfaction
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-trusted-experts" aria-describedby="feature-benefit-trusted-experts" data-testid="feature-card-trusted-experts">
+Same-day service available
+<p id="feature-benefit-fast-response" class="text-sm text-muted-foreground mb-3 line-clamp-2">
+Fast Response Same-day service available 2hr Response time
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-fast-response" aria-describedby="feature-benefit-fast-response" data-testid="feature-card-fast-response">
+Response time
+<div class="text-xs text-muted-foreground" data-testid="stat-label-fast-response">
+Fast Response Same-day service available 2hr Response time
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-fast-response" aria-describedby="feature-benefit-fast-response" data-testid="feature-card-fast-response">
+Guaranteed workmanship
+<p id="feature-benefit-quality-work" class="text-sm text-muted-foreground mb-3 line-clamp-2">
+Quality Work Guaranteed workmanship 100% Work guaranteed
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-quality-work" aria-describedby="feature-benefit-quality-work" data-testid="feature-card-quality-work">
+Work guaranteed
+<div class="text-xs text-muted-foreground" data-testid="stat-label-quality-work">
+Quality Work Guaranteed workmanship 100% Work guaranteed
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-quality-work" aria-describedby="feature-benefit-quality-work" data-testid="feature-card-quality-work">
+15+ years in electrical
+<p id="feature-benefit-experienced-team" class="text-sm text-muted-foreground mb-3 line-clamp-2">
+Experienced Team 15+ years in electrical 15+ Years experience
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-experienced-team" aria-describedby="feature-benefit-experienced-team" data-testid="feature-card-experienced-team">
+Years experience
+<div class="text-xs text-muted-foreground" data-testid="stat-label-experienced-team">
+Experienced Team 15+ years in electrical 15+ Years experience
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-experienced-team" aria-describedby="feature-benefit-experienced-team" data-testid="feature-card-experienced-team">
+Serving your community
+<p id="feature-benefit-local-business" class="text-sm text-muted-foreground mb-3 line-clamp-2">
+Local Business Serving your community 1000+ Projects completed
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-local-business" aria-describedby="feature-benefit-local-business" data-testid="feature-card-local-business">
+Projects completed
+<div class="text-xs text-muted-foreground" data-testid="stat-label-local-business">
+Local Business Serving your community 1000+ Projects completed
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-local-business" aria-describedby="feature-benefit-local-business" data-testid="feature-card-local-business">
+Latest electrical technology
+<p id="feature-benefit-modern-solutions" class="text-sm text-muted-foreground mb-3 line-clamp-2">
+Modern Solutions Latest electrical technology 5⭐ Google rating
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-modern-solutions" aria-describedby="feature-benefit-modern-solutions" data-testid="feature-card-modern-solutions">
+Google rating
+<div class="text-xs text-muted-foreground" data-testid="stat-label-modern-solutions">
+Modern Solutions Latest electrical technology 5⭐ Google rating
+<div class="rounded-lg border bg-card text-card-foreground shadow-sm h-full transition…" tabindex="0" role="article" aria-labelledby="feature-title-modern-solutions" aria-describedby="feature-benefit-modern-solutions" data-testid="feature-card-modern-solutions">
+1-3 Days Delivery
+<p class="text-xs text-gray-500 mt-1">
+Your trusted partner for all electrical needs. Licensed, insured, and committed…
+<footer class="bg-gray-900 text-white">
+2-5 Days Delivery
+<p class="text-xs text-gray-500 mt-1">
+Your trusted partner for all electrical needs. Licensed, insured, and committed…
+<footer class="bg-gray-900 text-white">
+All India Delivery Available - Free shipping on orders above ₹10,000
+<p class="text-xs text-gray-500 mt-4">
+Your trusted partner for all electrical needs. Licensed, insured, and committed…
+<footer class="bg-gray-900 text-white">
+These are opportunities to improve the legibility of your content.
+Navigation
+Heading elements are not in a sequentially-descending order
+Properly ordered headings that do not skip levels convey the semantic structure of the page, making it easier to navigate and understand when using assistive technologies. Learn more about heading order.
+Failing Elements
+Professional Wire
+<h3 class="text-2xl font-bold mb-2">
+Products
+<h5 class="text-lg font-semibold mb-4">
