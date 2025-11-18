@@ -1,4 +1,4 @@
-/* Inter font from Google Fonts */
+/* Inter font from Google Fonts - Optimized with display=swap for performance */
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 /* Auth animations */
@@ -132,7 +132,7 @@ input:focus {
   --background: 0 0% 100%;
   --foreground: 187 14% 15%;
   --muted: 186 10% 95%;
-  --muted-foreground: 186 8% 45%;
+  --muted-foreground: 186 8% 38%; /* Improved for WCAG AA contrast ratio (was 45%) */
   --popover: 0 0% 100%;
   --popover-foreground: 187 14% 15%;
   --card: 0 0% 100%;

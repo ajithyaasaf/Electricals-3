@@ -107,6 +107,7 @@ export function SearchBar() {
             <SelectTrigger 
               className="w-36 rounded-r-none border-r-0 bg-gray-100"
               data-testid="select-category"
+              aria-label="Select product category"
             >
               <SelectValue placeholder="Category" />
             </SelectTrigger>
@@ -138,6 +139,7 @@ export function SearchBar() {
             type="submit"
             className="rounded-l-none bg-copper-600 hover:bg-copper-700 text-white"
             data-testid="button-search"
+            aria-label="Search products"
           >
             <Search className="h-4 w-4" />
           </Button>

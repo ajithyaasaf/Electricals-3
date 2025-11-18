@@ -403,13 +403,13 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
           <div className="lg:col-span-2">
             <div 
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              role="grid"
+              role="list"
               aria-label="CopperBear features and benefits"
             >
               {data.features
                 .sort((a, b) => (a.order || 0) - (b.order || 0))
                 .map((feature, index) => (
-                  <div key={feature.id} role="gridcell">
+                  <div key={feature.id} role="listitem">
                     <FeatureCard feature={feature} index={index} />
                   </div>
                 ))}
