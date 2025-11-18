@@ -99,13 +99,23 @@ export function useEnterpriseNavigation() {
   ) => {
     const currentPath = location;
     
-    // Don't navigate to the same path
-    if (currentPath === newPath) return;
+    // For same-path navigation, still trigger setLocation to ensure
+    // React Router/wouter properly updates and re-renders components
+    // This is important for mobile menu closing and filter updates
+    const isSamePath = currentPath === newPath;
 
     // Save current scroll position
     saveScrollPosition(currentPath);
 
-    // Start navigation state
+    // For same-path navigation, skip loading animation for instant feel
+    if (isSamePath) {
+      // Still call setLocation to ensure proper state updates
+      // This is crucial for mobile menu closing and component re-renders
+      setLocation(newPath, { replace: options.replace || true });
+      return;
+    }
+
+    // Start navigation state (only for different paths)
     setNavigationState(prev => ({
       ...prev,
       isNavigating: true,

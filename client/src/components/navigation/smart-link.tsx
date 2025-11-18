@@ -32,21 +32,24 @@ export const SmartLink = forwardRef<HTMLAnchorElement, SmartLinkProps>(
       (href.includes('?') && location.includes(href.split('?')[0]));
     
     const handleClick = useCallback((e: React.MouseEvent<HTMLAnchorElement>) => {
-      // Don't prevent default for normal clicks - let wouter handle it
-      // Only prevent for special cases like middle-click or modified clicks
+      // Don't prevent default for special cases like middle-click or modified clicks
       if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) {
         return;
       }
       
+      // Always prevent default to maintain SPA behavior
       e.preventDefault();
       
-      // Call original onClick if provided
+      // Call original onClick if provided (e.g., closing mobile menu)
+      // This executes AFTER preventing default to ensure SPA navigation
       if (onClick) {
         onClick(e);
-        if (e.defaultPrevented) return; // If custom onClick prevented, don't navigate
+        if (e.defaultPrevented) return; // If custom onClick prevented further navigation, stop
       }
       
-      // Use enterprise navigation
+      // Always use enterprise navigation to stay in SPA mode
+      // Even for same-route navigation, this ensures proper state updates
+      // without forcing full-page reloads
       navigateWithProgress(href, { 
         preload,
         replace 

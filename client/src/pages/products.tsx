@@ -314,7 +314,7 @@ export default function Products() {
     // Wait for categories to load before syncing category filter
     if (categories.length === 0) return;
     
-    // Derive complete filter state from URL
+    // Derive complete filter state from URL - explicitly clear if not present
     let categoryId: string | undefined = undefined;
     if (urlCategory) {
       const category = categories.find(c => c.slug === urlCategory);
@@ -325,12 +325,13 @@ export default function Products() {
 
     // Only sync from URL, don't compare with current filter state
     // This prevents loops when user clicks X to remove filters
+    // IMPORTANT: Explicitly set all URL-derived filters (including undefined) to clear them when absent
     syncOriginRef.current = 'url';
     setFilters(prev => ({
       ...prev,
-      categoryId,
-      search: urlSearch,
-      featured: urlFeatured
+      categoryId: categoryId,  // Explicitly set to undefined when urlCategory is empty
+      search: urlSearch,        // Explicitly set to empty string when not in URL
+      featured: urlFeatured     // Explicitly set to false when not in URL
     }));
   }, [categories, urlCategory, urlSearch, urlFeatured]);
 
