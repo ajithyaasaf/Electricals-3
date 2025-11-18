@@ -21,7 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 import { SearchBar } from "@/components/common/search-bar";
 import { CartSidebar } from "@/components/cart/cart-sidebar";
 
@@ -182,6 +182,7 @@ export function Header() {
                     </Button>
                   </SheetTrigger>
                   <SheetContent side="top" className="h-auto p-4">
+                    <SheetTitle className="sr-only">Search Products</SheetTitle>
                     <SearchBar />
                   </SheetContent>
                 </Sheet>
@@ -201,6 +202,7 @@ export function Header() {
                     side="left"
                     className="w-[85vw] max-w-sm p-0 overflow-y-auto"
                   >
+                  <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                   {/* Header */}
                   <div className="bg-copper-700 text-white p-4 sm:p-6">
                     <div className="flex items-center space-x-2">
