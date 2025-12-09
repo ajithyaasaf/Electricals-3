@@ -8,7 +8,7 @@ export function registerProductRoutes(app: Express) {
   app.get("/api/products", async (req, res) => {
     try {
       const { categoryId, category, search, featured, minPrice, maxPrice, sortBy = "newest", sortOrder = "desc", limit = 20, offset = 0 } = req.query;
-      
+
       let products: any[] = [];
       if (featured === "true") {
         products = await storage.getFeaturedProducts();
@@ -29,13 +29,18 @@ export function registerProductRoutes(app: Express) {
         products = await storage.getAllProducts();
       }
 
+      // Apply discount filtering
+      if (req.query.hasDiscount === "true") {
+        products = products.filter(p => p.originalPrice && p.originalPrice > p.price);
+      }
+
       // Apply price filtering
       if (minPrice || maxPrice) {
         const minPriceNum = minPrice ? parseFloat(minPrice as string) : 0;
         const maxPriceNum = maxPrice ? parseFloat(maxPrice as string) : Infinity;
-        
+
         console.log(`🔍 Price filtering: min=${minPriceNum}, max=${maxPriceNum}`);
-        
+
         const originalCount = products.length;
         products = products.filter(product => {
           const price = parseFloat(product.price.toString());
@@ -45,14 +50,14 @@ export function registerProductRoutes(app: Express) {
           }
           return withinRange;
         });
-        
+
         console.log(`📊 Price filtering: ${originalCount} → ${products.length} products`);
       }
 
       // Apply sorting
       products = products.sort((a, b) => {
         let comparison = 0;
-        
+
         switch (sortBy) {
           case "name":
             comparison = a.name.localeCompare(b.name);
@@ -69,7 +74,7 @@ export function registerProductRoutes(app: Express) {
             comparison = a.id.localeCompare(b.id);
             break;
         }
-        
+
         return sortOrder === "desc" ? -comparison : comparison;
       });
 
@@ -124,7 +129,7 @@ export function registerProductRoutes(app: Express) {
     try {
       const userId = req.user.uid;
       const user = await storage.getUserById(userId);
-      
+
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -144,7 +149,7 @@ export function registerProductRoutes(app: Express) {
     try {
       const userId = req.user.uid;
       const user = await storage.getUserById(userId);
-      
+
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
@@ -164,7 +169,7 @@ export function registerProductRoutes(app: Express) {
     try {
       const userId = req.user.uid;
       const user = await storage.getUserById(userId);
-      
+
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }

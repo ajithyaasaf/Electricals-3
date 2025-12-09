@@ -56,7 +56,21 @@ export default function ProductDetail() {
   const [stockUrgency, setStockUrgency] = useState(false);
   const [showDeliveryEstimate, setShowDeliveryEstimate] = useState(false);
   const [imageZoom, setImageZoom] = useState({ x: 0, y: 0, scale: 1 });
+  const [scrollY, setScrollY] = useState(0);
+  const [showStickyBar, setShowStickyBar] = useState(false);
   const imageRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setScrollY(currentScrollY);
+      // Show sticky bar after scrolling past 500px (roughly past main image)
+      setShowStickyBar(currentScrollY > 500);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Fetch product details by slug
   const { data: product, isLoading } = useQuery<Product>({
@@ -238,31 +252,59 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-gray-50">
       <Header />
 
+
+
+
+      {/* Sticky Add to Cart Bar - Appears on Scroll */}
+      <div
+        className={`fixed top-0 left-0 w-full bg-white/90 backdrop-blur-md shadow-md z-40 transform transition-transform duration-300 border-b border-gray-200 ${showStickyBar ? "translate-y-0" : "-translate-y-full"
+          }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <img
+              src={images[0]}
+              alt={product.name}
+              className="w-10 h-10 object-cover rounded shadow-sm"
+            />
+            <div className="hidden md:block">
+              <h3 className="font-semibold text-gray-900 line-clamp-1">{product.name}</h3>
+              <p className="text-sm font-bold text-copper-600">{formatPrice(price)}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleAddToCart}
+              className="bg-copper-600 hover:bg-copper-700 text-white shadow-lg shadow-copper-200"
+            >
+              Add to Cart
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Breadcrumb */}
-        <nav className="text-sm text-gray-600 mb-6">
-          <Link href="/" className="hover:text-gray-900">
-            Home
-          </Link>
-          {" / "}
-          <Link href="/products" className="hover:text-gray-900">
-            Products
-          </Link>
-          {" / "}
-          <span className="text-gray-900">{product.name}</span>
+        {/* Breadcrumb - Elegant Minimalist */}
+        <nav className="text-sm text-gray-500 mb-8 pt-4 flex items-center space-x-2">
+          <Link href="/" className="hover:text-copper-600 transition-colors">Home</Link>
+          <ChevronRight className="w-4 h-4 text-gray-400" />
+          <Link href="/products" className="hover:text-copper-600 transition-colors">Products</Link>
+          <ChevronRight className="w-4 h-4 text-gray-400" />
+          <span className="text-gray-900 font-medium truncate max-w-[200px]">{product.name}</span>
         </nav>
 
-        {/* Product Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Advanced Product Images Gallery */}
-          <div className="space-y-4">
-            {/* Main Image with Zoom */}
-            <div className="relative aspect-square bg-white rounded-lg overflow-hidden group">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 xl:gap-16 mb-20 relative">
+
+          {/* Left Column - Sticky Image Gallery */}
+          <div className="space-y-6 lg:sticky lg:top-24 h-fit">
+
+            {/* Main Image with Premium Zoom Interaction */}
+            <div className="relative aspect-square bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 shadow-sm group">
               <img
                 ref={imageRef}
                 src={images[selectedImageIndex]}
                 alt={product.name}
-                className="w-full h-full object-cover cursor-zoom-in transition-transform duration-300"
+                className="w-full h-full object-cover cursor-crosshair transition-transform duration-500 ease-out"
                 style={{
                   transform: `scale(${imageZoom.scale})`,
                   transformOrigin: `${imageZoom.x}% ${imageZoom.y}%`,
@@ -272,266 +314,207 @@ export default function ProductDetail() {
                 onClick={() => setShowImageModal(true)}
               />
 
-              {/* Image Navigation Arrows */}
+              {/* Badges - Floating glassmorphism */}
+              <div className="absolute top-4 left-4 flex flex-col gap-2">
+                {hasDiscount && (
+                  <Badge className="bg-white/90 backdrop-blur text-red-600 border-red-100 shadow-sm px-3 py-1 text-xs uppercase tracking-wider">
+                    -{formatSavings(originalPrice!, price)}
+                  </Badge>
+                )}
+                {recentlyViewed > 5 && (
+                  <Badge className="bg-white/90 backdrop-blur text-gray-800 border-gray-200 shadow-sm px-3 py-1 text-xs flex items-center gap-1">
+                    <Eye className="w-3 h-3" /> {recentlyViewed} viewing
+                  </Badge>
+                )}
+              </div>
+
+              {/* Navigation Arrows (Hover only) */}
               {images.length > 1 && (
                 <>
                   <button
                     onClick={prevImage}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                    aria-label="Previous image"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={nextImage}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-black/70"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+                    aria-label="Next image"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </>
               )}
-
-              {/* Zoom Indicator */}
-              <div className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <ZoomIn className="w-4 h-4" />
-              </div>
-
-              {/* Clean Viewing Badge */}
-              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm border border-gray-200 px-3 py-1 rounded text-xs font-medium flex items-center space-x-1">
-                <Eye className="w-3 h-3 text-gray-600" />
-                <span className="text-gray-700">{recentlyViewed} viewing</span>
-              </div>
             </div>
 
-            {/* Thumbnail Grid */}
+            {/* Thumbnail Carousel - Clean & Minimal */}
             {images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
+              <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
                 {images.map((image: string, index: number) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`aspect-square bg-white rounded-lg overflow-hidden border-2 transition-all duration-200 hover:scale-105 ${
-                      selectedImageIndex === index
-                        ? "border-copper-600 shadow-lg"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 transition-all duration-300 ${selectedImageIndex === index
+                      ? "border-copper-600 ring-4 ring-copper-50"
+                      : "border-transparent opacity-70 hover:opacity-100 hover:border-gray-200"
+                      }`}
                   >
                     <img
                       src={image}
-                      alt={`${product.name} ${index + 1}`}
+                      alt={`${product.name} view ${index + 1}`}
                       className="w-full h-full object-cover"
                     />
                   </button>
                 ))}
               </div>
             )}
-
-            {/* Share Button */}
-            <button className="w-full flex items-center justify-center space-x-2 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200">
-              <Share2 className="w-4 h-4" />
-              <span className="text-sm font-medium">Share this product</span>
-            </button>
           </div>
 
-          {/* Product Info */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          {/* Right Column - Premium Buy Box Info */}
+          <div className="flex flex-col pt-2">
+
+            {/* Header Section */}
+            <div className="mb-6 border-b border-gray-100 pb-6">
+              {product.category && (
+                <Link href={`/products?category=${product.category.slug}`} className="text-copper-600 font-medium text-sm uppercase tracking-wider mb-2 block hover:underline">
+                  {product.category.name}
+                </Link>
+              )}
+              <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight tracking-tight">
                 {product.name}
               </h1>
 
-              {product.sku && (
-                <p className="text-sm text-gray-600 mb-4">SKU: {product.sku}</p>
-              )}
-
-              {/* Rating */}
-              {rating > 0 && (
-                <div className="flex items-center mb-4">
-                  <div className="flex text-yellow-400 mr-2">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-5 h-5 ${i < Math.floor(rating) ? "fill-current" : ""}`}
-                      />
-                    ))}
+              <div className="flex items-center gap-4 text-sm">
+                {rating > 0 && (
+                  <div className="flex items-center gap-1 group cursor-pointer hover:bg-gray-50 px-2 py-1 -ml-2 rounded-lg transition-colors">
+                    <div className="flex text-amber-400">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className={`w-4 h-4 ${i < Math.floor(rating) ? "fill-current" : "text-gray-200"}`} />
+                      ))}
+                    </div>
+                    <span className="font-medium text-gray-700 underline decoration-gray-300 underline-offset-4 group-hover:decoration-copper-400">
+                      {reviewCount} reviews
+                    </span>
                   </div>
-                  <span className="text-sm text-gray-600">
-                    ({reviewCount} reviews)
-                  </span>
-                </div>
-              )}
+                )}
+                {product.sku && <span className="text-gray-400">|</span>}
+                {product.sku && <span className="text-gray-500 font-mono">SKU: {product.sku}</span>}
+              </div>
+            </div>
 
-              {/* Price */}
-              <div className="flex items-center space-x-4 mb-6">
-                <span className="text-3xl font-bold text-gray-900">
+            {/* Price Section - Big Statement */}
+            <div className="mb-8">
+              <div className="flex items-baseline gap-4">
+                <span className="text-4xl font-bold text-gray-900 tracking-tight">
                   {formatPrice(price)}
                 </span>
                 {originalPrice && (
-                  <span className="text-xl text-gray-500 line-through">
+                  <span className="text-xl text-gray-400 line-through decoration-2">
                     {formatPrice(originalPrice)}
                   </span>
                 )}
-                {hasDiscount && (
-                  <Badge className="bg-red-500">
-                    {formatSavings(originalPrice!, price)}
-                  </Badge>
-                )}
               </div>
-
-              {/* Stock Status */}
-              <div className="mb-6">
-                {product.stock && product.stock > 0 ? (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-green-700 border-green-300 bg-green-50">
-                        In Stock
-                      </Badge>
-                      {stockUrgency && (
-                        <span className="text-sm text-muted-foreground">
-                          Only {product.stock} left
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Delivery Options */}
-                    <button
-                      onClick={() =>
-                        setShowDeliveryEstimate(!showDeliveryEstimate)
-                      }
-                      className="flex items-center gap-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
-                      data-testid="button-delivery-options"
-                    >
-                      <Truck className="w-4 h-4" />
-                      <span>Check delivery options</span>
-                      <ChevronDown
-                        className={`w-4 h-4 transition-transform duration-200 ${showDeliveryEstimate ? "rotate-180" : ""}`}
-                      />
-                    </button>
-
-                    {showDeliveryEstimate && (
-                      <div className="bg-blue-50 p-4 rounded-md text-sm space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-muted-foreground">Standard Delivery:</span>
-                          <span className="font-medium">3-5 business days</span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-muted-foreground">Express Delivery:</span>
-                          <span className="font-medium">1-2 business days</span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Badge variant="destructive">Out of Stock</Badge>
-                    <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                      Notify me when available
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Short Description */}
-              {product.shortDescription && (
-                <p className="text-gray-600 mb-6">{product.shortDescription}</p>
+              {hasDiscount && (
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
+                    Save {formatPrice(originalPrice! - price)}
+                  </span>
+                  <p className="text-sm text-gray-500">Includes all taxes</p>
+                </div>
               )}
+            </div>
 
-              {/* Quantity and Add to Cart */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-4">
-                  <label className="text-sm font-medium text-gray-900">
-                    Quantity:
-                  </label>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="icon"
+            {/* Description Excerpt */}
+            {product.shortDescription && (
+              <p className="text-lg text-gray-600 leading-relaxed mb-8">
+                {product.shortDescription}
+              </p>
+            )}
+
+            {/* Purchase Options */}
+            <div className="space-y-6 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+
+              {/* Quantity Selector */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                    <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
                       disabled={quantity <= 1}
+                      className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
                     >
-                      <Minus className="h-4 w-4" />
-                    </Button>
-                    <Input
+                      <Minus className="w-4 h-4 text-gray-600" />
+                    </button>
+                    <input
                       type="number"
                       value={quantity}
-                      onChange={(e) =>
-                        setQuantity(Math.max(1, parseInt(e.target.value) || 1))
-                      }
-                      className="w-20 text-center"
-                      min="1"
-                      max={product.stock || 999}
+                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                      className="w-16 text-center border-none focus:ring-0 font-medium text-gray-900"
                     />
-                    <Button
-                      variant="outline"
-                      size="icon"
+                    <button
                       onClick={() => setQuantity(quantity + 1)}
                       disabled={quantity >= (product.stock || 0)}
+                      className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
                     >
-                      <Plus className="h-4 w-4" />
-                    </Button>
+                      <Plus className="w-4 h-4 text-gray-600" />
+                    </button>
                   </div>
-                </div>
 
-                <div className="flex space-x-4">
-                  <Button
-                    onClick={handleAddToCart}
-                    disabled={addToCartMutation.isPending || !product.stock}
-                    className="flex-1 bg-copper-600 hover:bg-copper-700 text-white"
-                  >
-                    <ShoppingCart className="w-4 h-4 mr-2" />
-                    {addToCartMutation.isPending ? "Adding..." : "Add to Cart"}
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    onClick={handleToggleWishlist}
-                    disabled={toggleWishlistMutation.isPending}
-                  >
-                    <Heart
-                      className={`w-4 h-4 ${isWishlisted ? "fill-current text-red-500" : ""}`}
-                    />
-                  </Button>
+                  {product.stock && product.stock < 10 && (
+                    <span className="text-red-600 text-sm font-medium animate-pulse">
+                      Only {product.stock} left in stock!
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* Clean Trust Badges */}
-              <div className="mt-8 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-4 border-t border-b border-gray-200">
-                  <div className="flex items-center space-x-2">
-                    <Shield className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm text-gray-700">Quality Guaranteed</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Truck className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm text-gray-700">Free Shipping ₹500+</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RotateCcw className="w-5 h-5 text-gray-600" />
-                    <span className="text-sm text-gray-700">30-Day Returns</span>
-                  </div>
+              {/* Primary Actions */}
+              <div className="flex flex-col sm:flex-row gap-4">
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={!product.stock}
+                  className="flex-1 h-12 text-lg font-semibold bg-copper-600 hover:bg-copper-700 text-white rounded-xl shadow-lg shadow-copper-100 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  {product.stock ? "Add to Cart" : "Out of Stock"}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={handleToggleWishlist}
+                  className="h-12 px-6 rounded-xl border-gray-200 hover:border-copper-200 hover:bg-copper-50 transition-colors"
+                >
+                  <Heart className={`w-6 h-6 ${isWishlisted ? "fill-red-500 text-red-500" : "text-gray-400"}`} />
+                </Button>
+              </div>
+
+              {/* Guarantees */}
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200/50">
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Shield className="w-4 h-4 text-copper-600" />
+                  <span>2 Year Warranty</span>
                 </div>
-                
-                {/* Simple Social Proof */}
-                <div className="flex items-center justify-between py-2 px-3 bg-orange-50 border border-orange-200 rounded">
-                  <span className="text-sm text-orange-800">{recentlyViewed * 4} people added this to cart this week</span>
-                  <span className="text-xs text-orange-700 font-medium">Trending</span>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <RotateCcw className="w-4 h-4 text-copper-600" />
+                  <span>30-Day Returns</span>
                 </div>
-                
-                {/* Customer Satisfaction */}
-                <div className="flex items-center space-x-2">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-700">98% Customer Satisfaction</span>
-                  <span className="text-xs text-gray-500">(Based on 300+ reviews)</span>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Truck className="w-4 h-4 text-copper-600" />
+                  <span>Free Shipping</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Shield className="w-4 h-4 text-copper-600" />
+                  <span>Secure Checkout</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Frequently Bought Together */}
+        {/* Frequently Bought Together (Refreshed) */}
         <div className="mb-12 p-6 bg-white rounded-lg border border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             Frequently Bought Together
@@ -861,45 +844,47 @@ export default function ProductDetail() {
       </div>
 
       {/* Fullscreen Image Modal */}
-      {showImageModal && (
-        <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-          <div className="relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center px-4">
-            <button
-              onClick={() => setShowImageModal(false)}
-              className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
-            >
-              <X className="w-8 h-8" />
-            </button>
+      {
+        showImageModal && (
+          <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
+            <div className="relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center px-4">
+              <button
+                onClick={() => setShowImageModal(false)}
+                className="absolute top-4 right-4 text-white hover:text-gray-300 z-10"
+              >
+                <X className="w-8 h-8" />
+              </button>
 
-            {images.length > 1 && (
-              <>
-                <button
-                  onClick={prevImage}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10"
-                >
-                  <ChevronLeft className="w-10 h-10" />
-                </button>
-                <button
-                  onClick={nextImage}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10"
-                >
-                  <ChevronRight className="w-10 h-10" />
-                </button>
-              </>
-            )}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={prevImage}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10"
+                  >
+                    <ChevronLeft className="w-10 h-10" />
+                  </button>
+                  <button
+                    onClick={nextImage}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-white hover:text-gray-300 z-10"
+                  >
+                    <ChevronRight className="w-10 h-10" />
+                  </button>
+                </>
+              )}
 
-            <img
-              src={images[selectedImageIndex]}
-              alt={product.name}
-              className="max-w-full max-h-full object-contain"
-            />
+              <img
+                src={images[selectedImageIndex]}
+                alt={product.name}
+                className="max-w-full max-h-full object-contain"
+              />
 
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm">
-              {selectedImageIndex + 1} / {images.length}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white text-sm">
+                {selectedImageIndex + 1} / {images.length}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Clean Purchase Notification */}
       <div className="fixed bottom-4 left-4 z-40">
@@ -914,6 +899,6 @@ export default function ProductDetail() {
       </div>
 
       <Footer />
-    </div>
+    </div >
   );
 }

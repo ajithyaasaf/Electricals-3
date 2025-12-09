@@ -26,7 +26,7 @@ import { useSEO } from "@/hooks/use-seo";
 
 export default function Home() {
   const { user } = useFirebaseAuth();
-  
+
   // SEO optimization for homepage
   useSEO();
 
@@ -40,9 +40,9 @@ export default function Home() {
     queryKey: ["/api/services", { limit: 3 }],
   });
 
-  // Fetch deals data
+  // Fetch deals data (real discounted products)
   const { data: dealsData } = useQuery({
-    queryKey: ["/api/deals", { limit: 4 }],
+    queryKey: ["/api/products", { hasDiscount: true, limit: 4 }],
   });
 
   // Fetch best sellers
@@ -71,7 +71,7 @@ export default function Home() {
       featured: true
     },
     {
-      name: "Wiring & Cable Solutions", 
+      name: "Wiring & Cable Solutions",
       slug: "wiring-cables",
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
       description: "High-quality electrical wiring, cables, and connectivity solutions for all projects",
@@ -80,7 +80,7 @@ export default function Home() {
     },
     {
       name: "Professional Tools",
-      slug: "electrical-tools", 
+      slug: "electrical-tools",
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
       description: "Premium electrical tools and equipment for professionals and contractors",
       itemCount: 320,
@@ -109,54 +109,8 @@ export default function Home() {
     }
   ];
 
-  // Mock deals data (in real app, this would come from API)
-  const mockDeals = (dealsData as any)?.deals || [
-    {
-      id: "deal1",
-      title: "Professional Electrical Tool Kit",
-      description: "Complete 50-piece electrician tool set with case",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
-      discount: "30% OFF",
-      originalPrice: 24999,
-      salePrice: 17499,
-      timeLeft: "2h 45m",
-      link: "/products/professional-tool-kit",
-      category: "tools"
-    },
-    {
-      id: "deal2", 
-      title: "Smart Circuit Breaker",
-      description: "WiFi-enabled smart breaker with app control",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
-      discount: "25% OFF",  
-      originalPrice: 7499,
-      salePrice: 5624,
-      link: "/products/smart-breaker",
-      category: "breakers"
-    },
-    {
-      id: "deal3",
-      title: "LED Work Light Set",
-      description: "Portable LED work lights - Pack of 4",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
-      discount: "40% OFF", 
-      originalPrice: 6649,
-      salePrice: 3999,
-      link: "/products/led-work-lights",
-      category: "lighting"
-    },
-    {
-      id: "deal4",
-      title: "Wire Nuts Bulk Pack",
-      description: "Professional wire nuts - 500 piece assortment",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
-      discount: "50% OFF",
-      originalPrice: 2499,
-      salePrice: 1249,
-      link: "/products/wire-nuts-bulk",
-      category: "wiring"
-    }
-  ];
+  // Use real data
+  const deals = (dealsData as any)?.products || [];
 
   // Mock product data generator for horizontal sections
   const mockProducts = (type: string) => [
@@ -237,10 +191,10 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       {/* Hero Banner Slider - Amazon/Flipkart Style */}
       <div className="bg-gray-50 py-8 px-4 md:px-6 lg:px-8">
-        <BannerSlider 
+        <BannerSlider
           autoPlayInterval={5000}
           showControls={true}
           showDots={true}
@@ -254,7 +208,7 @@ export default function Home() {
       <RecentlyViewed />
 
       {/* Deals Banner */}
-      <DealsBanner deals={mockDeals} />
+      <DealsBanner products={deals} />
 
       {/* Visual Category Cards - Amazon Style */}
       <VisualCategoryCards categories={visualCategories} />
@@ -357,7 +311,7 @@ export default function Home() {
       </section>
 
       {/* Why Choose CopperBear Section */}
-      <WhyChooseSection 
+      <WhyChooseSection
         realtimePath="siteContent/whyChooseSection"
         className="bg-gray-50"
       />
