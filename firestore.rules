@@ -1,0 +1,123 @@
+rules_version = '2';
+
+/**
+ * CopperBear Electrical - Firestore Security Rules
+ * 
+ * ARCHITECTURE: Backend uses Firebase Admin SDK (bypasses these rules)
+ * 
+ * These rules apply ONLY to client-side requests (browser/frontend).
+ * The backend Admin SDK has full access regardless of these rules.
+ * 
+ * Security Model:
+ * - Public catalog data: Anyone can read
+ * - User-specific data: Only authenticated users can read their own data
+ * - Write operations: DENIED for clients (must go through backend API)
+ * 
+ * @see docs/ARCHITECTURE_DECISION.md
+ */
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // HELPER FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // PUBLIC CATALOG (Read-only for everyone)
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    // Products - Public catalog, read-only from client
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false; // Backend Admin SDK only
+    }
+    
+    // Categories - Public navigation
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Services - Public listings
+    match /services/{serviceId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // Reviews - Public, read-only
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow write: if false;
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // SITE CONTENT (CMS - Read-only for public)
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /siteContent/{docId} {
+      allow read: if true;
+      allow write: if false; // Only Admin SDK (site-content.ts route)
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // USER DATA (Auth-gated reads, backend-only writes)
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if false;
+    }
+    
+    match /cartItems/{itemId} {
+      allow read: if isAuthenticated() && 
+                    resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+    
+    match /orders/{orderId} {
+      allow read: if isAuthenticated() && 
+                    resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+    
+    match /orderItems/{itemId} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+    
+    match /wishlistItems/{itemId} {
+      allow read: if isAuthenticated() && 
+                    resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+    
+    match /serviceBookings/{bookingId} {
+      allow read: if isAuthenticated() && 
+                    resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+    
+    match /addresses/{addressId} {
+      allow read: if isAuthenticated() && 
+                    resource.data.userId == request.auth.uid;
+      allow write: if false;
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════
+    // CATCH-ALL: Deny everything else
+    // ═══════════════════════════════════════════════════════════════════════
+    
+    match /{document=**} {
+      allow read: if isAuthenticated();
+      allow write: if false;
+    }
+  }
+}

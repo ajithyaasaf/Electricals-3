@@ -1,0 +1,82 @@
+Implement and fix cart migration + preservation so carts never lose items during login/logout transitions.
+
+1. Guest → Login (Merge carts)
+When a guest logs in:
+
+Fetch the authenticated cart from the server.
+
+Merge guest cart items from localStorage into the authenticated cart.
+
+If an item exists in both (match by productId + serviceId), sum quantities or apply customization conflict rules.
+
+Save merged cart to the server and return it.
+
+Clear localStorage.guestCart only after migration success.
+
+TypeScript merge function for /api/cart/migrate:
+
+ts
+Copy
+Edit
+function mergeCarts(authCart: CartItem[], guestCart: GuestCartItem[]): CartItem[] {
+  const merged = [...authCart];
+
+  guestCart.forEach(guestItem => {
+    const existingIndex = merged.findIndex(
+      item =>
+        item.productId === guestItem.productId &&
+        item.serviceId === guestItem.serviceId
+    );
+
+    if (existingIndex >= 0) {
+      // Merge quantities
+      merged[existingIndex].quantity += guestItem.quantity;
+      // Optionally merge customizations if business rules allow
+    } else {
+      // Convert guest item to full CartItem format
+      merged.push({
+        ...guestItem,
+        price: 0, // Server will recalc
+        discount: 0,
+        createdAt: new Date().toISOString()
+      });
+    }
+  });
+
+  return merged;
+}
+2. Login → Logout (Preserve continuity)
+When a logged-in user logs out:
+
+Convert the authenticated cart to guest cart format.
+
+Save to localStorage.guestCart.
+
+Immediately load the guest cart into CartContext so UI matches.
+
+Do not leave authenticated cart in memory after logout.
+
+Preservation function:
+
+ts
+Copy
+Edit
+function preserveCartOnLogout(authCart: CartItem[]): GuestCartItem[] {
+  return authCart.map(item => ({
+    id: `preserved_${Date.now()}_${Math.random()}`,
+    productId: item.productId,
+    serviceId: item.serviceId,
+    quantity: item.quantity,
+    addedAt: Date.now(),
+    customizations: item.customizations || {}
+  }));
+}
+3. Rules
+No guest items vanish on login — always merge, never replace.
+
+After logout, cart should match the authenticated cart before logout.
+
+Prevent duplicates by matching productId + serviceId before adding.
+
+Server recalculates prices, discounts, and totals after merge.
+

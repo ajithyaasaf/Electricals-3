@@ -1,0 +1,135 @@
+Fix the cart system so guest mode and logged-in mode behave identically and reliably. Right now guest mode works perfectly; after login the cart behaves differently — quantity increments don’t persist, subtotal/total don’t recalc dynamically, and UI values get overwritten or revert. Find and remove the root causes (state-source conflicts, refetch overwrites, merge bugs, race conditions), and deliver a single, consistent cart flow.
+
+Goals
+Single source of truth for cart data (no competing systems writing different values).
+
+Instant, correct UI updates (quantities, item subtotal, cart subtotal, taxes/discounts, grand total) in both guest and logged-in modes.
+
+Robust guest → login merge that preserves items and quantities and updates server & UI immediately.
+
+No quantity reverts after successful update; handle fast clicks reliably.
+
+High-level approach (requirements)
+Unify source-of-truth
+
+Pick one system: either CartContext (recommended) or TanStack Query useCart.
+
+If using CartContext: ensure useCart reads from CartContext (or remove useCart).
+
+If using TanStack Query: make product cards use useCart + queryClient.setQueryData for optimistic updates.
+
+Important: Do not let one system overwrite the other’s state during/after updates.
+
+Deterministic cart reducer & derived selectors
+
+Implement cart reducer with actions: ADD_ITEM, INCREMENT_QTY, DECREMENT_QTY, SET_CART, REMOVE_ITEM, CLEAR_GUEST_CART.
+
+Cart item shape: { id, productId?, serviceId?, name, price, quantity, lineSubtotal }.
+
+Compute totals with useMemo/selectors: totalQuantity, subtotal, discountTotal, tax, grandTotal.
+
+Ensure UI components read totals from these selectors (not from ad-hoc computations).
+
+Optimistic updates + persistence
+
+On + click: update CartContext state immediately (optimistic).
+
+Fire the API/localStorage write in background.
+
+If API fails, rollback to previous state and show error toast.
+
+Avoid overwrites from refetches
+
+If using TanStack Query for server cart, use queryClient.setQueryData('cart', newCart) after optimistic update and invalidateQueries('cart') only after merge completes.
+
+Temporarily cancelQueries('cart') during login/merge to prevent refetch from overwriting optimistic values.
+
+Guest → Login merge flow
+
+Before login: guest cart persisted in localStorage as an array.
+
+On login: call /api/cart/migrate with local guest cart payload.
+
+Server merges in Firestore (sum quantities for duplicates) and responds with merged cart.
+
+Client uses response to SET_CART in CartContext / queryClient.setQueryData('cart', mergedCart').
+
+Clear guest localStorage cart only after successful server response.
+
+Concurrency & rapid clicks
+
+Implement a lightweight per-item update queue or debounce flush (e.g., buffer increments for 200–300ms then send single API update), OR process clicks sequentially (queue).
+
+Make updates atomic on the server (increment operator in the DB where possible).
+
+Add robust logging & telemetry
+
+Add temporary console logs on client: before login (read guest cart), payload sent to /api/cart/migrate, response body, setCart calls, optimistic update attempts, and final state.
+
+Add server logs for /api/cart/migrate, updateQuantity, addToCart showing incoming payloads and Firestore write results.
+
+Files to inspect & edit
+client/src/contexts/cart-context.tsx — migrate reducer and add selectors; ensure it is single source of truth.
+
+client/src/hooks/useCart.tsx — if kept, adapt it to read/write CartContext or remove usage in components that write to cart.
+
+client/src/components/CartIcon.tsx / header — ensure it subscribes to CartContext totals.
+
+client/src/pages/ProductsPage / product cards — make them dispatch to CartContext (or call unified addToCart function).
+
+client/src/pages/CartPage.tsx — read all derived totals from CartContext.
+
+lib/cart-service.ts (client) — ensure requests are consistent (/api/cart/add, /api/cart/update, /api/cart/migrate).
+
+server/src/routes/cart.ts — verify /api/cart/migrate, /api/cart/update-qty, /api/cart/add are implemented and return the updated cart.
+
+server/src/firestoreService.ts — ensure atomic updates and safe handling of undefined fields (skip invalid items).
+
+Temporary logs to add (examples)
+Client:
+
+ts
+Copy
+Edit
+console.log('GUEST CART BEFORE LOGIN', guestCart);
+console.log('MIGRATE PAYLOAD', payloadForMigrate);
+console.log('MIGRATE RESPONSE', response.data);
+console.log('SETTING CART CONTEXT', mergedCart);
+Server:
+
+ts
+Copy
+Edit
+console.log('POST /api/cart/migrate body:', req.body);
+console.log('Firestore merge result for user:', userId, mergedCart);
+Acceptance tests (must pass)
+Guest flow:
+
+Add A (qty 1) → CartIcon shows 1; Cart page shows A qty 1, subtotal and totals correct — no page refresh required.
+
+Click + on A three times quickly → UI shows qty 4 instantly, line subtotal updates, cart subtotal updates; after network roundtrip the stored quantity is 4.
+
+Rapid multi-product adds:
+
+Add A, then immediately add B (fast clicks) → both A and B appear; totals match.
+
+Guest → Login:
+
+Add items as guest (A qty 2, B qty 1) → login → /api/cart/migrate succeeds → Cart page shows A qty 2, B qty 1; server-side Firestore cart now contains A and B with same quantities; guest localStorage cleared.
+
+Logged-in qty updates:
+
+After login, increment A from 1 → 2 → 3 quickly → UI reflects and server persisted; no reverts.
+
+Common root causes to check (quick checklist)
+CartContext SET_CART not being called after server migration response.
+
+TanStack Query refetch overwriting a local optimistic state after login.
+
+useEffect that reads from Firestore on mount which runs after optimistic set and resets to stale data.
+
+Migrate endpoint returns 200 but with empty cart due to serviceId/productId undefined or validation rejecting items.
+
+LocalStorage cart cleared prematurely (before server response).
+
+Different item keys/ids used in guest vs server (client uses tempId, server uses docId) — unify keys.

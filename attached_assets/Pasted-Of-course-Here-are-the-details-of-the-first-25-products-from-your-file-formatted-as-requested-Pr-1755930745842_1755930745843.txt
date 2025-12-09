@@ -1,0 +1,626 @@
+Of course! Here are the details of the first 25 products from your file, formatted as requested:
+
+Product 1
+Slno: 1
+
+Product Name: 1.0sqmm Wire
+
+Category: Wires & Cables
+
+Brand: Finolex
+
+SKU/Code: FIN010303S
+
+Description: Finolex Flame retardant (FR) Pvc insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+
+Price: 1205.0
+
+MRP (if different): 1700.0
+
+Discount (if any): 40%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per coil
+
+Tax/HSN details (if required): 85446090.0
+
+Product 2
+Slno: 2
+
+Product Name: 1.5sqmm wire
+
+Category: Wires & Cables
+
+Brand: Finolex
+
+SKU/Code: FIN015303S
+
+Description: Finolex Flame retardant (FR) Pvc insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+
+Price: 1779.0
+
+MRP (if different): 2475.0
+
+Discount (if any): 39%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per coil
+
+Tax/HSN details (if required): 85446090.0
+
+Product 3
+Slno: 3
+
+Product Name: 2.5sqmm wire
+
+Category: Wires & Cables
+
+Brand: Finolex
+
+SKU/Code: FIN025303S
+
+Description: Finolex Flame retardant (FR) Pvc insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+
+Price: 2879.0
+
+MRP (if different): 4000.0
+
+Discount (if any): 39%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per coil
+
+Tax/HSN details (if required): 85446090.0
+
+Product 4
+Slno: 4
+
+Product Name: 4.0sqmm wire
+
+Category: Wires & Cables
+
+Brand: Finolex
+
+SKU/Code: FIN040303S
+
+Description: Finolex Flame retardant (FR) Pvc insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+
+Price: 4439.0
+
+MRP (if different): 6170.0
+
+Discount (if any): 39%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per coil
+
+Tax/HSN details (if required): 85446090.0
+
+Product 5
+Slno: 5
+
+Product Name: 1.0sqmm wire
+
+Category: Wires & Cables
+
+Brand: Kundan cable
+
+SKU/Code: KUN01020
+
+Description: Kundan Cable Flame retardant (FR) Pvc insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+
+Price: 1049.0
+
+MRP (if different): 2144.0
+
+Discount (if any): 51%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per coil
+
+Tax/HSN details (if required): 85446090.0
+
+Product 6
+Slno: 6
+
+Product Name: 1.5sqmm wire
+
+Category: Wires & Cables
+
+Brand: Kundan cable
+
+SKU/Code: KUN01520
+
+Description: Kundan Cable Flame retardant (FR) Pvc insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+
+Price: 1599.0
+
+MRP (if different): 3264.0
+
+Discount (if any): 51%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per coil
+
+Tax/HSN details (if required): 85446090.0
+
+Product 7
+Slno: 7
+
+Product Name: 2.5sqmm wire
+
+Category: Wires & Cables
+
+Brand: Kundan cable
+
+SKU/Code: KUN02520
+
+Description: Kundan Cable Flame retardant (FR) Pvc insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+
+Price: 2581.0
+
+MRP (if different): 5269.0
+
+Discount (if any): 51%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per coil
+
+Tax/HSN details (if required): 85446090.0
+
+Product 8
+Slno: 8
+
+Product Name: 4.0Sqmm wire
+
+Category: Wires & Cables
+
+Brand: Kundan cable
+
+SKU/Code: KUN04020
+
+Description: Kundan Cable Flame retardant (FR) Pvc insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor
+
+Price: 3809.0
+
+MRP (if different): 7774.0
+
+Discount (if any): 51%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per coil
+
+Tax/HSN details (if required): 85446090.0
+
+Product 9
+Slno: 9
+
+Product Name: 10w Inverter bulb
+
+Category: LED Emergency Bulb
+
+Brand: Sturlite
+
+SKU/Code: STU10EB3H
+
+Description: SMD LED chip, CRI>80, IP20,Bright light output, charging 6-8 hours, over charge protection, 6k - 3Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.
+
+Price: 214.08
+
+MRP (if different): 446.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per unit
+
+Warranty (if applicable): 1 year replacement
+
+Product 10
+Slno: 10
+
+Product Name: 10w Inverter bulb
+
+Category: LED Emergency Bulb
+
+Brand: Sturlite
+
+SKU/Code: STU10EB4H
+
+Description: SMD LED chip, CRI>80, IP20,Bright light output, charging 6-8 hours, over charge protection, 6k - 4Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.
+
+Price: 223.2
+
+MRP (if different): 465.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per unit
+
+Warranty (if applicable): 1 year replacement
+
+Product 11
+Slno: 11
+
+Product Name: 10w Inverter bulb
+
+Category: LED Emergency Bulb
+
+Brand: Sturlite
+
+SKU/Code: STU10EB6H
+
+Description: SMD LED chip, CRI>80, IP20,Bright light output, charging 6-8 hours, over charge protection, 6k - 6Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.
+
+Price: 266.4
+
+MRP (if different): 555.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per unit
+
+Warranty (if applicable): 1 year replacement
+
+Product 12
+Slno: 12
+
+Product Name: 30w Flood light
+
+Category: LED Flood Light
+
+Brand: Sturlite
+
+SKU/Code: STU0207-30W
+
+Description: SMD LED chip, CRI>80,25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt
+
+Price: 487.2
+
+MRP (if different): 1015.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per Unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 13
+Slno: 13
+
+Product Name: 50w Flood Light
+
+Category: LED Flood Light
+
+Brand: Sturlite
+
+SKU/Code: STU0207-50W
+
+Description: SMD LED chip, CRI>80,25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt
+
+Price: 672.0
+
+MRP (if different): 1400.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per Unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 14
+Slno: 14
+
+Product Name: 100w Flood Light
+
+Category: LED Flood Light
+
+Brand: Sturlite
+
+SKU/Code: STU0207-100W
+
+Description: SMD LED chip, CRI>80,25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt
+
+Price: 1101.6
+
+MRP (if different): 2295.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per Unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 15
+Slno: 15
+
+Product Name: 150w Flood light
+
+Category: LED Flood Light
+
+Brand: Sturlite
+
+SKU/Code: STU0207-1500W
+
+Description: SMD LED chip, CRI>80,25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt
+
+Price: 1852.8
+
+MRP (if different): 3860.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per Unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 16
+Slno: 16
+
+Product Name: 200w Flood Light
+
+Category: LED Flood Light
+
+Brand: Sturlite
+
+SKU/Code: STU0207-200W
+
+Description: SMD LED chip, CRI>80,25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt
+
+Price: 2236.8
+
+MRP (if different): 4660.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per Unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 17
+Slno: 17
+
+Product Name: 300w Flood Light
+
+Category: LED Flood Light
+
+Brand: Sturlite
+
+SKU/Code: STU0207-300W
+
+Description: SMD LED chip, CRI>80,25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt
+
+Price: 3852.0
+
+MRP (if different): 8025.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): Per Unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 18
+Slno: 18
+
+Product Name: 400w Flood Light
+
+Category: LED Flood Light
+
+Brand: Sturlite
+
+SKU/Code: STU0207-400W
+
+Description: SMD LED chip, CRI>80,25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt
+
+Price: 5208.0
+
+MRP (if different): 10850.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 19
+Slno: 19
+
+Product Name: 500w Flood Light
+
+Category: LED Flood Light
+
+Brand: Sturlite
+
+SKU/Code: STU0207-500W
+
+Description: SMD LED chip, CRI>80,25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt
+
+Price: 7536.0
+
+MRP (if different): 15700.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 20
+Slno: 20
+
+Product Name: 20w Street Light
+
+Category: LED Street Light
+
+Brand: Sturlite
+
+SKU/Code: STU0060-20W
+
+Description: SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2200 Lumens, 300x103x46mm Dimension
+
+Price: 566.5
+
+MRP (if different): 1180.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 21
+Slno: 21
+
+Product Name: 24w Street Light
+
+Category: LED Street Light
+
+Brand: Sturlite
+
+SKU/Code: STU0060-24W
+
+Description: SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2640 Lumens, 300x103x46mm Dimension
+
+Price: 588.0
+
+MRP (if different): 1225.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 22
+Slno: 22
+
+Product Name: 30w Street Light
+
+Category: LED Street Light
+
+Brand: Sturlite
+
+SKU/Code: STU0060-30W
+
+Description: SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, Lumerns 3300, 340x124x47mm dimension
+
+Price: 756.0
+
+MRP (if different): 1575.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 23
+Slno: 23
+
+Product Name: 36w Street Light
+
+Category: LED Street Light
+
+Brand: Sturlite
+
+SKU/Code: STU0060-36W
+
+Description: SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 3960 Lumens, 340x124x47mm Dimension
+
+Price: 782.4
+
+MRP (if different): 1630.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 24
+Slno: 24
+
+Product Name: 50w Street Light
+
+Category: LED Street Light
+
+Brand: Sturlite
+
+SKU/Code: STU0060-50W
+
+Description: SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 5500 Lumens, 391x145x50mm Dimension
+
+Price: 950.0
+
+MRP (if different): 1980.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per unit
+
+Warranty (if applicable): 2 year Warranty
+
+Product 25
+Slno: 25
+
+Product Name: 72w Street Light
+
+Category: LED Street Light
+
+Brand: Sturlite
+
+SKU/Code: STU0060-72W
+
+Description: SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 7920 Lumens, 3390x145x50mm Dimension
+
+Price: 1404.0
+
+MRP (if different): 2925.0
+
+Discount (if any): 52%
+
+Stock Quantity: 100
+
+Unit (e.g., piece, meter): per unit
+
+Warranty (if applicable): 2 year Warranty

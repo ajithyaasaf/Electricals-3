@@ -1,0 +1,461 @@
+/* Inter font from Google Fonts - Optimized with display=swap for performance */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* Auth animations */
+@import './styles/auth-animations.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Hide scrollbar for horizontal scrolling sections */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}
+
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Performance optimizations */
+* {
+  box-sizing: border-box;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Prevent layout shift for images */
+img[width][height] {
+  height: auto;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visibility for accessibility - removed blue outline */
+*:focus {
+  outline: none;
+}
+
+/* Custom focus styles for inputs */
+input:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: hsl(var(--border));
+}
+
+:root {
+  /* ============================================================================
+     🎨 BRAND COLORS - CENTRALIZED COLOR SYSTEM
+     ============================================================================ 
+     PRIMARY Color (Dark Teal):   #046e7b → HSL(187, 94%, 25%)
+     SECONDARY Color (Light Teal): #00adbb → HSL(184, 100%, 37%)
+     
+     📋 REBRAND CHECKLIST - To change brand colors:
+     
+     1. THIS FILE (index.css):
+        - Convert your primary hex to HSL (https://htmlcolors.com/hex-to-hsl)
+        - Update all --teal-* variables (lines ~89-98) with new HSL values
+        - Update all --teal-light-* variables (lines ~105-114) with secondary HSL
+        - Update semantic tokens (--primary, --accent) if needed
+     
+     2. CRITICAL CSS (client/src/lib/critical-css.css):
+        - Check --critical-* variables (reference this file's variables)
+        - Verify above-the-fold colors are correct
+     
+     3. COMPONENT GRADIENTS:
+        - Search for hardcoded Tailwind gradients: from-red-*, from-blue-*, etc.
+        - Replace with teal-based gradients for brand consistency
+        - Common files: banner-slider.tsx, hero-section.tsx, product-detail.tsx
+     
+     4. TAILWIND CONFIG (tailwind.config.ts):
+        - Already configured to reference these CSS variables
+        - No changes needed unless adding new color tokens
+     
+     💡 TIP: Use HSL color generator for consistent shade scales (50-900)
+     ⚠️  NOTE: All variables must use raw "H S% L%" format (not hsl() wrapper)
+     ============================================================================ */
+  
+  /* Core brand color scales - Based on primary #046e7b (Dark Teal) */
+  --brand-primary-h: 187;
+  --brand-primary-s: 94%;
+  --brand-primary-l: 25%;
+  
+  --teal-50: 187 94% 97%;   /* Lightest - derived from primary */
+  --teal-100: 187 94% 92%;
+  --teal-200: 187 94% 82%;
+  --teal-300: 187 94% 65%;
+  --teal-400: 187 94% 45%;
+  --teal-500: 187 94% 25%;  /* PRIMARY BASE COLOR #046e7b */
+  --teal-600: 187 94% 20%;
+  --teal-700: 187 94% 16%;
+  --teal-800: 187 94% 12%;
+  --teal-900: 187 94% 8%;   /* Darkest */
+  
+  /* Accent color scales - Based on secondary #00adbb (Light Teal) */
+  --brand-accent-h: 184;
+  --brand-accent-s: 100%;
+  --brand-accent-l: 37%;
+  
+  --teal-light-50: 184 100% 97%;   /* Lightest - derived from secondary */
+  --teal-light-100: 184 100% 92%;
+  --teal-light-200: 184 100% 82%;
+  --teal-light-300: 184 100% 65%;
+  --teal-light-400: 184 100% 50%;
+  --teal-light-500: 184 100% 37%;  /* SECONDARY BASE COLOR #00adbb */
+  --teal-light-600: 184 100% 30%;
+  --teal-light-700: 184 100% 24%;
+  --teal-light-800: 184 100% 18%;
+  --teal-light-900: 184 100% 12%;  /* Darkest */
+  
+  /* Semantic tokens - Use these in your app (raw HSL format for Tailwind) */
+  --background: 0 0% 100%;
+  --foreground: 187 14% 15%;
+  --muted: 186 10% 95%;
+  --muted-foreground: 186 8% 38%; /* Improved for WCAG AA contrast ratio (was 45%) */
+  --popover: 0 0% 100%;
+  --popover-foreground: 187 14% 15%;
+  --card: 0 0% 100%;
+  --card-foreground: 187 14% 15%;
+  --border: 186 10% 88%;
+  --input: 186 10% 88%;
+  
+  /* Primary = Dark Teal (#046e7b) */
+  --primary: var(--teal-500);
+  --primary-foreground: 0 0% 98%;
+  
+  /* Secondary = UI backgrounds */
+  --secondary: 186 10% 95%;
+  --secondary-foreground: 187 14% 15%;
+  
+  /* Accent = Light Teal (#00adbb) */
+  --accent: var(--teal-light-500);
+  --accent-foreground: 0 0% 98%;
+  
+  /* Other UI tokens */
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 187 14% 15%;
+  --radius: 0.5rem;
+  
+  /* Neutral colors for various UI elements (raw HSL format) */
+  --charcoal: 187 30% 17%;
+  --graphite: 187 45% 12%;
+  --off-white: 186 20% 98%;
+  
+  /* Legacy copper/lime aliases - map to teal colors for backward compatibility */
+  --copper-50: var(--teal-50);
+  --copper-100: var(--teal-100);
+  --copper-200: var(--teal-200);
+  --copper-300: var(--teal-300);
+  --copper-400: var(--teal-400);
+  --copper-500: var(--teal-500);
+  --copper-600: var(--teal-600);
+  --copper-700: var(--teal-700);
+  --copper-800: var(--teal-800);
+  --copper-900: var(--teal-900);
+  
+  --lime-50: var(--teal-light-50);
+  --lime-100: var(--teal-light-100);
+  --lime-200: var(--teal-light-200);
+  --lime-300: var(--teal-light-300);
+  --lime-400: var(--teal-light-400);
+  --lime-500: var(--teal-light-500);
+  --lime-600: var(--teal-light-600);
+  --lime-700: var(--teal-light-700);
+  --lime-800: var(--teal-light-800);
+  --lime-900: var(--teal-light-900);
+}
+
+.dark {
+  --background: 187 30% 8%;
+  --foreground: 0 0% 98%;
+  --muted: 187 20% 15%;
+  --muted-foreground: 186 10% 65%;
+  --popover: 187 30% 8%;
+  --popover-foreground: 0 0% 98%;
+  --card: 187 25% 10%;
+  --card-foreground: 0 0% 98%;
+  --border: 187 20% 18%;
+  --input: 187 20% 18%;
+  --primary: 187 94% 30%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 187 20% 15%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 184 100% 45%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 186 30% 70%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Teal (Dark Teal - Primary) utility classes */
+  .text-teal-50 { color: hsl(var(--teal-50)); }
+  .text-teal-100 { color: hsl(var(--teal-100)); }
+  .text-teal-200 { color: hsl(var(--teal-200)); }
+  .text-teal-300 { color: hsl(var(--teal-300)); }
+  .text-teal-400 { color: hsl(var(--teal-400)); }
+  .text-teal-500 { color: hsl(var(--teal-500)); }
+  .text-teal-600 { color: hsl(var(--teal-600)); }
+  .text-teal-700 { color: hsl(var(--teal-700)); }
+  .text-teal-800 { color: hsl(var(--teal-800)); }
+  .text-teal-900 { color: hsl(var(--teal-900)); }
+  
+  .bg-teal-50 { background-color: hsl(var(--teal-50)); }
+  .bg-teal-100 { background-color: hsl(var(--teal-100)); }
+  .bg-teal-200 { background-color: hsl(var(--teal-200)); }
+  .bg-teal-300 { background-color: hsl(var(--teal-300)); }
+  .bg-teal-400 { background-color: hsl(var(--teal-400)); }
+  .bg-teal-500 { background-color: hsl(var(--teal-500)); }
+  .bg-teal-600 { background-color: hsl(var(--teal-600)); }
+  .bg-teal-700 { background-color: hsl(var(--teal-700)); }
+  .bg-teal-800 { background-color: hsl(var(--teal-800)); }
+  .bg-teal-900 { background-color: hsl(var(--teal-900)); }
+  
+  .border-teal-50 { border-color: hsl(var(--teal-50)); }
+  .border-teal-100 { border-color: hsl(var(--teal-100)); }
+  .border-teal-200 { border-color: hsl(var(--teal-200)); }
+  .border-teal-300 { border-color: hsl(var(--teal-300)); }
+  .border-teal-400 { border-color: hsl(var(--teal-400)); }
+  .border-teal-500 { border-color: hsl(var(--teal-500)); }
+  .border-teal-600 { border-color: hsl(var(--teal-600)); }
+  .border-teal-700 { border-color: hsl(var(--teal-700)); }
+  .border-teal-800 { border-color: hsl(var(--teal-800)); }
+  .border-teal-900 { border-color: hsl(var(--teal-900)); }
+  
+  /* Teal Light (Light Teal - Secondary) utility classes */
+  .text-teal-light-50 { color: hsl(var(--teal-light-50)); }
+  .text-teal-light-100 { color: hsl(var(--teal-light-100)); }
+  .text-teal-light-200 { color: hsl(var(--teal-light-200)); }
+  .text-teal-light-300 { color: hsl(var(--teal-light-300)); }
+  .text-teal-light-400 { color: hsl(var(--teal-light-400)); }
+  .text-teal-light-500 { color: hsl(var(--teal-light-500)); }
+  .text-teal-light-600 { color: hsl(var(--teal-light-600)); }
+  .text-teal-light-700 { color: hsl(var(--teal-light-700)); }
+  .text-teal-light-800 { color: hsl(var(--teal-light-800)); }
+  .text-teal-light-900 { color: hsl(var(--teal-light-900)); }
+  
+  .bg-teal-light-50 { background-color: hsl(var(--teal-light-50)); }
+  .bg-teal-light-100 { background-color: hsl(var(--teal-light-100)); }
+  .bg-teal-light-200 { background-color: hsl(var(--teal-light-200)); }
+  .bg-teal-light-300 { background-color: hsl(var(--teal-light-300)); }
+  .bg-teal-light-400 { background-color: hsl(var(--teal-light-400)); }
+  .bg-teal-light-500 { background-color: hsl(var(--teal-light-500)); }
+  .bg-teal-light-600 { background-color: hsl(var(--teal-light-600)); }
+  .bg-teal-light-700 { background-color: hsl(var(--teal-light-700)); }
+  .bg-teal-light-800 { background-color: hsl(var(--teal-light-800)); }
+  .bg-teal-light-900 { background-color: hsl(var(--teal-light-900)); }
+  
+  .border-teal-light-50 { border-color: hsl(var(--teal-light-50)); }
+  .border-teal-light-100 { border-color: hsl(var(--teal-light-100)); }
+  .border-teal-light-200 { border-color: hsl(var(--teal-light-200)); }
+  .border-teal-light-300 { border-color: hsl(var(--teal-light-300)); }
+  .border-teal-light-400 { border-color: hsl(var(--teal-light-400)); }
+  .border-teal-light-500 { border-color: hsl(var(--teal-light-500)); }
+  .border-teal-light-600 { border-color: hsl(var(--teal-light-600)); }
+  .border-teal-light-700 { border-color: hsl(var(--teal-light-700)); }
+  .border-teal-light-800 { border-color: hsl(var(--teal-light-800)); }
+  .border-teal-light-900 { border-color: hsl(var(--teal-light-900)); }
+  
+  /* Legacy copper/lime aliases for backward compatibility */
+  .text-copper-50 { color: hsl(var(--copper-50)); }
+  .text-copper-100 { color: hsl(var(--copper-100)); }
+  .text-copper-200 { color: hsl(var(--copper-200)); }
+  .text-copper-300 { color: hsl(var(--copper-300)); }
+  .text-copper-400 { color: hsl(var(--copper-400)); }
+  .text-copper-500 { color: hsl(var(--copper-500)); }
+  .text-copper-600 { color: hsl(var(--copper-600)); }
+  .text-copper-700 { color: hsl(var(--copper-700)); }
+  .text-copper-800 { color: hsl(var(--copper-800)); }
+  .text-copper-900 { color: hsl(var(--copper-900)); }
+  
+  .bg-copper-50 { background-color: hsl(var(--copper-50)); }
+  .bg-copper-100 { background-color: hsl(var(--copper-100)); }
+  .bg-copper-200 { background-color: hsl(var(--copper-200)); }
+  .bg-copper-300 { background-color: hsl(var(--copper-300)); }
+  .bg-copper-400 { background-color: hsl(var(--copper-400)); }
+  .bg-copper-500 { background-color: hsl(var(--copper-500)); }
+  .bg-copper-600 { background-color: hsl(var(--copper-600)); }
+  .bg-copper-700 { background-color: hsl(var(--copper-700)); }
+  .bg-copper-800 { background-color: hsl(var(--copper-800)); }
+  .bg-copper-900 { background-color: hsl(var(--copper-900)); }
+  
+  .text-lime-50 { color: hsl(var(--lime-50)); }
+  .text-lime-100 { color: hsl(var(--lime-100)); }
+  .text-lime-200 { color: hsl(var(--lime-200)); }
+  .text-lime-300 { color: hsl(var(--lime-300)); }
+  .text-lime-400 { color: hsl(var(--lime-400)); }
+  .text-lime-500 { color: hsl(var(--lime-500)); }
+  .text-lime-600 { color: hsl(var(--lime-600)); }
+  .text-lime-700 { color: hsl(var(--lime-700)); }
+  .text-lime-800 { color: hsl(var(--lime-800)); }
+  .text-lime-900 { color: hsl(var(--lime-900)); }
+  
+  .bg-lime-50 { background-color: hsl(var(--lime-50)); }
+  .bg-lime-100 { background-color: hsl(var(--lime-100)); }
+  .bg-lime-200 { background-color: hsl(var(--lime-200)); }
+  .bg-lime-300 { background-color: hsl(var(--lime-300)); }
+  .bg-lime-400 { background-color: hsl(var(--lime-400)); }
+  .bg-lime-500 { background-color: hsl(var(--lime-500)); }
+  .bg-lime-600 { background-color: hsl(var(--lime-600)); }
+  .bg-lime-700 { background-color: hsl(var(--lime-700)); }
+  .bg-lime-800 { background-color: hsl(var(--lime-800)); }
+  .bg-lime-900 { background-color: hsl(var(--lime-900)); }
+  
+  .border-copper-50 { border-color: hsl(var(--copper-50)); }
+  .border-copper-100 { border-color: hsl(var(--copper-100)); }
+  .border-copper-200 { border-color: hsl(var(--copper-200)); }
+  .border-copper-300 { border-color: hsl(var(--copper-300)); }
+  .border-copper-400 { border-color: hsl(var(--copper-400)); }
+  .border-copper-500 { border-color: hsl(var(--copper-500)); }
+  .border-copper-600 { border-color: hsl(var(--copper-600)); }
+  .border-copper-700 { border-color: hsl(var(--copper-700)); }
+  .border-copper-800 { border-color: hsl(var(--copper-800)); }
+  .border-copper-900 { border-color: hsl(var(--copper-900)); }
+  
+  .border-lime-50 { border-color: hsl(var(--lime-50)); }
+  .border-lime-100 { border-color: hsl(var(--lime-100)); }
+  .border-lime-200 { border-color: hsl(var(--lime-200)); }
+  .border-lime-300 { border-color: hsl(var(--lime-300)); }
+  .border-lime-400 { border-color: hsl(var(--lime-400)); }
+  .border-lime-500 { border-color: hsl(var(--lime-500)); }
+  .border-lime-600 { border-color: hsl(var(--lime-600)); }
+  .border-lime-700 { border-color: hsl(var(--lime-700)); }
+  .border-lime-800 { border-color: hsl(var(--lime-800)); }
+  .border-lime-900 { border-color: hsl(var(--lime-900)); }
+  
+  .hover\:bg-copper-700:hover { background-color: hsl(var(--copper-700)); }
+  .hover\:bg-lime-700:hover { background-color: hsl(var(--lime-700)); }
+  .hover\:text-copper-600:hover { color: hsl(var(--copper-600)); }
+  .hover\:text-lime-600:hover { color: hsl(var(--lime-600)); }
+  
+  .hover\:bg-teal-700:hover { background-color: hsl(var(--teal-700)); }
+  .hover\:bg-teal-light-700:hover { background-color: hsl(var(--teal-light-700)); }
+  .hover\:text-teal-600:hover { color: hsl(var(--teal-600)); }
+  .hover\:text-teal-light-600:hover { color: hsl(var(--teal-light-600)); }
+  
+  /* Charcoal and Graphite utilities */
+  .text-charcoal { color: hsl(var(--charcoal)); }
+  .text-graphite { color: hsl(var(--graphite)); }
+  .text-off-white { color: hsl(var(--off-white)); }
+  .bg-charcoal { background-color: hsl(var(--charcoal)); }
+  .bg-graphite { background-color: hsl(var(--graphite)); }
+  .bg-off-white { background-color: hsl(var(--off-white)); }
+  
+  /* Scrollbar utilities */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Line clamp utilities */
+  .line-clamp-1 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 1;
+  }
+  
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+  
+  /* Ultra-modern minimalist scrollbar */
+  .scrollbar-modern {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
+  }
+  
+  .scrollbar-modern:hover {
+    scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+  }
+  
+  /* WebKit browsers (Chrome, Safari, Edge) - Ultra thin 3px */
+  .scrollbar-modern::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+  
+  .scrollbar-modern::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 4px 0;
+  }
+  
+  .scrollbar-modern::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 2px;
+    transition: background 0.3s ease;
+  }
+  
+  .scrollbar-modern:hover::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+  }
+  
+  .scrollbar-modern::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  /* Dark mode scrollbar */
+  .dark .scrollbar-modern:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  }
+  
+  .dark .scrollbar-modern:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .dark .scrollbar-modern::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+  
+  /* Smooth scroll */
+  .scrollbar-modern {
+    scroll-behavior: smooth;
+  }
+}

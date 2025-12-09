@@ -1,0 +1,93 @@
+Prompt for Replit Agent
+
+You are working on a dual-state shopping cart system with the following current architecture:
+
+Current Setup:
+
+Guest Mode:
+
+Storage: localStorage under key "guestCart"
+
+Format: { id, productId, serviceId, quantity, addedAt, customizations }
+
+Sync: All actions instantly update localStorage
+
+Display: Enriched via /api/cart/guest
+
+Persistence: Survives browser refresh/restart
+
+Authenticated Mode:
+
+Storage: Firestore linked to userId
+
+Format: Full CartItem (pricing, discounts, timestamps)
+
+Sync: Optimistic UI + queued API calls
+
+Display: /api/cart real-time feed
+
+Persistence: Permanent
+
+Migration Logic:
+
+Guest → Authenticated: Read guest cart → POST /api/cart/migrate → merge → clear localStorage → load merged cart
+
+Authenticated → Guest: Save current cart in guest format → set in localStorage → load guest cart
+
+Safeguards:
+
+Optimistic updates
+
+Debounced quantity updates (300ms)
+
+Duplicate prevention via productId/serviceId
+
+Logout cart preservation
+
+Required Improvements:
+
+Conflict Resolution Rules:
+
+Define exact behavior when guest and authenticated carts contain same item with different quantities/customizations (e.g., sum quantities, prefer guest customizations, or create separate line items).
+
+Atomic Migration:
+
+Clear guestCart from localStorage only after /api/cart/migrate succeeds.
+
+Ensure server merges are transactional to avoid partial data loss.
+
+Schema Versioning:
+
+Add schemaVersion to guest cart items for backward compatibility when format changes.
+
+LocalStorage Size & Expiry:
+
+Track lastUpdated timestamp; auto-clear carts older than a set threshold to avoid stale data.
+
+Cross-Tab Sync:
+
+Use window.addEventListener('storage', ...) to keep guest cart in sync across multiple open tabs.
+
+Server-Side Validation:
+
+On migration, fully validate incoming guest cart to prevent tampering.
+
+Always recalculate totals on the server.
+
+Edge Case Handling:
+
+Switching accounts without logging out
+
+Out-of-stock or invalid items during migration
+
+Very frequent add/remove actions during migration
+
+Goal for Agent:
+
+Implement the above improvements without breaking existing guest/auth cart flows.
+
+Maintain optimistic UI performance.
+
+Ensure data integrity for all edge cases.
+
+Document changes with comments for future maintainers.

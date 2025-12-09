@@ -1,0 +1,98 @@
+Title
+Production-Ready Amazon Clone for CopperBear: Electricals E-Commerce & Service Booking Platform
+
+Instructions
+Build a deployable, full-stack web application for CopperBear—a company specializing in electrical products and services. The application must exactly replicate Amazon.com’s user interface, user experience, structure, and all relevant features, but be completely branded and designed for CopperBear. Do not use Amazon’s color palette or color schemes under any circumstances. The visual identity, colors, and styling must be unique to CopperBear and must not resemble Amazon's official design.
+
+Core Requirements
+UI/UX & Features
+
+Recreate Amazon’s interface, layout, sections, and user flows:
+
+Homepage, search, navigation bar, category/departments, product detail pages, shopping cart, user reviews, product Q&A, account and order management, order tracking, returns, wishlists, checkout, payment, footer, header, etc.
+
+Match Amazon’s UX and structural design:
+
+Pixel-perfect layout, fully responsive (desktop, tablet, mobile), attention to typography, spacing, icons, and accessibility (WCAG 2.1 AA).
+
+Replicate all behaviors (carousels, hover states, filtering, sorting, pagination, pop-ups, authentication, search autocomplete, recommendations).
+
+Colors and Branding:
+
+All colors, visual accent choices, and branding must be original—tailored for CopperBear and distinct from any Amazon.com styling.
+
+Use an original CopperBear palette and branding guidelines throughout the application.
+
+Do not copy or reference any of Amazon’s official color schemes.
+
+All imagery, text, and interaction must be fully CopperBear-branded using unique colors and brand assets.
+
+CopperBear Customization
+
+Replace Amazon’s product catalog/content with electrical products and services relevant to CopperBear.
+
+Representative examples: circuit breakers, wires, tools, panels, sockets, installation, regular maintenance, and consulting (no “emergency” or unrelated services).
+
+Remove irrelevant Amazon categories.
+
+Use CopperBear logo, branding, and a unique color palette.
+
+All placeholders and demo data must reference CopperBear—never use or mimic Amazon’s branding or color identity.
+
+Only open-source and original visual assets (no Amazon images/icons).
+
+Backend & Admin
+
+Implement all typical Amazon functionality:
+
+User authentication, account management, ordering, inventory, service booking, reviews, (placeholder) payments, secure APIs.
+
+Admin dashboard for CRUD operations (products, services, orders, users).
+
+Dashboard includes analytics for orders, inventory, bookings.
+
+Technical Stack
+
+Use a modern JavaScript/TypeScript stack (e.g., Next.js or React, Express or Fastify, MongoDB or PostgreSQL).
+
+Modular, clean, and well-documented code.
+
+Include sample/mock data for CopperBear products, services, users.
+
+Complete documentation and deployment instructions.
+
+Seed scripts for populating with demo data.
+
+Other Requirements
+
+100% responsive and mobile-first.
+
+English-language UI (localization hooks if possible).
+
+All features pertinent to an Amazon-like electricals marketplace.
+
+No code or design may reference or imitate Amazon’s color palette.
+
+Never refer to "emergency" services.
+
+Section Checklist (All in Amazon Style, Unique Colors)
+Homepage: hero, featured products, services, deals/recommendations
+
+Departments: electrical products/services only
+
+Product Listings: filters, sorting, badges, add/remove cart
+
+Product Detail: gallery, specs, reviews, recommendations
+
+Cart & Checkout: address, order summary, payment methods
+
+Account: sign up/in, profile, order/return history, wishlist
+
+Services: detail, scheduling/bookings—installation, repairs, consulting
+
+Admin Panel: manage products, services, orders, users
+
+Footer/Header: legal, help, contact—all with CopperBear styling
+
+Summary
+Deliver a full-stack, Amazon-style CopperBear site for electricals, with all features, section structure, and UX flows, but do not use or mimic Amazon’s color scheme or visual identity. All colors, branding, and imagery must be original and unique to CopperBear

@@ -1,0 +1,120 @@
+/* Critical CSS for above-the-fold content - CopperBear Electrical */
+
+/* Base layout and typography */
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+}
+
+/* Header styles */
+.header {
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
+/* Hero section critical styles */
+.hero-section {
+  min-height: 500px;
+  background: hsl(var(--background));
+  padding: 2rem 0;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  height: 100%;
+}
+
+@media (min-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+/* Main content area */
+.hero-main {
+  position: relative;
+  min-height: 450px;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+/* Button critical styles */
+.btn-primary {
+  background-color: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  padding: 1rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: hsl(var(--teal-light-600));
+}
+
+/* Loading states */
+.skeleton {
+  background: linear-gradient(90deg, hsl(var(--muted)) 25%, hsl(var(--border)) 50%, hsl(var(--muted)) 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Product grid critical layout */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Responsive typography */
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0 0 1rem 0;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  h1 {
+    font-size: 3.75rem;
+  }
+}
+
+/* Container */
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Basic color variables - These reference the main index.css variables */
+:root {
+  --critical-primary: var(--teal-500);
+  --critical-accent: var(--teal-light-500);
+  --critical-background: var(--background);
+  --critical-foreground: var(--foreground);
+  --critical-muted: var(--muted);
+  --critical-border: var(--border);
+}

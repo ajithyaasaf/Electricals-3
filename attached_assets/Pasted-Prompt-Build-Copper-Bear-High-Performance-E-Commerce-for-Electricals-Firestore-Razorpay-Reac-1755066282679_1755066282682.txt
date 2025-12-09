@@ -1,0 +1,227 @@
+Prompt: Build Copper Bear — High-Performance E-Commerce for Electricals (Firestore + Razorpay + React)
+Brand & UX
+Name: Copper Bear
+
+Tone: Professional, trustworthy, industrial-modern, approachable.
+
+Palette:
+
+Copper #B46A3C
+
+Charcoal #1F2937
+
+Graphite #111827
+
+Off-white #F8FAFC
+
+Accent Lime #A3E635 (for CTAs)
+
+Typography: Inter (UI), JetBrains Mono (specs/labels).
+
+Logo/Favicon: Minimal bear head + lightning bolt; copper gradient.
+
+Design system: Tailwind CSS + shadcn/ui, dark/light mode, 8pt grid, rounded-2xl, soft shadows, accessible focus rings, reduced motion for prefers-reduced-motion.
+
+Business Scope
+Products: Cables & Wires, Switches & Sockets, MCB/RCCB/DBs, Conduits, Tools & Testers, Lighting, Motors/Starters, Control Gear, Appliances.
+
+B2C for launch; B2B tiered pricing & GST invoicing in phase 2.
+
+Goals
+Performance: Lighthouse ≥ 95 across categories; TTI < 2.5s on 4G.
+
+Code Quality: TypeScript, SOLID, feature-based folders, API boundary typed end-to-end.
+
+SEO & Accessibility: WCAG 2.1 AA, structured data, fast mobile UX.
+
+Tech Stack
+Frontend: React + Next.js 14 (App Router), TypeScript, Tailwind CSS, shadcn/ui, Framer Motion, React Hook Form + Zod.
+
+Backend: Firebase (Firestore, Cloud Functions v2, Firebase Auth, Cloud Storage, Cloud Tasks), Firebase Hosting or Vercel.
+
+Payments: Razorpay (Checkout + Orders API + Webhooks).
+
+Search: Algolia (optional) or Firestore composite indexes.
+
+Analytics: Google Analytics 4 + server events.
+
+Notifications: Firebase Extensions / Twilio + Email (Resend/SendGrid).
+
+CI/CD: GitHub Actions (lint, typecheck, test, build, deploy).
+
+Monitoring: Firebase Monitoring + Sentry.
+
+Architecture
+pgsql
+Copy
+Edit
+[ Next.js (SSR/SSG/ISR) ]
+   └─ API Routes / Server Actions
+        ├ Firestore Admin via callable HTTPS Functions
+        ├ Razorpay SDK (server-only)
+        └ Signed URLs from Cloud Storage
+
+[ Firebase Auth ]
+   └─ Email/Password + OAuth (Google/Apple) + MFA
+
+[ Firestore ]
+   └─ Real-time sync + offline cache
+
+[ Cloud Functions v2 ]
+   ├ createRazorpayOrder
+   ├ verifyPaymentWebhook
+   ├ calcShippingTax
+   ├ adminProductImport
+   └ onOrderPaid triggers
+
+[ Cloud Storage ]
+   └─ Product images, banners, processed thumbnails
+
+[ Hosting/CDN ]
+   └─ Firebase Hosting or Vercel + CDN caching
+Core Features
+Homepage – hero banners, featured categories, deals, trust badges, brand carousel.
+
+Category/Search Pages – filters, sort, infinite scroll, price sliders, availability toggle.
+
+Product Detail Page – zoomable gallery, specs, availability by pin code, related products, reviews/Q&A.
+
+Cart – persistent for guest and logged in users, coupon codes, shipping/tax estimate.
+
+Checkout – Razorpay Checkout integration, address book, delivery slots, GST field.
+
+Orders – status tracking, return/refund requests, downloadable invoices.
+
+Auth & Profile – sign up/in with Firebase Auth, profile management, order history, wishlist.
+
+Admin Dashboard – product CRUD, order management, analytics, inventory alerts.
+
+Search – instant suggestions, typo tolerance (Algolia optional).
+
+PWA – installable app, offline catalog browsing.
+
+Firestore Data Model
+bash
+Copy
+Edit
+/products
+/categories
+/brands
+/users
+/addresses (subcollection under /users)
+/carts
+/orders
+/payments
+/coupons
+/reviews
+/inventory
+/banners
+/settings
+Use composite indexes for product listing queries.
+
+Firestore Security Rules (summary)
+Public read for published products, categories, brands.
+
+Authenticated users can manage their profile, addresses, carts, orders.
+
+Admin-only writes for product, category, brand, coupon, banner collections.
+
+Reviews: create if signed in, update/delete own or by admin.
+
+Orders: create if user matches UID, read own or all if admin.
+
+Razorpay Integration
+Server (Cloud Function or Next API):
+
+POST /api/payment/order → Creates Razorpay order with validated totals from server-side cart.
+
+POST /api/payment/webhook → Verifies signature; updates order status; triggers inventory decrement & notification.
+
+Client:
+
+Razorpay Checkout modal; success/cancel callbacks.
+
+No client-side price authority — always from Firestore + server validation.
+
+Cloud Functions (must-have)
+createRazorpayOrder(userId | anonId)
+
+verifyPaymentWebhook()
+
+applyCoupon(code, cart)
+
+shippingQuote(address, cart)
+
+onOrderPaid(orderId) → inventory update, invoice generation, notification
+
+importProductsFromCSV(filePath) (admin)
+
+Performance Best Practices
+ISR for PLP/PDP; static for marketing pages.
+
+Next/Image for optimized images (AVIF/WebP).
+
+Code-splitting, lazy load heavy components.
+
+Prefetch links on hover.
+
+SWR for Firestore data; offline persistence.
+
+Bundle size target < 180KB gz.
+
+Accessibility & SEO
+Semantic HTML, keyboard navigation, ARIA labels.
+
+Structured data for products, breadcrumbs, ratings.
+
+Canonical URLs, XML sitemap, robots.txt.
+
+OG/Twitter cards for sharing.
+
+Admin Dashboard Scope
+Products: CRUD, variants, bulk import.
+
+Orders: search/filter, refund via Razorpay, comments.
+
+Inventory: stock management, alerts.
+
+Marketing: banners, coupons, featured products.
+
+Reports: sales trends, top products, abandoned carts.
+
+QA Checklist
+Guest & logged-in checkout flows.
+
+Coupon edge cases.
+
+Payment verification with Razorpay test mode.
+
+Inventory race conditions handled.
+
+Mobile performance on budget devices.
+
+PWA offline test.
+
+Error handling for 404/500.
+
+Environment Variables
+.env.local:
+
+NEXT_PUBLIC_FIREBASE_*
+
+RAZORPAY_KEY_ID
+
+RAZORPAY_KEY_SECRET
+
+NEXT_PUBLIC_GA_ID
+
+Deliverables
+Fully functional, deploy-ready repo.
+
+Documentation for setup & deployment.
+
+Seed data for products/categories.
+
+Postman collection for API endpoints.
+
+Tests (unit + e2e).

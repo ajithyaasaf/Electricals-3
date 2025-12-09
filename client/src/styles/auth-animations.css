@@ -1,0 +1,517 @@
+/* Auth Animation Styles */
+.auth-container {
+  background-color: hsl(var(--background));
+  border-radius: 30px;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 768px;
+  min-height: 550px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.form-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  min-height: 550px;
+  transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+.sign-in {
+  left: 0;
+  width: 50%;
+  z-index: 2;
+}
+
+.auth-container.active .sign-in {
+  transform: translateX(100%);
+}
+
+.sign-up {
+  left: 0;
+  width: 50%;
+  opacity: 0;
+  z-index: 1;
+}
+
+.auth-container.active .sign-up {
+  transform: translateX(100%);
+  opacity: 1;
+  z-index: 5;
+  animation: show 0.3s;
+}
+
+@keyframes show {
+  0%, 49.99% {
+    opacity: 0;
+    z-index: 1;
+  }
+  50%, 100% {
+    opacity: 1;
+    z-index: 5;
+  }
+}
+
+.forgot-password {
+  left: 0;
+  width: 50%;
+  opacity: 0;
+  z-index: 1;
+  transform: translateX(-100%);
+  transition: transform 0.4s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+.auth-container.forgot-mode .sign-in {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.auth-container.forgot-mode .forgot-password {
+  transform: translateX(0);
+  opacity: 1;
+  z-index: 5;
+}
+
+.auth-form {
+  background-color: hsl(var(--background));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 40px 50px;
+  min-height: 550px;
+  height: auto;
+  text-align: center;
+}
+
+.auth-input {
+  background-color: hsl(var(--muted));
+  border: none;
+  margin: 8px 0;
+  padding: 12px 15px;
+  font-size: 13px;
+  border-radius: 8px;
+  width: 100%;
+  outline: none;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.auth-input:focus {
+  background-color: hsl(var(--border));
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.2);
+}
+
+.auth-button {
+  border-radius: 20px;
+  border: 1px solid hsl(var(--primary));
+  background: linear-gradient(45deg, hsl(var(--primary)), hsl(var(--accent)));
+  color: hsl(var(--primary-foreground));
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px 45px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.auth-button:hover {
+  background: linear-gradient(45deg, hsl(var(--accent)), hsl(var(--primary)));
+  transform: translateY(-2px);
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.18);
+}
+
+.auth-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.social-icons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 20px 0;
+}
+
+.social-icon {
+  border: 1px solid hsl(var(--border));
+  border-radius: 50%;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 5px;
+  height: 40px;
+  width: 40px;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+  background: hsl(var(--background));
+}
+
+.social-icon:hover:not(:disabled) {
+  background: hsl(var(--muted));
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.4s ease-in-out, border-radius 0.4s ease-in-out;
+  border-radius: 150px 0 0 100px;
+  z-index: 1000;
+}
+
+.auth-container.active .toggle-container {
+  transform: translateX(-100%);
+  border-radius: 0 150px 100px 0;
+}
+
+.auth-container.forgot-mode .toggle-container {
+  display: none;
+}
+
+.toggle {
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
+  color: hsl(var(--primary-foreground));
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform 0.4s ease-in-out;
+}
+
+.auth-container.active .toggle {
+  transform: translateX(50%);
+}
+
+.toggle-panel {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 40px;
+  text-align: center;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
+}
+
+.toggle-left {
+  transform: translateX(-200%);
+}
+
+.auth-container.active .toggle-left {
+  transform: translateX(0);
+}
+
+.toggle-right {
+  right: 0;
+  transform: translateX(0);
+}
+
+.auth-container.active .toggle-right {
+  transform: translateX(200%);
+}
+
+/* Forgot Password Info Panel */
+.forgot-info-panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, hsl(var(--primary)), hsl(var(--accent)));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0 30px 30px 0;
+  z-index: 1000;
+}
+
+.forgot-info-content {
+  padding: 40px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-button {
+  border-radius: 20px !important;
+  border: 2px solid hsl(var(--primary-foreground)) !important;
+  background: transparent !important;
+  color: hsl(var(--primary-foreground)) !important;
+  font-size: 12px !important;
+  font-weight: bold !important;
+  padding: 12px 45px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  transition: all 0.3s ease !important;
+  margin: 8px 0 !important;
+  cursor: pointer !important;
+  width: auto !important;
+  min-width: 150px !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+  font-weight: bold !important;
+  box-shadow: none !important;
+}
+
+.toggle-button:hover:not(:disabled) {
+  background: hsl(var(--primary-foreground)) !important;
+  color: hsl(var(--primary)) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 7px 14px rgba(0, 0, 0, 0.18) !important;
+  text-shadow: none !important;
+}
+
+.toggle-button:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.toggle h1 {
+  color: hsl(var(--primary-foreground)) !important;
+  font-size: 2rem !important;
+  font-weight: bold !important;
+  margin-bottom: 1rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
+.toggle p {
+  color: hsl(var(--primary-foreground)) !important;
+  font-size: 0.9rem !important;
+  line-height: 1.5 !important;
+  margin-bottom: 1.5rem !important;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5) !important;
+}
+
+.toggle-panel h1 {
+  font-weight: bold;
+  margin-bottom: 15px;
+  font-size: 24px;
+}
+
+.toggle-panel p {
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 20px;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+
+.toggle-button {
+  background: transparent;
+  border: 2px solid hsl(var(--primary-foreground));
+  border-radius: 20px;
+  color: hsl(var(--primary-foreground));
+  font-size: 12px;
+  font-weight: bold;
+  padding: 12px 45px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.toggle-button:hover {
+  background: hsl(var(--primary-foreground) / 0.1);
+  color: hsl(var(--primary-foreground));
+  transform: translateY(-2px);
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .auth-container {
+    border-radius: 15px;
+    min-height: 650px;
+    height: auto;
+    flex-direction: column;
+    margin: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15), 0 5px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-container {
+    width: 100%;
+    position: relative;
+  }
+
+  .sign-in,
+  .sign-up,
+  .forgot-password {
+    width: 100%;
+    position: relative;
+    left: 0;
+    opacity: 1;
+    transform: none !important;
+  }
+
+  .sign-up {
+    display: none;
+  }
+
+  .auth-container.active .sign-in {
+    display: none;
+  }
+
+  .auth-container.active .sign-up {
+    display: flex;
+  }
+
+  .auth-container.forgot-mode .sign-in {
+    display: none;
+  }
+
+  .auth-container.forgot-mode .forgot-password {
+    display: flex;
+    opacity: 1;
+    transform: none;
+  }
+
+  .toggle-container {
+    position: relative;
+    width: 100%;
+    left: 0;
+    height: auto;
+    min-height: 120px;
+    transform: none !important;
+    border-radius: 0 0 15px 15px;
+  }
+
+  .auth-container.forgot-mode .toggle-container {
+    display: none;
+  }
+
+  .toggle {
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: none !important;
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
+    border-radius: 0 0 15px 15px;
+  }
+
+  .toggle-panel {
+    width: 100%;
+    padding: 25px 20px;
+    position: relative;
+    transform: none !important;
+  }
+
+  .toggle-left {
+    display: none;
+  }
+
+  .auth-container.active .toggle-left {
+    display: flex;
+  }
+
+  .auth-container.active .toggle-right {
+    display: none;
+  }
+
+  .auth-form {
+    padding: 35px 25px;
+    min-height: 500px;
+    height: auto;
+  }
+
+  .auth-input {
+    margin: 10px 0;
+    padding: 14px 16px;
+    font-size: 14px;
+    border-radius: 10px;
+  }
+
+  .auth-button {
+    padding: 14px 20px;
+    font-size: 13px;
+    margin-top: 20px;
+    border-radius: 25px;
+  }
+
+  .social-icon {
+    height: 45px;
+    width: 45px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-container {
+    margin: 5px;
+    border-radius: 12px;
+    min-height: 580px;
+  }
+
+  .auth-form {
+    padding: 25px 20px;
+    min-height: 420px;
+  }
+
+  .toggle-panel {
+    padding: 20px 15px;
+  }
+
+  .toggle-panel h1 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .toggle-panel p {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 15px;
+  }
+
+  .auth-input {
+    margin: 8px 0;
+    padding: 12px 14px;
+    font-size: 13px;
+  }
+
+  .auth-button {
+    padding: 12px 18px;
+    font-size: 12px;
+  }
+
+  .toggle-button {
+    padding: 10px 25px !important;
+    font-size: 11px !important;
+    min-width: 120px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .auth-form {
+    padding: 20px 15px;
+  }
+
+  .toggle-panel {
+    padding: 15px 10px;
+  }
+
+  .auth-input {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .toggle-panel h1 {
+    font-size: 16px;
+  }
+
+  .toggle-panel p {
+    font-size: 11px;
+  }
+}
