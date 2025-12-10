@@ -10,6 +10,7 @@ import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { FirebaseRedirectHandler } from "@/components/auth/firebase-redirect-handler";
 import { CartProvider } from "@/contexts/cart-context";
 import { WishlistProvider } from "@/contexts/wishlist-context";
+import { WhatsAppFloat } from "@/components/common/whatsapp-float";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -89,6 +90,7 @@ function App() {
               <NavigationProgress />
               <Toaster />
               <Router />
+              <WhatsAppFloat />
             </TooltipProvider>
           </WishlistProvider>
         </CartProvider>

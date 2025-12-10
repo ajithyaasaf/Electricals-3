@@ -86,9 +86,7 @@ export function Header() {
       title: "Special Offers",
       items: [
         { name: "Today's Deals", href: "/products?featured=true" },
-        { name: "Bulk Pricing", href: "/products?bulk=true" },
-        { name: "Contractor Discounts", href: "/contractor-program" },
-        { name: "Clearance Items", href: "/products?clearance=true" },
+        { name: "Bulk Purchasing", href: "https://wa.me/919080927452?text=Hi%2C%20I%27m%20interested%20in%20bulk%20purchasing%20for%20electrical%20products.%20Please%20share%20details%20about%20bulk%20pricing%20and%20discounts." },
       ],
     },
   ];
@@ -200,37 +198,73 @@ export function Header() {
                   </SheetTrigger>
                   <SheetContent
                     side="left"
-                    className="w-[85vw] max-w-sm p-0 overflow-y-auto"
+                    className="w-[85vw] max-w-sm p-0 overflow-y-auto bg-gray-50 [&>button]:hidden"
                   >
                     <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
-                    {/* Header */}
-                    <div className="bg-copper-700 text-white p-4 sm:p-6">
-                      <div className="flex items-center space-x-2">
-                        <User className="h-6 w-6 flex-shrink-0" />
-                        <span className="text-base sm:text-lg font-semibold truncate">
-                          {isAuthenticated
-                            ? `Hello, ${user?.displayName || user?.email?.split("@")[0] || "User"}`
-                            : "Hello, sign in"}
-                        </span>
+
+                    {/* Premium Header with Gradient */}
+                    <div className="bg-gradient-to-br from-copper-700 via-copper-600 to-gray-900 text-white p-6">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="h-12 w-12 rounded-full bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 border-2 border-white/30">
+                            <User className="h-6 w-6 text-white" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs text-white/80 mb-0.5">Welcome back</p>
+                            <p className="text-base font-bold truncate">
+                              {isAuthenticated
+                                ? user?.displayName || user?.email?.split("@")[0] || "User"
+                                : "Guest"}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors flex-shrink-0"
+                          aria-label="Close menu"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
                       </div>
+
+                      {/* User Stats */}
+                      {isAuthenticated && (
+                        <div className="flex gap-3">
+                          <div className="flex-1 bg-white/10 backdrop-blur rounded-lg p-3 border border-white/20">
+                            <p className="text-xs text-white/70 mb-1">Orders</p>
+                            <p className="text-lg font-bold">0</p>
+                          </div>
+                          <div className="flex-1 bg-white/10 backdrop-blur rounded-lg p-3 border border-white/20">
+                            <p className="text-xs text-white/70 mb-1">Wishlist</p>
+                            <p className="text-lg font-bold">{wishlistCount}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
-                    {/* Amazon-style Navigation */}
+                    {/* Navigation Content */}
                     <div className="flex-1 overflow-y-auto overscroll-contain">
-                      {/* Quick Access Categories - Tile Grid */}
+                      {/* Quick Access Categories - Premium Tile Grid */}
                       <div className="p-4 bg-white">
-                        <h3 className="text-sm font-semibold text-copper-800 mb-3">Shop by Category</h3>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="h-1 w-1 rounded-full bg-copper-600"></div>
+                          <h3 className="text-sm font-bold text-gray-900">Shop by Category</h3>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
                           {CATEGORIES.slice(0, 6).map((category) => (
                             <SmartLink
                               key={category.id}
                               href={`/products?category=${category.slug}`}
                               onClick={() => setMobileMenuOpen(false)}
-                              className="flex items-center gap-2 p-3 bg-copper-50 hover:bg-copper-100 rounded-md border border-copper-200 transition-colors"
+                              className="group relative flex items-start gap-2.5 p-4 bg-gradient-to-br from-white to-gray-50 hover:from-copper-50 hover:to-copper-100 rounded-xl border border-gray-200 hover:border-copper-300 transition-all duration-200 shadow-sm hover:shadow-md min-h-[80px]"
                               data-testid={`category-tile-${category.slug}`}
                             >
-                              <Zap className="h-4 w-4 text-copper-600 flex-shrink-0" />
-                              <span className="text-xs font-medium text-copper-800 line-clamp-2">{category.name}</span>
+                              <div className="h-10 w-10 rounded-lg bg-copper-100 group-hover:bg-copper-600 flex items-center justify-center transition-colors flex-shrink-0">
+                                <Zap className="h-5 w-5 text-copper-600 group-hover:text-white transition-colors" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <span className="text-xs font-semibold text-gray-900 line-clamp-2 leading-tight">{category.name}</span>
+                              </div>
                             </SmartLink>
                           ))}
                         </div>
@@ -240,62 +274,125 @@ export function Header() {
                       {mobileNavigation.map((section) => (
                         <div
                           key={section.title}
-                          className="border-t border-copper-200"
+                          className="border-t border-gray-200 bg-white"
                         >
                           {section.expandable ? (
                             <>
                               <button
                                 onClick={() => toggleSection(section.title)}
-                                className="w-full flex items-center justify-between p-4 text-left font-semibold text-copper-800 hover:bg-copper-50 active:bg-copper-100 transition-colors"
+                                className="w-full flex items-center justify-between p-4 text-left font-semibold text-gray-900 hover:bg-gray-50 active:bg-gray-100 transition-colors"
                                 data-testid={`section-toggle-${section.title}`}
                               >
-                                <span className="text-sm truncate pr-2">
+                                <span className="text-sm truncate pr-2 font-bold">
                                   {section.title}
                                 </span>
                                 {expandedSections[section.title] ? (
                                   <ChevronDown className="h-4 w-4 text-copper-600 flex-shrink-0" />
                                 ) : (
-                                  <ChevronRight className="h-4 w-4 text-copper-600 flex-shrink-0" />
+                                  <ChevronRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                 )}
                               </button>
                               {expandedSections[section.title] && (
-                                <div className="bg-copper-50">
-                                  {section.items.map((item) => (
-                                    <SmartLink
-                                      key={item.name}
-                                      href={item.href}
-                                      className="block px-6 py-3 text-sm text-copper-700 hover:text-lime-600 hover:bg-white transition-colors border-b border-copper-200 last:border-b-0"
-                                      onClick={() => setMobileMenuOpen(false)}
-                                      data-testid={`nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                    >
-                                      {item.name}
-                                    </SmartLink>
-                                  ))}
+                                <div className="bg-gray-50">
+                                  {section.items.map((item) => {
+                                    const isExternal = item.href.startsWith('http');
+                                    const linkClasses = "flex items-center gap-2 px-6 py-3.5 text-sm text-gray-700 hover:text-copper-600 hover:bg-white transition-colors border-b border-gray-200 last:border-b-0";
+
+                                    if (isExternal) {
+                                      return (
+                                        <a
+                                          key={item.name}
+                                          href={item.href}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className={linkClasses}
+                                          onClick={() => setMobileMenuOpen(false)}
+                                          data-testid={`nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                        >
+                                          <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
+                                          {item.name}
+                                        </a>
+                                      );
+                                    }
+
+                                    return (
+                                      <SmartLink
+                                        key={item.name}
+                                        href={item.href}
+                                        className={linkClasses}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        data-testid={`nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                      >
+                                        <ChevronRight className="h-3.5 w-3.5 text-gray-400" />
+                                        {item.name}
+                                      </SmartLink>
+                                    );
+                                  })}
                                 </div>
                               )}
                             </>
                           ) : (
                             <>
-                              <div className="p-4 font-semibold text-copper-800 bg-copper-100">
-                                <span className="text-sm">{section.title}</span>
+                              <div className="p-4 font-semibold text-gray-900 bg-gray-50 border-b border-gray-200">
+                                <span className="text-sm font-bold">{section.title}</span>
                               </div>
                               <div>
-                                {section.items.map((item) => (
-                                  <SmartLink
-                                    key={item.name}
-                                    href={item.href}
-                                    className="block px-6 py-3 text-sm text-copper-700 hover:text-lime-600 hover:bg-copper-50 transition-colors border-b border-copper-200 last:border-b-0"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    data-testid={`nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
-                                  >
-                                    {item.name}
-                                  </SmartLink>
-                                ))}
+                                {section.items.map((item) => {
+                                  const isExternal = item.href.startsWith('http');
+                                  const linkClasses = "flex items-center gap-2 px-6 py-3.5 text-sm text-gray-700 hover:text-copper-600 hover:bg-gray-50 transition-colors border-b border-gray-200 last:border-b-0 min-h-[48px]";
+
+                                  if (isExternal) {
+                                    return (
+                                      <a
+                                        key={item.name}
+                                        href={item.href}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={linkClasses}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        data-testid={`nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                      >
+                                        {item.name}
+                                      </a>
+                                    );
+                                  }
+
+                                  return (
+                                    <SmartLink
+                                      key={item.name}
+                                      href={item.href}
+                                      className={linkClasses}
+                                      onClick={() => setMobileMenuOpen(false)}
+                                      data-testid={`nav-link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+                                    >
+                                      {item.name}
+                                    </SmartLink>
+                                  );
+                                })}
                               </div>
                             </>
                           )}
                         </div>
                       ))}
+
+                      {/* Sign Out Section */}
+                      {isAuthenticated && (
+                        <div className="border-t border-gray-200 bg-white p-4">
+                          <Button
+                            onClick={() => {
+                              setMobileMenuOpen(false);
+                              handleSignOut();
+                            }}
+                            variant="outline"
+                            className="w-full h-12 border-2 border-gray-300 hover:border-red-500 hover:bg-red-50 hover:text-red-600 font-semibold transition-all"
+                          >
+                            Sign Out
+                          </Button>
+                        </div>
+                      )}
+
+                      {/* Bottom Padding */}
+                      <div className="h-8 bg-white"></div>
                     </div>
                   </SheetContent>
                 </Sheet>
