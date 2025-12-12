@@ -135,7 +135,7 @@ export default function ProductDetail() {
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      await addItem(product?.id, undefined, quantity);
+      await addItem(product?.id, undefined, quantity, undefined, product);
     },
     onSuccess: () => {
       toast({
@@ -377,11 +377,6 @@ export default function ProductDetail() {
 
             {/* Header Section */}
             <div className="mb-6 border-b border-gray-100 pb-6">
-              {product.category && (
-                <Link href={`/products?category=${product.category.slug}`} className="text-copper-600 font-medium text-sm uppercase tracking-wider mb-2 block hover:underline">
-                  {product.category.name}
-                </Link>
-              )}
               <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4 leading-tight tracking-tight">
                 {product.name}
               </h1>
@@ -546,7 +541,7 @@ export default function ProductDetail() {
                 />
               </div>
               <p className="text-xs text-center mt-2 font-medium">
-                {formatPrice(299)}
+                {formatPrice(29900)}
               </p>
             </div>
 
@@ -561,7 +556,7 @@ export default function ProductDetail() {
                 />
               </div>
               <p className="text-xs text-center mt-2 font-medium">
-                {formatPrice(149)}
+                {formatPrice(14900)}
               </p>
             </div>
 
@@ -572,10 +567,10 @@ export default function ProductDetail() {
               <div className="bg-green-100 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Bundle Price</p>
                 <p className="text-xl font-bold text-green-700">
-                  {formatPrice(price + 299 + 149 - 100)}
+                  {formatPrice(price + 29900 + 14900 - 10000)}
                 </p>
                 <p className="text-xs text-green-600">
-                  Save {formatPrice(100)}
+                  Save {formatPrice(10000)}
                 </p>
               </div>
               <Button className="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2">

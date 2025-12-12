@@ -260,7 +260,7 @@ export default function Account() {
     setAddressForm({
       label: address.label || "Home",
       firstName: address.firstName,
-      lastName: address.lastName,
+      lastName: address.lastName || "",
       street: address.street,
       city: address.city,
       state: address.state,
@@ -416,7 +416,7 @@ export default function Account() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-gray-900">
-                  ${(orders as any[]).reduce((sum: number, order: any) => sum + (typeof order.total === 'number' ? order.total : parseFloat(order.totalAmount || 0)), 0).toFixed(2)}
+                  {formatPrice((orders as any[]).reduce((sum: number, order: any) => sum + (typeof order.total === 'number' ? order.total : 0), 0))}
                 </p>
                 <p className="text-sm text-gray-600">Total Spent</p>
               </div>
@@ -680,7 +680,7 @@ export default function Account() {
                           {booking.totalAmount && (
                             <div className="flex items-center space-x-2">
                               <span className="font-medium">
-                                ₹{parseFloat(booking.totalAmount).toFixed(2)}
+                                {formatPrice(Number(booking.totalAmount))}
                               </span>
                             </div>
                           )}
@@ -915,7 +915,7 @@ export default function Account() {
                           </Link>
                           <div className="flex items-center justify-between">
                             <p className="text-lg font-semibold text-gray-900">
-                              ${parseFloat(item.product.price).toFixed(2)}
+                              {formatPrice(item.product.price)}
                             </p>
                             <Button
                               variant="outline"

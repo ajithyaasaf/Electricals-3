@@ -17,13 +17,13 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
         <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
           <ShoppingCart className="w-12 h-12 text-gray-400" />
         </div>
-        
+
         <h2 className="text-2xl font-semibold text-gray-900 mb-2">
           Your cart is empty
         </h2>
-        
+
         <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          Looks like you haven't added anything to your cart yet. 
+          Looks like you haven't added anything to your cart yet.
           Start shopping to fill it up with amazing electrical products and services!
         </p>
 
@@ -37,7 +37,7 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
               </span>
             </Button>
           </Link>
-          
+
           <Link href="/services">
             <Button variant="outline" size="lg">
               <span className="flex items-center gap-2">
@@ -69,7 +69,7 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Fast Delivery</h3>
               <p className="text-sm text-gray-600">
-                Free shipping on orders over ₹10,000 with quick delivery options
+                Fast 1-2 day delivery in Madurai | Weight-based shipping from ₹30
               </p>
             </CardContent>
           </Card>

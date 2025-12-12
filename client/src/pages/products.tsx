@@ -23,9 +23,9 @@ import { useSEO, useCategorySEO } from "@/hooks/use-seo";
 import type { ProductFilters } from "@/features/products/types";
 
 // Minimal isolated inputs with debugging - moved outside main component
-const PriceInputs = ({ 
-  onMinPriceChange, 
-  onMaxPriceChange 
+const PriceInputs = ({
+  onMinPriceChange,
+  onMaxPriceChange
 }: {
   onMinPriceChange: (value: string) => void;
   onMaxPriceChange: (value: string) => void;
@@ -66,9 +66,9 @@ const PriceInputs = ({
 };
 
 // FilterContent component moved outside to prevent recreation on every render
-const FilterContent = ({ 
-  filters, 
-  categories, 
+const FilterContent = ({
+  filters,
+  categories,
   activeFiltersCount,
   debouncedMinPrice,
   debouncedMaxPrice,
@@ -99,9 +99,9 @@ const FilterContent = ({
           <h3 className="text-sm font-medium text-gray-900">
             Active Filters ({activeFiltersCount})
           </h3>
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={clearFilters}
             className="text-copper-600 hover:text-copper-700 hover:bg-copper-50 h-auto p-1"
           >
@@ -186,11 +186,10 @@ const FilterContent = ({
       <div className="space-y-1">
         <button
           onClick={() => updateFilter("categoryId", undefined)}
-          className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-            !filters.categoryId 
-              ? "bg-copper-100 text-copper-900 border-2 border-copper-300" 
-              : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
-          }`}
+          className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${!filters.categoryId
+            ? "bg-copper-100 text-copper-900 border-2 border-copper-300"
+            : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+            }`}
         >
           All Categories
         </button>
@@ -198,11 +197,10 @@ const FilterContent = ({
           <button
             key={category.id}
             onClick={() => updateFilter("categoryId", category.id)}
-            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-              filters.categoryId === category.id 
-                ? "bg-copper-100 text-copper-900 border-2 border-copper-300" 
-                : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
-            }`}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${filters.categoryId === category.id
+              ? "bg-copper-100 text-copper-900 border-2 border-copper-300"
+              : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+              }`}
           >
             {category.name}
           </button>
@@ -237,7 +235,7 @@ const FilterContent = ({
             <div>₹{maxPriceNumber.toLocaleString('en-IN')}</div>
           </div>
         </div>
-        <PriceInputs 
+        <PriceInputs
           onMinPriceChange={setMinPriceString}
           onMaxPriceChange={setMaxPriceString}
         />
@@ -250,11 +248,10 @@ const FilterContent = ({
       <div className="space-y-3">
         <button
           onClick={() => updateFilter("featured", !filters.featured)}
-          className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-between ${
-            filters.featured 
-              ? "bg-green-100 text-green-900 border-2 border-green-300" 
-              : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
-          }`}
+          className={`w-full text-left px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-between ${filters.featured
+            ? "bg-green-100 text-green-900 border-2 border-green-300"
+            : "text-gray-700 hover:bg-gray-100 border-2 border-transparent"
+            }`}
         >
           <span>Featured Products</span>
           {filters.featured && (
@@ -275,22 +272,22 @@ export default function Products() {
   const searchParams = useSearch();
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
-  
+
   // Enable enterprise navigation features
   const { navigationState } = useEnterpriseNavigation();
-  
+
   // Parse URL parameters - these update reactively
   const urlParams = new URLSearchParams(searchParams);
   const urlCategory = urlParams.get("category") || "";
   const urlSearch = urlParams.get("search") || "";
   const urlFeatured = urlParams.get("featured") === "true";
-  
+
   // SEO optimization for products page
   useSEO();
-  
+
   // Fetch categories using custom hook FIRST
   const { data: categories = [] } = useCategories();
-  
+
   // Filter state - will be synchronized with URL
   const [filters, setFilters] = useState<ProductFilters>({
     categoryId: undefined,
@@ -313,7 +310,7 @@ export default function Products() {
   useEffect(() => {
     // Wait for categories to load before syncing category filter
     if (categories.length === 0) return;
-    
+
     // Derive complete filter state from URL - explicitly clear if not present
     let categoryId: string | undefined = undefined;
     if (urlCategory) {
@@ -365,8 +362,8 @@ export default function Products() {
     categoryId: filters.categoryId,
     search: debouncedSearch, // Use debounced search
     featured: filters.featured,
-    minPrice: debouncedMinPrice, // Send prices in rupees format
-    maxPrice: debouncedMaxPrice, // Send prices in rupees format
+    minPrice: debouncedMinPrice * 100, // Convert rupees to paise for DB comparison
+    maxPrice: debouncedMaxPrice * 100, // Convert rupees to paise for DB comparison
     sortBy: filters.sortBy,
     sortOrder: filters.sortOrder,
     limit: itemsPerPage,
@@ -384,29 +381,29 @@ export default function Products() {
     }
 
     syncOriginRef.current = 'filters';
-    
+
     const params = new URLSearchParams();
-    
+
     if (filters.search) params.set("search", filters.search);
     if (filters.categoryId) {
       const category = categories.find(c => c.id === filters.categoryId);
       if (category) params.set("category", category.slug);
     }
     if (filters.featured) params.set("featured", "true");
-    
+
     const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
     setLocation(newUrl, { replace: true });
-    
+
     // Will be reset to null in next render
   }, [filters.search, filters.categoryId, filters.featured, categories, setLocation]);
 
   const updateFilter = (key: string, value: any) => {
     // Store current scroll position to prevent jumping
     const scrollY = window.scrollY;
-    
+
     setFilters(prev => ({ ...prev, [key]: value }));
     setCurrentPage(1);
-    
+
     // Restore scroll position after a brief delay to allow DOM updates
     setTimeout(() => {
       window.scrollTo({ top: scrollY, behavior: 'instant' });
@@ -427,7 +424,7 @@ export default function Products() {
     setMinPriceString("");
     setMaxPriceString("");
     setCurrentPage(1);
-    
+
     // Also clear URL immediately to handle case when categories aren't ready
     setLocation('/products', { replace: true });
   };
@@ -449,7 +446,7 @@ export default function Products() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Enterprise Breadcrumb Navigation */}
         <BreadcrumbNavigation />
@@ -471,18 +468,18 @@ export default function Products() {
                 <div className="flex items-center justify-between p-6 pb-4 border-b bg-white">
                   <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
                   {activeFiltersCount > 0 && (
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className="bg-copper-100 text-copper-800"
                     >
                       {activeFiltersCount} active
                     </Badge>
                   )}
                 </div>
-                
+
                 {/* Scrollable Filter Content */}
                 <div className="overflow-y-auto overflow-x-hidden p-6 pt-4 flex-1 scrollbar-modern">
-                  <FilterContent 
+                  <FilterContent
                     filters={filters}
                     categories={categories}
                     activeFiltersCount={activeFiltersCount}
@@ -511,7 +508,7 @@ export default function Products() {
                 </div>
               </div>
             )}
-            
+
             {/* Enhanced Toolbar */}
             <div className="bg-white rounded-lg shadow-sm border p-4 mb-6">
               <div className="flex flex-col gap-4">
@@ -538,15 +535,15 @@ export default function Products() {
                   {isMobile && (
                     <Sheet open={mobileFiltersOpen} onOpenChange={setMobileFiltersOpen}>
                       <SheetTrigger asChild>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           className="w-full sm:w-auto border-copper-200 hover:bg-copper-50 hover:border-copper-300"
                         >
                           <Filter className="w-4 h-4 mr-2" />
                           Filters
                           {activeFiltersCount > 0 && (
-                            <Badge 
-                              variant="secondary" 
+                            <Badge
+                              variant="secondary"
                               className="ml-2 bg-copper-600 text-white hover:bg-copper-700 text-xs"
                             >
                               {activeFiltersCount}
@@ -559,15 +556,15 @@ export default function Products() {
                           <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-semibold text-gray-900">Filters</h2>
                             {activeFiltersCount > 0 && (
-                              <Badge 
-                                variant="secondary" 
+                              <Badge
+                                variant="secondary"
                                 className="bg-copper-100 text-copper-800"
                               >
                                 {activeFiltersCount} active
                               </Badge>
                             )}
                           </div>
-                          <FilterContent 
+                          <FilterContent
                             filters={filters}
                             categories={categories}
                             activeFiltersCount={activeFiltersCount}
@@ -609,7 +606,7 @@ export default function Products() {
                   {/* Sort */}
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Sort by:</span>
-                    <Select 
+                    <Select
                       value={`${filters.sortBy}-${filters.sortOrder}`}
                       onValueChange={(value) => {
                         const [sortBy, sortOrder] = value.split("-");
@@ -638,8 +635,8 @@ export default function Products() {
                 {filters.search && (
                   <Badge variant="secondary" className="flex items-center gap-1">
                     Search: {filters.search}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
+                    <X
+                      className="w-3 h-3 cursor-pointer"
                       onClick={() => updateFilter("search", "")}
                     />
                   </Badge>
@@ -647,8 +644,8 @@ export default function Products() {
                 {filters.categoryId && (
                   <Badge variant="secondary" className="flex items-center gap-1">
                     {categories.find(c => c.id === filters.categoryId)?.name}
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
+                    <X
+                      className="w-3 h-3 cursor-pointer"
                       onClick={() => updateFilter("categoryId", undefined)}
                     />
                   </Badge>
@@ -656,8 +653,8 @@ export default function Products() {
                 {filters.featured && (
                   <Badge variant="secondary" className="flex items-center gap-1">
                     Featured Only
-                    <X 
-                      className="w-3 h-3 cursor-pointer" 
+                    <X
+                      className="w-3 h-3 cursor-pointer"
                       onClick={() => updateFilter("featured", false)}
                     />
                   </Badge>
@@ -695,7 +692,7 @@ export default function Products() {
                   >
                     Previous
                   </Button>
-                  
+
                   {[...Array(totalPages)].map((_, i) => {
                     const page = i + 1;
                     if (page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)) {
@@ -717,7 +714,7 @@ export default function Products() {
                     }
                     return null;
                   })}
-                  
+
                   <Button
                     variant="outline"
                     disabled={currentPage === totalPages}

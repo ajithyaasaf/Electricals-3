@@ -28,7 +28,7 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      await addItem(product.id.toString());
+      await addItem(product.id.toString(), undefined, 1, undefined, product);
     },
     onSuccess: () => {
       toast({

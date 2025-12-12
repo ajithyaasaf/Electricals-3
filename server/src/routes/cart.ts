@@ -1,4 +1,3 @@
-// Enhanced Cart Routes - Enterprise-grade cart management with real-time updates
 import type { Express } from "express";
 import { storage } from "../../storage";
 import { isAuthenticated, optionalAuth } from "../../firebaseAuth";
@@ -13,6 +12,7 @@ import {
   type CartItemWithDetails
 } from "@shared/cart-types";
 import type { Product, Service } from "@shared/types";
+import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics } from '@shared/logistics';
 
 // Cart configuration - Updated based on client requirements
 const CART_CONFIG = {
@@ -1056,64 +1056,6 @@ export function registerCartRoutes(app: Express) {
     }
   });
 
-  // Get shipping options - Updated per client requirements
-  app.get("/api/cart/shipping-options", optionalAuth, async (req: any, res) => {
-    try {
-      const { state = '', orderValue = 0 } = req.query;
-      const isServiceableState = CART_CONFIG.serviceableStates.includes(state);
-
-      if (!isServiceableState) {
-        return res.json({
-          message: "Delivery not available in your area. We currently deliver only to Tamil Nadu.",
-          options: []
-        });
-      }
-
-      const shippingOptions = [
-        {
-          id: 'standard',
-          name: 'Standard Delivery',
-          description: '1-3 business days',
-          price: orderValue >= CART_CONFIG.freeShippingThreshold ? 0 : 100, // ₹100 for orders below ₹10k
-          estimatedDays: CART_CONFIG.deliveryDays.max,
-          isDefault: true,
-          minOrderAmount: 0,
-          serviceableStates: CART_CONFIG.serviceableStates
-        },
-        {
-          id: 'cod',
-          name: 'Cash on Delivery',
-          description: '1-3 business days, Pay at delivery',
-          price: orderValue >= CART_CONFIG.freeShippingThreshold ? 0 : 100,
-          estimatedDays: CART_CONFIG.deliveryDays.max,
-          isDefault: false,
-          minOrderAmount: CART_CONFIG.codConfig.minOrderAmount,
-          maxOrderAmount: CART_CONFIG.codConfig.maxOrderAmount,
-          additionalCharges: CART_CONFIG.codConfig.additionalCharges,
-          serviceableStates: CART_CONFIG.codConfig.serviceableStates
-        }
-      ];
-
-      // Add free shipping notice
-      if (orderValue < CART_CONFIG.freeShippingThreshold) {
-        shippingOptions.forEach((option: any) => {
-          option.freeShippingNotice = `Free delivery on orders above ₹${CART_CONFIG.freeShippingThreshold.toLocaleString()}`;
-        });
-      }
-
-      res.json({
-        options: shippingOptions,
-        freeShippingThreshold: CART_CONFIG.freeShippingThreshold,
-        isServiceableState,
-        returnPolicy: CART_CONFIG.returnPolicy
-      });
-
-    } catch (error) {
-      console.error("Error fetching shipping options:", error);
-      res.status(500).json({ message: "Failed to fetch shipping options" });
-    }
-  });
-
   // Manual cart cleanup endpoint for removing orphaned items
   app.post("/api/cart/cleanup", isAuthenticated, async (req: any, res) => {
     try {
@@ -1254,16 +1196,27 @@ function preserveCartOnLogout(authCart: any[]): any[] {
   }));
 }
 
+/**
+ * Calculate cart totals with weight-based shipping logic
+ * Server-authoritative calculation - never trust client data
+ * Handles missing product data gracefully with defaults
+ */
 function calculateCartTotals(items: CartItemWithDetails[], coupons: Coupon[] = []): CartTotals {
   const activeItems = items.filter(item => !item.savedForLater);
 
+  // Calculate subtotal (Sum of Selling Prices)
   const subtotal = activeItems.reduce((sum, item) =>
     sum + (item.unitPrice * item.quantity), 0
   );
 
-  let discount = activeItems.reduce((sum, item) =>
+  // Calculate product-level savings (MRP - Selling Price) - purely for display!
+  // DO NOT subtract this from subtotal as subtotal is already the selling price
+  const productSavings = activeItems.reduce((sum, item) =>
     sum + (item.discount * item.quantity), 0
   );
+
+  // Calculate coupon discounts (Deductible)
+  let couponDiscount = 0;
 
   // Apply coupon discounts
   coupons.forEach(coupon => {
@@ -1272,23 +1225,61 @@ function calculateCartTotals(items: CartItemWithDetails[], coupons: Coupon[] = [
     }
 
     if (coupon.type === 'percentage') {
-      const couponDiscount = subtotal * (coupon.value / 100);
-      discount += coupon.maxDiscount
-        ? Math.min(couponDiscount, coupon.maxDiscount)
-        : couponDiscount;
+      const discountAmount = subtotal * (coupon.value / 100);
+      couponDiscount += coupon.maxDiscount
+        ? Math.min(discountAmount, coupon.maxDiscount)
+        : discountAmount;
     } else if (coupon.type === 'fixed') {
-      discount += coupon.value;
+      couponDiscount += coupon.value;
     }
   });
 
-  const shipping = subtotal >= CART_CONFIG.freeShippingThreshold ? 0 : 100; // ₹100 shipping for orders below ₹10,000
-  const tax = (subtotal - discount) * CART_CONFIG.taxRate;
-  const total = subtotal - discount + shipping + tax;
-  const savings = discount;
+  // Calculate weight-based shipping
+  let totalWeight = 0;
+  let hasBulkyItems = false;
+
+  activeItems.forEach(item => {
+    const product = item.product;
+    const logistics = getProductLogistics(product);
+
+    totalWeight += logistics.weight * item.quantity;
+    if (logistics.isBulky) {
+      hasBulkyItems = true;
+    }
+  });
+
+  // Determine shipping cost using weight-based tiers
+  let shipping = 0;
+  const isHeavy = hasBulkyItems || totalWeight > 15; // > 15kg threshold
+
+  if (isHeavy) {
+    shipping = subtotal >= SHIPPING_THRESHOLDS.FREE_HEAVY
+      ? SHIPPING_FEES.FREE
+      : SHIPPING_FEES.HEAVY_FLAT;
+  } else {
+    // Standard shipping
+    if (subtotal >= SHIPPING_THRESHOLDS.FREE_STANDARD) {
+      shipping = SHIPPING_FEES.FREE;
+    } else if (subtotal >= SHIPPING_THRESHOLDS.SUBSIDIZED) {
+      shipping = SHIPPING_FEES.STANDARD_MID;
+    } else {
+      shipping = SHIPPING_FEES.STANDARD_LOW;
+    }
+  }
+
+  // Calculate GST on taxable amount (Subtotal - Coupon Discounts)
+  const taxableAmount = Math.max(0, subtotal - couponDiscount);
+  const tax = taxableAmount * CART_CONFIG.taxRate;
+
+  // Final total
+  const total = taxableAmount + shipping + tax;
+
+  // Total Savings = Product Savings (MRP diff) + Coupon Savings
+  const savings = productSavings + couponDiscount;
 
   return {
     subtotal: Math.max(0, subtotal),
-    discount: Math.max(0, discount),
+    discount: Math.max(0, couponDiscount), // Only return deductible discount here
     shipping: Math.max(0, shipping),
     tax: Math.max(0, tax),
     total: Math.max(0, total),

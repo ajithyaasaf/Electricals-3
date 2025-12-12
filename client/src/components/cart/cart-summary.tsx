@@ -49,10 +49,7 @@ export function CartSummary({
     setCouponCode('');
   };
 
-  // Calculate free shipping progress - Updated per client requirements
-  const freeShippingThreshold = 10000; // ₹10,000
-  const progressToFreeShipping = Math.min((totals.subtotal / freeShippingThreshold) * 100, 100);
-  const amountForFreeShipping = Math.max(freeShippingThreshold - totals.subtotal, 0);
+  // Delivery information now comes from server-calculated cart.totals
 
   return (
     <Card className={className}>
@@ -93,7 +90,7 @@ export function CartSummary({
           </div>
 
           <div className="flex justify-between text-base">
-            <span>Tax</span>
+            <span>Tax (18% GST)</span>
             <span>{formatPrice(totals.tax)}</span>
           </div>
 
@@ -115,25 +112,21 @@ export function CartSummary({
           )}
         </div>
 
-        {/* Free Shipping Progress */}
-        {totals.shipping > 0 && amountForFreeShipping > 0 && (
+        {/* Free Shipping Progress - Only show if currently charged shipping */}
+        {totals.shipping > 0 && (
           <div className="bg-blue-50 p-4 rounded-md">
             <div className="flex items-center gap-2 mb-2">
               <Truck className="w-4 h-4 text-blue-600" />
               <span className="text-sm font-medium text-blue-800">
-                Free Shipping Progress
+                Delivery Information
               </span>
             </div>
-            
-            <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-              <div 
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progressToFreeShipping}%` }}
-              />
-            </div>
-            
+
             <p className="text-xs text-blue-700">
-              Add {formatPrice(amountForFreeShipping)} more to qualify for free shipping!
+              Current shipping: {formatPrice(totals.shipping)}
+            </p>
+            <p className="text-xs text-blue-600 mt-1">
+              Delivery fees vary by weight and location. Heavy or bulky items may incur additional charges.
             </p>
           </div>
         )}
@@ -145,7 +138,7 @@ export function CartSummary({
             <div className="space-y-2">
               <p className="text-sm font-medium">Applied Coupons:</p>
               {appliedCoupons.map((coupon) => (
-                <div 
+                <div
                   key={coupon}
                   className="flex items-center justify-between bg-green-50 p-2 rounded-md"
                 >
@@ -202,10 +195,11 @@ export function CartSummary({
         <div className="space-y-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
           <h4 className="text-sm font-medium text-blue-900">Shipping & Returns</h4>
           <div className="text-xs text-blue-800 space-y-1">
-            <div>• Free delivery on orders above ₹10,000</div>
-            <div>• Delivery in 1-3 business days (Tamil Nadu only)</div>
+            <div>• Currently delivering within Madurai (625xxx pincodes)</div>
+            <div>• Delivery in 1-2 business days</div>
+            <div>• Shipping fees based on weight and product category</div>
             <div>• Returns: 5-7 days, 2.5% return shipping charge</div>
-            <div>• COD available (Tamil Nadu, no extra charges)</div>
+            <div>• COD available (Madurai, no extra charges)</div>
           </div>
         </div>
 
@@ -224,7 +218,7 @@ export function CartSummary({
         {/* Checkout Button */}
         <div className="space-y-3">
           <Link href="/checkout">
-            <Button 
+            <Button
               className="w-full bg-primary hover:bg-primary/90 text-white py-3"
               size="lg"
               disabled={totals.total <= 0}

@@ -136,11 +136,10 @@ export function Header() {
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 overflow-hidden">
-      {/* Top announcement bar */}
+      {/* Top announcement bar - Madurai Launch Phase */}
       <div className="bg-copper-700 text-white text-center py-2 text-sm px-2">
         <span className="text-xs sm:text-sm truncate block">
-          Free shipping on electrical products over ₹10,000 | Professional
-          installation services available
+          🚀 Madurai Launch! | 1-2 Day Delivery | Premium Products | Free Shipping ₹3,000+
         </span>
       </div>
 

@@ -212,6 +212,11 @@ export interface OrderTotals {
 
 /**
  * Calculate order totals with GST and shipping
+ * 
+ * @deprecated This function uses hardcoded shipping logic and is no longer used.
+ * Order creation now uses weight-based shipping calculation in createOrderWithTransaction.
+ * Kept for backward compatibility and potential future use.
+ * 
  * @param itemTotals Array of item total prices (unitPrice * quantity)
  * @param freeShippingThreshold Minimum subtotal for free shipping (default: ₹10,000)
  * @param shippingCost Cost of shipping if below threshold (default: ₹100)

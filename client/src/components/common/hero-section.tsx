@@ -39,14 +39,14 @@ export function HeroSection() {
                     <span className="text-white">Electrical Megastore</span>
                   </h1>
 
-                  {/* Location - Pan India Coverage */}
+                  {/* Location - Madurai Launch */}
                   <div className="space-y-2 mb-8">
                     <div className="flex items-center text-gray-200 text-lg">
                       <MapPin className="w-5 h-5 mr-2 text-yellow-400" />
                       <span className="font-semibold">Based in Madurai, Tamil Nadu</span>
                     </div>
                     <p className="text-gray-300 text-sm ml-7">
-                      Delivering across Tamil Nadu & North India • Delhi • Jaipur • Lucknow • All Major Cities
+                      Currently delivering within Madurai (625xxx) • Expanding across Tamil Nadu soon!
                     </p>
                   </div>
 

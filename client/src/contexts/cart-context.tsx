@@ -3,7 +3,8 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback,
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import type { Cart, CartItem } from '@shared/cart-types';
+import type { Cart, CartItem, CartItemWithDetails } from '@shared/cart-types';
+import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics } from '@shared/logistics';
 
 // Enhanced guest cart item interface with schema versioning and conflict resolution
 export interface GuestCartItem {
@@ -31,7 +32,7 @@ export interface GuestCartData {
 }
 
 // Cart reducer actions
-type CartAction = 
+type CartAction =
   | { type: 'SET_CART'; payload: Cart | null }
   | { type: 'ADD_ITEM'; payload: CartItem }
   | { type: 'UPDATE_QUANTITY'; payload: { itemId: string; quantity: number } }
@@ -46,7 +47,7 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
   switch (action.type) {
     case 'SET_CART':
       return action.payload;
-    
+
     case 'ADD_ITEM':
       if (!state) {
         // Create new cart with the item
@@ -65,18 +66,18 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
           expiresAt: undefined
         };
       }
-      
+
       // Check if item already exists
-      const existingItemIndex = state.items.findIndex(item => 
+      const existingItemIndex = state.items.findIndex(item =>
         (item.productId === action.payload.productId && item.productId) ||
         (item.serviceId === action.payload.serviceId && item.serviceId)
       );
-      
+
       let newItems: CartItem[];
       if (existingItemIndex >= 0) {
         // Update quantity of existing item
         newItems = state.items.map((item, index) =>
-          index === existingItemIndex 
+          index === existingItemIndex
             ? { ...item, quantity: item.quantity + action.payload.quantity, updatedAt: new Date() }
             : item
         );
@@ -84,7 +85,7 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
         // Add new item
         newItems = [...state.items, action.payload];
       }
-      
+
       return {
         ...state,
         items: newItems,
@@ -92,16 +93,16 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
         lastUpdated: new Date(),
         updatedAt: new Date()
       };
-    
+
     case 'UPDATE_QUANTITY':
       if (!state) return state;
-      
+
       const updatedItems = state.items.map(item =>
         item.id === action.payload.itemId
           ? { ...item, quantity: action.payload.quantity, updatedAt: new Date() }
           : item
       );
-      
+
       return {
         ...state,
         items: updatedItems,
@@ -109,12 +110,12 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
         lastUpdated: new Date(),
         updatedAt: new Date()
       };
-    
+
     case 'REMOVE_ITEM':
       if (!state) return state;
-      
+
       const filteredItems = state.items.filter(item => item.id !== action.payload.itemId);
-      
+
       return {
         ...state,
         items: filteredItems,
@@ -122,10 +123,10 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
         lastUpdated: new Date(),
         updatedAt: new Date()
       };
-    
+
     case 'CLEAR_CART':
       if (!state) return null;
-      
+
       return {
         ...state,
         items: [],
@@ -133,16 +134,16 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
         lastUpdated: new Date(),
         updatedAt: new Date()
       };
-    
+
     case 'OPTIMISTIC_UPDATE_ITEM':
       if (!state) return state;
-      
+
       const optimisticItems = state.items.map(item =>
         item.id === action.payload.itemId
           ? { ...item, ...action.payload.updates, updatedAt: new Date() }
           : item
       );
-      
+
       return {
         ...state,
         items: optimisticItems,
@@ -150,7 +151,7 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
         lastUpdated: new Date(),
         updatedAt: new Date()
       };
-    
+
     default:
       return state;
   }
@@ -160,21 +161,53 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
 function calculateOptimisticTotals(items: CartItem[]): Cart['totals'] {
   const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   const discount = items.reduce((sum, item) => sum + (item.discount || 0), 0);
-  
-  // Free shipping over ₹500 (50000 paise)
-  const shipping = subtotal > 50000 ? 0 : 5000;
-  
+
+  // Calculate total weight and bulkiness
+  let totalWeight = 0;
+  let hasBulkyItems = false;
+
+  items.forEach(item => {
+    // Cast to access product if available (runtime check provided by getProductLogistics)
+    const product = (item as any).product;
+    const logistics = getProductLogistics(product);
+
+    totalWeight += logistics.weight * item.quantity;
+    if (logistics.isBulky) {
+      hasBulkyItems = true;
+    }
+  });
+
+  // Determine Shipping Cost
+  let shipping = 0;
+
+  // Heavy/Bulky Logic
+  const isHeavy = hasBulkyItems || totalWeight > 15; // > 15kg count as heavy order automatically
+
+  if (isHeavy) {
+    // Heavy items charge HEAVY_FLAT unless order is very large (FREE_HEAVY threshold)
+    shipping = subtotal >= SHIPPING_THRESHOLDS.FREE_HEAVY ? SHIPPING_FEES.FREE : SHIPPING_FEES.HEAVY_FLAT;
+  } else {
+    // Standard Shipping Logic
+    if (subtotal >= SHIPPING_THRESHOLDS.FREE_STANDARD) {
+      shipping = SHIPPING_FEES.FREE;
+    } else if (subtotal >= SHIPPING_THRESHOLDS.SUBSIDIZED) {
+      shipping = SHIPPING_FEES.STANDARD_MID;
+    } else {
+      shipping = SHIPPING_FEES.STANDARD_LOW;
+    }
+  }
+
   // 18% GST
   const tax = Math.round(subtotal * 0.18);
-  
+
   // Calculate savings (difference between original price and unit price)
   const savings = items.reduce((sum, item) => {
     const originalPrice = item.originalPrice || item.unitPrice;
     return sum + ((originalPrice - item.unitPrice) * item.quantity);
   }, 0);
-  
+
   const total = subtotal - discount + shipping + tax;
-  
+
   return {
     subtotal: Math.max(0, subtotal),
     discount: Math.max(0, discount),
@@ -191,7 +224,7 @@ interface CartContextType {
   cart: Cart | null;
   isLoading: boolean;
   error: string | null;
-  
+
   // Derived selectors with memoization
   itemsCount: number;
   totalQuantity: number;
@@ -201,17 +234,17 @@ interface CartContextType {
   tax: number;
   total: number;
   savings: number;
-  
+
   // Cart actions
-  addItem: (productId?: string, serviceId?: string, quantity?: number, customizations?: Record<string, any>) => Promise<void>;
+  addItem: (productId?: string, serviceId?: string, quantity?: number, customizations?: Record<string, any>, productSnapshot?: any) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   updateQuantity: (itemId: string, quantity: number) => Promise<void>;
   updateNotes: (itemId: string, notes: string) => Promise<void>;
   clearCart: () => Promise<void>;
-  
+
   // Guest cart specific
   guestCart: GuestCartItem[];
-  
+
   // Refresh cart
   refreshCart: () => Promise<void>;
 }
@@ -240,7 +273,7 @@ class CartStorageManager {
       if (!stored) return [];
 
       const parsed = JSON.parse(stored);
-      
+
       // Handle legacy format (array) or new format (object with metadata)
       let cartData: GuestCartData;
       if (Array.isArray(parsed)) {
@@ -293,7 +326,7 @@ class CartStorageManager {
       };
 
       localStorage.setItem(GUEST_CART_KEY, JSON.stringify(cartData));
-      
+
       // Trigger cross-tab sync only if not coming from sync event
       if (!skipSync) {
         this.triggerCrossTabSync();
@@ -329,9 +362,9 @@ class CartStorageManager {
    */
   static isValidGuestItem(item: any): boolean {
     return !!(
-      item.id && 
-      (item.productId || item.serviceId) && 
-      typeof item.quantity === 'number' && 
+      item.id &&
+      (item.productId || item.serviceId) &&
+      typeof item.quantity === 'number' &&
       item.quantity > 0
     );
   }
@@ -377,15 +410,15 @@ class CartStorageManager {
    * Atomic merge operation with conflict resolution
    */
   static mergeCartItems(
-    guestItems: GuestCartItem[], 
+    guestItems: GuestCartItem[],
     authItems: CartItem[]
   ): { merged: CartItem[]; conflicts: Array<{ guest: GuestCartItem; auth: CartItem; resolution: string }> } {
     const merged: CartItem[] = [...authItems];
     const conflicts: Array<{ guest: GuestCartItem; auth: CartItem; resolution: string }> = [];
 
     for (const guestItem of guestItems) {
-      const existingIndex = merged.findIndex(authItem => 
-        authItem.productId === guestItem.productId && 
+      const existingIndex = merged.findIndex(authItem =>
+        authItem.productId === guestItem.productId &&
         authItem.serviceId === guestItem.serviceId
       );
 
@@ -393,7 +426,7 @@ class CartStorageManager {
         // Conflict detected - apply resolution rules
         const authItem = merged[existingIndex];
         const resolution = this.resolveCartConflict(guestItem, authItem);
-        
+
         merged[existingIndex] = resolution.resolvedItem;
         conflicts.push({
           guest: guestItem,
@@ -428,7 +461,7 @@ class CartStorageManager {
    * Resolve conflicts between guest and authenticated cart items
    */
   static resolveCartConflict(
-    guestItem: GuestCartItem, 
+    guestItem: GuestCartItem,
     authItem: CartItem
   ): { resolvedItem: CartItem; strategy: string } {
     const prefs = guestItem.conflictResolution || {
@@ -469,9 +502,9 @@ class CartStorageManager {
 
     resolvedItem.updatedAt = new Date();
 
-    return { 
-      resolvedItem, 
-      strategy: strategy.trim() || 'auth-preferred' 
+    return {
+      resolvedItem,
+      strategy: strategy.trim() || 'auth-preferred'
     };
   }
 }
@@ -479,22 +512,22 @@ class CartStorageManager {
 export function CartProvider({ children }: CartProviderProps) {
   const { isAuthenticated, user } = useFirebaseAuth();
   const { toast } = useToast();
-  
+
   // State management with reducer for deterministic updates
   const [cart, dispatch] = useReducer(cartReducer, null);
   const [guestCart, setGuestCart] = useState<GuestCartItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   // Request queue and debouncing for quantity updates
   const updateQueueRef = useRef<Map<string, { quantity: number; timestamp: number }>>(new Map());
   const pendingUpdatesRef = useRef<Set<string>>(new Set());
   const debounceTimersRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const saveGuestCartTimeoutRef = useRef<NodeJS.Timeout>();
-  
+
   // Keep reference to current cart for logout preservation
   const currentCartRef = useRef<Cart | null>(null);
-  
+
   // Add-to-cart operation queue
   const addOperationQueueRef = useRef<Array<{
     id: string;
@@ -551,12 +584,12 @@ export function CartProvider({ children }: CartProviderProps) {
     if (guestCart.length === 0 || isAuthenticated) {
       return;
     }
-    
+
     // Clear existing timeout
     if (saveGuestCartTimeoutRef.current) {
       clearTimeout(saveGuestCartTimeoutRef.current);
     }
-    
+
     // Debounce localStorage saves to prevent multiple rapid writes
     saveGuestCartTimeoutRef.current = setTimeout(() => {
       try {
@@ -566,7 +599,7 @@ export function CartProvider({ children }: CartProviderProps) {
         console.error('[CART CONTEXT] Error saving guest cart:', error);
       }
     }, 200);
-    
+
     return () => {
       if (saveGuestCartTimeoutRef.current) {
         clearTimeout(saveGuestCartTimeoutRef.current);
@@ -577,11 +610,11 @@ export function CartProvider({ children }: CartProviderProps) {
   // Load authenticated user's cart
   const loadAuthenticatedCart = useCallback(async () => {
     if (!isAuthenticated) return;
-    
+
     console.log('[CART CONTEXT] 🔄 Loading authenticated cart...');
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const response = await apiRequest('GET', '/api/cart');
       const cartData = await response.json();
@@ -594,20 +627,22 @@ export function CartProvider({ children }: CartProviderProps) {
       console.error('[CART CONTEXT] ❌ Error loading authenticated cart:', error);
       setError('Failed to load cart');
       // Fallback to empty cart
-      dispatch({ type: 'SET_CART', payload: {
-        id: `fallback_cart_${Date.now()}`,
-        items: [],
-        totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
-        currency: 'INR',
-        lastUpdated: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        appliedCoupons: [],
-        userId: undefined,
-        sessionId: undefined,
-        shippingAddress: undefined,
-        expiresAt: undefined
-      } });
+      dispatch({
+        type: 'SET_CART', payload: {
+          id: `fallback_cart_${Date.now()}`,
+          items: [],
+          totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
+          currency: 'INR',
+          lastUpdated: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          appliedCoupons: [],
+          userId: undefined,
+          sessionId: undefined,
+          shippingAddress: undefined,
+          expiresAt: undefined
+        }
+      });
     } finally {
       setIsLoading(false);
     }
@@ -617,24 +652,26 @@ export function CartProvider({ children }: CartProviderProps) {
   const loadGuestCartAsCart = useCallback(async () => {
     // Use enhanced cart storage manager for robust loading
     const currentGuestCart = CartStorageManager.loadGuestCart();
-    
+
     console.log('[CART CONTEXT] 📖 Loading guest cart from localStorage:', currentGuestCart.length, 'items');
-    
+
     if (currentGuestCart.length === 0) {
-      dispatch({ type: 'SET_CART', payload: {
-        id: `guest_cart_${Date.now()}`,
-        items: [],
-        totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
-        currency: 'INR',
-        lastUpdated: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        appliedCoupons: [],
-        userId: undefined,
-        sessionId: undefined,
-        shippingAddress: undefined,
-        expiresAt: undefined
-      }});
+      dispatch({
+        type: 'SET_CART', payload: {
+          id: `guest_cart_${Date.now()}`,
+          items: [],
+          totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
+          currency: 'INR',
+          lastUpdated: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          appliedCoupons: [],
+          userId: undefined,
+          sessionId: undefined,
+          shippingAddress: undefined,
+          expiresAt: undefined
+        }
+      });
       return;
     }
 
@@ -648,7 +685,7 @@ export function CartProvider({ children }: CartProviderProps) {
       dispatch({ type: 'SET_CART', payload: cartData });
       currentCartRef.current = cartData;
       console.log('[CART CONTEXT] 📦 Loaded guest cart as Cart with', cartData.items?.length || 0, 'items');
-      
+
       // Sync guest cart state
       setGuestCart(currentGuestCart);
     } catch (error) {
@@ -671,19 +708,19 @@ export function CartProvider({ children }: CartProviderProps) {
   // Load cart when authentication state changes (only once per auth change)
   useEffect(() => {
     let isMounted = true;
-    
+
     const loadCart = async () => {
       if (!isMounted) return;
-      
+
       if (isAuthenticated) {
         await loadAuthenticatedCart();
       } else {
         await loadGuestCartAsCart();
       }
     };
-    
+
     loadCart();
-    
+
     return () => {
       isMounted = false;
     };
@@ -704,24 +741,24 @@ export function CartProvider({ children }: CartProviderProps) {
       console.log('[CART CONTEXT] ⏭️ Skipping cart clearing - recently executed');
       return;
     }
-    
+
     console.log('[CART CONTEXT] 🗑️ User logged out, clearing cart data...');
     localStorage.setItem('recent_cart_clearing', Date.now().toString());
-    
+
     // Clear the cart state
     dispatch({ type: 'CLEAR_CART' });
-    
+
     // Clear guest cart from localStorage
     localStorage.removeItem(GUEST_CART_KEY);
-    
+
     // Clear the guest cart state
     setGuestCart([]);
-    
+
     // Clear current cart reference
     currentCartRef.current = null;
-    
+
     console.log('[CART CONTEXT] ✅ Cart cleared successfully on logout');
-    
+
     // Clean up clearing flag after a short delay
     setTimeout(() => {
       localStorage.removeItem('recent_cart_clearing');
@@ -731,7 +768,7 @@ export function CartProvider({ children }: CartProviderProps) {
   // Migrate guest cart when user signs in - ALWAYS run on authentication change
   useEffect(() => {
     let migrationTimeout: NodeJS.Timeout;
-    
+
     const migrateGuestCart = async () => {
       if (!isAuthenticated) {
         console.log('[CART MIGRATION] ℹ️ User not authenticated, skipping migration');
@@ -741,7 +778,7 @@ export function CartProvider({ children }: CartProviderProps) {
       // Always read current guest cart from localStorage for most up-to-date data
       const currentGuestCartData = localStorage.getItem(GUEST_CART_KEY);
       let currentGuestCart: GuestCartItem[] = [];
-      
+
       try {
         if (currentGuestCartData) {
           const parsed = JSON.parse(currentGuestCartData);
@@ -751,24 +788,24 @@ export function CartProvider({ children }: CartProviderProps) {
         console.error('[CART MIGRATION] Error parsing guest cart from localStorage:', error);
         localStorage.removeItem(GUEST_CART_KEY);
       }
-      
+
       // Also check current guest cart state as fallback
       if (currentGuestCart.length === 0 && guestCart.length > 0) {
         console.log('[CART MIGRATION] 📦 Using guest cart from state as fallback:', guestCart.length, 'items');
         currentGuestCart = guestCart;
       }
-      
+
       console.log('[CART MIGRATION] 🔍 Debug - localStorage items:', currentGuestCart.length);
       console.log('[CART MIGRATION] 🔍 Debug - state items:', guestCart.length);
       console.log('[CART MIGRATION] 🔍 Debug - localStorage raw:', currentGuestCartData);
-      
+
       if (currentGuestCart.length === 0) {
         console.log('[CART MIGRATION] ℹ️ No guest cart items to migrate');
         // Still load authenticated cart even if no guest items (but don't trigger another migration)
         console.log('[CART MIGRATION] 🔄 Loading authenticated cart directly...');
         setIsLoading(true);
         setError(null);
-        
+
         try {
           const response = await apiRequest('GET', '/api/cart');
           const cartData = await response.json();
@@ -787,25 +824,25 @@ export function CartProvider({ children }: CartProviderProps) {
       console.log('[CART MIGRATION] 🚀 Starting cart migration...');
       console.log('[CART MIGRATION] 📦 Current guest cart data from localStorage:', JSON.stringify(currentGuestCart, null, 2));
       console.log('[CART MIGRATION] 👤 User ID:', user?.uid);
-      
+
       try {
         console.log('[CART MIGRATION] 📤 Sending migration request to server...');
         const response = await apiRequest('POST', '/api/cart/migrate', {
           guestItems: currentGuestCart
         });
-        
+
         if (!response.ok) {
           throw new Error(`Migration failed with status: ${response.status}`);
         }
-        
+
         const migrationResult = await response.json();
         console.log('[CART MIGRATION] 📨 Server response data:', migrationResult);
-        
+
         // Clear guest cart after successful migration
         console.log('[CART MIGRATION] 🧹 Clearing guest cart from localStorage...');
         setGuestCart([]);
         localStorage.removeItem(GUEST_CART_KEY);
-        
+
         // Store migrated items info for future logout preservation  
         const migratedItemsInfo = currentGuestCart.map(item => ({
           productId: item.productId,
@@ -814,10 +851,10 @@ export function CartProvider({ children }: CartProviderProps) {
           source: 'migrated'
         }));
         localStorage.setItem('migrated_cart_info', JSON.stringify(migratedItemsInfo));
-        
+
         // Clear any cached migration flags
         localStorage.removeItem(MIGRATION_FLAG_KEY);
-        
+
         // Immediately refresh authenticated cart (direct call to avoid loop)
         console.log('[CART MIGRATION] 🔄 Refreshing authenticated cart...');
         setIsLoading(true);
@@ -831,27 +868,27 @@ export function CartProvider({ children }: CartProviderProps) {
         } finally {
           setIsLoading(false);
         }
-        
+
         // Dispatch event for other components
         window.dispatchEvent(new CustomEvent('cart-migrated'));
-        
+
         if (migrationResult.totalItems > 0) {
           toast({
             title: "Cart Synced",
             description: `${migrationResult.totalItems || 0} items merged successfully.`,
           });
         }
-        
+
         console.log('[CART MIGRATION] ✅ Cart migration completed successfully');
       } catch (error) {
         console.error('[CART MIGRATION] ❌ Cart migration failed:', error);
-        
+
         toast({
           title: "Sync Warning",
           description: "Some cart items couldn't be synced. Please check your cart.",
           variant: "destructive",
         });
-        
+
         // Still load authenticated cart even if migration fails (direct call)
         setIsLoading(true);
         try {
@@ -870,10 +907,10 @@ export function CartProvider({ children }: CartProviderProps) {
     // Run migration only when authentication state actually changes (prevent loops)
     const migrationKey = `migration_${isAuthenticated ? 'auth' : 'guest'}_${user?.uid || 'none'}`;
     const lastMigrationKey = sessionStorage.getItem('last_migration_key');
-    
+
     if (lastMigrationKey !== migrationKey) {
       sessionStorage.setItem('last_migration_key', migrationKey);
-      
+
       if (isAuthenticated && user?.uid) {
         // Debounce migration to prevent rapid-fire calls
         migrationTimeout = setTimeout(migrateGuestCart, 300);
@@ -930,16 +967,17 @@ export function CartProvider({ children }: CartProviderProps) {
     } finally {
       setIsLoading(false);
     }
-    
+
     isProcessingAddOperations.current = false;
   }, []); // Remove loadAuthenticatedCart dependency
 
   // Cart actions
   const addItem = useCallback(async (
-    productId?: string, 
-    serviceId?: string, 
+    productId?: string,
+    serviceId?: string,
     quantity: number = 1,
-    customizations?: Record<string, any>
+    customizations?: Record<string, any>,
+    productSnapshot?: any
   ) => {
     if (!productId && !serviceId) {
       toast({
@@ -952,7 +990,7 @@ export function CartProvider({ children }: CartProviderProps) {
 
     // Immediate optimistic UI update for both authenticated and guest users
     const optimisticItemId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     if (isAuthenticated) {
       // Create optimistic item for authenticated users
       const optimisticItem: CartItem = {
@@ -969,8 +1007,10 @@ export function CartProvider({ children }: CartProviderProps) {
         savedForLater: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-      };
-      
+        // Attach product snapshot for optimistic calculation
+        ...(productSnapshot ? { product: productSnapshot } : {})
+      } as CartItem;
+
       // Use reducer for deterministic state update
       dispatch({ type: 'ADD_ITEM', payload: optimisticItem });
 
@@ -1007,7 +1047,7 @@ export function CartProvider({ children }: CartProviderProps) {
     } else {
       // Guest user - atomic update with reducer to prevent race conditions
       console.log('[CART CONTEXT] Adding item to guest cart:', { productId, serviceId, quantity });
-      
+
       // Create optimistic item for immediate cart display
       const guestOptimisticItem: CartItem = {
         id: optimisticItemId,
@@ -1023,20 +1063,22 @@ export function CartProvider({ children }: CartProviderProps) {
         savedForLater: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-      };
-      
+        // Attach product snapshot for optimistic calculation
+        ...(productSnapshot ? { product: productSnapshot } : {})
+      } as CartItem;
+
       // Immediately update guest cart array and localStorage atomically
       setGuestCart(prev => {
-        const existingIndex = prev.findIndex(item => 
+        const existingIndex = prev.findIndex(item =>
           item.productId === productId && item.serviceId === serviceId
         );
-        
+
         let newCart: GuestCartItem[];
-        
+
         if (existingIndex >= 0) {
           // Update existing item quantity atomically
-          newCart = prev.map((item, index) => 
-            index === existingIndex 
+          newCart = prev.map((item, index) =>
+            index === existingIndex
               ? { ...item, quantity: item.quantity + quantity, addedAt: Date.now() }
               : item
           );
@@ -1059,25 +1101,25 @@ export function CartProvider({ children }: CartProviderProps) {
           };
           newCart = [...prev, newItem];
         }
-        
+
         console.log('[CART CONTEXT] Updated guest cart atomically:', newCart);
-        
+
         // CRITICAL: Immediately save to localStorage using CartStorageManager
         CartStorageManager.saveGuestCart(newCart, true); // Skip cross-tab sync to prevent loops
         console.log('[CART CONTEXT] ✅ Guest cart add operation persisted to localStorage:', newCart.length, 'items');
-        
+
         return newCart;
       });
-      
+
       // Use reducer for deterministic guest cart display update (atomic operation)
       dispatch({ type: 'ADD_ITEM', payload: guestOptimisticItem });
-      
+
       // Instant feedback without waiting for API
       toast({
         title: "Added to Cart",
         description: "Item added successfully",
       });
-      
+
       // Load full cart object with proper product data (non-blocking, in background)
       loadGuestCartAsCart().catch(error => {
         console.error('[CART CONTEXT] Background cart load failed:', error);
@@ -1090,7 +1132,7 @@ export function CartProvider({ children }: CartProviderProps) {
     if (isAuthenticated) {
       // Optimistically remove from cart display using reducer
       dispatch({ type: 'REMOVE_ITEM', payload: { itemId } });
-      
+
       try {
         await apiRequest('DELETE', `/api/cart/items/${itemId}`);
         await loadAuthenticatedCart();
@@ -1111,22 +1153,22 @@ export function CartProvider({ children }: CartProviderProps) {
     } else {
       // Guest mode - CRITICAL: Update both state and localStorage atomically
       console.log('[CART CONTEXT] Removing item from guest cart:', itemId);
-      
+
       // Update guest cart array with immediate localStorage sync
       setGuestCart(prev => {
         const updatedCart = prev.filter(item => item.id !== itemId);
         console.log('[CART CONTEXT] Removed item from guest cart:', itemId);
-        
+
         // CRITICAL: Immediately save to localStorage using CartStorageManager
         CartStorageManager.saveGuestCart(updatedCart, true); // Skip cross-tab sync to prevent loops
         console.log('[CART CONTEXT] ✅ Guest cart persisted to localStorage:', updatedCart.length, 'items');
-        
+
         return updatedCart;
       });
-      
+
       // Immediately update the cart object as well for instant UI sync using reducer
       dispatch({ type: 'REMOVE_ITEM', payload: { itemId } });
-      
+
       toast({
         title: "Removed",
         description: "Item removed from cart",
@@ -1154,11 +1196,11 @@ export function CartProvider({ children }: CartProviderProps) {
       if (isAuthenticated) {
         console.log('[CART CONTEXT] 📡 Sending server update for authenticated user...');
         await apiRequest('PATCH', `/api/cart/items/${itemId}`, { quantity: finalQuantity });
-        
+
         // Instead of reloading the entire cart, just verify the item was updated correctly
         // This prevents overwriting the optimistic UI update
         console.log('[CART CONTEXT] ✅ Server update completed, keeping optimistic UI');
-        
+
         toast({
           title: "Updated",
           description: "Quantity updated successfully",
@@ -1166,27 +1208,27 @@ export function CartProvider({ children }: CartProviderProps) {
       } else {
         // For guest cart, update localStorage synchronously with immediate persistence
         setGuestCart(prev => {
-          const updated = prev.map(item => 
+          const updated = prev.map(item =>
             item.id === itemId ? { ...item, quantity: finalQuantity, lastUpdated: Date.now() } : item
           );
           console.log('[CART CONTEXT] Processed guest quantity update:', { itemId, finalQuantity });
-          
+
           // CRITICAL: Immediately save to localStorage
           CartStorageManager.saveGuestCart(updated, true); // Skip cross-tab sync
           console.log('[CART CONTEXT] ✅ Guest cart quantity update persisted to localStorage');
-          
+
           return updated;
         });
         await loadGuestCartAsCart();
       }
     } catch (error) {
       console.error('[CART CONTEXT] ❌ Error processing quantity update:', error);
-      
+
       // On error, revert optimistic update by reloading cart
       if (isAuthenticated) {
         await loadAuthenticatedCart();
       }
-      
+
       toast({
         title: "Error",
         description: "Failed to update quantity",
@@ -1200,7 +1242,7 @@ export function CartProvider({ children }: CartProviderProps) {
 
   const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
     console.log('[CART CONTEXT] 🔄 Updating quantity:', { itemId, quantity, isAuthenticated });
-    
+
     // Immediately update UI optimistically for both authenticated and guest users using reducer
     console.log('[CART CONTEXT] 📦 Optimistic quantity update:', { itemId, quantity });
     dispatch({ type: 'UPDATE_QUANTITY', payload: { itemId, quantity } });
@@ -1208,14 +1250,14 @@ export function CartProvider({ children }: CartProviderProps) {
     if (!isAuthenticated) {
       // For guest cart, also update localStorage synchronously
       setGuestCart(prev => {
-        const updated = prev.map(item => 
+        const updated = prev.map(item =>
           item.id === itemId ? { ...item, quantity, lastUpdated: Date.now() } : item
         );
-        
+
         // CRITICAL: Immediately persist to localStorage
         CartStorageManager.saveGuestCart(updated, true); // Skip cross-tab sync
         console.log('[CART CONTEXT] ✅ Guest cart optimistic update persisted to localStorage');
-        
+
         return updated;
       });
     }
@@ -1244,10 +1286,10 @@ export function CartProvider({ children }: CartProviderProps) {
   // Update cart item notes
   const updateNotes = useCallback(async (itemId: string, notes: string) => {
     console.log('[CART CONTEXT] 📝 Updating item notes:', { itemId, notes: notes.substring(0, 50) + '...' });
-    
+
     // Immediate optimistic update for both authenticated and guest users
     dispatch({ type: 'OPTIMISTIC_UPDATE_ITEM', payload: { itemId, updates: { notes } } });
-    
+
     if (isAuthenticated) {
       try {
         await apiRequest('PATCH', `/api/cart/items/${itemId}`, { notes });
@@ -1265,17 +1307,17 @@ export function CartProvider({ children }: CartProviderProps) {
     } else {
       // For guest cart, update localStorage
       setGuestCart(prev => {
-        const updated = prev.map(item => 
+        const updated = prev.map(item =>
           item.id === itemId ? { ...item, notes, lastUpdated: Date.now() } : item
         );
-        
+
         // Persist to localStorage immediately
         CartStorageManager.saveGuestCart(updated, true);
         console.log('[CART CONTEXT] ✅ Guest cart notes updated in localStorage');
-        
+
         return updated;
       });
-      
+
       // Reload guest cart to sync with server representation
       await loadGuestCartAsCart();
     }
@@ -1299,7 +1341,7 @@ export function CartProvider({ children }: CartProviderProps) {
   const clearCart = useCallback(async () => {
     // Immediate optimistic clear for instant UI feedback using reducer
     dispatch({ type: 'CLEAR_CART' });
-    
+
     if (isAuthenticated) {
       setIsLoading(true);
       try {
@@ -1324,32 +1366,34 @@ export function CartProvider({ children }: CartProviderProps) {
     } else {
       // Guest mode - CRITICAL: Clear both state and localStorage atomically
       console.log('[CART CONTEXT] Clearing guest cart completely');
-      
+
       // Clear guest cart state
       setGuestCart([]);
-      
+
       // CRITICAL: Clear localStorage using CartStorageManager
       CartStorageManager.clearGuestCart();
       console.log('[CART CONTEXT] ✅ Guest cart cleared from localStorage');
-      
+
       // Set cart to empty state immediately using reducer
-      dispatch({ type: 'SET_CART', payload: {
-        id: `guest_cart_${Date.now()}`,
-        items: [],
-        totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
-        currency: 'INR',
-        lastUpdated: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        appliedCoupons: [],
-        userId: undefined,
-        sessionId: `guest_session_${Date.now()}`,
-        shippingAddress: undefined,
-        expiresAt: undefined
-      } });
-      
+      dispatch({
+        type: 'SET_CART', payload: {
+          id: `guest_cart_${Date.now()}`,
+          items: [],
+          totals: { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0, savings: 0 },
+          currency: 'INR',
+          lastUpdated: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          appliedCoupons: [],
+          userId: undefined,
+          sessionId: `guest_session_${Date.now()}`,
+          shippingAddress: undefined,
+          expiresAt: undefined
+        }
+      });
+
       console.log('[CART CONTEXT] Cleared guest cart');
-      
+
       toast({
         title: "Cart Cleared",
         description: "All items removed from cart",
@@ -1365,7 +1409,7 @@ export function CartProvider({ children }: CartProviderProps) {
     // For guest users, also include items not yet synced to Cart object
     const guestItemsCount = !isAuthenticated ? guestCart.length : 0;
     const guestTotalQuantity = !isAuthenticated ? guestCart.reduce((sum, item) => sum + item.quantity, 0) : 0;
-    
+
     // Use guest data if cart is not loaded yet (instant feedback)
     const finalItemsCount = cart ? itemsCount : guestItemsCount;
     const finalTotalQuantity = cart ? totalQuantity : guestTotalQuantity;

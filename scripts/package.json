@@ -1,0 +1,5 @@
+{
+    "scripts": {
+        "fix-prices": "tsx scripts/fix-product-prices.ts"
+    }
+}

@@ -1,11 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,39 +12,31 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { AdminLogin } from "@/components/admin/admin-login";
+import { AdminLayout } from "@/components/admin/admin-layout";
 import { OrdersManagement } from "@/components/admin/orders-management";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ImageUpload } from "@/components/admin/image-upload";
+import { formatPrice } from "@/lib/currency";
 import {
   Package,
   Users,
   ShoppingCart,
-  Calendar,
   Plus,
   Edit,
-  Trash2,
   BarChart3,
-
   TrendingUp,
-  Activity,
-  LogOut,
-  Shield,
-  ExternalLink,
   AlertTriangle,
-  CheckCircle,
-  Clock,
-  Truck,
-  Package2,
-  X,
-  Eye,
-  Printer
 } from "lucide-react";
-import { Link } from "wouter";
 
-// Form schemas
+// ═══════════════════════════════════════════════════════════════════════════
+// FORM SCHEMAS
+// ═══════════════════════════════════════════════════════════════════════════
+
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   slug: z.string().min(1, "Slug is required"),
@@ -60,11 +49,18 @@ const productSchema = z.object({
   imageUrls: z.array(z.string()).optional(),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
+  // Delivery fee calculation fields
+  category: z.string().optional(),
+  weightInKg: z.number().min(0, "Weight cannot be negative").default(0),
+  isBulky: z.boolean().default(false),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
 
-// Analytics types
+// ═══════════════════════════════════════════════════════════════════════════
+// ANALYTICS TYPES
+// ═══════════════════════════════════════════════════════════════════════════
+
 interface InventoryAnalytics {
   totalProducts: number;
   fastSelling: any[];
@@ -98,50 +94,721 @@ interface CustomerAnalytics {
   topCustomers: any[];
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// DASHBOARD SECTION
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface DashboardSectionProps {
+  totalRevenue: number;
+  totalProducts: number;
+  totalOrders: number;
+  orders: any[];
+  ordersLoading: boolean;
+}
+
+function DashboardSection({ totalRevenue, totalProducts, totalOrders, orders, ordersLoading }: DashboardSectionProps) {
+  return (
+    <div className="space-y-6">
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+        <Card className="border-0 shadow-md bg-gradient-to-br from-white to-gray-50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                <p className="text-2xl lg:text-3xl font-bold text-gray-900">
+                  ₹{totalRevenue.toFixed(2)}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
+                <TrendingUp className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md bg-gradient-to-br from-white to-gray-50">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Products</p>
+                <p className="text-2xl lg:text-3xl font-bold text-gray-900">{totalProducts}</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <Package className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md bg-gradient-to-br from-white to-gray-50 sm:col-span-2 lg:col-span-1">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                <p className="text-2xl lg:text-3xl font-bold text-gray-900">{totalOrders}</p>
+              </div>
+              <div className="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
+                <ShoppingCart className="w-6 h-6 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Orders */}
+      <Card className="border-0 shadow-md">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-lg font-semibold">Recent Orders</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {ordersLoading ? (
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="w-full h-16 rounded-lg" />
+              ))}
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">
+              <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-30" />
+              <p>No orders yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {orders.slice(0, 5).map((order: any) => (
+                <div key={order.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                  <div>
+                    <p className="font-medium text-gray-900">#{order.id.slice(-8)}</p>
+                    <p className="text-sm text-gray-600">
+                      {order.customerName || 'Unknown'} • {new Date(order.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-gray-900">{formatPrice(order.total)}</p>
+                    <Badge variant="outline" className="text-xs capitalize">
+                      {order.status}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ANALYTICS SECTION
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface AnalyticsSectionProps {
+  inventoryData?: InventoryAnalytics;
+  inventoryLoading: boolean;
+  revenueData?: RevenueAnalytics;
+  revenueLoading: boolean;
+  topProductsData?: TopProductsAnalytics;
+  topProductsLoading: boolean;
+  customerData?: CustomerAnalytics;
+  customerLoading: boolean;
+}
+
+function AnalyticsSection({
+  inventoryData,
+  inventoryLoading,
+  revenueData,
+  revenueLoading,
+  topProductsData,
+  topProductsLoading,
+  customerData,
+  customerLoading,
+}: AnalyticsSectionProps) {
+  return (
+    <div className="space-y-6">
+      {/* Analytics Overview Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                  {revenueLoading ? (
+                    <Skeleton className="w-20 h-8" />
+                  ) : (
+                    `₹${revenueData?.totalRevenue ? (revenueData.totalRevenue / 12).toFixed(0) : '0'}`
+                  )}
+                </p>
+                {!revenueLoading && revenueData?.revenueGrowth && (
+                  <p className="text-sm text-green-600">+{revenueData.revenueGrowth}% from last month</p>
+                )}
+              </div>
+              <BarChart3 className="w-8 h-8 text-teal-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Fast Selling</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                  {inventoryLoading ? <Skeleton className="w-16 h-8" /> : inventoryData?.fastSelling?.length || 0}
+                </p>
+                <p className="text-sm text-gray-500">products</p>
+              </div>
+              <TrendingUp className="w-8 h-8 text-green-600" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Slow Moving</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                  {inventoryLoading ? <Skeleton className="w-16 h-8" /> : inventoryData?.slowSelling?.length || 0}
+                </p>
+                <p className="text-sm text-gray-500">products</p>
+              </div>
+              <AlertTriangle className="w-8 h-8 text-amber-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-md">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Repeat Rate</p>
+                <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                  {customerLoading ? <Skeleton className="w-20 h-8" /> : `${customerData?.repeatRate?.toFixed(1) || 0}%`}
+                </p>
+                <p className="text-sm text-gray-500">returning customers</p>
+              </div>
+              <Users className="w-8 h-8 text-blue-600" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Analytics Charts and Tables */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Inventory Performance */}
+        <Card className="border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg">Inventory Performance</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {inventoryLoading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => <Skeleton key={i} className="w-full h-12" />)}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-green-600 mb-2">Fast Selling Products</h4>
+                  {inventoryData?.fastSelling?.slice(0, 3).map((product: any) => (
+                    <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-sm font-medium">{product.name}</span>
+                      <div className="text-right">
+                        <span className="text-xs text-gray-500">{product.totalSold} sold</span>
+                        <div className="text-xs text-green-600">{product.salesVelocity.toFixed(1)}/day</div>
+                      </div>
+                    </div>
+                  )) || <p className="text-sm text-gray-500">No fast-selling products</p>}
+                </div>
+
+                <div className="pt-4">
+                  <h4 className="font-medium text-amber-600 mb-2">Slow Moving Stock</h4>
+                  {inventoryData?.slowSelling?.slice(0, 3).map((product: any) => (
+                    <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-sm font-medium">{product.name}</span>
+                      <div className="text-right">
+                        <span className="text-xs text-gray-500">Stock: {product.stock}</span>
+                        <div className="text-xs text-amber-600">{product.salesVelocity.toFixed(1)}/day</div>
+                      </div>
+                    </div>
+                  )) || <p className="text-sm text-gray-500">All products moving well</p>}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Top Products */}
+        <Card className="border-0 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg">Top Revenue Products</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {topProductsLoading ? (
+              <div className="space-y-4">
+                {[...Array(5)].map((_, i) => <Skeleton key={i} className="w-full h-12" />)}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {topProductsData?.topByRevenue?.slice(0, 5).map((product: any, index: number) => (
+                  <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <div>
+                      <span className="text-sm font-medium">#{index + 1} {product.name}</span>
+                      <div className="text-xs text-gray-500">{product.totalQuantitySold} units sold</div>
+                    </div>
+                    <span className="text-sm font-bold text-teal-600">₹{product.totalRevenue.toFixed(0)}</span>
+                  </div>
+                )) || <p className="text-sm text-gray-500">No sales data available</p>}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Customer Analytics */}
+      <Card className="border-0 shadow-md">
+        <CardHeader>
+          <CardTitle className="text-lg">Customer Insights</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {customerLoading ? (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="w-full h-16" />)}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="text-center p-4 bg-gray-50 rounded-xl">
+                <p className="text-2xl font-bold text-teal-600">{customerData?.totalCustomers || 0}</p>
+                <p className="text-sm text-gray-600">Total Customers</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-xl">
+                <p className="text-2xl font-bold text-green-600">{customerData?.repeatCustomers || 0}</p>
+                <p className="text-sm text-gray-600">Repeat Customers</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-xl">
+                <p className="text-2xl font-bold text-gray-700">₹{customerData?.avgCustomerValue?.toFixed(0) || 0}</p>
+                <p className="text-sm text-gray-600">Avg Customer Value</p>
+              </div>
+              <div className="text-center p-4 bg-gray-50 rounded-xl">
+                <p className="text-2xl font-bold text-gray-700">{customerData?.avgOrdersPerCustomer?.toFixed(1) || 0}</p>
+                <p className="text-sm text-gray-600">Avg Orders/Customer</p>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PRODUCTS SECTION
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface ProductsSectionProps {
+  products: any[];
+  productsLoading: boolean;
+  productForm: any;
+  productDialogOpen: boolean;
+  setProductDialogOpen: (open: boolean) => void;
+  editingItem: any;
+  setEditingItem: (item: any) => void;
+  onProductSubmit: (data: ProductFormData) => void;
+  createProductMutation: any;
+  handleEditProduct: (product: any) => void;
+}
+
+function ProductsSection({
+  products,
+  productsLoading,
+  productForm,
+  productDialogOpen,
+  setProductDialogOpen,
+  editingItem,
+  onProductSubmit,
+  createProductMutation,
+  handleEditProduct,
+}: ProductsSectionProps) {
+  return (
+    <Card className="border-0 shadow-md">
+      <CardHeader>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <CardTitle className="text-lg">Products</CardTitle>
+          <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-500/30">
+                <Plus className="w-4 h-4 mr-2" />
+                Add Product
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>
+                  {editingItem ? "Edit Product" : "Add New Product"}
+                </DialogTitle>
+              </DialogHeader>
+
+              <Form {...productForm}>
+                <form onSubmit={productForm.handleSubmit(onProductSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={productForm.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Product Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={productForm.control}
+                      name="slug"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Slug</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Full Description */}
+                  <FormField
+                    control={productForm.control}
+                    name="description"
+                    render={({ field }) => {
+                      return (
+                        <FormItem>
+                          <FormLabel>Full Description</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              {...field}
+                              value={field.value || ''}
+                              rows={5}
+                              placeholder="Detailed product description, features, specifications, usage instructions..."
+                            />
+                          </FormControl>
+                          <p className="text-xs text-gray-500">Detailed information for product page</p>
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  <FormField
+                    control={productForm.control}
+                    name="shortDescription"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Short Description</FormLabel>
+                        <FormControl>
+                          <Textarea {...field} rows={2} placeholder="Brief description for listings..." />
+                        </FormControl>
+                        <p className="text-xs text-gray-500">Summary shown in product listings</p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={productForm.control}
+                      name="price"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Current Price (₹)</FormLabel>
+                          <FormControl>
+                            <Input type="number" step="0.01" {...field} placeholder="0.00" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={productForm.control}
+                      name="originalPrice"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Original Price (₹)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              {...field}
+                              value={field.value || ''}
+                              placeholder="0.00"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-gray-500">For showing discounts</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FormField
+                      control={productForm.control}
+                      name="sku"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>SKU / Product Code</FormLabel>
+                          <FormControl>
+                            <Input {...field} value={field.value || ''} placeholder="e.g., WC-001" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={productForm.control}
+                      name="stock"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Stock Quantity</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              {...field}
+                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              placeholder="0"
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Delivery Fee Configuration */}
+                  <div className="space-y-4 pt-4 border-t border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-700">Delivery Information</h3>
+
+                    <FormField
+                      control={productForm.control}
+                      name="category"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Category</FormLabel>
+                          <FormControl>
+                            <Input {...field} placeholder="e.g., Wires and Cables" />
+                          </FormControl>
+                          <p className="text-xs text-gray-500">Used for default weight if not specified</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormField
+                        control={productForm.control}
+                        name="weightInKg"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Weight (kg)</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                {...field}
+                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                placeholder="0.00"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-gray-500">Actual product weight</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={productForm.control}
+                        name="isBulky"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                              />
+                            </FormControl>
+                            <div className="space-y-1 leading-none">
+                              <FormLabel className="text-sm font-medium">
+                                Bulky Item
+                              </FormLabel>
+                              <p className="text-xs text-gray-500">
+                                Requires truck/special delivery
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Product Images */}
+                  <div className="space-y-4 pt-4 border-t border-gray-200">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700">Product Images</h3>
+                      <p className="text-xs text-gray-500 mt-1">First image will be the primary product image</p>
+                    </div>
+
+                    <FormField
+                      control={productForm.control}
+                      name="imageUrls"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <ImageUpload
+                              images={field.value || []}
+                              onChange={field.onChange}
+                              maxImages={5}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    disabled={createProductMutation.isPending}
+                    className="w-full bg-teal-600 hover:bg-teal-700 text-white"
+                  >
+                    {createProductMutation.isPending
+                      ? "Saving..."
+                      : editingItem
+                        ? "Update Product"
+                        : "Create Product"
+                    }
+                  </Button>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {productsLoading ? (
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => <Skeleton key={i} className="w-full h-16" />)}
+          </div>
+        ) : products.length === 0 ? (
+          <div className you="text-center py-8 text-gray-500">
+            <Package className="w-12 h-12 mx-auto mb-2 opacity-30" />
+            <p>No products yet</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead className="hidden sm:table-cell">Price</TableHead>
+                  <TableHead className="hidden sm:table-cell">Stock</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[80px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {products.map((product: any) => (
+                  <TableRow key={product.id}>
+                    <TableCell>
+                      <div>
+                        <span className="font-medium">{product.name}</span>
+                        <div className="sm:hidden text-sm text-gray-500">
+                          {formatPrice(product.price)} • Stock: {product.stock}
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">{formatPrice(product.price)}</TableCell>
+                    <TableCell className="hidden sm:table-cell">{product.stock}</TableCell>
+                    <TableCell>
+                      <Badge variant={product.isActive ? "default" : "secondary"} className="text-xs">
+                        {product.isActive ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleEditProduct(product)}
+                        className="h-8 w-8"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN ADMIN DASHBOARD
+// ═══════════════════════════════════════════════════════════════════════════
+
 function AdminDashboard() {
   const { adminUser, adminSignOut } = useAdminAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("dashboard");
+  const [activeSection, setActiveSection] = useState("dashboard");
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<any>(null);
 
-  // Fetch data with proper typing
+  // Fetch data
   const { data: productsData = { products: [], total: 0 }, isLoading: productsLoading } = useQuery({
     queryKey: ["/api/products", { limit: 100 }],
   });
 
-
   // Analytics data
   const { data: inventoryData, isLoading: inventoryLoading } = useQuery<InventoryAnalytics>({
     queryKey: ["/api/analytics/inventory"],
-    enabled: activeTab === "analytics" || activeTab === "dashboard"
+    enabled: activeSection === "analytics" || activeSection === "dashboard"
   });
 
   const { data: revenueData, isLoading: revenueLoading } = useQuery<RevenueAnalytics>({
     queryKey: ["/api/analytics/revenue"],
-    enabled: activeTab === "analytics" || activeTab === "dashboard"
+    enabled: activeSection === "analytics" || activeSection === "dashboard"
   });
 
   const { data: topProductsData, isLoading: topProductsLoading } = useQuery<TopProductsAnalytics>({
     queryKey: ["/api/analytics/top-products"],
-    enabled: activeTab === "analytics" || activeTab === "dashboard"
+    enabled: activeSection === "analytics" || activeSection === "dashboard"
   });
 
   const { data: customerData, isLoading: customerLoading } = useQuery<CustomerAnalytics>({
     queryKey: ["/api/analytics/customers"],
-    enabled: activeTab === "analytics" || activeTab === "dashboard"
+    enabled: activeSection === "analytics" || activeSection === "dashboard"
   });
 
   const { data: ordersData = [], isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
   });
 
-  // Extract arrays for easier access
+  // Extract arrays
   const products = (productsData as any)?.products || [];
   const orders = Array.isArray(ordersData) ? ordersData : [];
 
-  // Forms
+  // Form
   const productForm = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
     defaultValues: {
@@ -155,16 +822,28 @@ function AdminDashboard() {
       stock: 0,
       isFeatured: false,
       isActive: true,
+      // Delivery fee defaults
+      category: "",
+      weightInKg: 0,
+      isBulky: false,
     },
   });
-
 
   // Mutations
   const createProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
+      // Convert prices from RUPEES (form input) to PAISE (database storage)
+      const dataInPaise = {
+        ...data,
+        price: Math.round(parseFloat(data.price as any) * 100), // ₹ → paise
+        originalPrice: data.originalPrice
+          ? Math.round(parseFloat(data.originalPrice as any) * 100)
+          : undefined,
+      };
+
       const url = editingItem ? `/api/products/${editingItem.id}` : "/api/products";
       const method = editingItem ? "PUT" : "POST";
-      await apiRequest(method, url, data);
+      await apiRequest(method, url, dataInPaise);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
@@ -193,7 +872,6 @@ function AdminDashboard() {
     },
   });
 
-
   const handleLogout = async () => {
     try {
       await adminSignOut();
@@ -210,7 +888,7 @@ function AdminDashboard() {
     }
   };
 
-  // Calculate dashboard stats
+  // Calculate stats
   const totalRevenue = orders.reduce((sum: number, order: any) =>
     sum + parseFloat(order.total || "0"), 0);
   const totalProducts = (productsData as any)?.total || 0;
@@ -220,562 +898,109 @@ function AdminDashboard() {
     createProductMutation.mutate(data);
   };
 
-
   const handleEditProduct = (product: any) => {
     setEditingItem(product);
+
+    // Convert prices from PAISE (database) to RUPEES (form display)
+    const priceInRupees = product.price / 100;
+    const originalPriceInRupees = product.originalPrice
+      ? (product.originalPrice / 100).toString()
+      : "";
+
     productForm.reset({
       name: product.name,
       slug: product.slug,
       description: product.description || "",
       shortDescription: product.shortDescription || "",
-      price: product.price,
-      originalPrice: product.originalPrice || "",
+      price: priceInRupees.toString(), // paise → ₹ (as string)
+      originalPrice: originalPriceInRupees, // paise → ₹ (already string or "")
       sku: product.sku || "",
       stock: product.stock || 0,
       isFeatured: product.isFeatured || false,
       isActive: product.isActive !== false,
+      // Delivery fee fields with fallbacks for existing products
+      category: product.category || "",
+      weightInKg: product.weightInKg || 0,
+      isBulky: product.isBulky || false,
     });
     setProductDialogOpen(true);
   };
 
+  // Get section titles
+  const getSectionMeta = () => {
+    switch (activeSection) {
+      case "dashboard":
+        return { title: "Dashboard", description: "Overview of your store performance" };
+      case "analytics":
+        return { title: "Analytics", description: "Detailed insights and reports" };
+      case "products":
+        return { title: "Products", description: "Manage your product catalog" };
+      case "orders":
+        return { title: "Orders", description: "View and manage customer orders" };
+      default:
+        return { title: "Dashboard", description: "" };
+    }
+  };
+
+  const sectionMeta = getSectionMeta();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Admin Header */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <Shield className="w-6 h-6 text-copper-600" />
-                <h1 className="text-xl font-bold text-gray-900">CopperBear Admin</h1>
-              </div>
-              <Badge variant="secondary" className="bg-copper-100 text-copper-800">
-                Authenticated
-              </Badge>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open('/', '_blank')}
-                className="flex items-center space-x-2 text-copper-600 border-copper-200 hover:bg-copper-50"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>View Site</span>
-              </Button>
-              <span className="text-sm text-gray-600">
-                Welcome, {adminUser?.email}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleLogout}
-                className="flex items-center space-x-2 border-copper-200 text-copper-600 hover:bg-copper-50 hover:text-copper-700"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+    <AdminLayout
+      activeSection={activeSection}
+      onSectionChange={setActiveSection}
+      userEmail={adminUser?.email}
+      onLogout={handleLogout}
+      pageTitle={sectionMeta.title}
+      pageDescription={sectionMeta.description}
+    >
+      {activeSection === "dashboard" && (
+        <DashboardSection
+          totalRevenue={totalRevenue}
+          totalProducts={totalProducts}
+          totalOrders={totalOrders}
+          orders={orders}
+          ordersLoading={ordersLoading}
+        />
+      )}
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Dashboard</h1>
-          <p className="text-gray-600">
-            Manage products, services, orders, and users
-          </p>
-        </div>
+      {activeSection === "analytics" && (
+        <AnalyticsSection
+          inventoryData={inventoryData}
+          inventoryLoading={inventoryLoading}
+          revenueData={revenueData}
+          revenueLoading={revenueLoading}
+          topProductsData={topProductsData}
+          topProductsLoading={topProductsLoading}
+          customerData={customerData}
+          customerLoading={customerLoading}
+        />
+      )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 bg-copper-50 border-copper-200">
-            <TabsTrigger
-              value="dashboard"
-              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
-            >
-              Dashboard
-            </TabsTrigger>
-            <TabsTrigger
-              value="analytics"
-              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
-            >
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger
-              value="products"
-              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
-            >
-              Products
-            </TabsTrigger>
-            <TabsTrigger
-              value="orders"
-              className="data-[state=active]:bg-copper-600 data-[state=active]:text-white data-[state=active]:border-copper-700"
-            >
-              Orders
-            </TabsTrigger>
-          </TabsList>
+      {activeSection === "products" && (
+        <ProductsSection
+          products={products}
+          productsLoading={productsLoading}
+          productForm={productForm}
+          productDialogOpen={productDialogOpen}
+          setProductDialogOpen={setProductDialogOpen}
+          editingItem={editingItem}
+          setEditingItem={setEditingItem}
+          onProductSubmit={onProductSubmit}
+          createProductMutation={createProductMutation}
+          handleEditProduct={handleEditProduct}
+        />
+      )}
 
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Total Revenue</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        ₹{totalRevenue.toFixed(2)}
-                      </p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-lime-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Total Products</p>
-                      <p className="text-2xl font-bold text-gray-900">{totalProducts}</p>
-                    </div>
-                    <Package className="w-8 h-8 text-copper-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                      <p className="text-2xl font-bold text-gray-900">{totalOrders}</p>
-                    </div>
-                    <ShoppingCart className="w-8 h-8 text-copper-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-            </div>
-
-            {/* Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Orders</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {ordersLoading ? (
-                    <div className="space-y-3">
-                      {[...Array(5)].map((_, i) => (
-                        <Skeleton key={i} className="w-full h-12" />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {orders.slice(0, 5).map((order: any) => (
-                        <div key={order.id} className="flex items-center justify-between p-3 bg-copper-50 rounded-lg">
-                          <div>
-                            <p className="font-medium">#{order.id.slice(-8)}</p>
-                            <p className="text-sm text-gray-600">
-                              {order.customerName || 'Unknown'} • {new Date(order.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-medium">₹{parseFloat(order.total).toFixed(2)}</p>
-                            <Badge variant="outline" className="text-xs">
-                              {order.status}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-            </div>
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="mt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {/* Analytics Overview Cards */}
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {revenueLoading ? (
-                          <Skeleton className="w-20 h-8" />
-                        ) : (
-                          `₹${revenueData?.totalRevenue ? (revenueData.totalRevenue / 12).toFixed(0) : '0'}`
-                        )}
-                      </p>
-                      {!revenueLoading && revenueData?.revenueGrowth && (
-                        <p className="text-sm text-lime-600">+{revenueData.revenueGrowth}% from last month</p>
-                      )}
-                    </div>
-                    <BarChart3 className="w-8 h-8 text-lime-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Fast Selling</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {inventoryLoading ? (
-                          <Skeleton className="w-16 h-8" />
-                        ) : (
-                          inventoryData?.fastSelling?.length || 0
-                        )}
-                      </p>
-                      <p className="text-sm text-gray-500">products</p>
-                    </div>
-                    <TrendingUp className="w-8 h-8 text-lime-600" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Slow Moving</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {inventoryLoading ? (
-                          <Skeleton className="w-16 h-8" />
-                        ) : (
-                          inventoryData?.slowSelling?.length || 0
-                        )}
-                      </p>
-                      <p className="text-sm text-gray-500">products</p>
-                    </div>
-                    <AlertTriangle className="w-8 h-8 text-amber-500" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Customer Repeat Rate</p>
-                      <p className="text-2xl font-bold text-gray-900">
-                        {customerLoading ? (
-                          <Skeleton className="w-20 h-8" />
-                        ) : (
-                          `${customerData?.repeatRate?.toFixed(1) || 0}%`
-                        )}
-                      </p>
-                      <p className="text-sm text-gray-500">returning customers</p>
-                    </div>
-                    <Users className="w-8 h-8 text-copper-600" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Analytics Charts and Tables */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-              {/* Inventory Tracking */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Inventory Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {inventoryLoading ? (
-                    <div className="space-y-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Skeleton key={i} className="w-full h-12" />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-medium text-lime-600 mb-2">Fast Selling Products</h4>
-                        {inventoryData?.fastSelling?.slice(0, 3).map((product: any) => (
-                          <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span className="text-sm font-medium">{product.name}</span>
-                            <div className="text-right">
-                              <span className="text-xs text-gray-500">{product.totalSold} sold</span>
-                              <div className="text-xs text-lime-600">{product.salesVelocity.toFixed(1)}/day</div>
-                            </div>
-                          </div>
-                        )) || <p className="text-sm text-gray-500">No fast-selling products</p>}
-                      </div>
-
-                      <div className="pt-4">
-                        <h4 className="font-medium text-amber-600 mb-2">Slow Moving Stock</h4>
-                        {inventoryData?.slowSelling?.slice(0, 3).map((product: any) => (
-                          <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
-                            <span className="text-sm font-medium">{product.name}</span>
-                            <div className="text-right">
-                              <span className="text-xs text-gray-500">Stock: {product.stock}</span>
-                              <div className="text-xs text-amber-600">{product.salesVelocity.toFixed(1)}/day</div>
-                            </div>
-                          </div>
-                        )) || <p className="text-sm text-gray-500">All products moving well</p>}
-                      </div>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Top Products */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Top Revenue Products</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {topProductsLoading ? (
-                    <div className="space-y-4">
-                      {[...Array(5)].map((_, i) => (
-                        <Skeleton key={i} className="w-full h-12" />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {topProductsData?.topByRevenue?.slice(0, 5).map((product: any, index: number) => (
-                        <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
-                          <div>
-                            <span className="text-sm font-medium">#{index + 1} {product.name}</span>
-                            <div className="text-xs text-gray-500">{product.totalQuantitySold} units sold</div>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-sm font-bold text-lime-600">₹{product.totalRevenue.toFixed(0)}</span>
-                          </div>
-                        </div>
-                      )) || <p className="text-sm text-gray-500">No sales data available</p>}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Customer Analytics */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Customer Insights</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {customerLoading ? (
-                  <div className="grid grid-cols-4 gap-4">
-                    {[...Array(4)].map((_, i) => (
-                      <Skeleton key={i} className="w-full h-16" />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-copper-600">{customerData?.totalCustomers || 0}</p>
-                      <p className="text-sm text-gray-600">Total Customers</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-lime-600">{customerData?.repeatCustomers || 0}</p>
-                      <p className="text-sm text-gray-600">Repeat Customers</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-gray-600">₹{customerData?.avgCustomerValue?.toFixed(0) || 0}</p>
-                      <p className="text-sm text-gray-600">Avg Customer Value</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="text-2xl font-bold text-gray-600">{customerData?.avgOrdersPerCustomer?.toFixed(1) || 0}</p>
-                      <p className="text-sm text-gray-600">Avg Orders/Customer</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Products Tab */}
-          <TabsContent value="products" className="mt-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>Products</CardTitle>
-                  <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
-                    <DialogTrigger asChild>
-                      <Button className="bg-copper-600 hover:bg-copper-700 text-white">
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Product
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>
-                          {editingItem ? "Edit Product" : "Add New Product"}
-                        </DialogTitle>
-                      </DialogHeader>
-
-                      <Form {...productForm}>
-                        <form onSubmit={productForm.handleSubmit(onProductSubmit)} className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={productForm.control}
-                              name="name"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Product Name</FormLabel>
-                                  <FormControl>
-                                    <Input {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={productForm.control}
-                              name="slug"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Slug</FormLabel>
-                                  <FormControl>
-                                    <Input {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-                          <FormField
-                            control={productForm.control}
-                            name="shortDescription"
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>Short Description</FormLabel>
-                                <FormControl>
-                                  <Textarea {...field} />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
-                            )}
-                          />
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                              control={productForm.control}
-                              name="price"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Price</FormLabel>
-                                  <FormControl>
-                                    <Input type="number" step="0.01" {...field} />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-
-                            <FormField
-                              control={productForm.control}
-                              name="stock"
-                              render={({ field }) => (
-                                <FormItem>
-                                  <FormLabel>Stock</FormLabel>
-                                  <FormControl>
-                                    <Input
-                                      type="number"
-                                      {...field}
-                                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                                </FormItem>
-                              )}
-                            />
-                          </div>
-
-
-                          <Button
-                            type="submit"
-                            disabled={createProductMutation.isPending}
-                            className="w-full bg-copper-600 hover:bg-copper-700 text-white"
-                          >
-                            {createProductMutation.isPending
-                              ? "Saving..."
-                              : editingItem
-                                ? "Update Product"
-                                : "Create Product"
-                            }
-                          </Button>
-                        </form>
-                      </Form>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {productsLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(5)].map((_, i) => (
-                      <Skeleton key={i} className="w-full h-16" />
-                    ))}
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead>Stock</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {products.map((product: any) => (
-                        <TableRow key={product.id}>
-                          <TableCell className="font-medium">{product.name}</TableCell>
-                          <TableCell>₹{parseFloat(product.price).toFixed(2)}</TableCell>
-                          <TableCell>{product.stock}</TableCell>
-                          <TableCell>
-                            <Badge variant={product.isActive ? "default" : "secondary"}>
-                              {product.isActive ? "Active" : "Inactive"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex space-x-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditProduct(product)}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-
-
-          {/* Orders Tab */}
-          <TabsContent value="orders" className="mt-6">
-            <OrdersManagement />
-          </TabsContent>
-
-        </Tabs>
-      </div>
-    </div>
+      {activeSection === "orders" && (
+        <OrdersManagement />
+      )}
+    </AdminLayout>
   );
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// MAIN EXPORT
+// ═══════════════════════════════════════════════════════════════════════════
 
 export default function Admin() {
   const { isAdminAuthenticated, loading: authLoading } = useAdminAuth();
@@ -783,10 +1008,10 @@ export default function Admin() {
   // Show loading state
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-copper-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading admin panel...</p>
+          <div className="w-16 h-16 border-4 border-teal-200 border-t-teal-600 rounded-full animate-spin mx-auto"></div>
+          <p className="mt-4 text-gray-600 font-medium">Loading admin panel...</p>
         </div>
       </div>
     );

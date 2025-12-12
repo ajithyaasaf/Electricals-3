@@ -14,6 +14,7 @@ import { storage } from "../../storage";
 import { isAuthenticated } from "../../firebaseAuth";
 import { z } from "zod";
 import { OrderStatus, ORDER_STATUSES, ShippingAddressSchema } from "@shared/types";
+import { isServiceable, getServiceabilityMessage } from "@shared/delivery-zones";
 import {
   createOrderWithTransaction,
   updateOrderStatusWithTransaction,
@@ -134,6 +135,19 @@ export function registerOrderRoutes(app: Express) {
       }
 
       const { shippingAddress } = validationResult.data;
+
+      // ═══════════════════════════════════════════════════════════════════
+      // DELIVERY ZONE GATEKEEPER - Madurai Only (Phase 1)
+      // ═══════════════════════════════════════════════════════════════════
+      const pincode = shippingAddress.zipCode;
+      if (!isServiceable(pincode)) {
+        return res.status(400).json({
+          message: "Delivery not available in your area",
+          details: getServiceabilityMessage(pincode),
+          code: "DELIVERY_NOT_SERVICEABLE",
+          pincode,
+        });
+      }
 
       // Get user info for denormalization
       const user = await storage.getUserById(userId);

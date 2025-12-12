@@ -11,6 +11,7 @@ import { registerWishlistRoutes } from "./wishlist";
 import { registerAnalyticsRoutes } from "./analytics";
 import { registerSiteContentRoutes } from "./site-content";
 import { registerAddressRoutes } from "./addresses";
+import { registerUploadRoutes } from "./upload";
 import { setupFirebaseAuth } from "../../firebaseAuth";
 
 export async function registerAllRoutes(app: Express) {
@@ -26,6 +27,8 @@ export async function registerAllRoutes(app: Express) {
     });
   });
 
+
+
   // Register domain-specific routes
   registerAuthRoutes(app);
   registerCategoryRoutes(app);
@@ -38,5 +41,6 @@ export async function registerAllRoutes(app: Express) {
   registerAnalyticsRoutes(app);
   registerSiteContentRoutes(app);  // CMS content management
   registerAddressRoutes(app);
+  registerUploadRoutes(app);  // Image upload routes
   registerAdminRoutes(app);
 }

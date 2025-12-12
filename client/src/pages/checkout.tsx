@@ -18,9 +18,10 @@ import { signInWithGoogle } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice } from "@/lib/currency";
-import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle } from "lucide-react";
+import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle, AlertCircle, ShoppingBag, Package, Shield } from "lucide-react";
 import { StateSelector } from "@/components/common/state-selector";
 import { Address } from "@shared/types";
+import { checkServiceability, getServiceabilityMessage } from "@shared/delivery-zones";
 import {
   Select,
   SelectContent,
@@ -86,6 +87,11 @@ export default function Checkout() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [orderComplete, setOrderComplete] = useState(false);
+  const [pincodeServiceability, setPincodeServiceability] = useState<{
+    isServiceable: boolean;
+    message: string;
+    checked: boolean;
+  }>({ isServiceable: false, message: '', checked: false });
 
   // Get cart items from context
   const cartItems = cart?.items || [];
@@ -267,15 +273,12 @@ export default function Checkout() {
     );
   }
 
-  // Calculate totals
-  const subtotal = cartItems.reduce((total: number, item: any) => {
-    const price = parseFloat(item.product?.price || "0");
-    return total + (price * item.quantity);
-  }, 0);
-
-  const shipping = subtotal >= 10000 ? 0 : 100; // ₹100 shipping for orders below ₹10,000
-  const tax = subtotal * 0.18; // 18% GST for India
-  const total = subtotal + shipping + tax;
+  // Get totals from cart context (server-calculated with weight-based shipping)
+  // This ensures checkout display matches what order will actually save
+  const subtotal = cart?.totals?.subtotal || 0;
+  const shipping = cart?.totals?.shipping || 0;
+  const tax = cart?.totals?.tax || 0;
+  const total = cart?.totals?.total || 0;
 
   const updateFormData = (section: keyof CheckoutFormData, field: string, value: any) => {
     setFormData(prev => ({
@@ -285,6 +288,38 @@ export default function Checkout() {
         [field]: value,
       },
     }));
+  };
+
+  // Handle pincode change with real-time serviceability validation
+  const handlePincodeChange = (pincode: string) => {
+    updateFormData("shippingAddress", "zipCode", pincode);
+
+    // Only validate if we have a complete 6-digit pincode
+    if (pincode.length === 6) {
+      const result = checkServiceability(pincode);
+      setPincodeServiceability({
+        isServiceable: result.isServiceable,
+        message: result.message,
+        checked: true,
+      });
+
+      // Show immediate feedback
+      if (!result.isServiceable) {
+        toast({
+          title: "Delivery Not Available",
+          description: result.message,
+          variant: "destructive",
+        });
+      } else if (result.estimatedDelivery) {
+        toast({
+          title: "Delivery Available!",
+          description: `${result.message}\nEstimated delivery: ${result.estimatedDelivery}`,
+        });
+      }
+    } else {
+      // Reset validation if pincode is incomplete
+      setPincodeServiceability({ isServiceable: false, message: '', checked: false });
+    }
   };
 
   const updateRootField = (field: keyof CheckoutFormData, value: any) => {
@@ -298,9 +333,24 @@ export default function Checkout() {
     switch (step) {
       case 1: // Shipping
         const shippingAddr = formData.shippingAddress;
-        return !!(shippingAddr.firstName && shippingAddr.email &&
+        const basicInfoValid = !!(shippingAddr.firstName && shippingAddr.email &&
           shippingAddr.phone && shippingAddr.street && shippingAddr.city &&
           shippingAddr.state && shippingAddr.zipCode);
+
+        // Also check pincode serviceability
+        if (basicInfoValid && shippingAddr.zipCode.length === 6) {
+          const serviceabilityCheck = checkServiceability(shippingAddr.zipCode);
+          if (!serviceabilityCheck.isServiceable) {
+            toast({
+              title: "Delivery Not Available",
+              description: serviceabilityCheck.message,
+              variant: "destructive",
+            });
+            return false;
+          }
+        }
+
+        return basicInfoValid;
       case 2: // Payment
         return !!formData.paymentMethod;
       default:
@@ -571,14 +621,43 @@ export default function Checkout() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="zipCode">Pincode</Label>
+                        <Label htmlFor="zipCode">Pin code *</Label>
                         <Input
                           id="zipCode"
                           value={formData.shippingAddress.zipCode}
-                          onChange={(e) => updateFormData("shippingAddress", "zipCode", e.target.value)}
+                          onChange={(e) => handlePincodeChange(e.target.value)}
                           required
                           data-testid="input-zipcode"
+                          maxLength={6}
+                          placeholder="625xxx"
+                          className={
+                            pincodeServiceability.checked
+                              ? pincodeServiceability.isServiceable
+                                ? "border-green-500 focus:ring-green-500"
+                                : "border-red-500 focus:ring-red-500"
+                              : ""
+                          }
                         />
+                        {pincodeServiceability.checked && (
+                          <div
+                            className={`flex items-start gap-2 text-sm mt-2 ${pincodeServiceability.isServiceable
+                              ? "text-green-700 bg-green-50 border border-green-200"
+                              : "text-red-700 bg-red-50 border border-red-200"
+                              } p-2 rounded-md`}
+                          >
+                            {pincodeServiceability.isServiceable ? (
+                              <>
+                                <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                <span>{pincodeServiceability.message}</span>
+                              </>
+                            ) : (
+                              <>
+                                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
+                                <span>{pincodeServiceability.message}</span>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -726,49 +805,94 @@ export default function Checkout() {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <Card className="sticky top-8">
-              <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+            <Card className="sticky top-8 shadow-sm border-2 border-gray-100/50 overflow-hidden">
+              <CardHeader className="bg-gray-50/50 pb-4">
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <ShoppingBag className="w-5 h-5 text-copper-600" />
+                  Order Summary
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
+              <CardContent className="space-y-6 pt-6">
+                {/* Product List */}
+                <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-gray-200">
                   {cartItems.map((item: any) => (
-                    <div key={item.id} className="flex justify-between text-sm">
-                      <span>{item.product?.name} × {item.quantity}</span>
-                      <span>{formatPrice(parseFloat(item.product?.price || "0") * item.quantity)}</span>
+                    <div key={item.id} className="flex gap-3 group">
+                      {/* Product Thumbnail */}
+                      <div className="w-12 h-12 rounded-md bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0">
+                        {item.product?.imageUrls?.[0] ? (
+                          <img
+                            src={item.product.imageUrls[0]}
+                            alt={item.product.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-gray-400">
+                            <Package className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Details */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start gap-2">
+                          <p className="text-sm font-medium text-gray-900 truncate">
+                            {item.product?.name}
+                          </p>
+                          <p className="text-sm font-semibold text-gray-900 tabular-nums">
+                            {formatPrice(parseFloat(item.product?.price || "0") * item.quantity)}
+                          </p>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-0.5">
+                          Qty: {item.quantity}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
 
                 <Separator />
 
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
+                {/* Calculations */}
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between text-gray-600">
                     <span>Subtotal</span>
-                    <span>{formatPrice(subtotal)}</span>
+                    <span className="font-medium tabular-nums">{formatPrice(subtotal)}</span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-gray-600">
                     <span>Shipping</span>
-                    <span>{shipping === 0 ? "Free" : formatPrice(shipping)}</span>
+                    <span className={`font-medium tabular-nums ${shipping === 0 ? "text-green-600" : ""}`}>
+                      {shipping === 0 ? "Free" : formatPrice(shipping)}
+                    </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Tax</span>
-                    <span>{formatPrice(tax)}</span>
+                  <div className="flex justify-between text-gray-600">
+                    <span className="flex items-center gap-1">
+                      Tax <span className="text-xs text-gray-400">(18% GST)</span>
+                    </span>
+                    <span className="font-medium tabular-nums">{formatPrice(tax)}</span>
                   </div>
                 </div>
 
-                <Separator />
+                <Separator className="bg-gray-200" />
 
-                <div className="flex justify-between font-medium">
-                  <span>Total</span>
-                  <span>{formatPrice(total)}</span>
+                {/* Total */}
+                <div className="flex justify-between items-end">
+                  <span className="text-base font-semibold text-gray-900">Total Amount</span>
+                  <span className="text-xl font-bold text-copper-700 leading-none tabular-nums">
+                    {formatPrice(total)}
+                  </span>
                 </div>
 
-                {subtotal < 10000 && (
-                  <div className="text-xs text-gray-500 mt-2">
-                    Add {formatPrice(10000 - subtotal)} more for free shipping!
+                {/* Trust Badges */}
+                <div className="bg-gray-50 rounded-lg p-3 grid grid-cols-2 gap-2 text-[10px] text-gray-500 mt-2">
+                  <div className="flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5 text-green-600" />
+                    Secure Checkout
                   </div>
-                )}
+                  <div className="flex items-center gap-1.5">
+                    <Truck className="w-3.5 h-3.5 text-blue-600" />
+                    Fast Delivery
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

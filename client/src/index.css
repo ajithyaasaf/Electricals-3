@@ -458,4 +458,30 @@ input:focus {
   .scrollbar-modern {
     scroll-behavior: smooth;
   }
+  
+  /* Admin Sidebar Utilities */
+  .admin-sidebar-gradient {
+    background: linear-gradient(180deg, 
+      hsl(var(--teal-800)) 0%, 
+      hsl(var(--teal-900)) 50%, 
+      hsl(187, 94%, 6%) 100%
+    );
+  }
+  
+  .admin-nav-item-active {
+    background: linear-gradient(90deg, 
+      hsla(var(--teal-500), 0.2) 0%, 
+      transparent 100%
+    );
+  }
+  
+  /* Pulse animation for status indicators */
+  @keyframes admin-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  
+  .admin-pulse {
+    animation: admin-pulse 2s ease-in-out infinite;
+  }
 }

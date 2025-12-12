@@ -46,17 +46,18 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
     const productOrService = item.product || item.service;
     if (!productOrService) return null;
 
-    const hasDiscount = productOrService.compareAtPrice && productOrService.compareAtPrice > item.unitPrice;
+    const originalPrice = item.originalPrice || productOrService.originalPrice || 0;
+    const hasDiscount = originalPrice > item.unitPrice;
     const discountPercent = hasDiscount
-      ? Math.round((1 - item.unitPrice / productOrService.compareAtPrice) * 100)
+      ? Math.round(((originalPrice - item.unitPrice) / originalPrice) * 100)
       : 0;
 
     return (
       <div className="group relative bg-white border border-gray-100 rounded-xl p-3 hover:border-copper-200 hover:shadow-md transition-all duration-200">
         {/* Discount badge */}
         {hasDiscount && (
-          <Badge className="absolute -top-2 -left-2 bg-red-500 text-white text-xs px-2 py-0.5 z-10">
-            -{discountPercent}%
+          <Badge className="absolute -top-2 -left-2 bg-red-500 text-white text-xs px-2 py-0.5 z-10 shadow-sm">
+            {discountPercent}% OFF
           </Badge>
         )}
 
@@ -96,7 +97,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
               </span>
               {hasDiscount && (
                 <span className="text-xs text-gray-400 line-through">
-                  {formatPrice(productOrService.compareAtPrice * item.quantity)}
+                  {formatPrice(originalPrice * item.quantity)}
                 </span>
               )}
             </div>
@@ -231,6 +232,11 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
                       )}
                     </span>
                   </div>
+
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Tax (18% GST)</span>
+                    <span className="font-medium text-gray-900">{formatPrice(totals?.tax || 0)}</span>
+                  </div>
                 </div>
 
                 <Separator className="my-2" />
@@ -278,7 +284,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
 
                   <p className="text-xs text-gray-500 text-center pt-1 flex items-center justify-center gap-1">
                     <Package className="w-3 h-3" />
-                    Free shipping on orders over ₹10,000
+                    🚀 Madurai Launch | Free Shipping ₹3,000+
                   </p>
                 </div>
               </div>

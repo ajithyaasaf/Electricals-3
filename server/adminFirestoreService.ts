@@ -29,6 +29,7 @@ import {
     OrderHistory, CreateOrderHistory,
     OrderStatus
 } from '@shared/types';
+import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics } from '@shared/logistics';
 
 /**
  * Get Firestore Admin instance
@@ -570,7 +571,6 @@ export class AdminAddressQueries {
 import {
     generateOrderNumber,
     validateTransition,
-    calculateOrderTotals,
 } from './lib/orderStateMachine';
 
 export interface OrderItemInput {
@@ -608,6 +608,7 @@ export interface CreateOrderResult {
 /**
  * Create order with atomic stock validation and decrement
  * Uses Firestore transaction to ensure consistency
+ * CRITICAL: Uses weight-based shipping calculation matching cart logic
  * 
  * @throws Error if any product has insufficient stock
  */
@@ -619,12 +620,13 @@ export async function createOrderWithTransaction(
     return db.runTransaction(async (transaction) => {
         const { items, userId, customerName, customerEmail, customerPhone, shippingAddress } = input;
 
-        // Step 1: Validate all stock (read phase - must happen first in transaction)
+        // Step 1: Validate all stock AND fetch product data (read phase - must happen first in transaction)
         const stockChecks: Array<{
             ref: FirebaseFirestore.DocumentReference;
             productName: string;
             currentStock: number;
             requestedQuantity: number;
+            productData: any; // Full product data for shipping calculation
         }> = [];
 
         for (const item of items) {
@@ -650,17 +652,77 @@ export async function createOrderWithTransaction(
                 productName: item.productName,
                 currentStock,
                 requestedQuantity: item.quantity,
+                productData, // Store for shipping calculation
             });
         }
 
-        // Step 2: Calculate totals
+        // Step 2: Calculate subtotal
         const itemTotals = items.map(item => item.unitPrice * item.quantity);
-        const { subtotal, tax, shippingCost, total } = calculateOrderTotals(itemTotals);
+        const subtotal = itemTotals.reduce((sum, total) => sum + total, 0);
 
-        // Step 3: Generate unique order number
+        // Step 3: Calculate weight-based shipping (MATCHING CART LOGIC)
+        let totalWeight = 0;
+        let hasBulkyItems = false;
+
+        stockChecks.forEach((check, index) => {
+            const product = {
+                ...check.productData,
+                id: items[index].productId,
+            };
+
+            // Use getProductLogistics for graceful fallback handling
+            // Will use product weight, or category defaults, or safe default (0.5kg)
+            const logistics = getProductLogistics(product);
+
+            totalWeight += logistics.weight * check.requestedQuantity;
+            if (logistics.isBulky) {
+                hasBulkyItems = true;
+            }
+        });
+
+        // Determine shipping cost using weight-based tiers (EXACT SAME LOGIC AS CART)
+        let shippingCost = 0;
+        const isHeavy = hasBulkyItems || totalWeight > 15; // > 15kg threshold
+
+        if (isHeavy) {
+            // Heavy/Bulky items require special delivery (truck/auto)
+            shippingCost = subtotal >= SHIPPING_THRESHOLDS.FREE_HEAVY
+                ? SHIPPING_FEES.FREE
+                : SHIPPING_FEES.HEAVY_FLAT; // ₹150
+        } else {
+            // Standard shipping with tiered pricing
+            if (subtotal >= SHIPPING_THRESHOLDS.FREE_STANDARD) {
+                shippingCost = SHIPPING_FEES.FREE; // Free shipping over ₹3000
+            } else if (subtotal >= SHIPPING_THRESHOLDS.SUBSIDIZED) {
+                shippingCost = SHIPPING_FEES.STANDARD_MID; // ₹30 for ₹500-₹3000
+            } else {
+                shippingCost = SHIPPING_FEES.STANDARD_LOW; // ₹60 for under ₹500
+            }
+        }
+
+        // Convert from paise to rupees for database storage
+        const shippingCostInRupees = shippingCost / 100;
+
+        // Step 4: Calculate tax (18% GST)
+        const tax = Math.round(subtotal * 0.18 * 100) / 100;
+
+        // Step 5: Calculate total
+        const total = subtotal + tax + shippingCostInRupees;
+
+        console.log('[ORDER] Weight-based shipping calculation:', {
+            totalWeight: `${totalWeight}kg`,
+            hasBulkyItems,
+            isHeavy,
+            subtotal: `₹${subtotal}`,
+            shippingCost: `₹${shippingCostInRupees}`,
+            tax: `₹${tax}`,
+            total: `₹${total}`
+        });
+
+        // Step 6: Generate unique order number
         const orderNumber = generateOrderNumber();
 
-        // Step 4: Create order document (write phase)
+        // Step 7: Create order document (write phase)
         const orderRef = db.collection(COLLECTIONS.ORDERS).doc();
         transaction.set(orderRef, {
             orderNumber,
@@ -671,7 +733,7 @@ export async function createOrderWithTransaction(
             status: 'pending',
             subtotal,
             tax,
-            shippingCost,
+            shippingCost: shippingCostInRupees,
             total,
             shippingAddress: {
                 ...shippingAddress,
@@ -684,7 +746,7 @@ export async function createOrderWithTransaction(
             updatedAt: FieldValue.serverTimestamp(),
         });
 
-        // Step 5: Create order items with product snapshots (write phase)
+        // Step 8: Create order items with product snapshots (write phase)
         for (const item of items) {
             const itemRef = db.collection(COLLECTIONS.ORDER_ITEMS).doc();
             transaction.set(itemRef, {
@@ -702,7 +764,7 @@ export async function createOrderWithTransaction(
             });
         }
 
-        // Step 6: Decrement stock atomically (write phase)
+        // Step 9: Decrement stock atomically (write phase)
         for (const check of stockChecks) {
             transaction.update(check.ref, {
                 stock: FieldValue.increment(-check.requestedQuantity),
@@ -710,7 +772,7 @@ export async function createOrderWithTransaction(
             });
         }
 
-        // Step 7: Log initial status in order history
+        // Step 10: Log initial status in order history
         const historyRef = db.collection(COLLECTIONS.ORDER_HISTORY).doc();
         transaction.set(historyRef, {
             orderId: orderRef.id,
