@@ -329,16 +329,30 @@ export default function Checkout() {
     }));
   };
 
+  const getMissingFields = (step: number): string[] => {
+    const missing: string[] = [];
+    if (step === 1) {
+      const { firstName, email, phone, street, city, state, zipCode } = formData.shippingAddress;
+      if (!firstName) missing.push("First Name");
+      if (!email) missing.push("Email");
+      if (!phone) missing.push("Phone");
+      if (!street) missing.push("Street");
+      if (!city) missing.push("City");
+      if (!state) missing.push("State");
+      if (!zipCode) missing.push("Pin Code");
+    } else if (step === 2) {
+      if (!formData.paymentMethod) missing.push("Payment Method");
+    }
+    return missing;
+  };
+
   const validateStep = (step: number): boolean => {
     switch (step) {
       case 1: // Shipping
         const shippingAddr = formData.shippingAddress;
-        const basicInfoValid = !!(shippingAddr.firstName && shippingAddr.email &&
-          shippingAddr.phone && shippingAddr.street && shippingAddr.city &&
-          shippingAddr.state && shippingAddr.zipCode);
 
         // Also check pincode serviceability
-        if (basicInfoValid && shippingAddr.zipCode.length === 6) {
+        if (shippingAddr.zipCode && shippingAddr.zipCode.length === 6) {
           const serviceabilityCheck = checkServiceability(shippingAddr.zipCode);
           if (!serviceabilityCheck.isServiceable) {
             toast({
@@ -350,7 +364,9 @@ export default function Checkout() {
           }
         }
 
-        return basicInfoValid;
+        const missing = getMissingFields(1);
+        return missing.length === 0;
+
       case 2: // Payment
         return !!formData.paymentMethod;
       default:
@@ -362,11 +378,17 @@ export default function Checkout() {
     if (validateStep(currentStep)) {
       setCurrentStep(currentStep + 1);
     } else {
-      toast({
-        title: "Incomplete information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      const missing = getMissingFields(currentStep);
+      // Only show "Incomplete information" if there are actually missing fields.
+      // If missing is empty, it means validation failed due to other reasons (like Serviceability)
+      // which have already shown their own specific toast errors.
+      if (missing.length > 0) {
+        toast({
+          title: "Incomplete information",
+          description: `Please fill in the following required fields: ${missing.join(", ")}`,
+          variant: "destructive",
+        });
+      }
     }
   };
 
