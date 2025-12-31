@@ -22,6 +22,8 @@ import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle, AlertCircle, ShoppingB
 import { StateSelector } from "@/components/common/state-selector";
 import { Address } from "@shared/types";
 import { checkServiceability, getServiceabilityMessage } from "@shared/delivery-zones";
+import { BANK_DETAILS } from "@/lib/constants";
+import { BankTransferProofForm } from "@/components/payment/bank-transfer-proof-form";
 import {
   Select,
   SelectContent,
@@ -92,6 +94,10 @@ export default function Checkout() {
     message: string;
     checked: boolean;
   }>({ isServiceable: false, message: '', checked: false });
+
+  // Payment Verification State
+  // Moved to BankTransferProofForm component
+  const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
 
   // Get cart items from context
   const cartItems = cart?.items || [];
@@ -190,6 +196,7 @@ export default function Checkout() {
         title: "Order placed successfully!",
         description: `Your order #${order.orderNumber} has been confirmed.`,
       });
+      setCurrentOrderId(order.id);
       setOrderComplete(true);
     },
     onError: (error: any) => {
@@ -431,23 +438,86 @@ export default function Checkout() {
         <Header />
         <div className="max-w-4xl mx-auto px-4 py-16">
           <div className="text-center">
-            <CheckCircle className="mx-auto h-16 w-16 text-green-600 mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Order Confirmed!</h1>
-            <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
-              Thank you for your purchase. We'll send you a confirmation email shortly.
-            </p>
-            <div className="space-x-4">
-              <Button asChild className="bg-copper-600 hover:bg-copper-700">
-                <Link href="/account?tab=orders">View Orders</Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/products">Continue Shopping</Link>
-              </Button>
-            </div>
+            {formData.paymentMethod === "bank_transfer" ? (
+              <div className="bg-white p-8 rounded-lg shadow-md max-w-2xl mx-auto w-full text-center space-y-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                  <CreditCard className="w-8 h-8 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Payment Verification Pending</h2>
+                  <p className="text-gray-600 mt-2">Order ID: {currentOrderId}</p>
+                </div>
+
+                <div className="text-left bg-blue-50 p-6 rounded-lg border border-blue-200">
+                  <p className="text-sm text-blue-800 mb-4">
+                    Please transfer <strong>{formatPrice(total)}</strong> to the bank account below and submit the transaction details.
+                  </p>
+
+                  {/* Bank Details Card */}
+                  <div className="bg-white p-4 rounded border border-blue-100 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <p className="text-gray-500 text-xs uppercase">Bank Name</p>
+                        <p className="font-medium">{BANK_DETAILS.bankName}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-xs uppercase">Account Name</p>
+                        <p className="font-medium">{BANK_DETAILS.accountName}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-xs uppercase">Account Number</p>
+                        <p className="font-mono font-medium tracking-wide">{BANK_DETAILS.accountNumber}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-xs uppercase">IFSC Code</p>
+                        <p className="font-mono font-medium">{BANK_DETAILS.ifscCode}</p>
+                      </div>
+                      <div className="col-span-1 md:col-span-2">
+                        <p className="text-gray-500 text-xs uppercase">UPI ID</p>
+                        <p className="font-medium">{BANK_DETAILS.upiId}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator className="my-4 bg-blue-200" />
+
+                  <BankTransferProofForm
+                    orderId={currentOrderId!}
+                    onSuccess={() => {
+                      setLocation(`/account/orders/${currentOrderId}`);
+                    }}
+                  />
+                </div>
+
+                <div className="flex justify-center gap-4 pt-4">
+                  <Link href="/account/orders">
+                    <Button variant="outline">Do this later</Button>
+                  </Link>
+                </div>
+              </div>
+            ) : (
+
+              // COD Success View (Default)
+              <>
+                <CheckCircle className="mx-auto h-16 w-16 text-green-600 mb-4" />
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Order Confirmed!</h1>
+                <p className="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                  Thank you for your purchase. We'll send you a confirmation email shortly.
+                </p>
+                <div className="space-x-4">
+                  <Button asChild className="bg-copper-600 hover:bg-copper-700">
+                    <Link href="/account?tab=orders">View Orders</Link>
+                  </Button>
+                  <Button variant="outline" asChild>
+                    <Link href="/products">Continue Shopping</Link>
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
-        </div>
+        </div >
         <Footer />
-      </div>
+      </div >
     );
   }
 
@@ -715,28 +785,68 @@ export default function Checkout() {
                     <div>
                       <Label>Payment Method</Label>
                       <div className="mt-2 space-y-2">
-                        <div className="flex items-center space-x-2 opacity-60 cursor-not-allowed">
-                          <input
-                            type="radio"
-                            id="razorpay"
-                            name="paymentMethod"
-                            value="razorpay"
-                            checked={formData.paymentMethod === "razorpay"}
-                            disabled
-                            className="cursor-not-allowed"
-                          />
-                          <div className="flex items-center gap-2">
-                            <label htmlFor="razorpay" className="text-sm font-medium cursor-not-allowed">
-                              Razorpay (UPI, Cards, NetBanking, Wallets)
+                        <div className="border-2 border-blue-100 rounded-lg p-4 bg-blue-50/50">
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id="bank_transfer"
+                              name="paymentMethod"
+                              value="bank_transfer"
+                              checked={formData.paymentMethod === "bank_transfer"}
+                              onChange={(e) => updateRootField("paymentMethod", e.target.value)}
+                            />
+                            <label htmlFor="bank_transfer" className="text-sm font-medium flex items-center gap-2">
+                              <span className="text-lg">🏦</span>
+                              Manual Bank Transfer / UPI
                             </label>
-                            <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-gray-200">
-                              COMING SOON
-                            </span>
                           </div>
+
+                          {formData.paymentMethod === "bank_transfer" && (
+                            <div className="mt-4 ml-6 space-y-3 bg-white p-4 rounded border shadow-sm animate-in fade-in slide-in-from-top-2">
+                              <h4 className="font-semibold text-gray-900 border-b pb-2 mb-3">Transfer to:</h4>
+
+                              <div className="space-y-2 text-sm">
+                                <p className="flex justify-between sm:justify-start sm:gap-8">
+                                  <span className="text-gray-600 w-32 shrink-0">Account Name:</span>
+                                  <span className="font-medium select-all">{BANK_DETAILS.accountName}</span>
+                                </p>
+                                <p className="flex justify-between sm:justify-start sm:gap-8">
+                                  <span className="text-gray-600 w-32 shrink-0">Account Number:</span>
+                                  <span className="font-mono font-medium select-all">{BANK_DETAILS.accountNumber}</span>
+                                </p>
+                                <p className="flex justify-between sm:justify-start sm:gap-8">
+                                  <span className="text-gray-600 w-32 shrink-0">Bank:</span>
+                                  <span className="font-medium">{BANK_DETAILS.bankName}</span>
+                                </p>
+                                <p className="flex justify-between sm:justify-start sm:gap-8">
+                                  <span className="text-gray-600 w-32 shrink-0">Branch:</span>
+                                  <span className="font-medium">{BANK_DETAILS.branch}</span>
+                                </p>
+                                <p className="flex justify-between sm:justify-start sm:gap-8">
+                                  <span className="text-gray-600 w-32 shrink-0">IFSC Code:</span>
+                                  <span className="font-mono font-medium select-all">{BANK_DETAILS.ifscCode}</span>
+                                </p>
+                                <p className="flex justify-between sm:justify-start sm:gap-8">
+                                  <span className="text-gray-600 w-32 shrink-0">UPI ID:</span>
+                                  <span className="font-mono font-medium select-all">{BANK_DETAILS.upiId}</span>
+                                </p>
+                              </div>
+
+                              <div className="bg-amber-50 border border-amber-200 p-3 rounded mt-3 flex gap-2">
+                                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                                <div className="space-y-1">
+                                  <p className="text-xs text-amber-800 font-medium">
+                                    Important: Order confirmation depends on payment verification.
+                                  </p>
+                                  <p className="text-xs text-amber-700">
+                                    Verification time may vary depending on bank processing and admin availability.
+                                    You will be asked to upload payment proof after placing the order.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-400 mt-2 pl-6">
-                          Online payments are currently unavailable. Please use Cash on Delivery.
-                        </p>
 
                         <div className="flex items-center space-x-2 mt-4">
                           <input

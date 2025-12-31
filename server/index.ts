@@ -78,4 +78,26 @@ app.use((req, res, next) => {
   server.listen(port, "0.0.0.0", () => {
     log(`serving on port ${port}`);
   });
+
+  // Start Cron Jobs
+  try {
+    const { expireUnpaidOrders } = await import("./adminFirestoreService");
+
+    // Run immediately on startup to check
+    expireUnpaidOrders().then(count => {
+      if (count > 0) log(`[CRON] Expired ${count} stale orders on startup.`);
+    }).catch(err => console.error("[CRON] Startup check failed:", err));
+
+    // Schedule hourly check (3600000 ms)
+    setInterval(() => {
+      expireUnpaidOrders().then(count => {
+        if (count > 0) log(`[CRON] Expired ${count} stale orders.`);
+      }).catch(err => console.error("[CRON] Scheduled check failed:", err));
+    }, 3600000);
+
+    log("⏰ Cron jobs scheduled (Hourly expiry check)");
+  } catch (err) {
+    console.error("Failed to start cron jobs:", err);
+  }
+
 })();

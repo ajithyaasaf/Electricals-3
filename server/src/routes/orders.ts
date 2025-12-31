@@ -19,6 +19,8 @@ import {
   createOrderWithTransaction,
   updateOrderStatusWithTransaction,
   getOrderDetails,
+  approveBankTransferPayment,
+  expireUnpaidOrders,
   AdminOrderQueries,
   AdminCartQueries,
 } from "../../adminFirestoreService";
@@ -502,4 +504,109 @@ export function registerOrderRoutes(app: Express) {
       res.status(500).json({ message: "Failed to update tracking information" });
     }
   });
+
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // POST /api/orders/:id/confirm-payment - Submit payment proof
+  // ─────────────────────────────────────────────────────────────────────────
+  app.post("/api/orders/:id/confirm-payment", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.uid;
+      const orderId = req.params.id;
+      const { transactionId, paymentProofUrl } = req.body;
+
+      if (!transactionId) {
+        return res.status(400).json({ message: "Transaction ID is required" });
+      }
+
+      // Get order
+      const order = await storage.getOrderById(orderId);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+
+      // Verify ownership
+      if (order.userId !== userId) {
+        return res.status(403).json({ message: "Access denied" });
+      }
+
+      // Idempotency & State Guard
+      if (order.paymentStatus !== 'awaiting_payment') {
+        // If already pending verification, just return success (idempotent)
+        if (order.paymentStatus === 'verification_pending') {
+          return res.status(200).json({
+            message: "Payment proof already submitted",
+            order
+          });
+        }
+
+        return res.status(400).json({
+          message: "Order is not awaiting payment",
+          currentStatus: order.paymentStatus
+        });
+      }
+
+      // Update order
+      await storage.updateOrder(orderId, {
+        transactionId,
+        paymentProofUrl: paymentProofUrl || null,
+        paymentStatus: 'verification_pending',
+      });
+
+      // Fetch updated order
+      const updatedOrder = await storage.getOrderById(orderId);
+
+      // TODO: Send email notification here
+
+      res.json({
+        message: "Payment proof submitted successfully. Verification pending.",
+        order: updatedOrder,
+      });
+    } catch (error) {
+      console.error("Error confirming payment:", error);
+      res.status(500).json({ message: "Failed to submit payment proof" });
+    }
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // POST /api/orders/:id/approve-payment - Approve bank transfer (Admin only)
+  // ─────────────────────────────────────────────────────────────────────────
+  app.post("/api/orders/:id/approve-payment", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.uid;
+      const orderId = req.params.id;
+
+      const user = await storage.getUserById(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const updatedOrder = await approveBankTransferPayment(orderId, {
+        userId,
+        email: user.email,
+        role: "admin",
+      });
+
+      res.json({
+        message: "Payment approved and order processed successfully.",
+        order: updatedOrder,
+      });
+    } catch (error: any) {
+      console.error("Error approving payment:", error);
+
+      if (error.message.includes("Insufficient stock")) {
+        return res.status(400).json({
+          message: error.message,
+          code: "INSUFFICIENT_STOCK",
+        });
+      }
+
+      if (error.message.includes("Only bank transfer")) {
+        return res.status(400).json({ message: error.message });
+      }
+
+      res.status(500).json({ message: "Failed to approve payment" });
+    }
+  });
+
 }

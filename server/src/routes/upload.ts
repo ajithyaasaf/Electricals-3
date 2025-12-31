@@ -219,4 +219,50 @@ export function registerUploadRoutes(app: Express) {
             }
         }
     );
+
+
+    /**
+     * Upload payment proof (Customer)
+     * POST /api/upload/payment-proof
+     * Requires: Authentication
+     */
+    app.post(
+        "/api/upload/payment-proof",
+        isAuthenticated,
+        upload.single('image'),
+        async (req: any, res) => {
+            try {
+                if (!req.file) {
+                    return res.status(400).json({
+                        success: false,
+                        message: "No image file provided"
+                    });
+                }
+
+                console.log('[Upload] Payment proof upload request:', {
+                    userId: req.user?.uid,
+                    filename: req.file.originalname,
+                    size: req.file.size
+                });
+
+                // Upload to Cloudinary - specific folder for proofs
+                const result = await uploadImage(req.file.buffer, {
+                    folder: 'payment-proofs',
+                });
+
+                res.json({
+                    success: true,
+                    url: result.secureUrl,
+                    publicId: result.publicId,
+                });
+            } catch (error) {
+                console.error("[Upload] Payment proof error:", error);
+                res.status(500).json({
+                    success: false,
+                    message: "Failed to upload payment proof",
+                    error: error instanceof Error ? error.message : 'Unknown error'
+                });
+            }
+        }
+    );
 }

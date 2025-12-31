@@ -170,8 +170,12 @@ export const OrderSchema = z.object({
   shippingAddress: ShippingAddressSchema,
 
   // Payment
-  paymentMethod: z.enum(['cod', 'razorpay']).default('cod'),
-  paymentStatus: z.enum(['pending', 'paid', 'failed', 'refunded']).default('pending'),
+  paymentMethod: z.enum(['cod', 'razorpay', 'bank_transfer']).default('cod'),
+  paymentStatus: z.enum(['pending', 'awaiting_payment', 'verification_pending', 'paid', 'failed', 'refunded']).default('pending'),
+
+  // Payment verification details
+  transactionId: z.string().optional(),
+  paymentProofUrl: z.string().optional(),
 
   // Cancellation metadata (populated if cancelled)
   cancelledAt: z.date().optional(),

@@ -598,6 +598,7 @@ export interface CreateOrderInput {
         phone?: string;
     };
     items: OrderItemInput[];
+    paymentMethod?: 'cod' | 'razorpay' | 'bank_transfer';
 }
 
 export interface CreateOrderResult {
@@ -739,8 +740,8 @@ export async function createOrderWithTransaction(
                 ...shippingAddress,
                 country: shippingAddress.country || 'India',
             },
-            paymentMethod: 'cod',
-            paymentStatus: 'pending',
+            paymentMethod: input.paymentMethod || 'cod',
+            paymentStatus: input.paymentMethod === 'bank_transfer' ? 'awaiting_payment' : 'pending',
             itemCount: items.length,
             createdAt: FieldValue.serverTimestamp(),
             updatedAt: FieldValue.serverTimestamp(),
@@ -765,11 +766,17 @@ export async function createOrderWithTransaction(
         }
 
         // Step 9: Decrement stock atomically (write phase)
-        for (const check of stockChecks) {
-            transaction.update(check.ref, {
-                stock: FieldValue.increment(-check.requestedQuantity),
-                updatedAt: FieldValue.serverTimestamp(),
-            });
+        // CRITICAL: For bank transfers, we DO NOT deduct stock here. 
+        // Stock is checked/deducted only upon admin approval.
+        const shouldDeductStock = (input.paymentMethod || 'cod') !== 'bank_transfer';
+
+        if (shouldDeductStock) {
+            for (const check of stockChecks) {
+                transaction.update(check.ref, {
+                    stock: FieldValue.increment(-check.requestedQuantity),
+                    updatedAt: FieldValue.serverTimestamp(),
+                });
+            }
         }
 
         // Step 10: Log initial status in order history
@@ -839,19 +846,26 @@ export async function updateOrderStatusWithTransaction(
             updateData.cancellationReason = reason || 'No reason provided';
 
             // Restore stock for cancelled orders
-            const orderItemsSnap = await db
-                .collection(COLLECTIONS.ORDER_ITEMS)
-                .where('orderId', '==', orderId)
-                .get();
+            // CRITICAL: Only restore if stock was actually deducted.
+            // Bank transfer orders in 'pending' status did NOT deduct stock.
+            const isBankTransfer = orderData.paymentMethod === 'bank_transfer';
+            const wasDeducted = !isBankTransfer || currentStatus !== 'pending';
 
-            for (const itemDoc of orderItemsSnap.docs) {
-                const item = itemDoc.data();
-                if (item.productId) {
-                    const productRef = db.collection(COLLECTIONS.PRODUCTS).doc(item.productId);
-                    transaction.update(productRef, {
-                        stock: FieldValue.increment(item.quantity),
-                        updatedAt: FieldValue.serverTimestamp(),
-                    });
+            if (wasDeducted) {
+                const orderItemsSnap = await db
+                    .collection(COLLECTIONS.ORDER_ITEMS)
+                    .where('orderId', '==', orderId)
+                    .get();
+
+                for (const itemDoc of orderItemsSnap.docs) {
+                    const item = itemDoc.data();
+                    if (item.productId) {
+                        const productRef = db.collection(COLLECTIONS.PRODUCTS).doc(item.productId);
+                        transaction.update(productRef, {
+                            stock: FieldValue.increment(item.quantity),
+                            updatedAt: FieldValue.serverTimestamp(),
+                        });
+                    }
                 }
             }
         }
@@ -901,4 +915,142 @@ export async function getOrderDetails(orderId: string): Promise<{
 }
 
 console.log('✅ Firebase Admin Firestore Service initialized');
+
+/**
+ * Approve bank transfer payment
+ * 1. Checks stock availability (again)
+ * 2. Deducts stock
+ * 3. Updates payment status to 'paid' and order status to 'processing'
+ */
+export async function approveBankTransferPayment(
+    orderId: string,
+    approvedBy: { userId: string; email?: string; role: 'admin' }
+): Promise<Order> {
+    const db = getDb();
+
+    console.log(`[APPROVE] Approving payment for order ${orderId} by ${approvedBy.email}`);
+
+    await db.runTransaction(async (transaction) => {
+        const orderRef = db.collection(COLLECTIONS.ORDERS).doc(orderId);
+        const orderSnap = await transaction.get(orderRef);
+
+        if (!orderSnap.exists) {
+            throw new Error('Order not found.');
+        }
+
+        const orderData = orderSnap.data()!;
+
+        // Validation
+        if (orderData.paymentMethod !== 'bank_transfer') {
+            throw new Error('Only bank transfer orders can be approved manually.');
+        }
+
+        if (orderData.paymentStatus === 'paid') {
+            throw new Error('Payment is already approved.');
+        }
+
+        // If status went beyond pending without payment (shouldn't happen), prevent double deduction
+        if (orderData.status !== 'pending') {
+            if (orderData.status === 'cancelled') {
+                throw new Error('Cannot approve cancelled order.');
+            }
+        }
+
+        // Fetch items to deduct stock
+        const orderItemsSnap = await db
+            .collection(COLLECTIONS.ORDER_ITEMS)
+            .where('orderId', '==', orderId)
+            .get();
+
+        // Check and Deduct Stock
+        for (const itemDoc of orderItemsSnap.docs) {
+            const item = itemDoc.data();
+            const productRef = db.collection(COLLECTIONS.PRODUCTS).doc(item.productId);
+            const productSnap = await transaction.get(productRef);
+
+            if (!productSnap.exists) {
+                throw new Error(`Product "${item.productName}" no longer exists.`);
+            }
+
+            const currentStock = productSnap.data()!.stock || 0;
+            if (currentStock < item.quantity) {
+                throw new Error(`Insufficient stock for "${item.productName}". Available: ${currentStock}, Required: ${item.quantity}`);
+            }
+
+            // Deduct
+            transaction.update(productRef, {
+                stock: FieldValue.increment(-item.quantity),
+                updatedAt: FieldValue.serverTimestamp(),
+            });
+        }
+
+        // Update Order
+        transaction.update(orderRef, {
+            status: 'processing', // Move to processing
+            paymentStatus: 'paid',
+            updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        // Log History
+        const historyRef = db.collection(COLLECTIONS.ORDER_HISTORY).doc();
+        transaction.set(historyRef, {
+            orderId,
+            previousStatus: orderData.status,
+            newStatus: 'processing',
+            changedBy: approvedBy.userId,
+            changedByEmail: approvedBy.email || null,
+            changedByRole: 'admin',
+            reason: 'Bank transfer payment approved',
+            createdAt: FieldValue.serverTimestamp(),
+        });
+    });
+
+    const updatedOrder = await adminOrderService.getById(orderId);
+    if (!updatedOrder) throw new Error('Order not found after update');
+    return updatedOrder;
+}
+
+/**
+ * Expire unpaid bank transfer orders > 48 hours old
+ * Cron job helper
+ */
+export async function expireUnpaidOrders(): Promise<number> {
+    const db = getDb();
+    const now = new Date();
+    const expiryTime = new Date(now.getTime() - 48 * 60 * 60 * 1000); // 48 hours ago
+
+    console.log(`[CRON] Checking for unpaid orders created before ${expiryTime.toISOString()}...`);
+
+    // Query orders that are awaiting payment or pending verification AND are bank transfers
+    const unpaidSnap = await db.collection(COLLECTIONS.ORDERS)
+        .where('paymentMethod', '==', 'bank_transfer')
+        .where('paymentStatus', 'in', ['pending', 'awaiting_payment'])
+        .where('createdAt', '<=', Timestamp.fromDate(expiryTime))
+        .where('status', '!=', 'cancelled')
+        .get();
+
+    let count = 0;
+    for (const doc of unpaidSnap.docs) {
+        try {
+            const orderId = doc.id;
+            const orderData = doc.data();
+
+            if (orderData.status === 'cancelled' || orderData.status === 'delivered') continue;
+
+            console.log(`[CRON] Expiring order ${orderId} (Created: ${orderData.createdAt.toDate().toISOString()})`);
+
+            await updateOrderStatusWithTransaction(
+                orderId,
+                'cancelled',
+                { userId: 'system', role: 'system' },
+                'Auto-expired due to non-payment (48h limit)'
+            );
+            count++;
+        } catch (error) {
+            console.error(`[CRON] Failed to expire order ${doc.id}:`, error);
+        }
+    }
+
+    return count;
+}
 

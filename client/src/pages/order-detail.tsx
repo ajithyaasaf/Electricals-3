@@ -51,6 +51,8 @@ import {
     Mail,
     Copy,
 } from "lucide-react";
+import { BANK_DETAILS } from "@/lib/constants";
+import { BankTransferProofForm } from "@/components/payment/bank-transfer-proof-form";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -365,6 +367,72 @@ export default function OrderDetail() {
                         <p className="text-center text-gray-600 mt-4">{config.description}</p>
                     </CardContent>
                 </Card>
+
+                {/* Bank Transfer Payment Action */}
+                {order.paymentMethod === "bank_transfer" &&
+                    (order.paymentStatus === "awaiting_payment" || order.paymentStatus === "verification_pending") && (
+                        <Card className="mb-6 border-blue-200 bg-blue-50">
+                            <CardHeader>
+                                <CardTitle className="text-lg flex items-center gap-2 text-blue-900">
+                                    <CreditCard className="w-5 h-5" />
+                                    {order.paymentStatus === "verification_pending"
+                                        ? "Payment Verification Pending"
+                                        : "Complete Your Payment"}
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {order.paymentStatus === "verification_pending" ? (
+                                    <div className="flex items-center gap-3 text-blue-800">
+                                        <Clock className="w-5 h-5" />
+                                        <p>
+                                            We have received your payment proof and are verifying the details.
+                                            This usually takes 1-2 hours. You will be notified once approved.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-6">
+                                        <p className="text-sm text-blue-800">
+                                            Please transfer <strong>{formatPrice(order.total)}</strong> to the account below and upload the proof.
+                                        </p>
+
+                                        {/* Bank Details Card */}
+                                        <div className="bg-white p-4 rounded border border-blue-100">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase">Bank Name</p>
+                                                    <p className="font-medium">{BANK_DETAILS.bankName}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase">Account Name</p>
+                                                    <p className="font-medium">{BANK_DETAILS.accountName}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase">Account Number</p>
+                                                    <p className="font-mono font-medium tracking-wide">{BANK_DETAILS.accountNumber}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-500 text-xs uppercase">IFSC Code</p>
+                                                    <p className="font-mono font-medium">{BANK_DETAILS.ifscCode}</p>
+                                                </div>
+                                                <div className="col-span-1 md:col-span-2">
+                                                    <p className="text-gray-500 text-xs uppercase">UPI ID</p>
+                                                    <p className="font-medium">{BANK_DETAILS.upiId}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <BankTransferProofForm
+                                            orderId={order.id}
+                                            onSuccess={() => {
+                                                queryClient.invalidateQueries({ queryKey: [`/api/orders/${order.id}`] });
+                                                toast({ title: "Payment Proof Submitted" });
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
 
                 {/* Tracking Info (if shipped) */}
                 {order.trackingNumber && (

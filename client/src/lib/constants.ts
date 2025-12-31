@@ -79,3 +79,12 @@ export const COMPANY_INFO = {
   tagline: "Professional Electrical Products & Services",
   description: "Your trusted partner for all electrical needs. Licensed, insured, and committed to excellence.",
 };
+
+export const BANK_DETAILS = {
+  accountName: "Tamilnadu electric solutions",
+  accountNumber: "438300081011334D",
+  bankName: "Punjab National Bank",
+  branch: "West Masi street, Madurai",
+  ifscCode: "PUNB0438300",
+  upiId: "mijain009-4@okicici",
+};

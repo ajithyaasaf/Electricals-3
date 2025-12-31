@@ -128,6 +128,8 @@ interface Order {
     };
     paymentMethod: string;
     paymentStatus: string;
+    transactionId?: string;
+    paymentProofUrl?: string;
     trackingNumber?: string;
     trackingCarrier?: string;
     trackingUrl?: string;
@@ -223,6 +225,21 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
         },
     });
 
+    const approvePaymentMutation = useMutation({
+        mutationFn: async () => {
+            const response = await apiRequest("POST", `/api/orders/${orderId}/approve-payment`);
+            return response.json();
+        },
+        onSuccess: (data) => {
+            toast({ title: "Payment Approved", description: "Order status updated to processing." });
+            queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+            onClose();
+        },
+        onError: (error: any) => {
+            toast({ title: "Approval Failed", description: error.message, variant: "destructive" });
+        },
+    });
+
     if (!orderId) return null;
 
     return (
@@ -301,22 +318,27 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                         </div>
 
                         {/* Payment Info */}
-                        <Card>
-                            <CardHeader className="pb-3">
+                        <Card className={details.order.paymentStatus === 'verification_pending' ? "border-yellow-400 bg-yellow-50" : ""}>
+                            <CardHeader className="pb-3 flex flex-row items-center justify-between">
                                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                                     <CreditCard className="w-4 h-4" />
                                     Payment Information
                                 </CardTitle>
+                                {details.order.paymentStatus === 'verification_pending' && (
+                                    <Badge variant="outline" className="bg-yellow-200 text-yellow-800 border-yellow-400 animate-pulse">
+                                        Verification Needed
+                                    </Badge>
+                                )}
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
                                     <div>
                                         <p className="text-gray-600">Method</p>
                                         <p className="font-medium uppercase">{details.order.paymentMethod}</p>
                                     </div>
                                     <div>
                                         <p className="text-gray-600">Status</p>
-                                        <Badge variant="outline" className="capitalize">{details.order.paymentStatus}</Badge>
+                                        <Badge variant="outline" className="capitalize">{details.order.paymentStatus.replace('_', ' ')}</Badge>
                                     </div>
                                     <div>
                                         <p className="text-gray-600">Subtotal</p>
@@ -327,6 +349,50 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                         <p className="font-medium">{formatPrice(details.order.tax + details.order.shippingCost)}</p>
                                     </div>
                                 </div>
+
+                                {/* Bank Transfer Specifics */}
+                                {details.order.paymentMethod === 'bank_transfer' && (
+                                    <div className="mt-4 pt-4 border-t border-gray-200/50">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Transaction ID</p>
+                                                <p className="font-mono font-medium bg-white p-2 rounded border">
+                                                    {details.order.transactionId || "Not provided"}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Payment Proof</p>
+                                                {details.order.paymentProofUrl ? (
+                                                    <a
+                                                        href={details.order.paymentProofUrl}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="text-blue-600 hover:underline flex items-center gap-1 text-sm bg-white p-2 rounded border"
+                                                    >
+                                                        <FileText className="w-4 h-4" />
+                                                        View Screenshot
+                                                    </a>
+                                                ) : (
+                                                    <p className="text-sm text-gray-400 italic">No screenshot uploaded</p>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Action Buttons for Verification */}
+                                        {details.order.paymentStatus === 'verification_pending' && (
+                                            <div className="mt-4 flex gap-3">
+                                                <Button
+                                                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                                    onClick={() => approvePaymentMutation.mutate()}
+                                                    disabled={approvePaymentMutation.isPending}
+                                                >
+                                                    {approvePaymentMutation.isPending ? "Approving..." : "Approve Payment & Order"}
+                                                </Button>
+                                                {/* Reject handled via normal status update to Cancelled */}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
