@@ -117,8 +117,8 @@ export default function Home() {
     {
       id: `${type}-1`,
       name: "Professional Wire Stripper Set",
-      price: 2499,
-      originalPrice: type === "trending" ? 3324 : undefined,
+      price: 249900,
+      originalPrice: type === "trending" ? 332400 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "tools",
       rating: 4.5
@@ -126,8 +126,8 @@ export default function Home() {
     {
       id: `${type}-2`,
       name: "Smart GFCI Outlet",
-      price: 3824,
-      originalPrice: type === "trending" ? 4649 : undefined,
+      price: 382400,
+      originalPrice: type === "trending" ? 464900 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "outlets",
       rating: 4.8
@@ -135,8 +135,8 @@ export default function Home() {
     {
       id: `${type}-3`,
       name: "20A Circuit Breaker",
-      price: 1579,
-      originalPrice: type === "trending" ? 2074 : undefined,
+      price: 157900,
+      originalPrice: type === "trending" ? 207400 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "breakers",
       rating: 4.7
@@ -144,8 +144,8 @@ export default function Home() {
     {
       id: `${type}-4`,
       name: "LED Work Light 2000LM",
-      price: 2904,
-      originalPrice: type === "trending" ? 3737 : undefined,
+      price: 290400,
+      originalPrice: type === "trending" ? 373700 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "lighting",
       rating: 4.6
@@ -153,8 +153,8 @@ export default function Home() {
     {
       id: `${type}-5`,
       name: "12 AWG Copper Wire (100ft)",
-      price: 7479,
-      originalPrice: type === "trending" ? 9149 : undefined,
+      price: 747900,
+      originalPrice: type === "trending" ? 914900 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "wiring",
       rating: 4.9
@@ -162,8 +162,8 @@ export default function Home() {
     {
       id: `${type}-6`,
       name: "Digital Multimeter",
-      price: 4984,
-      originalPrice: type === "trending" ? 6649 : undefined,
+      price: 498400,
+      originalPrice: type === "trending" ? 664900 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "tools",
       rating: 4.4
@@ -171,8 +171,8 @@ export default function Home() {
     {
       id: `${type}-7`,
       name: "Electrical Panel Cover",
-      price: 2074,
-      originalPrice: type === "trending" ? 2494 : undefined,
+      price: 207400,
+      originalPrice: type === "trending" ? 249400 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "panels",
       rating: 4.3
@@ -180,8 +180,8 @@ export default function Home() {
     {
       id: `${type}-8`,
       name: "Wire Nuts Assortment",
-      price: 1079,
-      originalPrice: type === "trending" ? 1414 : undefined,
+      price: 107900,
+      originalPrice: type === "trending" ? 141400 : undefined,
       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
       category: "wiring",
       rating: 4.2

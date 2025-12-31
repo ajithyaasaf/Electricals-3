@@ -715,21 +715,27 @@ export default function Checkout() {
                     <div>
                       <Label>Payment Method</Label>
                       <div className="mt-2 space-y-2">
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-2 opacity-60 cursor-not-allowed">
                           <input
                             type="radio"
                             id="razorpay"
                             name="paymentMethod"
                             value="razorpay"
                             checked={formData.paymentMethod === "razorpay"}
-                            onChange={(e) => updateRootField("paymentMethod", e.target.value)}
+                            disabled
+                            className="cursor-not-allowed"
                           />
-                          <label htmlFor="razorpay" className="text-sm font-medium">
-                            Razorpay (UPI, Cards, NetBanking, Wallets)
-                          </label>
+                          <div className="flex items-center gap-2">
+                            <label htmlFor="razorpay" className="text-sm font-medium cursor-not-allowed">
+                              Razorpay (UPI, Cards, NetBanking, Wallets)
+                            </label>
+                            <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-gray-200">
+                              COMING SOON
+                            </span>
+                          </div>
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                          Pay securely using UPI, Credit/Debit Cards, Net Banking, or Digital Wallets
+                        <p className="text-sm text-gray-400 mt-2 pl-6">
+                          Online payments are currently unavailable. Please use Cash on Delivery.
                         </p>
 
                         <div className="flex items-center space-x-2 mt-4">

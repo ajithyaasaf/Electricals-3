@@ -131,6 +131,7 @@ async function findAndFixCorruptedProducts() {
     console.log(`   ✅ Successfully fixed: ${fixed} products`);
     console.log(`   ❌ Failed: ${failed} products`);
     console.log(`   📦 Total processed: ${corrupted.length} products\n`);
+    
 
     if (failed === 0) {
         console.log('🎉 All corrupted products fixed successfully!');

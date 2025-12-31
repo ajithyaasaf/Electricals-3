@@ -82,10 +82,11 @@ export const ServiceSchema = z.object({
   slug: z.string(),
   description: z.string().optional(),
   shortDescription: z.string().optional(),
-  price: z.number(),
+  startingPrice: z.number(),
   duration: z.number(), // in minutes
   categoryId: z.string().optional(),
   imageUrls: z.array(z.string()).default([]),
+  features: z.array(z.string()).optional(),
   isActive: z.boolean().default(true),
   rating: z.number().default(0),
   reviewCount: z.number().default(0),
@@ -257,7 +258,7 @@ export const ServiceBookingSchema = z.object({
   id: z.string(),
   userId: z.string(),
   serviceId: z.string(),
-  scheduledDate: z.date(),
+  scheduledDate: z.coerce.date(),
   scheduledTime: z.string(),
   status: z.enum(['pending', 'confirmed', 'in_progress', 'completed', 'cancelled']).default('pending'),
   address: z.object({

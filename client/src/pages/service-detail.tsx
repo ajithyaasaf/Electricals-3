@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useSearch } from "wouter";
+import type { Service, Review } from "@shared/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -48,18 +49,19 @@ export default function ServiceDetail() {
   const { isAuthenticated } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const urlParams = new URLSearchParams(searchParams);
   const autoOpenBooking = urlParams.get("book") === "true";
 
+
   // Fetch service details
-  const { data: service, isLoading } = useQuery({
+  const { data: service, isLoading } = useQuery<Service>({
     queryKey: ["/api/services", slug],
   });
 
   // Fetch reviews
-  const { data: reviews = [] } = useQuery({
+  const { data: reviews = [] } = useQuery<Review[]>({
     queryKey: ["/api/reviews", { serviceId: service?.id }],
     enabled: !!service?.id,
   });
@@ -85,7 +87,7 @@ export default function ServiceDetail() {
         scheduledTime: data.scheduledTime,
         address: data.address,
         notes: data.notes,
-        totalAmount: service?.startingPrice,
+        total: service?.startingPrice,
       });
     },
     onSuccess: () => {
@@ -182,9 +184,9 @@ export default function ServiceDetail() {
     );
   }
 
-  const imageUrl = service.imageUrl || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
-  const startingPrice = parseFloat(service.startingPrice);
-  const rating = parseFloat(service.rating || "0");
+  const imageUrl = service.imageUrls?.[0] || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+  const startingPrice = service.startingPrice;
+  const rating = service.rating || 0;
   const reviewCount = service.reviewCount || 0;
   const duration = service.duration ? `${Math.floor(service.duration / 60)}h ${service.duration % 60}m` : "Varies";
 
@@ -196,7 +198,7 @@ export default function ServiceDetail() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="text-sm text-gray-600 mb-6">
@@ -275,7 +277,7 @@ export default function ServiceDetail() {
               {/* Book Service Button */}
               <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
                 <DialogTrigger asChild>
-                  <Button 
+                  <Button
                     onClick={handleBookService}
                     className="w-full bg-lime-600 hover:bg-lime-700 text-white"
                     size="lg"
@@ -288,7 +290,7 @@ export default function ServiceDetail() {
                   <DialogHeader>
                     <DialogTitle>Book {service.name}</DialogTitle>
                   </DialogHeader>
-                  
+
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                       {/* Date Selection */}
@@ -303,9 +305,8 @@ export default function ServiceDetail() {
                                 <FormControl>
                                   <Button
                                     variant="outline"
-                                    className={`pl-3 text-left font-normal ${
-                                      !field.value && "text-muted-foreground"
-                                    }`}
+                                    className={`pl-3 text-left font-normal ${!field.value && "text-muted-foreground"
+                                      }`}
                                   >
                                     {field.value ? (
                                       format(field.value, "PPP")
@@ -360,7 +361,7 @@ export default function ServiceDetail() {
                       {/* Address */}
                       <div className="space-y-4">
                         <h3 className="font-semibold text-gray-900">Service Address</h3>
-                        
+
                         <FormField
                           control={form.control}
                           name="address.street"
@@ -477,7 +478,7 @@ export default function ServiceDetail() {
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="reviews">Reviews ({reviewCount})</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="description" className="mt-6">
             <div className="bg-white rounded-lg p-6">
               <div className="prose max-w-none">
@@ -489,7 +490,7 @@ export default function ServiceDetail() {
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="reviews" className="mt-6">
             <div className="bg-white rounded-lg p-6">
               {reviews.length > 0 ? (

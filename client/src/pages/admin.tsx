@@ -117,7 +117,7 @@ function DashboardSection({ totalRevenue, totalProducts, totalOrders, orders, or
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                 <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                  ₹{totalRevenue.toFixed(2)}
+                  {formatPrice(totalRevenue)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
@@ -707,7 +707,7 @@ function ProductsSection({
             {[...Array(5)].map((_, i) => <Skeleton key={i} className="w-full h-16" />)}
           </div>
         ) : products.length === 0 ? (
-          <div className you="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-gray-500">
             <Package className="w-12 h-12 mx-auto mb-2 opacity-30" />
             <p>No products yet</p>
           </div>
@@ -800,13 +800,13 @@ function AdminDashboard() {
     enabled: activeSection === "analytics" || activeSection === "dashboard"
   });
 
-  const { data: ordersData = [], isLoading: ordersLoading } = useQuery({
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
     queryKey: ["/api/orders"],
   });
 
   // Extract arrays
   const products = (productsData as any)?.products || [];
-  const orders = Array.isArray(ordersData) ? ordersData : [];
+  const orders = (ordersData as any)?.orders || [];
 
   // Form
   const productForm = useForm<ProductFormData>({
@@ -826,6 +826,7 @@ function AdminDashboard() {
       category: "",
       weightInKg: 0,
       isBulky: false,
+      imageUrls: [],
     },
   });
 
@@ -922,6 +923,7 @@ function AdminDashboard() {
       category: product.category || "",
       weightInKg: product.weightInKg || 0,
       isBulky: product.isBulky || false,
+      imageUrls: product.imageUrls || [],
     });
     setProductDialogOpen(true);
   };

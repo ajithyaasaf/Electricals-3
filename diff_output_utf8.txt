@@ -1,0 +1,1148 @@
+﻿diff --git a/client/src/pages/admin.tsx b/client/src/pages/admin.tsx
+index f12e1cc..51c25fa 100644
+--- a/client/src/pages/admin.tsx
++++ b/client/src/pages/admin.tsx
+@@ -117,7 +117,7 @@ function DashboardSection({ totalRevenue, totalProducts, totalOrders, orders, or
+               <div>
+                 <p className="text-sm font-medium text-gray-600">Total Revenue</p>
+                 <p className="text-2xl lg:text-3xl font-bold text-gray-900">
+-                  Γé╣{totalRevenue.toFixed(2)}
++                  {formatPrice(totalRevenue)}
+                 </p>
+               </div>
+               <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
+@@ -707,7 +707,7 @@ function ProductsSection({
+             {[...Array(5)].map((_, i) => <Skeleton key={i} className="w-full h-16" />)}
+           </div>
+         ) : products.length === 0 ? (
+-          <div className you="text-center py-8 text-gray-500">
++          <div className="text-center py-8 text-gray-500">
+             <Package className="w-12 h-12 mx-auto mb-2 opacity-30" />
+             <p>No products yet</p>
+           </div>
+@@ -800,13 +800,13 @@ function AdminDashboard() {
+     enabled: activeSection === "analytics" || activeSection === "dashboard"
+   });
+ 
+-  const { data: ordersData = [], isLoading: ordersLoading } = useQuery({
++  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+     queryKey: ["/api/orders"],
+   });
+ 
+   // Extract arrays
+   const products = (productsData as any)?.products || [];
+-  const orders = Array.isArray(ordersData) ? ordersData : [];
++  const orders = (ordersData as any)?.orders || [];
+ 
+   // Form
+   const productForm = useForm<ProductFormData>({
+@@ -826,6 +826,7 @@ function AdminDashboard() {
+       category: "",
+       weightInKg: 0,
+       isBulky: false,
++      imageUrls: [],
+     },
+   });
+ 
+@@ -922,6 +923,7 @@ function AdminDashboard() {
+       category: product.category || "",
+       weightInKg: product.weightInKg || 0,
+       isBulky: product.isBulky || false,
++      imageUrls: product.imageUrls || [],
+     });
+     setProductDialogOpen(true);
+   };
+diff --git a/client/src/pages/checkout.tsx b/client/src/pages/checkout.tsx
+index f5f0835..d38a22f 100644
+--- a/client/src/pages/checkout.tsx
++++ b/client/src/pages/checkout.tsx
+@@ -715,21 +715,27 @@ export default function Checkout() {
+                     <div>
+                       <Label>Payment Method</Label>
+                       <div className="mt-2 space-y-2">
+-                        <div className="flex items-center space-x-2">
++                        <div className="flex items-center space-x-2 opacity-60 cursor-not-allowed">
+                           <input
+                             type="radio"
+                             id="razorpay"
+                             name="paymentMethod"
+                             value="razorpay"
+                             checked={formData.paymentMethod === "razorpay"}
+-                            onChange={(e) => updateRootField("paymentMethod", e.target.value)}
++                            disabled
++                            className="cursor-not-allowed"
+                           />
+-                          <label htmlFor="razorpay" className="text-sm font-medium">
+-                            Razorpay (UPI, Cards, NetBanking, Wallets)
+-                          </label>
++                          <div className="flex items-center gap-2">
++                            <label htmlFor="razorpay" className="text-sm font-medium cursor-not-allowed">
++                              Razorpay (UPI, Cards, NetBanking, Wallets)
++                            </label>
++                            <span className="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full border border-gray-200">
++                              COMING SOON
++                            </span>
++                          </div>
+                         </div>
+-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+-                          Pay securely using UPI, Credit/Debit Cards, Net Banking, or Digital Wallets
++                        <p className="text-sm text-gray-400 mt-2 pl-6">
++                          Online payments are currently unavailable. Please use Cash on Delivery.
+                         </p>
+ 
+                         <div className="flex items-center space-x-2 mt-4">
+diff --git a/client/src/pages/home.tsx b/client/src/pages/home.tsx
+index dbab60f..89c786e 100644
+--- a/client/src/pages/home.tsx
++++ b/client/src/pages/home.tsx
+@@ -117,8 +117,8 @@ export default function Home() {
+     {
+       id: `${type}-1`,
+       name: "Professional Wire Stripper Set",
+-      price: 2499,
+-      originalPrice: type === "trending" ? 3324 : undefined,
++      price: 249900,
++      originalPrice: type === "trending" ? 332400 : undefined,
+       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+       category: "tools",
+       rating: 4.5
+@@ -126,8 +126,8 @@ export default function Home() {
+     {
+       id: `${type}-2`,
+       name: "Smart GFCI Outlet",
+-      price: 3824,
+-      originalPrice: type === "trending" ? 4649 : undefined,
++      price: 382400,
++      originalPrice: type === "trending" ? 464900 : undefined,
+       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+       category: "outlets",
+       rating: 4.8
+@@ -135,8 +135,8 @@ export default function Home() {
+     {
+       id: `${type}-3`,
+       name: "20A Circuit Breaker",
+-      price: 1579,
+-      originalPrice: type === "trending" ? 2074 : undefined,
++      price: 157900,
++      originalPrice: type === "trending" ? 207400 : undefined,
+       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+       category: "breakers",
+       rating: 4.7
+@@ -144,8 +144,8 @@ export default function Home() {
+     {
+       id: `${type}-4`,
+       name: "LED Work Light 2000LM",
+-      price: 2904,
+-      originalPrice: type === "trending" ? 3737 : undefined,
++      price: 290400,
++      originalPrice: type === "trending" ? 373700 : undefined,
+       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+       category: "lighting",
+       rating: 4.6
+@@ -153,8 +153,8 @@ export default function Home() {
+     {
+       id: `${type}-5`,
+       name: "12 AWG Copper Wire (100ft)",
+-      price: 7479,
+-      originalPrice: type === "trending" ? 9149 : undefined,
++      price: 747900,
++      originalPrice: type === "trending" ? 914900 : undefined,
+       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+       category: "wiring",
+       rating: 4.9
+@@ -162,8 +162,8 @@ export default function Home() {
+     {
+       id: `${type}-6`,
+       name: "Digital Multimeter",
+-      price: 4984,
+-      originalPrice: type === "trending" ? 6649 : undefined,
++      price: 498400,
++      originalPrice: type === "trending" ? 664900 : undefined,
+       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+       category: "tools",
+       rating: 4.4
+@@ -171,8 +171,8 @@ export default function Home() {
+     {
+       id: `${type}-7`,
+       name: "Electrical Panel Cover",
+-      price: 2074,
+-      originalPrice: type === "trending" ? 2494 : undefined,
++      price: 207400,
++      originalPrice: type === "trending" ? 249400 : undefined,
+       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+       category: "panels",
+       rating: 4.3
+@@ -180,8 +180,8 @@ export default function Home() {
+     {
+       id: `${type}-8`,
+       name: "Wire Nuts Assortment",
+-      price: 1079,
+-      originalPrice: type === "trending" ? 1414 : undefined,
++      price: 107900,
++      originalPrice: type === "trending" ? 141400 : undefined,
+       image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
+       category: "wiring",
+       rating: 4.2
+@@ -340,6 +340,7 @@ export default function Home() {
+               <h5 className="font-semibold text-gray-900 mb-1">Saved Items</h5>
+               <p className="text-sm text-gray-600">Your wishlist and favorites</p>
+             </Link>
++            console.log()
+ 
+             <Link href="/services" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
+               <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-200 transition-colors">
+diff --git a/client/src/pages/service-detail.tsx b/client/src/pages/service-detail.tsx
+index bb27e3e..609bd8a 100644
+--- a/client/src/pages/service-detail.tsx
++++ b/client/src/pages/service-detail.tsx
+@@ -1,5 +1,6 @@
+ import { useState } from "react";
+ import { useParams, useSearch } from "wouter";
++import type { Service, Review } from "@shared/types";
+ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+ import { Header } from "@/components/layout/header";
+ import { Footer } from "@/components/layout/footer";
+@@ -48,18 +49,19 @@ export default function ServiceDetail() {
+   const { isAuthenticated } = useFirebaseAuth();
+   const { toast } = useToast();
+   const queryClient = useQueryClient();
+-  
++
+   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+   const urlParams = new URLSearchParams(searchParams);
+   const autoOpenBooking = urlParams.get("book") === "true";
+ 
++
+   // Fetch service details
+-  const { data: service, isLoading } = useQuery({
++  const { data: service, isLoading } = useQuery<Service>({
+     queryKey: ["/api/services", slug],
+   });
+ 
+   // Fetch reviews
+-  const { data: reviews = [] } = useQuery({
++  const { data: reviews = [] } = useQuery<Review[]>({
+     queryKey: ["/api/reviews", { serviceId: service?.id }],
+     enabled: !!service?.id,
+   });
+@@ -85,7 +87,7 @@ export default function ServiceDetail() {
+         scheduledTime: data.scheduledTime,
+         address: data.address,
+         notes: data.notes,
+-        totalAmount: service?.startingPrice,
++        total: service?.startingPrice,
+       });
+     },
+     onSuccess: () => {
+@@ -182,9 +184,9 @@ export default function ServiceDetail() {
+     );
+   }
+ 
+-  const imageUrl = service.imageUrl || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+-  const startingPrice = parseFloat(service.startingPrice);
+-  const rating = parseFloat(service.rating || "0");
++  const imageUrl = service.imageUrls?.[0] || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
++  const startingPrice = service.startingPrice;
++  const rating = service.rating || 0;
+   const reviewCount = service.reviewCount || 0;
+   const duration = service.duration ? `${Math.floor(service.duration / 60)}h ${service.duration % 60}m` : "Varies";
+ 
+@@ -196,7 +198,7 @@ export default function ServiceDetail() {
+   return (
+     <div className="min-h-screen bg-gray-50">
+       <Header />
+-      
++
+       <div className="max-w-7xl mx-auto px-4 py-8">
+         {/* Breadcrumb */}
+         <nav className="text-sm text-gray-600 mb-6">
+@@ -275,7 +277,7 @@ export default function ServiceDetail() {
+               {/* Book Service Button */}
+               <Dialog open={bookingDialogOpen} onOpenChange={setBookingDialogOpen}>
+                 <DialogTrigger asChild>
+-                  <Button 
++                  <Button
+                     onClick={handleBookService}
+                     className="w-full bg-lime-600 hover:bg-lime-700 text-white"
+                     size="lg"
+@@ -288,7 +290,7 @@ export default function ServiceDetail() {
+                   <DialogHeader>
+                     <DialogTitle>Book {service.name}</DialogTitle>
+                   </DialogHeader>
+-                  
++
+                   <Form {...form}>
+                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                       {/* Date Selection */}
+@@ -303,9 +305,8 @@ export default function ServiceDetail() {
+                                 <FormControl>
+                                   <Button
+                                     variant="outline"
+-                                    className={`pl-3 text-left font-normal ${
+-                                      !field.value && "text-muted-foreground"
+-                                    }`}
++                                    className={`pl-3 text-left font-normal ${!field.value && "text-muted-foreground"
++                                      }`}
+                                   >
+                                     {field.value ? (
+                                       format(field.value, "PPP")
+@@ -360,7 +361,7 @@ export default function ServiceDetail() {
+                       {/* Address */}
+                       <div className="space-y-4">
+                         <h3 className="font-semibold text-gray-900">Service Address</h3>
+-                        
++
+                         <FormField
+                           control={form.control}
+                           name="address.street"
+@@ -477,7 +478,7 @@ export default function ServiceDetail() {
+             <TabsTrigger value="description">Description</TabsTrigger>
+             <TabsTrigger value="reviews">Reviews ({reviewCount})</TabsTrigger>
+           </TabsList>
+-          
++
+           <TabsContent value="description" className="mt-6">
+             <div className="bg-white rounded-lg p-6">
+               <div className="prose max-w-none">
+@@ -489,7 +490,7 @@ export default function ServiceDetail() {
+               </div>
+             </div>
+           </TabsContent>
+-          
++
+           <TabsContent value="reviews" className="mt-6">
+             <div className="bg-white rounded-lg p-6">
+               {reviews.length > 0 ? (
+diff --git a/scripts/fix-product-prices.ts b/scripts/fix-product-prices.ts
+index 1b1a09c..1bb4911 100644
+--- a/scripts/fix-product-prices.ts
++++ b/scripts/fix-product-prices.ts
+@@ -131,6 +131,7 @@ async function findAndFixCorruptedProducts() {
+     console.log(`   Γ£à Successfully fixed: ${fixed} products`);
+     console.log(`   Γ¥î Failed: ${failed} products`);
+     console.log(`   ≡ƒôª Total processed: ${corrupted.length} products\n`);
++    
+ 
+     if (failed === 0) {
+         console.log('≡ƒÄë All corrupted products fixed successfully!');
+diff --git a/server/data/electricalProductsData.ts b/server/data/electricalProductsData.ts
+index 127344b..418a3d7 100644
+--- a/server/data/electricalProductsData.ts
++++ b/server/data/electricalProductsData.ts
+@@ -3,768 +3,13 @@
+ 
+ import type { Category, Product } from '@shared/types';
+ import { ELECTRICAL_CATEGORIES } from '@shared/data/categories';
++import { ELECTRICAL_PRODUCTS } from '@shared/data/products';
+ 
+ // Import categories from shared source to ensure consistency
+ export const AUTHENTIC_CATEGORIES: Omit<Category, 'createdAt' | 'updatedAt'>[] = ELECTRICAL_CATEGORIES;
+ 
+ // Complete CopperBear customer products - All 25 products from CSV
+-export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
+-  // Finolex Wires & Cables (4 products)
+-  {
+-    id: 'prod-001',
+-    name: '1.0sqmm Wire',
+-    slug: 'finolex-1-0sqmm-wire',
+-    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+-    shortDescription: 'Finolex 1.0sqmm FR PVC insulated cable with copper conductor',
+-    price: 1205, // Γé╣1205.00
+-    originalPrice: 1700, // Γé╣1700.00
+-    sku: 'FIN010303S',
+-    stock: 100,
+-    categoryId: 'cat-1',
+-    imageUrls: ['/products/finolex-wire.jpg'],
+-    specifications: {
+-      size: '1.0sqmm',
+-      brand: 'Finolex',
+-      type: 'FR PVC Insulated',
+-      conductor: 'Multistrand Copper',
+-      core_type: 'Single Core Unsheathed',
+-      unit: 'per coil',
+-      hsn_code: '85446090',
+-      discount: '40%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.5,
+-    reviewCount: 25
+-  },
+-  {
+-    id: 'prod-002',
+-    name: '1.5sqmm Wire',
+-    slug: 'finolex-1-5sqmm-wire',
+-    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+-    shortDescription: 'Finolex 1.5sqmm FR PVC insulated cable with copper conductor',
+-    price: 1779, // Γé╣1779.00
+-    originalPrice: 2475, // Γé╣2475.00
+-    sku: 'FIN015303S',
+-    stock: 100,
+-    categoryId: 'cat-1',
+-    imageUrls: ['/products/finolex-wire.jpg'],
+-    specifications: {
+-      size: '1.5sqmm',
+-      brand: 'Finolex',
+-      type: 'FR PVC Insulated',
+-      conductor: 'Multistrand Copper',
+-      core_type: 'Single Core Unsheathed',
+-      unit: 'per coil',
+-      hsn_code: '85446090',
+-      discount: '39%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.6,
+-    reviewCount: 32
+-  },
+-  {
+-    id: 'prod-003',
+-    name: '2.5sqmm Wire',
+-    slug: 'finolex-2-5sqmm-wire',
+-    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+-    shortDescription: 'Finolex 2.5sqmm FR PVC insulated cable with copper conductor',
+-    price: 2879, // Γé╣2879.00
+-    originalPrice: 4000, // Γé╣4000.00
+-    sku: 'FIN025303S',
+-    stock: 100,
+-    categoryId: 'cat-1',
+-    imageUrls: ['/products/finolex-wire.jpg'],
+-    specifications: {
+-      size: '2.5sqmm',
+-      brand: 'Finolex',
+-      type: 'FR PVC Insulated',
+-      conductor: 'Multistrand Copper',
+-      core_type: 'Single Core Unsheathed',
+-      unit: 'per coil',
+-      hsn_code: '85446090',
+-      discount: '39%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.7,
+-    reviewCount: 18
+-  },
+-  {
+-    id: 'prod-004',
+-    name: '4.0sqmm Wire',
+-    slug: 'finolex-4-0sqmm-wire',
+-    description: 'Finolex Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+-    shortDescription: 'Finolex 4.0sqmm FR PVC insulated cable with copper conductor',
+-    price: 4439, // Γé╣4439.00
+-    originalPrice: 6170, // Γé╣6170.00
+-    sku: 'FIN040303S',
+-    stock: 100,
+-    categoryId: 'cat-1',
+-    imageUrls: ['/products/finolex-wire.jpg'],
+-    specifications: {
+-      size: '4.0sqmm',
+-      brand: 'Finolex',
+-      type: 'FR PVC Insulated',
+-      conductor: 'Multistrand Copper',
+-      core_type: 'Single Core Unsheathed',
+-      unit: 'per coil',
+-      hsn_code: '85446090',
+-      discount: '39%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.8,
+-    reviewCount: 22
+-  },
+-
+-  // Kundan Cable Wires & Cables (4 products)
+-  {
+-    id: 'prod-005',
+-    name: '1.0sqmm Wire',
+-    slug: 'kundan-1-0sqmm-wire',
+-    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+-    shortDescription: 'Kundan Cable 1.0sqmm FR PVC insulated cable with copper conductor',
+-    price: 1049, // Γé╣1049.00
+-    originalPrice: 2144, // Γé╣2144.00
+-    sku: 'KUN01020',
+-    stock: 100,
+-    categoryId: 'cat-1',
+-    imageUrls: ['/products/kundan-wire.jpg'],
+-    specifications: {
+-      size: '1.0sqmm',
+-      brand: 'Kundan Cable',
+-      type: 'FR PVC Insulated',
+-      conductor: 'Multistrand Copper',
+-      core_type: 'Single Core Unsheathed',
+-      unit: 'per coil',
+-      hsn_code: '85446090',
+-      discount: '51%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.3,
+-    reviewCount: 19
+-  },
+-  {
+-    id: 'prod-006',
+-    name: '1.5sqmm Wire',
+-    slug: 'kundan-1-5sqmm-wire',
+-    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+-    shortDescription: 'Kundan Cable 1.5sqmm FR PVC insulated cable with copper conductor',
+-    price: 1599, // Γé╣1599.00
+-    originalPrice: 3264, // Γé╣3264.00
+-    sku: 'KUN01520',
+-    stock: 100,
+-    categoryId: 'cat-1',
+-    imageUrls: ['/products/kundan-wire.jpg'],
+-    specifications: {
+-      size: '1.5sqmm',
+-      brand: 'Kundan Cable',
+-      type: 'FR PVC Insulated',
+-      conductor: 'Multistrand Copper',
+-      core_type: 'Single Core Unsheathed',
+-      unit: 'per coil',
+-      hsn_code: '85446090',
+-      discount: '51%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.4,
+-    reviewCount: 16
+-  },
+-  {
+-    id: 'prod-007',
+-    name: '2.5sqmm Wire',
+-    slug: 'kundan-2-5sqmm-wire',
+-    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+-    shortDescription: 'Kundan Cable 2.5sqmm FR PVC insulated cable with copper conductor',
+-    price: 2581, // Γé╣2581.00
+-    originalPrice: 5269, // Γé╣5269.00
+-    sku: 'KUN02520',
+-    stock: 100,
+-    categoryId: 'cat-1',
+-    imageUrls: ['/products/kundan-wire.jpg'],
+-    specifications: {
+-      size: '2.5sqmm',
+-      brand: 'Kundan Cable',
+-      type: 'FR PVC Insulated',
+-      conductor: 'Multistrand Copper',
+-      core_type: 'Single Core Unsheathed',
+-      unit: 'per coil',
+-      hsn_code: '85446090',
+-      discount: '51%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.5,
+-    reviewCount: 14
+-  },
+-  {
+-    id: 'prod-008',
+-    name: '4.0sqmm Wire',
+-    slug: 'kundan-4-0sqmm-wire',
+-    description: 'Kundan Cable Flame retardant (FR) PVC insulated cable. Single core unsheathed industrial cables with flame retardant properties & multistrand rare copper conductor',
+-    shortDescription: 'Kundan Cable 4.0sqmm FR PVC insulated cable with copper conductor',
+-    price: 3809, // Γé╣3809.00
+-    originalPrice: 7774, // Γé╣7774.00
+-    sku: 'KUN04020',
+-    stock: 100,
+-    categoryId: 'cat-1',
+-    imageUrls: ['/products/kundan-wire.jpg'],
+-    specifications: {
+-      size: '4.0sqmm',
+-      brand: 'Kundan Cable',
+-      type: 'FR PVC Insulated',
+-      conductor: 'Multistrand Copper',
+-      core_type: 'Single Core Unsheathed',
+-      unit: 'per coil',
+-      hsn_code: '85446090',
+-      discount: '51%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.6,
+-    reviewCount: 13
+-  },
+-
+-  // Sturlite LED Emergency Bulbs (3 products)
+-  {
+-    id: 'prod-009',
+-    name: '10W Inverter Bulb (3Hr Backup)',
+-    slug: 'sturlite-10w-inverter-bulb-3hr',
+-    description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 3Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
+-    shortDescription: 'Sturlite 10W emergency LED bulb with 3 hour backup',
+-    price: 214.08, // Γé╣214.08
+-    originalPrice: 446, // Γé╣446.00
+-    sku: 'STU10EB3H',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
+-    specifications: {
+-      wattage: '10W',
+-      backup_time: '3 Hours',
+-      lumens: '900',
+-      base_type: 'B22',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      ip_rating: 'IP20',
+-      dimensions: '70x140mm',
+-      brand: 'Sturlite',
+-      warranty: '1 year replacement',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.4,
+-    reviewCount: 45
+-  },
+-  {
+-    id: 'prod-010',
+-    name: '10W Inverter Bulb (4Hr Backup)',
+-    slug: 'sturlite-10w-inverter-bulb-4hr',
+-    description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 4Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
+-    shortDescription: 'Sturlite 10W emergency LED bulb with 4 hour backup',
+-    price: 223.2, // Γé╣223.20
+-    originalPrice: 465, // Γé╣465.00
+-    sku: 'STU10EB4H',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
+-    specifications: {
+-      wattage: '10W',
+-      backup_time: '4 Hours',
+-      lumens: '900',
+-      base_type: 'B22',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      ip_rating: 'IP20',
+-      dimensions: '70x140mm',
+-      brand: 'Sturlite',
+-      warranty: '1 year replacement',
+-      discount: '52%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.5,
+-    reviewCount: 38
+-  },
+-  {
+-    id: 'prod-011',
+-    name: '10W Inverter Bulb (6Hr Backup)',
+-    slug: 'sturlite-10w-inverter-bulb-6hr',
+-    description: 'SMD LED chip, CRI>80, IP20, Bright light output, charging 6-8 hours, over charge protection, 6k - 6Hr back up, 900Lumens, B22 base, Dimensions 70x140mm.',
+-    shortDescription: 'Sturlite 10W emergency LED bulb with 6 hour backup',
+-    price: 266.4, // Γé╣266.40
+-    originalPrice: 555, // Γé╣555.00
+-    sku: 'STU10EB6H',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-inverter-bulb.jpg'],
+-    specifications: {
+-      wattage: '10W',
+-      backup_time: '6 Hours',
+-      lumens: '900',
+-      base_type: 'B22',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      ip_rating: 'IP20',
+-      dimensions: '70x140mm',
+-      brand: 'Sturlite',
+-      warranty: '1 year replacement',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.7,
+-    reviewCount: 52
+-  },
+-
+-  // Sturlite LED Flood Lights (8 products)
+-  {
+-    id: 'prod-012',
+-    name: '30W Flood Light',
+-    slug: 'sturlite-30w-flood-light',
+-    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+-    shortDescription: 'Sturlite 30W LED flood light with IP66 protection',
+-    price: 487.2, // Γé╣487.20
+-    originalPrice: 1015, // Γé╣1015.00
+-    sku: 'STU0207-30W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-flood-30w.jpg'],
+-    specifications: {
+-      wattage: '30W',
+-      lumens_per_watt: '100',
+-      total_lumens: '3000',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '25000 hours',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.6,
+-    reviewCount: 34
+-  },
+-  {
+-    id: 'prod-013',
+-    name: '50W Flood Light',
+-    slug: 'sturlite-50w-flood-light',
+-    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+-    shortDescription: 'Sturlite 50W LED flood light with IP66 protection',
+-    price: 672, // Γé╣672.00
+-    originalPrice: 1400, // Γé╣1400.00
+-    sku: 'STU0207-50W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-flood-50w.jpg'],
+-    specifications: {
+-      wattage: '50W',
+-      lumens_per_watt: '100',
+-      total_lumens: '5000',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '25000 hours',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.7,
+-    reviewCount: 28
+-  },
+-  {
+-    id: 'prod-014',
+-    name: '100W Flood Light',
+-    slug: 'sturlite-100w-flood-light',
+-    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+-    shortDescription: 'Sturlite 100W LED flood light with IP66 protection',
+-    price: 1101.6, // Γé╣1101.60
+-    originalPrice: 2295, // Γé╣2295.00
+-    sku: 'STU0207-100W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-flood-100w.jpg'],
+-    specifications: {
+-      wattage: '100W',
+-      lumens_per_watt: '100',
+-      total_lumens: '10000',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '25000 hours',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.8,
+-    reviewCount: 22
+-  },
+-  {
+-    id: 'prod-015',
+-    name: '150W Flood Light',
+-    slug: 'sturlite-150w-flood-light',
+-    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+-    shortDescription: 'Sturlite 150W LED flood light with IP66 protection',
+-    price: 1852.8, // Γé╣1852.80
+-    originalPrice: 3860, // Γé╣3860.00
+-    sku: 'STU0207-1500W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-flood-150w.jpg'],
+-    specifications: {
+-      wattage: '150W',
+-      lumens_per_watt: '100',
+-      total_lumens: '15000',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '25000 hours',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.6,
+-    reviewCount: 19
+-  },
+-  {
+-    id: 'prod-016',
+-    name: '200W Flood Light',
+-    slug: 'sturlite-200w-flood-light',
+-    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+-    shortDescription: 'Sturlite 200W LED flood light with IP66 protection',
+-    price: 2236.8, // Γé╣2236.80
+-    originalPrice: 4660, // Γé╣4660.00
+-    sku: 'STU0207-200W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-flood-200w.jpg'],
+-    specifications: {
+-      wattage: '200W',
+-      lumens_per_watt: '100',
+-      total_lumens: '20000',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '25000 hours',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.9,
+-    reviewCount: 15
+-  },
+-  {
+-    id: 'prod-017',
+-    name: '300W Flood Light',
+-    slug: 'sturlite-300w-flood-light',
+-    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+-    shortDescription: 'Sturlite 300W LED flood light with IP66 protection',
+-    price: 3852, // Γé╣3852.00
+-    originalPrice: 8025, // Γé╣8025.00
+-    sku: 'STU0207-300W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-flood-300w-500w.png'],
+-    specifications: {
+-      wattage: '300W',
+-      lumens_per_watt: '100',
+-      total_lumens: '30000',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '25000 hours',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.7,
+-    reviewCount: 12
+-  },
+-  {
+-    id: 'prod-018',
+-    name: '400W Flood Light',
+-    slug: 'sturlite-400w-flood-light',
+-    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+-    shortDescription: 'Sturlite 400W LED flood light with IP66 protection',
+-    price: 5208, // Γé╣5208.00
+-    originalPrice: 10850, // Γé╣10850.00
+-    sku: 'STU0207-400W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-flood-300w-500w.png'],
+-    specifications: {
+-      wattage: '400W',
+-      lumens_per_watt: '100',
+-      total_lumens: '40000',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '25000 hours',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.8,
+-    reviewCount: 9
+-  },
+-  {
+-    id: 'prod-019',
+-    name: '500W Flood Light',
+-    slug: 'sturlite-500w-flood-light',
+-    description: 'SMD LED chip, CRI>80, 25000hrs life span, IP66, ADC12 Diecast housing rust proof, Adjustable bracket, upto 6.0KV Surge protection, 100Lumen/watt',
+-    shortDescription: 'Sturlite 500W LED flood light with IP66 protection',
+-    price: 7536, // Γé╣7536.00
+-    originalPrice: 15700, // Γé╣15700.00
+-    sku: 'STU0207-500W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-flood-300w-500w.png'],
+-    specifications: {
+-      wattage: '500W',
+-      lumens_per_watt: '100',
+-      total_lumens: '50000',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '25000 hours',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 5.0,
+-    reviewCount: 8
+-  },
+-
+-  // Sturlite LED Street Lights (6 products)
+-  {
+-    id: 'prod-020',
+-    name: '20W Street Light',
+-    slug: 'sturlite-20w-street-light',
+-    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2200 Lumens, 300x103x46mm Dimension',
+-    shortDescription: 'Sturlite 20W LED street light with 2200 lumens',
+-    price: 566.5, // Γé╣566.50
+-    originalPrice: 1180, // Γé╣1180.00
+-    sku: 'STU0060-20W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-street-20w.jpg'],
+-    specifications: {
+-      wattage: '20W',
+-      lumens_per_watt: '110',
+-      total_lumens: '2200',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '50000 hours',
+-      dimensions: '300x103x46mm',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.5,
+-    reviewCount: 31
+-  },
+-  {
+-    id: 'prod-021',
+-    name: '24W Street Light',
+-    slug: 'sturlite-24w-street-light',
+-    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 2640 Lumens, 300x103x46mm Dimension',
+-    shortDescription: 'Sturlite 24W LED street light with 2640 lumens',
+-    price: 588, // Γé╣588.00
+-    originalPrice: 1225, // Γé╣1225.00
+-    sku: 'STU0060-24W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-street-24w.jpg'],
+-    specifications: {
+-      wattage: '24W',
+-      lumens_per_watt: '110',
+-      total_lumens: '2640',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '50000 hours',
+-      dimensions: '300x103x46mm',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.6,
+-    reviewCount: 27
+-  },
+-  {
+-    id: 'prod-022',
+-    name: '30W Street Light',
+-    slug: 'sturlite-30w-street-light',
+-    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, Lumens 3300, 340x124x47mm dimension',
+-    shortDescription: 'Sturlite 30W LED street light with 3300 lumens',
+-    price: 756, // Γé╣756.00
+-    originalPrice: 1575, // Γé╣1575.00
+-    sku: 'STU0060-30W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-street-30w.jpg'],
+-    specifications: {
+-      wattage: '30W',
+-      lumens_per_watt: '110',
+-      total_lumens: '3300',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '50000 hours',
+-      dimensions: '340x124x47mm',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.7,
+-    reviewCount: 33
+-  },
+-  {
+-    id: 'prod-023',
+-    name: '36W Street Light',
+-    slug: 'sturlite-36w-street-light',
+-    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 3960 Lumens, 340x124x47mm Dimension',
+-    shortDescription: 'Sturlite 36W LED street light with 3960 lumens',
+-    price: 782.4, // Γé╣782.40
+-    originalPrice: 1630, // Γé╣1630.00
+-    sku: 'STU0060-36W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-street-36w.jpg'],
+-    specifications: {
+-      wattage: '36W',
+-      lumens_per_watt: '110',
+-      total_lumens: '3960',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '50000 hours',
+-      dimensions: '340x124x47mm',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: false,
+-    isActive: true,
+-    rating: 4.6,
+-    reviewCount: 24
+-  },
+-  {
+-    id: 'prod-024',
+-    name: '50W Street Light',
+-    slug: 'sturlite-50w-street-light',
+-    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 5500 Lumens, 391x145x50mm Dimension',
+-    shortDescription: 'Sturlite 50W LED street light with 5500 lumens',
+-    price: 950, // Γé╣950.00
+-    originalPrice: 1980, // Γé╣1980.00
+-    sku: 'STU0060-50W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-street-50w.jpg'],
+-    specifications: {
+-      wattage: '50W',
+-      lumens_per_watt: '110',
+-      total_lumens: '5500',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '50000 hours',
+-      dimensions: '391x145x50mm',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.8,
+-    reviewCount: 29
+-  },
+-  {
+-    id: 'prod-025',
+-    name: '72W Street Light',
+-    slug: 'sturlite-72w-street-light',
+-    description: 'SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing rust proof, upto 6.0KV Surge protection, 110Lumen/watt, 7920 Lumens, 3390x145x50mm Dimension',
+-    shortDescription: 'Sturlite 72W LED street light with 7920 lumens',
+-    price: 1404, // Γé╣1404.00
+-    originalPrice: 2925, // Γé╣2925.00
+-    sku: 'STU0060-72W',
+-    stock: 100,
+-    categoryId: 'cat-6',
+-    imageUrls: ['/products/sturlite-street-72w.png'],
+-    specifications: {
+-      wattage: '72W',
+-      lumens_per_watt: '110',
+-      total_lumens: '7920',
+-      ip_rating: 'IP66',
+-      housing: 'ADC12 Diecast',
+-      surge_protection: '6.0KV',
+-      lifespan: '50000 hours',
+-      dimensions: '3390x145x50mm',
+-      led_chip: 'SMD LED',
+-      cri: '>80',
+-      brand: 'Sturlite',
+-      warranty: '2 year warranty',
+-      discount: '52%'
+-    },
+-    isFeatured: true,
+-    isActive: true,
+-    rating: 4.9,
+-    reviewCount: 21
+-  }
+-];
++export const AUTHENTIC_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = ELECTRICAL_PRODUCTS;
+ 
+ // Development data service with timestamp handling for complete customer products
+ export class AuthenticElectricalDataService {
+@@ -798,17 +43,7 @@ export class AuthenticElectricalDataService {
+       product.name.toLowerCase().includes(searchTerm) ||
+       (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+       (product.shortDescription && product.shortDescription.toLowerCase().includes(searchTerm)) ||
+-      (product.sku && product.sku.toLowerCase().includes(searchTerm)) ||
+-      (product.specifications?.brand && 
+-       product.specifications.brand.toLowerCase().includes(searchTerm))
++      product.specifications?.brand?.toLowerCase().includes(searchTerm)
+     );
+   }
+-
+-  static getProductById(id: string): (Product & { createdAt: Date; updatedAt: Date }) | undefined {
+-    return this.getProducts().find(p => p.id === id);
+-  }
+-
+-  static getProductBySlug(slug: string): (Product & { createdAt: Date; updatedAt: Date }) | undefined {
+-    return this.getProducts().find(p => p.slug === slug);
+-  }
+ }
+\ No newline at end of file
+diff --git a/shared/types.ts b/shared/types.ts
+index 28b4849..6a2b82c 100644
+--- a/shared/types.ts
++++ b/shared/types.ts
+@@ -82,10 +82,11 @@ export const ServiceSchema = z.object({
+   slug: z.string(),
+   description: z.string().optional(),
+   shortDescription: z.string().optional(),
+-  price: z.number(),
++  startingPrice: z.number(),
+   duration: z.number(), // in minutes
+   categoryId: z.string().optional(),
+   imageUrls: z.array(z.string()).default([]),
++  features: z.array(z.string()).optional(),
+   isActive: z.boolean().default(true),
+   rating: z.number().default(0),
+   reviewCount: z.number().default(0),
+@@ -257,7 +258,7 @@ export const ServiceBookingSchema = z.object({
+   id: z.string(),
+   userId: z.string(),
+   serviceId: z.string(),
+-  scheduledDate: z.date(),
++  scheduledDate: z.coerce.date(),
+   scheduledTime: z.string(),
+   status: z.enum(['pending', 'confirmed', 'in_progress', 'completed', 'cancelled']).default('pending'),
+   address: z.object({
