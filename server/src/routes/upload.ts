@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import multer from "multer";
 import { isAuthenticated } from "../../firebaseAuth";
-import { uploadImage, deleteImage } from "../lib/cloudinary";
+import { getImageService } from "../lib/image-service-factory";
 import { storage } from "../../storage";
 
 // Configure multer for memory storage (no disk writes)
@@ -29,6 +29,37 @@ const upload = multer({
     },
 });
 
+// Custom error handler for better user feedback
+function handleMulterError(err: any, req: any, res: any, next: any) {
+    if (err) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({
+                success: false,
+                message: 'Image is too large. Maximum file size is 5 MB. Please compress your image or choose a smaller file.',
+                error: {
+                    code: 'FILE_TOO_LARGE',
+                    maxSize: '5 MB',
+                }
+            });
+        }
+        if (err.message === 'Invalid file type. Only JPEG, PNG, WebP, and GIF images are allowed.') {
+            return res.status(400).json({
+                success: false,
+                message: err.message,
+                error: {
+                    code: 'INVALID_FILE_TYPE',
+                }
+            });
+        }
+        return res.status(400).json({
+            success: false,
+            message: err.message || 'File upload failed',
+        });
+    }
+    next();
+}
+
+
 export function registerUploadRoutes(app: Express) {
 
     /**
@@ -40,7 +71,10 @@ export function registerUploadRoutes(app: Express) {
         "/api/upload/image",
         isAuthenticated,
         upload.single('image'),
+        handleMulterError,  // Add error handler
         async (req: any, res) => {
+            let uploadedMetadata: any = null;
+
             try {
                 const userId = req.user?.uid;
 
@@ -66,28 +100,44 @@ export function registerUploadRoutes(app: Express) {
                     mimetype: req.file.mimetype,
                 });
 
-                // Upload to Cloudinary
-                const result = await uploadImage(req.file.buffer, {
+                // Get image service (abstraction layer)
+                const imageService = getImageService();
+
+                // Upload to configured provider
+                uploadedMetadata = await imageService.uploadImage(req.file.buffer, {
                     folder: 'electrical-products',
                 });
 
-                console.log('[Upload] Image uploaded successfully:', result.publicId);
+                console.log('[Upload] Image uploaded successfully:', uploadedMetadata.providerImageId);
 
+                // Return full metadata (not just URL)
                 res.json({
                     success: true,
-                    url: result.secureUrl,
-                    publicId: result.publicId,
-                    width: result.width,
-                    height: result.height,
-                    format: result.format,
-                    size: result.bytes,
+                    ...uploadedMetadata,
                 });
             } catch (error) {
                 console.error("[Upload] Single image error:", error);
+
+                // Compensating action: Delete orphaned image if something fails after upload
+                if (uploadedMetadata) {
+                    try {
+                        const imageService = getImageService();
+                        await imageService.deleteImage(uploadedMetadata.providerImageId);
+                        console.log('[Rollback] Deleted orphaned image:', uploadedMetadata.providerImageId);
+                    } catch (deleteError) {
+                        // Log orphaned image for cleanup job
+                        console.error('[Orphan] Failed to delete orphan image:', uploadedMetadata.providerImageId, deleteError);
+                    }
+                }
+
+                // Structured error response
                 res.status(500).json({
                     success: false,
-                    message: "Failed to upload image",
-                    error: error instanceof Error ? error.message : 'Unknown error'
+                    error: {
+                        code: error instanceof Error && 'code' in error ? (error as any).code : 'UPLOAD_FAILED',
+                        message: error instanceof Error ? error.message : 'Failed to upload image',
+                        provider: uploadedMetadata?.provider || 'unknown',
+                    }
                 });
             }
         }
@@ -102,6 +152,7 @@ export function registerUploadRoutes(app: Express) {
         "/api/upload/images",
         isAuthenticated,
         upload.array('images', 10), // Max 10 images
+        handleMulterError,  // Add error handler
         async (req: any, res) => {
             try {
                 const userId = req.user?.uid;
@@ -127,11 +178,13 @@ export function registerUploadRoutes(app: Express) {
                     totalSize: req.files.reduce((sum: number, f: any) => sum + f.size, 0),
                 });
 
-                // Upload all images to Cloudinary in parallel
+                const imageService = getImageService();
+
+                // Upload all images in parallel
                 const uploadPromises = req.files.map((file: Express.Multer.File) =>
-                    uploadImage(file.buffer, {
+                    imageService.uploadImage(file.buffer, {
                         folder: 'electrical-products',
-                    }).catch(err => {
+                    }).catch((err: Error) => {
                         console.error(`[Upload] Failed to upload ${file.originalname}:`, err);
                         return null; // Return null for failed uploads
                     })
@@ -202,7 +255,8 @@ export function registerUploadRoutes(app: Express) {
 
                 console.log('[Upload] Delete image request:', publicId);
 
-                await deleteImage(publicId);
+                const imageService = getImageService();
+                await imageService.deleteImage(publicId);
 
                 res.json({
                     success: true,
@@ -230,6 +284,7 @@ export function registerUploadRoutes(app: Express) {
         "/api/upload/payment-proof",
         isAuthenticated,
         upload.single('image'),
+        handleMulterError,  // Add error handler
         async (req: any, res) => {
             try {
                 if (!req.file) {
@@ -245,15 +300,16 @@ export function registerUploadRoutes(app: Express) {
                     size: req.file.size
                 });
 
-                // Upload to Cloudinary - specific folder for proofs
-                const result = await uploadImage(req.file.buffer, {
+                // Upload to configured provider - specific folder for proofs
+                const imageService = getImageService();
+                const metadata = await imageService.uploadImage(req.file.buffer, {
                     folder: 'payment-proofs',
                 });
 
                 res.json({
                     success: true,
-                    url: result.secureUrl,
-                    publicId: result.publicId,
+                    url: metadata.url,
+                    providerImageId: metadata.providerImageId,
                 });
             } catch (error) {
                 console.error("[Upload] Payment proof error:", error);

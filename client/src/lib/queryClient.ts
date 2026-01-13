@@ -11,7 +11,7 @@ async function throwIfResNotOk(res: Response) {
 // Helper to get Firebase auth token
 async function getAuthHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
-  
+
   if (auth.currentUser) {
     try {
       // Get the actual Firebase ID token
@@ -21,7 +21,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
       console.error('Error getting auth token:', error);
     }
   }
-  
+
   return headers;
 }
 
@@ -31,15 +31,21 @@ export async function apiRequest(
   data?: unknown | undefined,
 ): Promise<Response> {
   const authHeaders = await getAuthHeaders();
+
+  // Check if data is FormData (for file uploads)
+  const isFormData = data instanceof FormData;
+
+  // Don't set Content-Type for FormData - browser will set it with boundary
   const headers = {
-    ...(data ? { "Content-Type": "application/json" } : {}),
+    ...(!isFormData && data ? { "Content-Type": "application/json" } : {}),
     ...authHeaders,
   };
 
   const res = await fetch(url, {
     method,
     headers,
-    body: data ? JSON.stringify(data) : undefined,
+    // Don't stringify FormData - send it as-is
+    body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
     credentials: "include",
   });
 
@@ -52,38 +58,38 @@ export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
-  async ({ queryKey }) => {
-    let url = queryKey[0] as string;
-    
-    // Handle query parameters from the second element
-    if (queryKey.length > 1 && typeof queryKey[1] === 'object' && queryKey[1] !== null) {
-      const params = new URLSearchParams();
-      const queryParams = queryKey[1] as Record<string, any>;
-      
-      Object.entries(queryParams).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          params.append(key, String(value));
+    async ({ queryKey }) => {
+      let url = queryKey[0] as string;
+
+      // Handle query parameters from the second element
+      if (queryKey.length > 1 && typeof queryKey[1] === 'object' && queryKey[1] !== null) {
+        const params = new URLSearchParams();
+        const queryParams = queryKey[1] as Record<string, any>;
+
+        Object.entries(queryParams).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            params.append(key, String(value));
+          }
+        });
+
+        if (params.toString()) {
+          url += `?${params.toString()}`;
         }
-      });
-      
-      if (params.toString()) {
-        url += `?${params.toString()}`;
       }
-    }
 
-    const authHeaders = await getAuthHeaders();
-    const res = await fetch(url, {
-      credentials: "include",
-      headers: authHeaders,
-    });
+      const authHeaders = await getAuthHeaders();
+      const res = await fetch(url, {
+        credentials: "include",
+        headers: authHeaders,
+      });
 
-    if (unauthorizedBehavior === "returnNull" && res.status === 401) {
-      return null;
-    }
+      if (unauthorizedBehavior === "returnNull" && res.status === 401) {
+        return null;
+      }
 
-    await throwIfResNotOk(res);
-    return await res.json();
-  };
+      await throwIfResNotOk(res);
+      return await res.json();
+    };
 
 export const queryClient = new QueryClient({
   defaultOptions: {

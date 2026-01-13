@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +29,7 @@ import {
   ShoppingCart,
   Plus,
   Edit,
+  Trash2,
   BarChart3,
   TrendingUp,
   AlertTriangle,
@@ -417,6 +419,7 @@ interface ProductsSectionProps {
   onProductSubmit: (data: ProductFormData) => void;
   createProductMutation: any;
   handleEditProduct: (product: any) => void;
+  handleDeleteProduct: (product: any) => void;  // Add delete handler
 }
 
 function ProductsSection({
@@ -429,7 +432,19 @@ function ProductsSection({
   onProductSubmit,
   createProductMutation,
   handleEditProduct,
+  handleDeleteProduct,  // Add delete handler
 }: ProductsSectionProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<any>(null);
+
+  const confirmDelete = () => {
+    if (productToDelete) {
+      handleDeleteProduct(productToDelete);
+      setDeleteDialogOpen(false);
+      setProductToDelete(null);
+    }
+  };
+
   return (
     <Card className="border-0 shadow-md">
       <CardHeader>
@@ -742,14 +757,29 @@ function ProductsSection({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleEditProduct(product)}
-                        className="h-8 w-8"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditProduct(product)}
+                          className="h-8 w-8"
+                          title="Edit product"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            setProductToDelete(product);
+                            setDeleteDialogOpen(true);
+                          }}
+                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          title="Delete product"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -758,6 +788,32 @@ function ProductsSection({
           </div>
         )}
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Product</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete <span className="font-semibold">{productToDelete?.name}</span>?
+              <br />
+              <br />
+              This action cannot be undone and will permanently remove this product from your catalog.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setProductToDelete(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            >
+              Delete Product
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
@@ -872,6 +928,39 @@ function AdminDashboard() {
       });
     },
   });
+
+  // Delete product mutation
+  const deleteProductMutation = useMutation({
+    mutationFn: async (productId: string) => {
+      await apiRequest("DELETE", `/api/products/${productId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      toast({
+        title: "Success",
+        description: "Product deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Access denied",
+          description: "You don't have permission to delete products.",
+          variant: "destructive",
+        });
+        return;
+      }
+      toast({
+        title: "Error",
+        description: "Failed to delete product. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDeleteProduct = (product: any) => {
+    deleteProductMutation.mutate(product.id);
+  };
 
   const handleLogout = async () => {
     try {
@@ -990,6 +1079,7 @@ function AdminDashboard() {
           onProductSubmit={onProductSubmit}
           createProductMutation={createProductMutation}
           handleEditProduct={handleEditProduct}
+          handleDeleteProduct={handleDeleteProduct}
         />
       )}
 

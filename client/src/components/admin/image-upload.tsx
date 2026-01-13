@@ -90,8 +90,35 @@ export function ImageUpload({
         }
     }, [images, maxImages, onChange, toast]);
 
+    // Handle rejected files (too large, wrong type, etc.)
+    const onDropRejected = useCallback((fileRejections: any[]) => {
+        fileRejections.forEach((rejection) => {
+            const { file, errors } = rejection;
+
+            errors.forEach((error: any) => {
+                let message = '';
+
+                if (error.code === 'file-too-large') {
+                    const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+                    message = `"${file.name}" is too large (${sizeMB} MB). Maximum file size is 5 MB. Please compress your image or choose a smaller file.`;
+                } else if (error.code === 'file-invalid-type') {
+                    message = `"${file.name}" is not a supported image format. Only JPEG, PNG, WebP, and GIF images are allowed.`;
+                } else {
+                    message = `Failed to upload "${file.name}": ${error.message}`;
+                }
+
+                toast({
+                    title: "Upload rejected",
+                    description: message,
+                    variant: "destructive",
+                });
+            });
+        });
+    }, [toast]);
+
     const { getRootProps, getInputProps, isDragActive } = useDropzone({
         onDrop,
+        onDropRejected,  // Add rejection handler
         accept: {
             'image/*': ['.png', '.jpg', '.jpeg', '.webp', '.gif']
         },
