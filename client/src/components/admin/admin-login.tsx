@@ -126,7 +126,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
                         <Input
                           {...field}
                           type="email"
-                          placeholder="admin@copperbear.com"
+                          placeholder="Enter your admin email"
                           className="h-11"
                           disabled={isLoading}
                         />
