@@ -44,7 +44,7 @@ export function AdminLogin({ onLoginSuccess }: AdminLoginProps) {
       const user = userCredential.user;
 
       // Check if this user has admin privileges
-      if (user.email === 'godivaadmin@cb.com') {
+      if (user.email === 'admin@godiva.com') {
         toast({
           title: "Welcome, Admin",
           description: "Successfully logged into admin dashboard.",

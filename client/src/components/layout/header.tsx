@@ -422,7 +422,7 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/account?tab=bookings" className="w-full cursor-pointer">Service Bookings</Link>
                   </DropdownMenuItem>
-                  {user?.email === "admin@copperbear.com" && (
+                  {user?.email === "admin@godiva.com" && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>

@@ -9,7 +9,7 @@ export function useAdminAuth() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email === 'admin@copperbear.com') {
+      if (user && user.email === 'admin@godiva.com') {
         setIsAdminAuthenticated(true);
         setAdminUser(user);
       } else {
