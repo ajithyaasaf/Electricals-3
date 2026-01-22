@@ -251,50 +251,7 @@ function AnalyticsSection({
           </CardContent>
         </Card>
 
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Fast Selling</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                  {inventoryLoading ? <Skeleton className="w-16 h-8" /> : inventoryData?.fastSelling?.length || 0}
-                </p>
-                <p className="text-sm text-gray-500">products</p>
-              </div>
-              <TrendingUp className="w-8 h-8 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Slow Moving</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                  {inventoryLoading ? <Skeleton className="w-16 h-8" /> : inventoryData?.slowSelling?.length || 0}
-                </p>
-                <p className="text-sm text-gray-500">products</p>
-              </div>
-              <AlertTriangle className="w-8 h-8 text-amber-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Repeat Rate</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                  {customerLoading ? <Skeleton className="w-20 h-8" /> : `${customerData?.repeatRate?.toFixed(1) || 0}%`}
-                </p>
-                <p className="text-sm text-gray-500">returning customers</p>
-              </div>
-              <Users className="w-8 h-8 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Analytics Charts and Tables */}
