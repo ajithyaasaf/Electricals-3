@@ -21,7 +21,7 @@ git push
 Add only ONE variable in Vercel Dashboard:
 
 ```
-VITE_API_URL=https://electricals-3.onrender.com
+VITE_API_URL=https://copper-bear.onrender.com
 ```
 
 ### 3. Update Frontend API Calls
@@ -33,7 +33,7 @@ The frontend needs to call Render's API. We already have the proxy setup in `ver
 **How it works:**
 - User visits: `your-site.vercel.app`
 - Vercel serves: React frontend (super fast)
-- API calls go to: `electricals-3.onrender.com/api/...`
+- API calls go to: `copper-bear.onrender.com/api/...`
 - Everything works perfectly!
 
 ## Why This is Better

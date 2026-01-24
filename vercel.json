@@ -4,7 +4,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://electricals-3.onrender.com/api/:path*"
+      "destination": "https://copper-bear.onrender.com/api/:path*"
     },
     {
       "source": "/(.*)",

@@ -46,7 +46,7 @@ Your Render deployment should automatically trigger a rebuild when you push to y
 
 ### Step 3: Verify
 Once the deployment is complete, visit your site:
-- https://electricals-3.onrender.com/products
+- https://copper-bear.onrender.com/products
 - Check that all product images are displaying correctly
 
 ## Technical Details
