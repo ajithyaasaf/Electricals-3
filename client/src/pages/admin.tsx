@@ -55,6 +55,9 @@ const productSchema = z.object({
   category: z.string().optional(),
   weightInKg: z.number().min(0, "Weight cannot be negative").default(0),
   isBulky: z.boolean().default(false),
+  // Review fields (manual until real-time reviews implemented)
+  rating: z.number().min(0, "Rating cannot be negative").max(5, "Rating cannot exceed 5").default(0),
+  reviewCount: z.number().min(0, "Review count cannot be negative").default(0),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -630,6 +633,63 @@ function ProductsSection({
                     </div>
                   </div>
 
+                  {/* Review Information */}
+                  <div className="space-y-4 pt-4 border-t border-gray-200">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700">Review Information (Manual)</h3>
+                      <p className="text-xs text-gray-500 mt-1">Set review data</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <FormField
+                        control={productForm.control}
+                        name="rating"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Star Rating</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.1"
+                                min="0"
+                                max="5"
+                                {...field}
+                                onChange={(e) => {
+                                  const value = parseFloat(e.target.value) || 0;
+                                  field.onChange(Math.min(5, Math.max(0, value)));
+                                }}
+                                placeholder="4.5"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-gray-500">Rating from 0 to 5 stars</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={productForm.control}
+                        name="reviewCount"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Number of Reviews</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min="0"
+                                {...field}
+                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                placeholder="21"
+                              />
+                            </FormControl>
+                            <p className="text-xs text-gray-500">Total review count</p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
                   {/* Product Images */}
                   <div className="space-y-4 pt-4 border-t border-gray-200">
                     <div>
@@ -840,6 +900,9 @@ function AdminDashboard() {
       weightInKg: 0,
       isBulky: false,
       imageUrls: [],
+      // Review defaults
+      rating: 0,
+      reviewCount: 0,
     },
   });
 
@@ -970,6 +1033,9 @@ function AdminDashboard() {
       weightInKg: product.weightInKg || 0,
       isBulky: product.isBulky || false,
       imageUrls: product.imageUrls || [],
+      // Review fields with fallbacks for existing products
+      rating: product.rating || 0,
+      reviewCount: product.reviewCount || 0,
     });
     setProductDialogOpen(true);
   };
