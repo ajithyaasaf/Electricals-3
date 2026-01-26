@@ -198,7 +198,7 @@ export function CartSummary({
             <div>• Currently delivering within Madurai (625xxx pincodes)</div>
             <div>• Delivery in 1-2 business days</div>
             <div>• Shipping fees based on weight and product category</div>
-            <div>• Returns: 5-7 days, 2.5% return shipping charge</div>
+            <div>• Returns: 5-7 days</div>
             <div>• COD available (Madurai, no extra charges)</div>
           </div>
         </div>
@@ -240,7 +240,7 @@ export function CartSummary({
         {/* Additional Info */}
         <div className="text-center space-y-1">
           <p className="text-xs text-gray-500">
-            Free returns within 30 days
+            Returns within 7 days
           </p>
           <p className="text-xs text-gray-500">
             Questions? Call us at 1-800-COPPER

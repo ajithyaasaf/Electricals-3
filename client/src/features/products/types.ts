@@ -23,6 +23,7 @@ export interface ProductItem {
   isActive: boolean;
   rating: number;
   reviewCount: number;
+  warranty?: string;
 }
 
 export interface CategoryItem {

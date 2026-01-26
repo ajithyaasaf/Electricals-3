@@ -40,7 +40,7 @@ export const BUSINESS_POLICIES = {
   },
   returns: {
     returnWindowDays: 7, // 5-7 working days
-    returnShippingChargePercent: 2.5, // 2.5% of return product value
+    returnShippingChargePercent: 0, // No return shipping charge as per client feedback
     conditions: [
       'Items must be in original packaging',
       'Products should be unused and sealed',
@@ -69,7 +69,7 @@ export const BUSINESS_POLICIES = {
 // Formatted policy text for display (Phase 1: Madurai Only)
 export const POLICY_TEXT = {
   shipping: `• Currently delivering within Madurai (625xxx pincodes)\n• Delivery in 1-2 business days\n• Shipping fees based on weight and product category (₹30 - ₹150)\n• Expanding to all of Tamil Nadu soon!`,
-  returns: `• Return window: 5-7 working days from delivery\n• Return shipping charges: 2.5% of product value\n• Items must be unused, sealed, and in original packaging\n• All accessories must be included`,
+  returns: `• Return window: 5-7 working days from delivery\n• Items must be unused, sealed, and in original packaging\n• All accessories must be included`,
   cod: `• Available in Madurai (625xxx pincodes)\n• No additional charges for COD\n• COD limit: ₹50,000 per order\n• Prepaid options: UPI, Cards, Net Banking`,
   cancellation: `Order cancellation is not available once placed. Please review your order carefully before confirming.`
 };

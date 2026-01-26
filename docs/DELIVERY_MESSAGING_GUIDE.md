@@ -123,7 +123,7 @@ Fast 1-2 day delivery in Madurai | Weight-based shipping from ₹30
 • Currently delivering within Madurai (625xxx pincodes)
 • Delivery in 1-2 business days
 • Shipping fees based on weight and product category
-• Returns: 5-7 days, 2.5% return shipping charge
+• Returns: 5-7 days
 • COD available (Madurai, no extra charges)
 ```
 

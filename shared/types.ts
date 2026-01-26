@@ -62,6 +62,7 @@ export const ProductSchema = z.object({
   isActive: z.boolean().default(true),
   rating: z.number().default(0),
   reviewCount: z.number().default(0),
+  warranty: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });

@@ -54,6 +54,7 @@ export interface ProductWithCategory {
   reviewCount: number | null;
   createdAt: string | null;
   updatedAt: string | null;
+  warranty?: string | null;
   category?: {
     id: number;
     name: string;

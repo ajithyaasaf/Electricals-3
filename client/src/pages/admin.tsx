@@ -58,6 +58,8 @@ const productSchema = z.object({
   // Review fields (manual until real-time reviews implemented)
   rating: z.number().min(0, "Rating cannot be negative").max(5, "Rating cannot exceed 5").default(0),
   reviewCount: z.number().min(0, "Review count cannot be negative").default(0),
+  // Warranty information
+  warranty: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -688,6 +690,33 @@ function ProductsSection({
                         )}
                       />
                     </div>
+                  </div>
+
+                  {/* Warranty Information */}
+                  <div className="space-y-4 pt-4 border-t border-gray-200">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-700">Warranty Information</h3>
+                      <p className="text-xs text-gray-500 mt-1">Set warranty period for this product</p>
+                    </div>
+
+                    <FormField
+                      control={productForm.control}
+                      name="warranty"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Warranty Period</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              value={field.value || ''}
+                              placeholder="e.g., 2 Year Warranty, 1 Year Warranty, No Warranty"
+                            />
+                          </FormControl>
+                          <p className="text-xs text-gray-500">Display text for warranty badge (optional)</p>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
 
                   {/* Product Images */}

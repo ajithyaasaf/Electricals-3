@@ -283,7 +283,7 @@ export default function Cart() {
                 <div className="space-y-3">
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span>30-day money-back guarantee</span>
+                    <span>7-day returns policy</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />

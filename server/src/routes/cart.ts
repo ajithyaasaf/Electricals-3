@@ -35,7 +35,7 @@ const CART_CONFIG = {
   },
   returnPolicy: {
     returnWindowDays: 7, // 5-7 working days
-    returnShippingChargePercent: 2.5 // 2.5% of return product value
+    returnShippingChargePercent: 0 // No return shipping charge as per client feedback
   }
 };
 

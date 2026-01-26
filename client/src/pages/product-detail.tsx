@@ -488,17 +488,15 @@ export default function ProductDetail() {
 
               {/* Guarantees */}
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200/50">
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Shield className="w-4 h-4 text-copper-600" />
-                  <span>2 Year Warranty</span>
-                </div>
+                {product.warranty && (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Shield className="w-4 h-4 text-copper-600" />
+                    <span>{product.warranty}</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <RotateCcw className="w-4 h-4 text-copper-600" />
-                  <span>30-Day Returns</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Truck className="w-4 h-4 text-copper-600" />
-                  <span>Free Shipping</span>
+                  <span>7-Day Returns</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-600">
                   <Shield className="w-4 h-4 text-copper-600" />
@@ -582,10 +580,10 @@ export default function ProductDetail() {
 
         {/* Product Details Tabs */}
         <Tabs defaultValue="description" className="mb-12">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="description">Description</TabsTrigger>
             <TabsTrigger value="specifications">Specifications</TabsTrigger>
-            <TabsTrigger value="reviews">Reviews ({reviewCount})</TabsTrigger>
+            {/* <TabsTrigger value="reviews">Reviews ({reviewCount})</TabsTrigger> */}
           </TabsList>
 
           <TabsContent value="description" className="mt-6">
@@ -630,12 +628,10 @@ export default function ProductDetail() {
             </div>
           </TabsContent>
 
-          <TabsContent value="reviews" className="mt-6">
+          {/* <TabsContent value="reviews" className="mt-6">
             <div className="bg-white rounded-lg p-6">
-              {/* Review Summary & Filters */}
               <div className="mb-6 pb-6 border-b border-gray-200">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Rating Overview */}
                   <div>
                     <div className="flex items-center space-x-4 mb-4">
                       <div className="text-4xl font-bold text-gray-900">
@@ -656,10 +652,9 @@ export default function ProductDetail() {
                       </div>
                     </div>
 
-                    {/* Rating Breakdown */}
                     <div className="space-y-2">
                       {[5, 4, 3, 2, 1].map((stars) => {
-                        const percentage = Math.floor(Math.random() * 60) + 20; // Simulated data
+                        const percentage = Math.floor(Math.random() * 60) + 20; 
                         return (
                           <div
                             key={stars}
@@ -681,7 +676,6 @@ export default function ProductDetail() {
                     </div>
                   </div>
 
-                  {/* Review Filters */}
                   <div>
                     <h4 className="font-medium text-gray-900 mb-3">
                       Filter Reviews
@@ -707,10 +701,8 @@ export default function ProductDetail() {
                 </div>
               </div>
 
-              {/* Reviews List */}
               {reviews.length > 0 ? (
                 <div className="space-y-6">
-                  {/* Sample Premium Review */}
                   <div className="border-b border-gray-200 pb-6">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex items-center space-x-3">
@@ -744,7 +736,6 @@ export default function ProductDetail() {
                       with the included mounting hardware.
                     </p>
 
-                    {/* Customer Photos */}
                     <div className="flex space-x-2 mb-3">
                       <img
                         src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=100&h=100&fit=crop"
@@ -758,7 +749,6 @@ export default function ProductDetail() {
                       />
                     </div>
 
-                    {/* Review Actions */}
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <button className="flex items-center space-x-1 hover:text-blue-600">
                         <span>👍</span>
@@ -769,7 +759,6 @@ export default function ProductDetail() {
                     </div>
                   </div>
 
-                  {/* Additional reviews would be mapped here */}
                   {reviews.map((review: any) => (
                     <div
                       key={review.id}
@@ -795,30 +784,34 @@ export default function ProductDetail() {
                           {new Date(review.createdAt).toLocaleDateString()}
                         </span>
                       </div>
+
                       {review.comment && (
                         <p className="text-gray-600">{review.comment}</p>
+
                       )}
+                      </div>
+                
+  ))}
+                      </div>
+                      ) : (
+                      <div className="text-center py-12">
+                        <div className="text-gray-400 mb-4">
+                          <Star className="w-16 h-16 mx-auto" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">
+                          Be the first to review!
+                        </h3>
+                        <p className="text-gray-600 mb-4">
+                          Share your experience with other customers.
+                        </p>
+                        <Button className="bg-copper-600 hover:bg-copper-700 text-white">
+                          Write a Review
+                        </Button>
+                      </div>
+    )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="text-gray-400 mb-4">
-                    <Star className="w-16 h-16 mx-auto" />
-                  </div>
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    Be the first to review!
-                  </h3>
-                  <p className="text-gray-600 mb-4">
-                    Share your experience with other customers.
-                  </p>
-                  <Button className="bg-copper-600 hover:bg-copper-700 text-white">
-                    Write a Review
-                  </Button>
-                </div>
-              )}
-            </div>
           </TabsContent>
+          */}
         </Tabs>
 
         {/* Related Products */}
