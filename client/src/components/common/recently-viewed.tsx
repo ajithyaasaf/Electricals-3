@@ -5,7 +5,8 @@ interface RecentlyViewedItem {
   id: string;
   name: string;
   price: number;
-  image: string;
+  image: string; // Legacy: keeps storing single image for simplicity in storage
+  slug?: string; // Added for SEO links
   category: string;
   viewedAt: number;
 }
@@ -34,7 +35,7 @@ export function RecentlyViewed() {
   const addToRecentlyViewed = (item: Omit<RecentlyViewedItem, 'viewedAt'>) => {
     const stored = localStorage.getItem('copperbear_recently_viewed');
     let items: RecentlyViewedItem[] = [];
-    
+
     if (stored) {
       try {
         items = JSON.parse(stored);
@@ -45,7 +46,7 @@ export function RecentlyViewed() {
 
     // Remove item if it already exists
     items = items.filter(existing => existing.id !== item.id);
-    
+
     // Add new item at the beginning
     items.unshift({
       ...item,
@@ -57,7 +58,7 @@ export function RecentlyViewed() {
 
     // Save back to localStorage
     localStorage.setItem('copperbear_recently_viewed', JSON.stringify(items));
-    
+
     setRecentlyViewed(items.slice(0, 12));
   };
 
@@ -85,11 +86,12 @@ export const addToRecentlyViewed = (item: {
   name: string;
   price: number;
   image: string;
+  slug?: string;
   category: string;
 }) => {
   const stored = localStorage.getItem('copperbear_recently_viewed');
   let items: RecentlyViewedItem[] = [];
-  
+
   if (stored) {
     try {
       items = JSON.parse(stored);
@@ -100,7 +102,7 @@ export const addToRecentlyViewed = (item: {
 
   // Remove item if it already exists
   items = items.filter(existing => existing.id !== item.id);
-  
+
   // Add new item at the beginning
   items.unshift({
     ...item,

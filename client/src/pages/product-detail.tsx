@@ -40,6 +40,7 @@ import { ReviewList } from "@/components/reviews/review-list";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { useProductSEO } from "@/hooks/use-seo";
 import type { Product } from "shared/types";
+import { addToRecentlyViewed } from "@/components/common/recently-viewed";
 
 // Helper to format specification keys (e.g., ip_rating -> IP Rating)
 const formatSpecKey = (key: string): string => {
@@ -131,6 +132,16 @@ export default function ProductDetail() {
       if (product.stock && product.stock <= 5) {
         setStockUrgency(true);
       }
+
+      // Track recently viewed
+      addToRecentlyViewed({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.imageUrls?.[0] || "",
+        slug: product.slug,
+        category: product.category || ""
+      });
     }
   }, [product]);
 

@@ -12,6 +12,7 @@ interface Product {
   price: number;
   image?: string; // Kept optional for backward compatibility
   imageUrls?: string[]; // Added for real API data
+  slug?: string; // Added for SEO friendly links
   category: string;
   rating?: number;
   originalPrice?: number;
@@ -129,7 +130,7 @@ export function HorizontalProductSection({
               return (
                 <Link
                   key={product.id}
-                  href={`/products/${product.id}`}
+                  href={`/products/${product.slug || product.id}`}
                   className="flex-shrink-0 w-44 sm:w-48 group cursor-pointer"
                 >
                   <Card className="h-full border-0 shadow-sm hover:shadow-md transition-all duration-200 group-hover:scale-[1.02]">
