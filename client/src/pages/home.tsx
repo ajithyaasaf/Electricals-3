@@ -17,7 +17,7 @@ import { ServiceCard } from "@/components/service/service-card";
 import { Button } from "@/components/ui/button";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Zap, Wrench, ClipboardCheck, Tag, Clock, Shield, Phone, User, Heart, Calendar, Settings } from "lucide-react";
+import { Zap, Wrench, ClipboardCheck, Tag, Clock, Shield, Phone, User, Heart, Calendar, Settings, MapPin } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
 import { getOptimizedImageUrl } from "@/lib/performance";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
@@ -250,7 +250,7 @@ export default function Home() {
             <p className="text-lg text-gray-600">Quick access to your orders, saved items, and account features</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             <Link href="/account" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
               <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-200 transition-colors">
                 <User className="text-teal-600 w-6 h-6" />
@@ -259,28 +259,12 @@ export default function Home() {
               <p className="text-sm text-gray-600">Track your recent purchases</p>
             </Link>
 
-            <Link href="/account?tab=saved" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
+            <Link href="/account?tab=addresses" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
               <div className="w-12 h-12 bg-teal-light-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-light-200 transition-colors">
-                <Heart className="text-teal-light-600 w-6 h-6" />
+                <MapPin className="text-teal-light-600 w-6 h-6" />
               </div>
-              <h5 className="font-semibold text-gray-900 mb-1">Saved Items</h5>
-              <p className="text-sm text-gray-600">Your wishlist and favorites</p>
-            </Link>
-
-            <Link href="/services" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-200 transition-colors">
-                <Calendar className="text-teal-600 w-6 h-6" />
-              </div>
-              <h5 className="font-semibold text-gray-900 mb-1">Book Service</h5>
-              <p className="text-sm text-gray-600">Schedule electrical work</p>
-            </Link>
-
-            <Link href="/account?tab=settings" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-teal-light-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-light-200 transition-colors">
-                <Settings className="text-teal-light-600 w-6 h-6" />
-              </div>
-              <h5 className="font-semibold text-gray-900 mb-1">Account Settings</h5>
-              <p className="text-sm text-gray-600">Manage your preferences</p>
+              <h5 className="font-semibold text-gray-900 mb-1">Address Management</h5>
+              <p className="text-sm text-gray-600">Manage your shipping addresses</p>
             </Link>
           </div>
         </div>

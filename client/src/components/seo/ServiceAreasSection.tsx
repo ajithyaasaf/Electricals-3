@@ -57,7 +57,7 @@ export function ServiceAreasSection() {
                 <Package className="w-4 h-4 mr-3 text-green-600 flex-shrink-0" />
                 <div>
                   <div className="font-semibold">Weight-Based Shipping</div>
-                  <div className="text-xs text-gray-600">From ₹30 | Free {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+*</div>
+                  <div className="text-xs text-gray-600">From ₹50 | Free {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+*</div>
                 </div>
               </div>
             </div>
@@ -168,7 +168,7 @@ export function ServiceAreasSection() {
                 </li>
                 <li className="flex items-start">
                   <Truck className="w-4 h-4 mr-2 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Weight-based shipping: ₹30 (light), ₹60 (standard), ₹150 (heavy)</span>
+                  <span>Weight-based shipping: ₹50 (light), ₹60 (standard), ₹150 (heavy)</span>
                 </li>
                 <li className="flex items-start">
                   <Clock className="w-4 h-4 mr-2 text-green-600 flex-shrink-0 mt-0.5" />

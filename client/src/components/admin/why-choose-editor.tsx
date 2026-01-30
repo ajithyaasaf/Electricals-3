@@ -88,7 +88,7 @@ const WhyChooseEditor: React.FC = () => {
     headline: "Why Choose CopperBear Electrical?",
     bulletReasons: [
       "Licensed professionals with 15+ years experience",
-      "24/7 emergency service with 2-hour response time",
+      "24/7 emergency service with quick response time",
       "Quality guarantee with lifetime warranty coverage"
     ],
     ctaText: "Get Free Quote",
@@ -105,8 +105,8 @@ const WhyChooseEditor: React.FC = () => {
         id: "fast-service",
         icon: "Clock",
         title: "Fast Response",
-        benefit: "Emergency service within 2 hours",
-        stat: { value: "2hr", label: "Response time" },
+        benefit: "Emergency service available 24/7",
+        stat: { value: "Quick", label: "Response time" },
         order: 2
       },
       {

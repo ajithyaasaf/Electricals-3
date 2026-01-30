@@ -20,7 +20,6 @@ export function DealsBanner({ products }: DealsBannerProps) {
     const originalPrice = product.originalPrice || product.price * 1.2; // Fallback for demo if data missing
     const salePrice = product.price;
     const discountPercent = Math.round(((originalPrice - salePrice) / originalPrice) * 100);
-
     return {
       id: product.id,
       title: product.name,

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Shield, 
-  Clock, 
-  Award, 
-  Users, 
-  Zap, 
-  CheckCircle, 
-  Star, 
+import {
+  Shield,
+  Clock,
+  Award,
+  Users,
+  Zap,
+  CheckCircle,
+  Star,
   TrendingUp,
   Phone,
   MapPin
@@ -72,7 +72,7 @@ const defaultData: WhyChooseData = {
   headline: "Why Choose CopperBear Electrical?",
   bulletReasons: [
     "Licensed professionals with 15+ years experience",
-    "24/7 emergency service with 2-hour response time",
+    "24/7 emergency service with quick response time",
     "Quality guarantee with lifetime warranty coverage"
   ],
   ctaText: "Get Free Quote",
@@ -87,9 +87,9 @@ const defaultData: WhyChooseData = {
     {
       id: "fast-service",
       icon: "Clock",
-      title: "Fast Response",
-      benefit: "Emergency service within 2 hours",
-      stat: { value: "2hr", label: "Response time" }
+      title: "Response",
+      benefit: "Emergency service available 24/7",
+      stat: { value: "Quick", label: "Response time" }
     },
     {
       id: "warranty",
@@ -169,14 +169,14 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
   // Real-time Firestore listener setup
   useEffect(() => {
     if (!realtimePath || typeof window === 'undefined') return;
-    
+
     setIsLoading(true);
 
     const initializeListener = async () => {
       try {
         const { doc, onSnapshot } = await import('firebase/firestore');
         const { db } = await import('@/lib/firebase');
-        
+
         // Parse the realtime path - expecting format like 'siteContent/whyChooseSection'
         const pathParts = realtimePath.split('/');
         if (pathParts.length < 2) {
@@ -184,20 +184,20 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
           setIsLoading(false);
           return;
         }
-        
+
         const [collection, docId] = pathParts;
-        
+
         console.log('[WHY CHOOSE] Setting up real-time listener for:', { collection, docId });
-        
+
         const unsubscribe = onSnapshot(
-          doc(db, collection, docId), 
+          doc(db, collection, docId),
           (docSnap) => {
             if (docSnap.exists()) {
               const firestoreData = docSnap.data() as WhyChooseData;
               console.log('[WHY CHOOSE] Real-time update received:', firestoreData);
-              
-              setData(prevData => ({ 
-                ...prevData, 
+
+              setData(prevData => ({
+                ...prevData,
                 ...firestoreData,
                 lastUpdated: new Date().toISOString()
               }));
@@ -218,9 +218,9 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
         setIsLoading(false);
       }
     };
-    
+
     let cleanup: (() => void) | undefined;
-    
+
     initializeListener().then(unsubscribe => {
       cleanup = unsubscribe;
     });
@@ -244,7 +244,7 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
   // Feature card component with accessibility
   const FeatureCard: React.FC<{ feature: FeatureCardData; index: number }> = ({ feature, index }) => (
     <div className="group">
-      <Card 
+      <Card
         className="h-full transition-all duration-200 hover:shadow-lg focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-primary cursor-pointer"
         tabIndex={0}
         role="article"
@@ -260,29 +260,29 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
       >
         <CardContent className="p-6 text-center">
           {/* Icon */}
-          <div 
+          <div
             className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary mb-4 group-hover:bg-primary/15 transition-colors"
             aria-hidden="true"
           >
             {renderIcon(feature.icon)}
           </div>
-          
+
           {/* Title */}
-          <h3 
+          <h3
             id={`feature-title-${feature.id}`}
             className="text-lg font-semibold text-foreground mb-2"
           >
             {feature.title}
           </h3>
-          
+
           {/* Benefit */}
-          <p 
+          <p
             id={`feature-benefit-${feature.id}`}
             className="text-sm text-muted-foreground mb-3 line-clamp-2"
           >
             {feature.benefit}
           </p>
-          
+
           {/* Stat */}
           {feature.stat && (
             <div className="text-center" aria-label={`Statistic: ${feature.stat.value} ${feature.stat.label}`}>
@@ -317,7 +317,7 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
   }
 
   return (
-    <section 
+    <section
       className={`py-16 bg-background ${className}`}
       aria-labelledby="why-choose-heading"
       data-testid="why-choose-section"
@@ -327,14 +327,14 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
           {/* Hero Content - Left Side */}
           <div className="lg:col-span-1 space-y-6">
             <div>
-              <h2 
+              <h2
                 id="why-choose-heading"
                 className="text-3xl lg:text-4xl font-bold text-foreground mb-4"
                 data-testid="section-headline"
               >
                 {data.headline}
               </h2>
-              
+
               {/* Bullet Points */}
               <ul className="space-y-3" role="list" aria-label="Key reasons to choose CopperBear">
                 {data.bulletReasons.map((reason, index) => (
@@ -343,9 +343,9 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
                     className="flex items-start gap-3"
                     data-testid={`bullet-reason-${index}`}
                   >
-                    <CheckCircle 
-                      className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" 
-                      aria-hidden="true" 
+                    <CheckCircle
+                      className="h-5 w-5 text-primary mt-0.5 flex-shrink-0"
+                      aria-hidden="true"
                     />
                     <span className="text-muted-foreground leading-relaxed">
                       {reason}
@@ -358,7 +358,7 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
             {/* CTA Button with Modal */}
             <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
               <DialogTrigger asChild>
-                <Button 
+                <Button
                   size="lg"
                   className="w-full sm:w-auto"
                   data-testid="cta-button"
@@ -367,7 +367,7 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
                   {data.ctaText}
                 </Button>
               </DialogTrigger>
-              <DialogContent 
+              <DialogContent
                 className="sm:max-w-md"
                 aria-labelledby="modal-title"
                 aria-describedby="modal-description"
@@ -401,7 +401,7 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
 
           {/* Feature Cards Grid - Right Side */}
           <div className="lg:col-span-2">
-            <div 
+            <div
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               role="list"
               aria-label="CopperBear features and benefits"

@@ -69,7 +69,7 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Fast Delivery</h3>
               <p className="text-sm text-gray-600">
-                Fast 1-2 day delivery in Madurai | Weight-based shipping from ₹30
+                Fast 1-2 day delivery in Madurai | Weight-based shipping from ₹50
               </p>
             </CardContent>
           </Card>

@@ -105,9 +105,9 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               {serviceLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
+                  <span className="text-gray-400 cursor-default">
                     {link.name}
-                  </Link>
+                  </span>
                 </li>
               ))}
             </ul>
@@ -152,7 +152,7 @@ export function Footer() {
                 <strong className="text-gray-300">{BUSINESS_POLICIES.serviceAreas.coverage}</strong>
               </p>
               <p className="text-xs text-gray-500">
-                *Free shipping on standard items {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+. Heavy/bulky items: {formatPrice(SHIPPING_THRESHOLDS.FREE_HEAVY)}+. Weight-based shipping from ₹30.
+                *Free shipping on standard items {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+. Heavy/bulky items: {formatPrice(SHIPPING_THRESHOLDS.FREE_HEAVY)}+. Weight-based shipping from ₹50.
               </p>
             </div>
           </div>
