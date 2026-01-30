@@ -144,7 +144,7 @@ export function Footer() {
               <div>
                 <p className="text-yellow-400 font-semibold mb-2">⏳ Coming Soon</p>
                 <p className="text-gray-400 text-xs leading-relaxed">All of Tamil Nadu - Chennai, Coimbatore, Trichy & more</p>
-                <p className="text-xs text-gray-500 mt-1">Expanding Q1 2025</p>
+                <p className="text-xs text-gray-500 mt-1">Expanding Q1 2026</p>
               </div>
             </div>
             <div className="mt-4 space-y-1">

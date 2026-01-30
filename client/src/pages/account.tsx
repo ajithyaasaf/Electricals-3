@@ -388,29 +388,9 @@ export default function Account() {
             </div>
           </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{(bookings as any[]).length}</p>
-                <p className="text-sm text-gray-600">Service Bookings</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Calendar className="w-6 h-6 text-blue-600" />
-              </div>
-            </div>
-          </Card>
 
-          <Card className="p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{(wishlist as any[]).length}</p>
-                <p className="text-sm text-gray-600">Saved Items</p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-                <Heart className="w-6 h-6 text-red-600" />
-              </div>
-            </div>
-          </Card>
+
+
 
           <Card className="p-6 hover:shadow-lg transition-shadow">
             <div className="flex items-center justify-between">
@@ -428,7 +408,7 @@ export default function Account() {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="profile" className="flex items-center text-xs sm:text-sm">
               <User className="w-4 h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Profile</span>
@@ -437,30 +417,14 @@ export default function Account() {
               <Package className="w-4 h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Orders</span>
             </TabsTrigger>
-            <TabsTrigger value="bookings" className="flex items-center text-xs sm:text-sm">
-              <Calendar className="w-4 h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Bookings</span>
-            </TabsTrigger>
+
             <TabsTrigger value="addresses" className="flex items-center text-xs sm:text-sm">
               <MapPin className="w-4 h-4 mr-1 sm:mr-2" />
               <span className="hidden sm:inline">Addresses</span>
             </TabsTrigger>
-            <TabsTrigger value="wishlist" className="flex items-center text-xs sm:text-sm">
-              <Heart className="w-4 h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Wishlist</span>
-            </TabsTrigger>
-            <TabsTrigger value="payments" className="flex items-center text-xs sm:text-sm">
-              <CreditCard className="w-4 h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Payments</span>
-            </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center text-xs sm:text-sm">
-              <Shield className="w-4 h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Security</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center text-xs sm:text-sm">
-              <Settings className="w-4 h-4 mr-1 sm:mr-2" />
-              <span className="hidden sm:inline">Settings</span>
-            </TabsTrigger>
+
+
+
           </TabsList>
 
           {/* Profile Tab */}
@@ -622,85 +586,7 @@ export default function Account() {
           </TabsContent>
 
           {/* Bookings Tab */}
-          <TabsContent value="bookings" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Service Bookings</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {bookingsLoading ? (
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="p-4 border rounded-lg">
-                        <Skeleton className="w-full h-20" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (bookings as any[]).length > 0 ? (
-                  <div className="space-y-4">
-                    {(bookings as any[]).map((booking: BookingWithService) => (
-                      <div key={booking.id} className="p-4 border rounded-lg">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h3 className="font-semibold text-gray-900">
-                              {booking.service.name}
-                            </h3>
-                            <p className="text-sm text-gray-600">
-                              Booking #{booking.bookingNumber}
-                            </p>
-                          </div>
-                          <Badge className={`${getStatusColor(booking.status, "booking")} flex items-center space-x-1`}>
-                            {getStatusIcon(booking.status)}
-                            <span className="capitalize">{booking.status.replace("_", " ")}</span>
-                          </Badge>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div className="flex items-center space-x-2">
-                            <Calendar className="w-4 h-4 text-gray-500" />
-                            <span>
-                              {booking.scheduledDate
-                                ? new Date(booking.scheduledDate).toLocaleDateString()
-                                : "Date TBD"
-                              }
-                            </span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Clock className="w-4 h-4 text-gray-500" />
-                            <span>{booking.scheduledTime || "Time TBD"}</span>
-                          </div>
-                          {booking.address && (
-                            <div className="flex items-center space-x-2">
-                              <MapPin className="w-4 h-4 text-gray-500" />
-                              <span>
-                                {booking.address.street}, {booking.address.city}
-                              </span>
-                            </div>
-                          )}
-                          {booking.totalAmount && (
-                            <div className="flex items-center space-x-2">
-                              <span className="font-medium">
-                                {formatPrice(Number(booking.totalAmount))}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No service bookings</h3>
-                    <p className="text-gray-600 mb-4">Book a service to see your appointments here.</p>
-                    <Button asChild className="bg-lime-600 hover:bg-lime-700">
-                      <Link href="/services">Browse Services</Link>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
 
           {/* Addresses Tab */}
@@ -880,335 +766,15 @@ export default function Account() {
           </TabsContent>
 
           {/* Wishlist Tab */}
-          <TabsContent value="wishlist" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Wishlist</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {wishlistLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[...Array(6)].map((_, i) => (
-                      <div key={i} className="border rounded-lg p-4">
-                        <Skeleton className="w-full h-32 mb-4" />
-                        <Skeleton className="w-3/4 h-4 mb-2" />
-                        <Skeleton className="w-1/2 h-4" />
-                      </div>
-                    ))}
-                  </div>
-                ) : (wishlist as any[]).length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {(wishlist as any[]).map((item: any) => (
-                      <div key={item.id} className="border rounded-lg overflow-hidden">
-                        <Link href={`/products/${item.product.slug || item.product.id}`}>
-                          <img
-                            src={item.product.imageUrls?.[0] || "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300"}
-                            alt={item.product.name}
-                            className="w-full h-32 object-cover"
-                          />
-                        </Link>
-                        <div className="p-4">
-                          <Link href={`/products/${item.product.slug || item.product.id}`}>
-                            <h3 className="font-medium text-gray-900 hover:text-copper-600 mb-2">
-                              {item.product.name}
-                            </h3>
-                          </Link>
-                          <div className="flex items-center justify-between">
-                            <p className="text-lg font-semibold text-gray-900">
-                              {formatPrice(item.product.price)}
-                            </p>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => removeFromWishlistMutation.mutate(item.productId)}
-                              disabled={removeFromWishlistMutation.isPending}
-                            >
-                              <Heart className="w-4 h-4 text-red-500 fill-current" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No items in wishlist</h3>
-                    <p className="text-gray-600 mb-4">Save products you love to see them here.</p>
-                    <Button asChild className="bg-copper-600 hover:bg-copper-700">
-                      <Link href="/products">Browse Products</Link>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+
 
           {/* Payments Tab */}
-          <TabsContent value="payments" className="mt-6">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Payment Methods
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4 bg-gray-50">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-6 bg-blue-600 rounded text-white flex items-center justify-center text-xs font-bold">
-                            VISA
-                          </div>
-                          <div>
-                            <p className="font-medium">•••• •••• •••• 4242</p>
-                            <p className="text-sm text-gray-600">Expires 12/27</p>
-                          </div>
-                        </div>
-                        <Badge variant="secondary">Default</Badge>
-                      </div>
-                    </div>
 
-                    <Button variant="outline" className="w-full">
-                      <CreditCard className="w-4 h-4 mr-2" />
-                      Add New Payment Method
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <FileText className="w-5 h-5 mr-2" />
-                    Billing History
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between py-3 border-b">
-                      <div>
-                        <p className="font-medium">Order #CB-2024-001</p>
-                        <p className="text-sm text-gray-600">January 15, 2024</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">₹18,749</p>
-                        <Button variant="ghost" size="sm">
-                          <Download className="w-4 h-4 mr-1" />
-                          Invoice
-                        </Button>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center justify-between py-3 border-b">
-                      <div>
-                        <p className="font-medium">Order #CB-2023-087</p>
-                        <p className="text-sm text-gray-600">December 8, 2023</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-medium">₹11,738</p>
-                        <Button variant="ghost" size="sm">
-                          <Download className="w-4 h-4 mr-1" />
-                          Invoice
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Security Tab */}
-          <TabsContent value="security" className="mt-6">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Shield className="w-5 h-5 mr-2" />
-                    Security Settings
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                        <CheckCircle className="w-5 h-5 text-green-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Two-Factor Authentication</p>
-                        <p className="text-sm text-gray-600">Extra security for your account</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Enable
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <Smartphone className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Login Notifications</p>
-                        <p className="text-sm text-gray-600">Get notified of new sign-ins</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Configure
-                    </Button>
-                  </div>
-
-                  <div className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-                        <Lock className="w-5 h-5 text-yellow-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Password</p>
-                        <p className="text-sm text-gray-600">Last changed 3 months ago</p>
-                      </div>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Change
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Globe className="w-5 h-5 mr-2" />
-                    Active Sessions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50">
-                      <div>
-                        <p className="font-medium">Current Session</p>
-                        <p className="text-sm text-gray-600">Chrome on Windows • United States</p>
-                        <p className="text-xs text-gray-500">Last activity: Just now</p>
-                      </div>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
-                        Current
-                      </Badge>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Mobile App</p>
-                        <p className="text-sm text-gray-600">iOS App • New York</p>
-                        <p className="text-xs text-gray-500">Last activity: 2 hours ago</p>
-                      </div>
-                      <Button variant="outline" size="sm">
-                        Sign Out
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
 
           {/* Settings Tab */}
-          <TabsContent value="settings" className="mt-6">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Bell className="w-5 h-5 mr-2" />
-                    Notification Preferences
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Order Updates</p>
-                      <p className="text-sm text-gray-600">Get notified about order status changes</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Promotional Emails</p>
-                      <p className="text-sm text-gray-600">Receive special offers and deals</p>
-                    </div>
-                    <input type="checkbox" defaultChecked className="toggle" />
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Service Reminders</p>
-                      <p className="text-sm text-gray-600">Maintenance and service notifications</p>
-                    </div>
-                    <input type="checkbox" className="toggle" />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Building className="w-5 h-5 mr-2" />
-                    Business Account
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="p-4 border rounded-lg bg-blue-50">
-                    <div className="flex items-center space-x-3 mb-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                        <UserCheck className="w-5 h-5 text-blue-600" />
-                      </div>
-                      <div>
-                        <p className="font-medium">Upgrade to Business</p>
-                        <p className="text-sm text-gray-600">Access bulk pricing and contractor benefits</p>
-                      </div>
-                    </div>
-                    <Button className="w-full">
-                      Learn More About Business Account
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    <Settings className="w-5 h-5 mr-2" />
-                    Account Actions
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button
-                    variant="outline"
-                    onClick={handleSignOut}
-                    className="w-full"
-                  >
-                    Sign Out
-                  </Button>
-
-                  <div className="pt-4 border-t">
-                    <div className="flex items-center space-x-2 text-red-600">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span className="text-sm font-medium">Danger Zone</span>
-                    </div>
-                    <p className="text-sm text-gray-600 mt-2 mb-4">
-                      These actions are permanent and cannot be undone.
-                    </p>
-                    <Button variant="destructive" className="w-full">
-                      Delete Account
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
         </Tabs>
       </div>
 

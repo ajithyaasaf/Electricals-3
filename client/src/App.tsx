@@ -11,6 +11,7 @@ import { FirebaseRedirectHandler } from "@/components/auth/firebase-redirect-han
 import { CartProvider } from "@/contexts/cart-context";
 import { WishlistProvider } from "@/contexts/wishlist-context";
 import { WhatsAppFloat } from "@/components/common/whatsapp-float";
+import { ScrollToTop } from "@/components/common/scroll-to-top";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import Home from "@/pages/home";
@@ -26,6 +27,9 @@ import OrderDetail from "@/pages/order-detail";
 import Admin from "@/pages/admin";
 import Auth from "@/pages/auth";
 import Wishlist from "@/pages/wishlist";
+import Returns from "@/pages/returns";
+import Shipping from "@/pages/shipping";
+import Warranty from "@/pages/warranty";
 
 function Router() {
   const { isAuthenticated, loading } = useFirebaseAuth();
@@ -55,6 +59,10 @@ function Router() {
           <Route path="/checkout" component={Checkout} />
           <Route path="/account" component={Account} />
           <Route path="/account/orders/:orderId" component={OrderDetail} />
+
+          <Route path="/returns" component={Returns} />
+          <Route path="/shipping" component={Shipping} />
+          <Route path="/warranty" component={Warranty} />
           <Route path="/admin" component={Admin} />
         </>
       ) : (
@@ -70,6 +78,10 @@ function Router() {
           <Route path="/checkout" component={Checkout} />
           <Route path="/account" component={Account} />
           <Route path="/account/orders/:orderId" component={OrderDetail} />
+
+          <Route path="/returns" component={Returns} />
+          <Route path="/shipping" component={Shipping} />
+          <Route path="/warranty" component={Warranty} />
           <Route path="/admin" component={Admin} />
         </>
       )}
@@ -87,6 +99,7 @@ function App() {
             <TooltipProvider>
               <FirebaseRedirectHandler />
               <PerformanceMonitor />
+              <ScrollToTop />
               <NavigationProgress />
               <Toaster />
               <Router />
