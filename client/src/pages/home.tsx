@@ -112,81 +112,7 @@ export default function Home() {
   // Use real data
   const deals = (dealsData as any)?.products || [];
 
-  // Mock product data generator for horizontal sections
-  const mockProducts = (type: string) => [
-    {
-      id: `${type}-1`,
-      name: "Professional Wire Stripper Set",
-      price: 249900,
-      originalPrice: type === "trending" ? 332400 : undefined,
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
-      category: "tools",
-      rating: 4.5
-    },
-    {
-      id: `${type}-2`,
-      name: "Smart GFCI Outlet",
-      price: 382400,
-      originalPrice: type === "trending" ? 464900 : undefined,
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
-      category: "outlets",
-      rating: 4.8
-    },
-    {
-      id: `${type}-3`,
-      name: "20A Circuit Breaker",
-      price: 157900,
-      originalPrice: type === "trending" ? 207400 : undefined,
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
-      category: "breakers",
-      rating: 4.7
-    },
-    {
-      id: `${type}-4`,
-      name: "LED Work Light 2000LM",
-      price: 290400,
-      originalPrice: type === "trending" ? 373700 : undefined,
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
-      category: "lighting",
-      rating: 4.6
-    },
-    {
-      id: `${type}-5`,
-      name: "12 AWG Copper Wire (100ft)",
-      price: 747900,
-      originalPrice: type === "trending" ? 914900 : undefined,
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
-      category: "wiring",
-      rating: 4.9
-    },
-    {
-      id: `${type}-6`,
-      name: "Digital Multimeter",
-      price: 498400,
-      originalPrice: type === "trending" ? 664900 : undefined,
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
-      category: "tools",
-      rating: 4.4
-    },
-    {
-      id: `${type}-7`,
-      name: "Electrical Panel Cover",
-      price: 207400,
-      originalPrice: type === "trending" ? 249400 : undefined,
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
-      category: "panels",
-      rating: 4.3
-    },
-    {
-      id: `${type}-8`,
-      name: "Wire Nuts Assortment",
-      price: 107900,
-      originalPrice: type === "trending" ? 141400 : undefined,
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 160),
-      category: "wiring",
-      rating: 4.2
-    }
-  ];
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -216,7 +142,7 @@ export default function Home() {
       {/* Best Sellers - Horizontal Scrolling */}
       <HorizontalProductSection
         title="Best Sellers in Electrical"
-        products={(bestSellersData as any)?.products || mockProducts("bestsellers")}
+        products={(bestSellersData as any)?.products || []}
         viewAllLink="/products?bestsellers=true"
         showPrices={true}
       />
@@ -224,7 +150,7 @@ export default function Home() {
       {/* New Arrivals - Horizontal Scrolling */}
       <HorizontalProductSection
         title="New Arrivals"
-        products={(newArrivalsData as any)?.products || mockProducts("new")}
+        products={(newArrivalsData as any)?.products || []}
         viewAllLink="/products?new=true"
         showPrices={true}
       />
@@ -232,7 +158,7 @@ export default function Home() {
       {/* Trending Now - Horizontal Scrolling */}
       <HorizontalProductSection
         title="Trending Now"
-        products={(trendingData as any)?.products || mockProducts("trending")}
+        products={(trendingData as any)?.products || []}
         viewAllLink="/products?trending=true"
         showPrices={true}
         dealBadge="Hot"

@@ -41,6 +41,6 @@ export interface ProductFilters {
   featured: boolean;
   minPrice: number;
   maxPrice: number;
-  sortBy: "name" | "price" | "rating" | "newest";
+  sortBy: "name" | "price" | "rating" | "newest" | "featured";
   sortOrder: "asc" | "desc";
 }

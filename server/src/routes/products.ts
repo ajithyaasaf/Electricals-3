@@ -59,23 +59,52 @@ export function registerProductRoutes(app: Express) {
         let comparison = 0;
 
         switch (sortBy) {
+          case "featured":
+            // Primary Sort: Featured items first (descending boolean: true > false)
+            // We treat true as 1 and false as 0 for comparison
+            const aFeatured = a.isFeatured ? 1 : 0;
+            const bFeatured = b.isFeatured ? 1 : 0;
+            comparison = aFeatured - bFeatured;
+            break;
+
           case "name":
             comparison = a.name.localeCompare(b.name);
             break;
+
           case "price":
-            comparison = parseFloat(a.price.toString()) - parseFloat(b.price.toString());
+            // Data Safety: Handle invalid/NaN prices mostly for safety
+            const priceA = parseFloat(a.price?.toString() || "0") || 0;
+            const priceB = parseFloat(b.price?.toString() || "0") || 0;
+            comparison = priceA - priceB;
             break;
+
           case "rating":
-            comparison = (a.rating || 0) - (b.rating || 0);
+            // Data Safety: Handle null/undefined ratings as 0
+            const ratingA = a.rating || 0;
+            const ratingB = b.rating || 0;
+            comparison = ratingA - ratingB;
             break;
+
           case "newest":
           default:
-            // For newest, we'll use the product id or creation time if available
-            comparison = a.id.localeCompare(b.id);
+            // Will fallback to secondary sort (id) which effectively works as newest
+            // since newer items usually have higher/later IDs or we can compare created dates if available
+            comparison = 0;
             break;
         }
 
-        return sortOrder === "desc" ? -comparison : comparison;
+        // Apply sort order
+        const result = sortOrder === "desc" ? -comparison : comparison;
+
+        // TIE-BREAKER: Deterministic sorting
+        // If the primary comparison is equal (result === 0), use ID as a tie-breaker.
+        // We always sort by ID descending (newest first) for consistency across pages.
+        if (result === 0) {
+          // String ID comparison (assuming UUIDs or string IDs)
+          return b.id.localeCompare(a.id);
+        }
+
+        return result;
       });
 
       // Apply pagination

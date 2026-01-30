@@ -20,7 +20,7 @@ interface RecommendationEngineProps {
 
 export function RecommendationEngine({ productId, category, userId }: RecommendationEngineProps) {
   const { user } = useFirebaseAuth();
-  
+
   // Fetch "Customers who bought this also bought" recommendations
   const { data: alsoBoughtData } = useQuery({
     queryKey: ["/api/recommendations/also-bought", productId],
@@ -56,7 +56,7 @@ export function RecommendationEngine({ productId, category, userId }: Recommenda
   if (productId && ((alsoBoughtData as any)?.products?.length > 0 || !alsoBoughtData)) {
     recommendations.push({
       title: "Customers who bought this item also bought",
-      products: (alsoBoughtData as any)?.products || generateMockProducts("also-bought"),
+      products: (alsoBoughtData as any)?.products || [],
       viewAllLink: `/products?related=${productId}`,
       key: "also-bought"
     });
@@ -66,7 +66,7 @@ export function RecommendationEngine({ productId, category, userId }: Recommenda
   if (user && ((personalizedData as any)?.products?.length > 0 || !personalizedData)) {
     recommendations.push({
       title: "Recommended for you",
-      products: (personalizedData as any)?.products || generateMockProducts("personalized"),
+      products: (personalizedData as any)?.products || [],
       viewAllLink: "/products?personalized=true",
       key: "personalized"
     });
@@ -76,7 +76,7 @@ export function RecommendationEngine({ productId, category, userId }: Recommenda
   if (category || ((categoryData as any)?.products?.length > 0 || !categoryData)) {
     recommendations.push({
       title: `More in ${category || 'this category'}`,
-      products: (categoryData as any)?.products || generateMockProducts("category"),
+      products: (categoryData as any)?.products || [],
       viewAllLink: `/products?category=${category}`,
       key: "category"
     });
@@ -86,7 +86,7 @@ export function RecommendationEngine({ productId, category, userId }: Recommenda
   if ((trendingData as any)?.products?.length > 0 || !trendingData) {
     recommendations.push({
       title: "Trending electrical products",
-      products: (trendingData as any)?.products || generateMockProducts("trending"),
+      products: (trendingData as any)?.products || [],
       viewAllLink: "/products?trending=true",
       key: "trending"
     });
@@ -96,7 +96,7 @@ export function RecommendationEngine({ productId, category, userId }: Recommenda
   if (productId && ((bundleData as any)?.products?.length > 0 || !bundleData)) {
     recommendations.push({
       title: "Frequently bought together",
-      products: (bundleData as any)?.products || generateMockProducts("bundle"),
+      products: (bundleData as any)?.products || [],
       viewAllLink: `/products?bundle=${productId}`,
       key: "bundle"
     });
@@ -121,41 +121,7 @@ export function RecommendationEngine({ productId, category, userId }: Recommenda
   );
 }
 
-// Generate mock products for recommendations
-const generateMockProducts = (type: string): Product[] => [
-  {
-    id: `${type}-rec-1`,
-    name: "Professional Electrical Toolkit",
-    price: 12449,
-    image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=160",
-    category: "tools",
-    rating: 4.8
-  },
-  {
-    id: `${type}-rec-2`,
-    name: "Smart Circuit Breaker Panel",
-    price: 24899,
-    image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=160",
-    category: "panels",
-    rating: 4.7
-  },
-  {
-    id: `${type}-rec-3`,
-    name: "Industrial Grade Cable",
-    price: 6639,
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=160",
-    category: "wiring",
-    rating: 4.9
-  },
-  {
-    id: `${type}-rec-4`,
-    name: "LED Flood Light 5000LM",
-    price: 7469,
-    image: "https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=160",
-    category: "lighting",
-    rating: 4.6
-  }
-];
+
 
 // Utility function to track user product interactions
 export const trackProductInteraction = (productId: string, action: 'view' | 'cart' | 'purchase', userId?: string) => {
@@ -170,7 +136,7 @@ export const trackProductInteraction = (productId: string, action: 'view' | 'car
   // Store in localStorage for immediate use
   const stored = localStorage.getItem('copperbear_interactions');
   let interactions = [];
-  
+
   if (stored) {
     try {
       interactions = JSON.parse(stored);
@@ -180,10 +146,10 @@ export const trackProductInteraction = (productId: string, action: 'view' | 'car
   }
 
   interactions.push(interaction);
-  
+
   // Keep only last 100 interactions
   interactions = interactions.slice(-100);
-  
+
   localStorage.setItem('copperbear_interactions', JSON.stringify(interactions));
 
   // In a real app, this would also send to backend

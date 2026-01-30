@@ -348,7 +348,7 @@ export default function Products() {
     featured: urlFeatured,
     minPrice: 0,
     maxPrice: MAX_PRODUCT_PRICE,
-    sortBy: "newest",
+    sortBy: "featured",
     sortOrder: "desc"
   });
 
@@ -471,7 +471,7 @@ export default function Products() {
       featured: false,
       minPrice: 0,
       maxPrice: MAX_PRODUCT_PRICE,
-      sortBy: "newest",
+      sortBy: "featured",
       sortOrder: "desc"
     });
     setMinPriceString("");
@@ -575,11 +575,7 @@ export default function Products() {
                       className="w-full"
                     />
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span className="font-medium">
-                      {productsData?.total || 0} products found
-                    </span>
-                  </div>
+
                 </div>
 
                 {/* Bottom Row - Filters and Sort */}
@@ -671,12 +667,11 @@ export default function Products() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="newest-desc">Newest First</SelectItem>
-                        <SelectItem value="name-asc">Name A-Z</SelectItem>
-                        <SelectItem value="name-desc">Name Z-A</SelectItem>
+                        <SelectItem value="featured-desc">Featured</SelectItem>
                         <SelectItem value="price-asc">Price: Low to High</SelectItem>
                         <SelectItem value="price-desc">Price: High to Low</SelectItem>
-                        <SelectItem value="rating-desc">Highest Rated</SelectItem>
+                        <SelectItem value="rating-desc">Good Customer Reviews</SelectItem>
+                        <SelectItem value="newest-desc">Newest Arrivals</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -786,6 +781,6 @@ export default function Products() {
       </div>
 
       <Footer />
-    </div>
+    </div >
   );
 }

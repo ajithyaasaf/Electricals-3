@@ -10,7 +10,8 @@ interface Product {
   id: string;
   name: string;
   price: number;
-  image: string;
+  image?: string; // Kept optional for backward compatibility
+  imageUrls?: string[]; // Added for real API data
   category: string;
   rating?: number;
   originalPrice?: number;
@@ -24,9 +25,9 @@ interface HorizontalProductSectionProps {
   dealBadge?: string;
 }
 
-export function HorizontalProductSection({ 
-  title, 
-  products, 
+export function HorizontalProductSection({
+  title,
+  products,
   viewAllLink,
   showPrices = true,
   dealBadge
@@ -55,9 +56,9 @@ export function HorizontalProductSection({
   const scroll = (direction: 'left' | 'right') => {
     if (scrollContainerRef.current) {
       const scrollAmount = 300;
-      const newScrollLeft = scrollContainerRef.current.scrollLeft + 
+      const newScrollLeft = scrollContainerRef.current.scrollLeft +
         (direction === 'left' ? -scrollAmount : scrollAmount);
-      
+
       scrollContainerRef.current.scrollTo({
         left: newScrollLeft,
         behavior: 'smooth'
@@ -121,91 +122,96 @@ export function HorizontalProductSection({
             className="flex gap-4 overflow-x-auto scrollbar-hide pb-2"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {products.map((product) => (
-              <Link
-                key={product.id}
-                href={`/products/${product.id}`}
-                className="flex-shrink-0 w-44 sm:w-48 group cursor-pointer"
-              >
-                <Card className="h-full border-0 shadow-sm hover:shadow-md transition-all duration-200 group-hover:scale-[1.02]">
-                  <CardContent className="p-3">
-                    {/* Product Image */}
-                    <div className="relative mb-3">
-                      <LazyImage
-                        src={product.image}
-                        alt={product.name}
-                        className="w-full h-36 sm:h-40 object-cover rounded-lg"
-                        fallback="/api/placeholder/200/160"
-                      />
-                      {product.originalPrice && product.originalPrice > product.price && (
-                        <div className="absolute top-2 left-2 bg-teal-600 text-white px-2 py-1 rounded text-xs font-medium shadow-sm">
-                          {calculateDiscount(product.originalPrice, product.price)}% OFF
-                        </div>
-                      )}
-                      {/* Quick Action Badge */}
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                        <div className="bg-white bg-opacity-90 backdrop-blur-sm p-1.5 rounded-full shadow-sm">
-                          <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
+            {products.map((product) => {
+              // Smart image resolution: Try imageUrls[0] first (real data), then image (mock/legacy), then fallback
+              const displayImage = product.imageUrls?.[0] || product.image || "/placeholder.png";
+
+              return (
+                <Link
+                  key={product.id}
+                  href={`/products/${product.id}`}
+                  className="flex-shrink-0 w-44 sm:w-48 group cursor-pointer"
+                >
+                  <Card className="h-full border-0 shadow-sm hover:shadow-md transition-all duration-200 group-hover:scale-[1.02]">
+                    <CardContent className="p-3">
+                      {/* Product Image */}
+                      <div className="relative mb-3">
+                        <LazyImage
+                          src={displayImage}
+                          alt={product.name}
+                          className="w-full h-36 sm:h-40 object-cover rounded-lg"
+                          fallback="/api/placeholder/200/160"
+                        />
+                        {product.originalPrice && product.originalPrice > product.price && (
+                          <div className="absolute top-2 left-2 bg-teal-600 text-white px-2 py-1 rounded text-xs font-medium shadow-sm">
+                            {calculateDiscount(product.originalPrice, product.price)}% OFF
+                          </div>
+                        )}
+                        {/* Quick Action Badge */}
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                          <div className="bg-white bg-opacity-90 backdrop-blur-sm p-1.5 rounded-full shadow-sm">
+                            <svg className="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Product Info */}
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-teal-600 transition-colors leading-tight">
-                        {product.name}
-                      </h3>
-                      
-                      {product.rating && (
-                        <div className="flex items-center gap-1">
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <span 
-                                key={i}
-                                className={`text-xs ${i < product.rating! ? 'text-teal-500' : 'text-gray-300'}`}
-                              >
-                                ★
-                              </span>
-                            ))}
+                      {/* Product Info */}
+                      <div className="space-y-2">
+                        <h3 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-teal-600 transition-colors leading-tight">
+                          {product.name}
+                        </h3>
+
+                        {product.rating && (
+                          <div className="flex items-center gap-1">
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <span
+                                  key={i}
+                                  className={`text-xs ${i < product.rating! ? 'text-teal-500' : 'text-gray-300'}`}
+                                >
+                                  ★
+                                </span>
+                              ))}
+                            </div>
+                            <span className="text-xs text-gray-500">({product.rating})</span>
                           </div>
-                          <span className="text-xs text-gray-500">({product.rating})</span>
-                        </div>
-                      )}
+                        )}
 
-                      {showPrices && (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="text-base sm:text-lg font-bold text-gray-900">
-                              {formatPrice(product.price)}
-                            </span>
-                            {product.originalPrice && product.originalPrice > product.price && (
-                              <span className="text-xs sm:text-sm text-gray-500 line-through">
-                                {formatPrice(product.originalPrice)}
+                        {showPrices && (
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-base sm:text-lg font-bold text-gray-900">
+                                {formatPrice(product.price)}
                               </span>
+                              {product.originalPrice && product.originalPrice > product.price && (
+                                <span className="text-xs sm:text-sm text-gray-500 line-through">
+                                  {formatPrice(product.originalPrice)}
+                                </span>
+                              )}
+                            </div>
+                            {product.originalPrice && product.originalPrice > product.price && (
+                              <div className="text-xs text-teal-light-600 font-medium">
+                                {formatSavings(product.originalPrice, product.price)}
+                              </div>
                             )}
                           </div>
-                          {product.originalPrice && product.originalPrice > product.price && (
-                            <div className="text-xs text-teal-light-600 font-medium">
-                              {formatSavings(product.originalPrice, product.price)}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs text-gray-500 capitalize">{product.category}</p>
-                        <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                          <div className="text-xs text-teal-600 font-medium">View →</div>
+                        )}
+
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs text-gray-500 capitalize">{product.category}</p>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                            <div className="text-xs text-teal-600 font-medium">View →</div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </div>
