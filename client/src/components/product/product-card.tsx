@@ -98,7 +98,7 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
           </div>
 
           {/* Wishlist Button - improved visibility */}
-          <div className="absolute top-3 right-3 z-10 transform translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+          <div className="absolute top-3 right-3 z-10 transition-all duration-300">
             <WishlistButton
               productId={product.id.toString()}
               variant="icon"

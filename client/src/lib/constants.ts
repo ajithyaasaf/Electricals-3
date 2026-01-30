@@ -66,9 +66,17 @@ export const BUSINESS_POLICIES = {
   }
 };
 
+export const SERVICE_AREAS = {
+  tamilNadu: ['Madurai', 'Chennai', 'Coimbatore', 'Salem', 'Trichy', 'Tirunelveli', 'Erode', 'Vellore'],
+  northIndia: ['Delhi', 'Jaipur', 'Lucknow', 'Chandigarh']
+};
+
+import { SHIPPING_THRESHOLDS } from '@shared/logistics';
+import { formatPrice } from './currency';
+
 // Formatted policy text for display (Phase 1: Madurai Only)
 export const POLICY_TEXT = {
-  shipping: `• Currently delivering within Madurai (625xxx pincodes)\n• Delivery in 1-2 business days\n• Shipping fees based on weight and product category (₹30 - ₹150)\n• Expanding to all of Tamil Nadu soon!`,
+  shipping: `• Currently delivering within Madurai (625xxx pincodes)\n• Delivery in 1-2 business days\n• Shipping fees based on weight and product category (₹30 - ₹150)\n• **Free shipping on orders above ${formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}**\n• Expanding to all of Tamil Nadu soon!`,
   returns: `• Return window: 5-7 working days from delivery\n• Items must be unused, sealed, and in original packaging\n• All accessories must be included`,
   cod: `• Available in Madurai (625xxx pincodes)\n• No additional charges for COD\n• COD limit: ₹50,000 per order\n• Prepaid options: UPI, Cards, Net Banking`,
   cancellation: `Order cancellation is not available once placed. Please review your order carefully before confirming.`
@@ -88,3 +96,5 @@ export const BANK_DETAILS = {
   ifscCode: "PUNB0438300",
   upiId: "mijain009-4@okicici",
 };
+
+export const MAX_PRODUCT_PRICE = 10000;

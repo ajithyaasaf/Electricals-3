@@ -1,5 +1,7 @@
 import { MapPin, Truck, Package, Clock } from 'lucide-react';
 import { BUSINESS_POLICIES } from '@/lib/constants';
+import { SHIPPING_THRESHOLDS } from '@shared/logistics';
+import { formatPrice } from '@/lib/currency';
 
 /**
  * SEO-optimized Service Areas Section
@@ -55,7 +57,7 @@ export function ServiceAreasSection() {
                 <Package className="w-4 h-4 mr-3 text-green-600 flex-shrink-0" />
                 <div>
                   <div className="font-semibold">Weight-Based Shipping</div>
-                  <div className="text-xs text-gray-600">From ₹30 | Free ₹3,000+*</div>
+                  <div className="text-xs text-gray-600">From ₹30 | Free {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+*</div>
                 </div>
               </div>
             </div>
@@ -170,7 +172,7 @@ export function ServiceAreasSection() {
                 </li>
                 <li className="flex items-start">
                   <Clock className="w-4 h-4 mr-2 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span>Free shipping on standard items ₹3,000+, heavy items ₹5,000+</span>
+                  <span>Free shipping on standard items {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+, heavy items {formatPrice(SHIPPING_THRESHOLDS.FREE_HEAVY)}+</span>
                 </li>
               </ul>
             </div>

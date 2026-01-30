@@ -3,13 +3,13 @@ import { createContext, useContext, useEffect, useState, ReactNode, useCallback,
 import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
-import type { 
-  WishlistItemWithDetails, 
-  GuestWishlistItem, 
+import type {
+  WishlistItemWithDetails,
+  GuestWishlistItem,
   GuestWishlistData,
   WishlistOperationResult,
   WishlistAnalytics,
-  WishlistSyncStatus 
+  WishlistSyncStatus
 } from '@shared/wishlist-types';
 
 // Enhanced guest wishlist item interface with schema versioning
@@ -29,7 +29,7 @@ interface WishlistState {
 }
 
 // Wishlist reducer actions
-type WishlistAction = 
+type WishlistAction =
   | { type: 'SET_WISHLIST'; payload: WishlistItemWithDetails[] }
   | { type: 'ADD_ITEM'; payload: WishlistItemWithDetails }
   | { type: 'UPDATE_ITEM'; payload: { itemId: string; updates: Partial<WishlistItemWithDetails> } }
@@ -52,7 +52,7 @@ function wishlistReducer(state: WishlistState, action: WishlistAction): Wishlist
         totalValue: items.reduce((sum, item) => sum + (item.currentPrice || 0), 0),
         error: null,
       };
-    
+
     case 'ADD_ITEM':
       const newItems = [action.payload, ...state.items];
       return {
@@ -62,7 +62,7 @@ function wishlistReducer(state: WishlistState, action: WishlistAction): Wishlist
         totalValue: newItems.reduce((sum, item) => sum + (item.currentPrice || 0), 0),
         error: null,
       };
-    
+
     case 'UPDATE_ITEM':
       const updatedItems = state.items.map(item =>
         item.id === action.payload.itemId
@@ -76,7 +76,7 @@ function wishlistReducer(state: WishlistState, action: WishlistAction): Wishlist
         totalValue: updatedItems.reduce((sum, item) => sum + (item.currentPrice || 0), 0),
         error: null,
       };
-    
+
     case 'REMOVE_ITEM':
       const filteredItems = state.items.filter(item => item.id !== action.payload.itemId);
       return {
@@ -86,7 +86,7 @@ function wishlistReducer(state: WishlistState, action: WishlistAction): Wishlist
         totalValue: filteredItems.reduce((sum, item) => sum + (item.currentPrice || 0), 0),
         error: null,
       };
-    
+
     case 'CLEAR_WISHLIST':
       return {
         ...state,
@@ -96,22 +96,22 @@ function wishlistReducer(state: WishlistState, action: WishlistAction): Wishlist
         analytics: null,
         error: null,
       };
-    
+
     case 'SET_LOADING':
       return { ...state, loading: action.payload };
-    
+
     case 'SET_ERROR':
       return { ...state, error: action.payload, loading: false };
-    
+
     case 'SET_ANALYTICS':
       return { ...state, analytics: action.payload };
-    
+
     case 'SET_SYNC_STATUS':
       return {
         ...state,
         syncStatus: { ...state.syncStatus, ...action.payload },
       };
-    
+
     default:
       return state;
   }
@@ -144,7 +144,7 @@ interface WishlistContextType {
   totalValue: number;
   analytics: WishlistAnalytics | null;
   syncStatus: WishlistSyncStatus;
-  
+
   // Actions
   addToWishlist: (productId?: string, serviceId?: string, options?: {
     notes?: string;
@@ -159,7 +159,7 @@ interface WishlistContextType {
   isInWishlist: (productId?: string, serviceId?: string) => boolean;
   refreshWishlist: () => Promise<void>;
   loadAnalytics: () => Promise<void>;
-  
+
   // Guest specific
   getGuestWishlistData: () => GuestWishlistItem[];
   migrateGuestWishlist: () => Promise<boolean>;
@@ -172,7 +172,7 @@ class GuestWishlistManager {
   private static getStorageKey(): string {
     return GUEST_WISHLIST_KEY;
   }
-  
+
   static load(): GuestWishlistData {
     try {
       const stored = localStorage.getItem(this.getStorageKey());
@@ -185,9 +185,9 @@ class GuestWishlistManager {
           syncAttempts: 0,
         };
       }
-      
+
       const data = JSON.parse(stored) as GuestWishlistData;
-      
+
       // Check for expiry
       const expiryTime = data.lastUpdated + (data.expiryHours * 60 * 60 * 1000);
       if (Date.now() > expiryTime) {
@@ -201,7 +201,7 @@ class GuestWishlistManager {
           syncAttempts: 0,
         };
       }
-      
+
       // Schema migration if needed
       if (data.schemaVersion !== CURRENT_SCHEMA_VERSION) {
         console.log('[WISHLIST CONTEXT] 🔄 Migrating guest wishlist schema...');
@@ -209,7 +209,7 @@ class GuestWishlistManager {
         this.save(migratedData);
         return migratedData;
       }
-      
+
       console.log('[WISHLIST CONTEXT] 📖 Loading guest wishlist from localStorage:', data.items.length, 'items');
       return data;
     } catch (error) {
@@ -224,7 +224,7 @@ class GuestWishlistManager {
       };
     }
   }
-  
+
   static save(data: GuestWishlistData): void {
     try {
       data.lastUpdated = Date.now();
@@ -234,7 +234,7 @@ class GuestWishlistManager {
       console.error('[WISHLIST CONTEXT] ❌ Error saving guest wishlist:', error);
     }
   }
-  
+
   static clear(): void {
     try {
       localStorage.removeItem(this.getStorageKey());
@@ -243,7 +243,7 @@ class GuestWishlistManager {
       console.error('[WISHLIST CONTEXT] ❌ Error clearing guest wishlist:', error);
     }
   }
-  
+
   static addItem(productId?: string, serviceId?: string, options?: {
     notes?: string;
     priority?: 'low' | 'medium' | 'high';
@@ -252,24 +252,24 @@ class GuestWishlistManager {
   }): boolean {
     try {
       const data = this.load();
-      
+
       // Check if item already exists
-      const itemExists = data.items.some(item => 
+      const itemExists = data.items.some(item =>
         (item.productId === productId && productId) ||
         (item.serviceId === serviceId && serviceId)
       );
-      
+
       if (itemExists) {
         console.log('[WISHLIST CONTEXT] ⚠️ Item already in guest wishlist');
         return false;
       }
-      
+
       // Check limits
       if (data.items.length >= 50) { // Max guest items
         console.log('[WISHLIST CONTEXT] ⚠️ Guest wishlist limit reached');
         return false;
       }
-      
+
       const newItem: GuestWishlistItem = {
         id: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         productId,
@@ -282,10 +282,10 @@ class GuestWishlistManager {
         lastUpdated: Date.now(),
         schemaVersion: CURRENT_SCHEMA_VERSION,
       };
-      
+
       data.items.unshift(newItem);
       this.save(data);
-      
+
       console.log('[WISHLIST CONTEXT] ✅ Item added to guest wishlist:', newItem.id);
       return true;
     } catch (error) {
@@ -293,19 +293,19 @@ class GuestWishlistManager {
       return false;
     }
   }
-  
+
   static removeItem(itemId: string): boolean {
     try {
       const data = this.load();
       const originalLength = data.items.length;
       data.items = data.items.filter(item => item.id !== itemId);
-      
+
       if (data.items.length < originalLength) {
         this.save(data);
         console.log('[WISHLIST CONTEXT] ✅ Item removed from guest wishlist:', itemId);
         return true;
       }
-      
+
       console.log('[WISHLIST CONTEXT] ⚠️ Item not found in guest wishlist:', itemId);
       return false;
     } catch (error) {
@@ -313,11 +313,29 @@ class GuestWishlistManager {
       return false;
     }
   }
-  
+
+  static removeItemByContext(productId?: string, serviceId?: string): boolean {
+    try {
+      const data = this.load();
+      const itemToRemove = data.items.find(item =>
+        (productId && item.productId === productId) ||
+        (serviceId && item.serviceId === serviceId)
+      );
+
+      if (itemToRemove) {
+        return this.removeItem(itemToRemove.id);
+      }
+      return false;
+    } catch (error) {
+      console.error('[WISHLIST CONTEXT] ❌ Error removing item by context:', error);
+      return false;
+    }
+  }
+
   static isInWishlist(productId?: string, serviceId?: string): boolean {
     try {
       const data = this.load();
-      return data.items.some(item => 
+      return data.items.some(item =>
         (item.productId === productId && productId) ||
         (item.serviceId === serviceId && serviceId)
       );
@@ -326,7 +344,7 @@ class GuestWishlistManager {
       return false;
     }
   }
-  
+
   private static migrateSchema(data: GuestWishlistData): GuestWishlistData {
     // Handle schema migrations here
     return {
@@ -343,7 +361,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
   const hasInitialized = useRef(false);
   const migrationInProgress = useRef(false);
-  
+
   // Load wishlist on mount and auth changes
   useEffect(() => {
     if (!hasInitialized.current) {
@@ -351,7 +369,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       hasInitialized.current = true;
     }
   }, []);
-  
+
   // Handle authentication changes
   useEffect(() => {
     if (hasInitialized.current && isAuthenticated && user && !migrationInProgress.current) {
@@ -360,26 +378,26 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       handleGuestUserWishlist();
     }
   }, [isAuthenticated, user]);
-  
+
   // Load wishlist from appropriate source
   const loadWishlist = useCallback(async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
-    
+
     try {
       if (isAuthenticated && user) {
         // Load authenticated user's wishlist
         const response = await apiRequest('GET', '/api/wishlist');
         const result = await response.json() as WishlistOperationResult;
-        
+
         if (result.success && result.items) {
           dispatch({ type: 'SET_WISHLIST', payload: result.items });
-          dispatch({ 
-            type: 'SET_SYNC_STATUS', 
-            payload: { 
-              status: 'idle', 
+          dispatch({
+            type: 'SET_SYNC_STATUS',
+            payload: {
+              status: 'idle',
               lastSync: new Date(),
-              pendingChanges: 0 
-            } 
+              pendingChanges: 0
+            }
           });
         } else {
           dispatch({ type: 'SET_ERROR', payload: result.message || 'Failed to load wishlist' });
@@ -387,25 +405,25 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       } else {
         // Load guest wishlist from localStorage
         const guestData = GuestWishlistManager.load();
-        
+
         if (guestData.items.length > 0) {
           // Enrich guest items with current product/service data
           const response = await apiRequest('POST', '/api/wishlist/unified', { guestWishlist: guestData.items });
           const result = await response.json() as WishlistOperationResult;
-          
+
           if (result.success && result.items) {
             dispatch({ type: 'SET_WISHLIST', payload: result.items });
           }
         } else {
           dispatch({ type: 'SET_WISHLIST', payload: [] });
         }
-        
-        dispatch({ 
-          type: 'SET_SYNC_STATUS', 
-          payload: { 
-            status: 'pending', 
-            pendingChanges: guestData.items.length 
-          } 
+
+        dispatch({
+          type: 'SET_SYNC_STATUS',
+          payload: {
+            status: 'pending',
+            pendingChanges: guestData.items.length
+          }
         });
       }
     } catch (error) {
@@ -415,11 +433,11 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   }, [isAuthenticated, user]);
-  
+
   // Handle authenticated user wishlist
   const handleAuthenticatedUserWishlist = useCallback(async () => {
     console.log('[WISHLIST CONTEXT] 👤 User authenticated, loading wishlist...');
-    
+
     // Check if there's a guest wishlist to migrate
     const guestData = GuestWishlistManager.load();
     if (guestData.items.length > 0 && !migrationInProgress.current) {
@@ -429,12 +447,12 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       await loadWishlist();
     }
   }, [loadWishlist]);
-  
+
   // Handle guest user wishlist - load guest data instead of clearing
   const handleGuestUserWishlist = useCallback(async () => {
     console.log('[WISHLIST CONTEXT] 🗑️ User logged out, clearing wishlist data...');
     dispatch({ type: 'CLEAR_WISHLIST' });
-    
+
     // Load guest wishlist from localStorage after logout
     try {
       const guestData = GuestWishlistManager.load();
@@ -443,7 +461,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         // Enrich guest items with current product/service data
         const response = await apiRequest('POST', '/api/wishlist/unified', { guestWishlist: guestData.items });
         const result = await response.json() as WishlistOperationResult;
-        
+
         if (result.success && result.items) {
           dispatch({ type: 'SET_WISHLIST', payload: result.items });
         }
@@ -451,22 +469,22 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('[WISHLIST CONTEXT] ❌ Error loading guest wishlist after logout:', error);
     }
-    
-    dispatch({ 
-      type: 'SET_SYNC_STATUS', 
-      payload: { 
-        status: 'pending', 
+
+    dispatch({
+      type: 'SET_SYNC_STATUS',
+      payload: {
+        status: 'pending',
         pendingChanges: 0,
-        lastSync: new Date() 
-      } 
+        lastSync: new Date()
+      }
     });
     console.log('[WISHLIST CONTEXT] ✅ Wishlist cleared successfully on logout');
   }, []);
-  
+
   // Add item to wishlist
   const addToWishlist = useCallback(async (
-    productId?: string, 
-    serviceId?: string, 
+    productId?: string,
+    serviceId?: string,
     options?: {
       notes?: string;
       priority?: 'low' | 'medium' | 'high';
@@ -486,7 +504,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
           addedFrom: options?.addedFrom || 'other',
         });
         const result = await response.json() as WishlistOperationResult;
-        
+
         if (result.success && result.item) {
           dispatch({ type: 'ADD_ITEM', payload: result.item });
           toast({
@@ -513,7 +531,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       } else {
         // Add to guest wishlist
         const success = GuestWishlistManager.addItem(productId, serviceId, options);
-        
+
         if (success) {
           // Reload wishlist to get enriched data
           await loadWishlist();
@@ -531,7 +549,29 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
           return false;
         }
       }
-    } catch (error) {
+    } catch (error: any) {
+      // Senior Dev "Plan B": Robust handling for state desynchronization
+      // If server says 409 Conflict, it means the item exists but our client state is stale.
+      // We should verify this, notify the user gently, and AUTO-HEAL the state.
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const isDuplicate = errorMessage.includes('409') ||
+        errorMessage.toLowerCase().includes('already in wishlist');
+
+      if (isDuplicate) {
+        console.log('[WISHLIST CONTEXT] ℹ️ Item already in wishlist (caught via error), syncing state...');
+
+        toast({
+          title: "Already in Wishlist",
+          description: "This item is already saved to your wishlist.",
+          variant: "default",
+        });
+
+        // Critical Fix: Sync local state with server to reflect reality (turn heart red)
+        loadWishlist().catch(e => console.error("Failed to sync wishlist after duplicate error", e));
+
+        return true; // Treat as success since the goal (item in wishlist) is met
+      }
+
       console.error('[WISHLIST CONTEXT] ❌ Error adding to wishlist:', error);
       toast({
         title: "Error",
@@ -541,7 +581,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }, [isAuthenticated, user, toast, loadWishlist]);
-  
+
   // Remove item from wishlist
   const removeFromWishlist = useCallback(async (itemIdOrProductId?: string, serviceId?: string): Promise<boolean> => {
     // Support both itemId (for authenticated) and productId/serviceId (for guest)
@@ -549,7 +589,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     if (!isAuthenticated) {
       // Guest mode - remove from localStorage
       try {
-        const success = GuestWishlistManager.removeItem(productId, serviceId);
+        const success = GuestWishlistManager.removeItemByContext(productId, serviceId);
         if (success) {
           // Reload wishlist to get updated data
           await loadWishlist();
@@ -557,48 +597,58 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         }
         return false;
       } catch (error) {
-        console.error('Error removing from guest wishlist:', error);
-        return false;
       }
+    }
+
+    // Find the item by productId or serviceId (Before try block for scope access)
+    const item = state.items.find(item =>
+      (productId && item.productId === productId) ||
+      (serviceId && item.serviceId === serviceId)
+    );
+
+    if (!item) {
+      return false;
     }
 
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
-      
-      // Find the item by productId or serviceId
-      const item = state.items.find(item => 
-        (productId && item.productId === productId) || 
-        (serviceId && item.serviceId === serviceId)
-      );
-      
-      if (!item) {
-        return false;
-      }
-      
-      await apiRequest('DELETE', `/api/wishlist/items/${item.id}`);
-      
+
+      // Fix: Correct API URL (removed /items/ segment)
+      await apiRequest('DELETE', `/api/wishlist/${item.id}`);
+
       // Update local state
       dispatch({ type: 'REMOVE_ITEM', payload: { itemId: item.id } });
-      
+
       return true;
-    } catch (error) {
+    } catch (error: any) {
+      // Senior Dev Fix: Idempotent deletion
+      // If 404 (Not Found), it means the item is already gone from the server.
+      // We should treat this as success and ensure our local state is clean.
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      if (errorMessage.includes('404')) {
+        console.log('[WISHLIST CONTEXT] ℹ️ Item already removed on server (404), cleaning up local state...');
+        dispatch({ type: 'REMOVE_ITEM', payload: { itemId: item.id } });
+        return true;
+      }
+
       console.error('Error removing from wishlist:', error);
       return false;
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   }, [isAuthenticated, state.items, loadWishlist]);
-  
+
   // Update wishlist item
   const updateWishlistItem = useCallback(async (
-    itemId: string, 
+    itemId: string,
     updates: Partial<WishlistItemWithDetails>
   ): Promise<boolean> => {
     try {
       if (isAuthenticated && user) {
         const response = await apiRequest('PATCH', `/api/wishlist/${itemId}`, updates);
         const result = await response.json() as WishlistOperationResult;
-        
+
         if (result.success && result.item) {
           dispatch({ type: 'UPDATE_ITEM', payload: { itemId, updates: result.item } });
           return true;
@@ -610,7 +660,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }, [isAuthenticated, user]);
-  
+
   // Clear wishlist
   const clearWishlist = useCallback(async (): Promise<boolean> => {
     try {
@@ -623,7 +673,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         // Clear guest wishlist
         GuestWishlistManager.clear();
       }
-      
+
       dispatch({ type: 'CLEAR_WISHLIST' });
       toast({
         title: "Wishlist Cleared",
@@ -635,25 +685,25 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }, [isAuthenticated, user, state.items, toast]);
-  
+
   // Move item to cart
   const moveToCart = useCallback(async (
-    itemId: string, 
-    quantity: number = 1, 
+    itemId: string,
+    quantity: number = 1,
     removeFromWishlist: boolean = true
   ): Promise<boolean> => {
     try {
       if (isAuthenticated && user) {
         const response = await apiRequest('POST', `/api/wishlist/${itemId}/move-to-cart`, { quantity, removeFromWishlist });
         const result = await response.json() as WishlistOperationResult;
-        
+
         if (result.success) {
           if (removeFromWishlist) {
             dispatch({ type: 'REMOVE_ITEM', payload: { itemId } });
           }
           toast({
             title: "Added to Cart",
-            description: removeFromWishlist 
+            description: removeFromWishlist
               ? "Item moved to cart successfully."
               : "Item added to cart successfully.",
           });
@@ -666,11 +716,11 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       return false;
     }
   }, [isAuthenticated, user, toast]);
-  
+
   // Check if item is in wishlist
   const isInWishlist = useCallback((productId?: string, serviceId?: string): boolean => {
     if (isAuthenticated && user) {
-      return state.items.some(item => 
+      return state.items.some(item =>
         (item.productId === productId && productId) ||
         (item.serviceId === serviceId && serviceId)
       );
@@ -678,19 +728,19 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       return GuestWishlistManager.isInWishlist(productId, serviceId);
     }
   }, [isAuthenticated, user, state.items]);
-  
+
   // Refresh wishlist
   const refreshWishlist = useCallback(async (): Promise<void> => {
     await loadWishlist();
   }, [loadWishlist]);
-  
+
   // Load analytics
   const loadAnalytics = useCallback(async (): Promise<void> => {
     try {
       if (isAuthenticated && user) {
         const response = await apiRequest('GET', '/api/wishlist/analytics');
         const result = await response.json() as { success: boolean; analytics: WishlistAnalytics };
-        
+
         if (result.success && result.analytics) {
           dispatch({ type: 'SET_ANALYTICS', payload: result.analytics });
         }
@@ -699,46 +749,46 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       console.error('[WISHLIST CONTEXT] ❌ Error loading analytics:', error);
     }
   }, [isAuthenticated, user]);
-  
+
   // Get guest wishlist data
   const getGuestWishlistData = useCallback((): GuestWishlistItem[] => {
     return GuestWishlistManager.load().items;
   }, []);
-  
+
   // Migrate guest wishlist to authenticated user
   const migrateGuestWishlist = useCallback(async (): Promise<boolean> => {
     if (migrationInProgress.current) return false;
-    
+
     try {
       migrationInProgress.current = true;
       dispatch({ type: 'SET_SYNC_STATUS', payload: { status: 'syncing' } });
-      
+
       const guestData = GuestWishlistManager.load();
-      
+
       if (guestData.items.length === 0) {
         migrationInProgress.current = false;
         await loadWishlist();
         return true;
       }
-      
+
       console.log('[WISHLIST CONTEXT] 🔄 Migrating', guestData.items.length, 'guest items...');
-      
+
       const response = await apiRequest('POST', '/api/wishlist/bulk', { items: guestData.items });
       const result = await response.json() as WishlistOperationResult;
-      
+
       if (result.success) {
         // Clear guest wishlist after successful migration
         GuestWishlistManager.clear();
-        
+
         // Load the updated wishlist
         await loadWishlist();
-        
+
         const migratedCount = result.items?.length || 0;
         toast({
           title: "Wishlist Synced",
           description: `Successfully synced ${migratedCount} items to your account.`,
         });
-        
+
         console.log('[WISHLIST CONTEXT] ✅ Migration completed:', migratedCount, 'items synced');
         return true;
       } else {
@@ -754,7 +804,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       migrationInProgress.current = false;
     }
   }, [loadWishlist, toast]);
-  
+
   // Context value
   const contextValue: WishlistContextType = useMemo(() => ({
     // State
@@ -765,7 +815,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     totalValue: state.totalValue,
     analytics: state.analytics,
     syncStatus: state.syncStatus,
-    
+
     // Actions
     addToWishlist,
     removeFromWishlist,
@@ -775,7 +825,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     isInWishlist,
     refreshWishlist,
     loadAnalytics,
-    
+
     // Guest specific
     getGuestWishlistData,
     migrateGuestWishlist,
@@ -792,7 +842,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     getGuestWishlistData,
     migrateGuestWishlist,
   ]);
-  
+
   return (
     <WishlistContext.Provider value={contextValue}>
       {children}

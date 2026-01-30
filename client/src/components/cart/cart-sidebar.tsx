@@ -16,6 +16,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatPrice } from '@/lib/currency';
 import { useCartContext } from '@/contexts/cart-context';
 import { cn } from '@/lib/utils';
+import { SHIPPING_THRESHOLDS } from '@shared/logistics';
 
 interface CartSidebarProps {
   children: React.ReactNode;
@@ -284,7 +285,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
 
                   <p className="text-xs text-gray-500 text-center pt-1 flex items-center justify-center gap-1">
                     <Package className="w-3 h-3" />
-                    🚀 Madurai Launch | Free Shipping ₹3,000+
+                    🚀 Madurai Launch | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+
                   </p>
                 </div>
               </div>

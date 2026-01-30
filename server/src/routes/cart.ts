@@ -21,7 +21,7 @@ const CART_CONFIG = {
   minOrderAmount: 0,
   allowGuestCheckout: true,
   cartExpiryHours: 72,
-  freeShippingThreshold: 10000, // ₹10,000 (updated per client requirement)
+  freeShippingThreshold: SHIPPING_THRESHOLDS.FREE_STANDARD / 100, // Derived from shared constants
   standardShipping: 0, // Will be calculated based on policy
   taxRate: 0.18, // 18% GST for India
   deliveryDays: { min: 1, max: 3 }, // 1-3 days delivery
@@ -71,8 +71,8 @@ async function enrichGuestCartItems(guestItems: any[]) {
     if (item.serviceId) {
       const service = await storage.getServiceById(item.serviceId);
       if (service) {
-        enrichedItem.unitPrice = service.price;
-        enrichedItem.originalPrice = service.price;
+        enrichedItem.unitPrice = service.startingPrice;
+        enrichedItem.originalPrice = service.startingPrice;
       }
     }
 
@@ -191,8 +191,8 @@ export function registerCartRoutes(app: Express) {
           const service = await storage.getServiceById(item.serviceId);
           if (service) {
             enrichedItem.service = service;
-            enrichedItem.unitPrice = service.price;
-            enrichedItem.originalPrice = service.price;
+            enrichedItem.unitPrice = service.startingPrice;
+            enrichedItem.originalPrice = service.startingPrice;
           } else {
             console.warn(`[CART] Service not found for ID: ${item.serviceId}, removing orphaned cart item ${item.id}`);
             // Remove orphaned cart items with invalid service IDs
@@ -272,8 +272,8 @@ export function registerCartRoutes(app: Express) {
           const service = await storage.getServiceById(item.serviceId);
           if (service) {
             enrichedItem.service = service;
-            enrichedItem.unitPrice = service.price;
-            enrichedItem.originalPrice = service.price;
+            enrichedItem.unitPrice = service.startingPrice;
+            enrichedItem.originalPrice = service.startingPrice;
           }
         }
 
@@ -341,8 +341,8 @@ export function registerCartRoutes(app: Express) {
         if (!service) {
           return res.status(404).json({ message: "Service not found" });
         }
-        unitPrice = service.price;
-        originalPrice = service.price;
+        unitPrice = service.startingPrice;
+        originalPrice = service.startingPrice;
       }
 
       if (userId) {
@@ -674,7 +674,7 @@ export function registerCartRoutes(app: Express) {
               serviceId: item.serviceId,
               name: service.name,
               quantity: item.quantity,
-              unitPrice: service.price,
+              unitPrice: service.startingPrice,
               imageUrl: service.imageUrls?.[0],
             });
           }

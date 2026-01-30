@@ -11,6 +11,7 @@
  */
 
 import type { OrderStatus } from '@shared/types';
+import { SHIPPING_THRESHOLDS } from '@shared/logistics';
 
 // ═══════════════════════════════════════════════════════════════════════════
 // CONSTANTS
@@ -231,7 +232,7 @@ export function calculateOrderTotals(
     } = {}
 ): OrderTotals {
     const {
-        freeShippingThreshold = 10000,
+        freeShippingThreshold = SHIPPING_THRESHOLDS.FREE_STANDARD / 100,
         shippingCost: baseShippingCost = 100,
         taxRate = 0.18,
     } = options;

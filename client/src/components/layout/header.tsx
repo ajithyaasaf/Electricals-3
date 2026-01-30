@@ -41,6 +41,8 @@ import { CATEGORIES } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { formatPrice } from "@/lib/currency";
+import { SHIPPING_THRESHOLDS } from "@shared/logistics";
 
 export function Header() {
   const { isAuthenticated, user, loading } = useFirebaseAuth();
@@ -139,7 +141,7 @@ export function Header() {
       {/* Top announcement bar - Madurai Launch Phase */}
       <div className="bg-copper-700 text-white text-center py-2 text-sm px-2">
         <span className="text-xs sm:text-sm truncate block">
-          🚀 Madurai Launch! | 1-2 Day Delivery | Premium Products | Free Shipping ₹3,000+
+          🚀 Madurai Launch! | 1-2 Day Delivery | Premium Products | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+
         </span>
       </div>
 

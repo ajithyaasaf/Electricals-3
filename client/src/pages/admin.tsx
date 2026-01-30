@@ -60,6 +60,11 @@ const productSchema = z.object({
   reviewCount: z.number().min(0, "Review count cannot be negative").default(0),
   // Warranty information
   warranty: z.string().optional(),
+  // Specifications (Dynamic key-value pairs)
+  specifications: z.array(z.object({
+    key: z.string().min(1, "Key is required"),
+    value: z.string().min(1, "Value is required")
+  })).optional().default([]),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -367,6 +372,130 @@ function AnalyticsSection({
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
+// SPECIFICATIONS EDITOR COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════
+
+interface SpecificationsEditorProps {
+  form: any;
+}
+
+function SpecificationsEditor({ form }: SpecificationsEditorProps) {
+  // We need to use useFieldArray here, but since we are inside a component that receives the form,
+  // we might need to use the form context or just manage it via the form prop if it's passed correctly.
+  // Actually, useFieldArray requires control from useForm.
+
+  // Since we can't easily add useFieldArray hook inside a sub-component without re-structuring heavily if not already set up,
+  // we will implement a controlled component approach using form.watch and form.setValue for simplicity and robustness 
+  // without breaking the existing massive component structure.
+
+  // Wait, useFieldArray is the standard way. Let's try to grab control from form.
+  // If form is passed as prop (which is ReturnType<typeof useForm>), we can use it.
+
+  // However, simpler approach for this "Senior" request without refactoring the whole parent:
+  // Manage a local state for specs and sync with form, OR just work with form.getValues/setValue
+
+  const specs = form.watch("specifications") || [];
+
+  const addSpec = () => {
+    const current = form.getValues("specifications") || [];
+    form.setValue("specifications", [...current, { key: "", value: "" }]);
+  };
+
+  const removeSpec = (index: number) => {
+    const current = form.getValues("specifications") || [];
+    const newSpecs = [...current];
+    newSpecs.splice(index, 1);
+    form.setValue("specifications", newSpecs);
+  };
+
+  // Check for duplicates
+  const getDuplicateError = (index: number, key: string) => {
+    if (!key) return null;
+    const current = form.getValues("specifications") || [];
+    const isDuplicate = current.some((s: any, i: number) => i !== index && s.key.toLowerCase() === key.toLowerCase());
+    return isDuplicate ? "Duplicate key" : null;
+  };
+
+  return (
+    <div className="space-y-4 pt-4 border-t border-gray-200">
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-gray-700">Specifications</h3>
+          <p className="text-xs text-gray-500 mt-1">Add technical details (e.g., Wattage, Material)</p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={addSpec}
+          className="border-teal-200 text-teal-700 hover:bg-teal-50"
+        >
+          <Plus className="w-3 h-3 mr-1" /> Add Spec
+        </Button>
+      </div>
+
+      <div className="space-y-3">
+        {specs.map((spec: any, index: number) => {
+          const duplicateError = getDuplicateError(index, spec.key);
+
+          return (
+            <div key={index} className="flex gap-3 items-start group">
+              <div className="flex-1 space-y-1">
+                <Input
+                  placeholder="Feature (e.g. Color)"
+                  value={spec.key}
+                  onChange={(e) => {
+                    const newSpecs = [...specs];
+                    newSpecs[index].key = e.target.value;
+                    form.setValue("specifications", newSpecs);
+                  }}
+                  className={duplicateError ? "border-red-500" : ""}
+                />
+                {duplicateError && <p className="text-[10px] text-red-500">{duplicateError}</p>}
+              </div>
+              <div className="flex-1">
+                <Input
+                  placeholder="Value (e.g. Red)"
+                  value={spec.value}
+                  onChange={(e) => {
+                    const newSpecs = [...specs];
+                    newSpecs[index].value = e.target.value;
+                    form.setValue("specifications", newSpecs);
+                  }}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeSpec(index)}
+                className="text-gray-400 hover:text-red-500 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          );
+        })}
+
+        {specs.length === 0 && (
+          <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+            <p className="text-sm text-gray-500">No specifications added yet.</p>
+            <Button
+              type="button"
+              variant="link"
+              onClick={addSpec}
+              className="text-teal-600 h-auto p-0 text-sm"
+            >
+              Add one now
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
 // PRODUCTS SECTION
 // ═══════════════════════════════════════════════════════════════════════════
 
@@ -391,6 +520,7 @@ function ProductsSection({
   productDialogOpen,
   setProductDialogOpen,
   editingItem,
+  setEditingItem,
   onProductSubmit,
   createProductMutation,
   handleEditProduct,
@@ -414,7 +544,32 @@ function ProductsSection({
           <CardTitle className="text-lg">Products</CardTitle>
           <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-500/30">
+              <Button
+                className="bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-500/30"
+                onClick={() => {
+                  setEditingItem(null);
+                  productForm.reset({
+                    name: "",
+                    slug: "",
+                    description: "",
+                    shortDescription: "",
+                    price: "",
+                    originalPrice: "",
+                    sku: "",
+                    stock: 0,
+                    imageUrls: [],
+                    isFeatured: false,
+                    isActive: true,
+                    category: "",
+                    weightInKg: 0,
+                    isBulky: false,
+                    rating: 0,
+                    reviewCount: 0,
+                    warranty: "",
+                    specifications: [] // Reset specs
+                  });
+                }}
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Product
               </Button>
@@ -719,6 +874,9 @@ function ProductsSection({
                     />
                   </div>
 
+                  {/* Specifications Editor */}
+                  <SpecificationsEditor form={productForm} />
+
                   {/* Product Images */}
                   <div className="space-y-4 pt-4 border-t border-gray-200">
                     <div>
@@ -932,6 +1090,7 @@ function AdminDashboard() {
       // Review defaults
       rating: 0,
       reviewCount: 0,
+      specifications: [],
     },
   });
 
@@ -1034,7 +1193,20 @@ function AdminDashboard() {
   const totalOrders = orders.length;
 
   const onProductSubmit = (data: ProductFormData) => {
-    createProductMutation.mutate(data);
+    const { specifications, ...rest } = data;
+
+    // Transform specs array to object
+    const specsObject = (specifications || []).reduce((acc: any, curr: any) => {
+      if (curr.key && curr.key.trim()) {
+        acc[curr.key.trim()] = curr.value;
+      }
+      return acc;
+    }, {});
+
+    createProductMutation.mutate({
+      ...data,
+      specifications: specsObject,
+    } as any);
   };
 
   const handleEditProduct = (product: any) => {
@@ -1065,6 +1237,13 @@ function AdminDashboard() {
       // Review fields with fallbacks for existing products
       rating: product.rating || 0,
       reviewCount: product.reviewCount || 0,
+      warranty: product.warranty || "",
+      specifications: product.specifications
+        ? Object.entries(product.specifications).map(([key, value]) => ({
+          key,
+          value: String(value)
+        }))
+        : [],
     });
     setProductDialogOpen(true);
   };

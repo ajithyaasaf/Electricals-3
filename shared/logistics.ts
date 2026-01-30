@@ -10,7 +10,7 @@ export const SHIPPING_FEES = {
 
 // Constants for Thresholds (in Paise)
 export const SHIPPING_THRESHOLDS = {
-    FREE_STANDARD: 300000, // ₹3000
+    FREE_STANDARD: 299900, // ₹2999
     SUBSIDIZED: 50000,     // ₹500
     FREE_HEAVY: 1000000,   // ₹10,000
 };

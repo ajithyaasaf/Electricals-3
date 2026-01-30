@@ -8,62 +8,41 @@
 
 ## 🎯 Quick Start: Changing Banner/Delivery Messaging
 
-When expanding delivery areas or updating shipping policies, update these locations in order:
+When expanding delivery areas or updating shipping policies, start here:
+
+> [!IMPORTANT]
+> **Shipping Thresholds are now Centralized!**
+> You no longer need to manually update shipping amounts in banners/footers.
+> Update `shared/logistics.ts` and the UI will reflect changes automatically.
+
+### **1. Updating Shipping Thresholds**
+**File**: `shared/logistics.ts`
+**Action**: Change `FREE_STANDARD` or `FREE_HEAVY` in `SHIPPING_THRESHOLDS`.
+
+### **2. Expanding Delivery Areas** (Manual Update Required)
+When expanding to new cities/states, update text in these files:
 
 ---
 
-## 📍 **1. CRITICAL UPDATES** (Customer-Facing)
+## 📍 **CRITICAL UPDATES** (Service Areas Only)
 
 ### **A. Header Banner** ⭐ MOST VISIBLE
-**File**: `client/src/components/layout/header.tsx`  
-**Line**: ~140-142  
+**File**: `client/src/components/layout/header.tsx`
 **Current**:
 ```tsx
-🚀 Madurai Launch! | 1-2 Day Delivery | Premium Products | Free Shipping ₹3,000+*
+🚀 Madurai Launch! | 1-2 Day Delivery | Premium Products | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+*
 ```
-
-**When to Update**:
-- Expanding to new cities
-- Changing free shipping thresholds
-- Launching promotions
-
-**Example for Tamil Nadu Expansion**:
-```tsx
-🎉 Now in Chennai & Madurai! | Fast Delivery Across Tamil Nadu | Free Shipping ₹3,000+*
-```
-
----
+**Update When**: Expanding to new cities. (Shipping amount updates automatically).
 
 ### **B. Footer Delivery Section**
-**File**: `client/src/components/layout/footer.tsx`  
-**Lines**: ~131-158  
-
-**Current Structure**:
-```tsx
-✓ Now Serving: Madurai, Tamil Nadu (625xxx pincodes) - Fast 1-2 Days
-⏳ Coming Soon: All of Tamil Nadu - Expanding Q1 2025
-```
-
-**Update When**: Adding new service areas
-
-**Template**:
-```tsx
-<div>
-  <p className="text-green-400 font-semibold mb-2">✓ Now Serving</p>
-  <p className="text-gray-300">{BUSINESS_POLICIES.serviceAreas.current}</p>
-  <p className="text-xs text-gray-400 mt-1">Fast 1-2 Days Delivery</p>
-</div>
-```
-
-**Disclaimer Section** (Line ~149):
-```tsx
-*Free shipping on standard items ₹3,000+. Heavy/bulky items: ₹5,000+. 
-Weight-based shipping from ₹30.
-```
-
----
+**File**: `client/src/components/layout/footer.tsx`
+**Update When**: Adding new service areas text.
+**Note**: The disclaimer at the bottom updates automatically based on `shared/logistics.ts`.
 
 ### **C. Service Areas Component** (Homepage)
+**File**: `client/src/components/seo/ServiceAreasSection.tsx`
+**Note**: Shipping costs in cards update automatically. Update city names/statuses manually.
+
 **File**: `client/src/components/seo/ServiceAreasSection.tsx`  
 **Entire File** - Shows delivery roadmap
 
@@ -102,7 +81,7 @@ Currently delivering within Madurai (625xxx) • Expanding across Tamil Nadu soo
 **File**: `client/src/components/cart/cart-sidebar.tsx`  
 **Line**: ~281
 ```tsx
-🚀 Madurai Launch | Free Shipping ₹3,000+*
+🚀 Madurai Launch | Free Shipping ₹2,999+*
 ```
 
 #### **Empty Cart**
@@ -321,22 +300,11 @@ When updating delivery messaging, check ALL these files:
 
 **Example**: ₹3,000 → ₹5,000
 
-1. Update `shared/logistics.ts`:
+1. **Update `shared/logistics.ts`**:
    ```typescript
-   FREE_STANDARD: 500000, // ₹5,000 (was 300000)
+   FREE_STANDARD: 500000, // ₹5,000 (was 299900)
    ```
-
-2. Update header banner:
-   ```tsx
-   Free Shipping ₹5,000+*
-   ```
-
-3. Update footer disclaimer:
-   ```tsx
-   *Free shipping on standard items ₹5,000+. ...
-   ```
-
-4. Update all cart components mentioning ₹3,000
+2. **Done!** The Header, Footer, Cart Sidebar, and Service Cards will update automatically.
 
 ---
 

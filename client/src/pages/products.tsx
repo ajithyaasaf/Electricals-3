@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Filter, X } from "lucide-react";
-import { CATEGORIES } from "@/lib/constants";
+import { CATEGORIES, MAX_PRODUCT_PRICE } from "@/lib/constants";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SearchInput } from "@/components/common/search-input";
@@ -24,43 +24,104 @@ import type { ProductFilters } from "@/features/products/types";
 
 // Minimal isolated inputs with debugging - moved outside main component
 const PriceInputs = ({
-  onMinPriceChange,
-  onMaxPriceChange
+  minPrice,
+  maxPrice,
+  onMinChange,
+  onMaxChange,
+  maxLimit
 }: {
-  onMinPriceChange: (value: string) => void;
-  onMaxPriceChange: (value: string) => void;
+  minPrice: number;
+  maxPrice: number;
+  onMinChange: (value: number) => void;
+  onMaxChange: (value: number) => void;
+  maxLimit: number;
 }) => {
-  const [minVal, setMinVal] = useState("");
-  const [maxVal, setMaxVal] = useState("");
+  // Local state for inputs to allow typing freely
+  const [minStr, setMinStr] = useState(minPrice.toString());
+  const [maxStr, setMaxStr] = useState(maxPrice.toString());
 
-  // Debug: Log when component mounts
+  // Sync local state when props change (e.g. from slider)
+  // We only sync if the values are different to avoid cursor jumps if we were syncing on change
+  // But since we sync on blur/enter for the parent, this effect mainly handles slider updates
   useEffect(() => {
-    console.log("🔍 PriceInputs component mounted");
-    return () => console.log("🚮 PriceInputs component unmounted");
-  }, []);
+    setMinStr(minPrice.toString());
+  }, [minPrice]);
+
+  useEffect(() => {
+    setMaxStr(maxPrice.toString());
+  }, [maxPrice]);
+
+  const handleMinCommit = () => {
+    let val = parseInt(minStr);
+    if (isNaN(val)) val = 0;
+
+    // Clamping
+    if (val < 0) val = 0;
+    if (val > maxLimit) val = maxLimit;
+
+    // Cross-over check: Min cannot be greater than current Max
+    if (val > maxPrice) {
+      val = maxPrice;
+    }
+
+    setMinStr(val.toString());
+    onMinChange(val);
+  };
+
+  const handleMaxCommit = () => {
+    let val = parseInt(maxStr);
+    if (isNaN(val)) val = maxLimit;
+
+    // Clamping
+    if (val < 0) val = 0;
+    if (val > maxLimit) val = maxLimit;
+
+    // Cross-over check: Max cannot be less than current Min
+    if (val < minPrice) {
+      val = minPrice;
+    }
+
+    setMaxStr(val.toString());
+    onMaxChange(val);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent, commitFn: () => void) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      (e.currentTarget as HTMLInputElement).blur(); // Triggers onBlur which calls commitFn
+    }
+  };
 
   return (
-    <div className="grid grid-cols-2 gap-2">
-      <Input
-        type="number"
-        placeholder="Min price"
-        value={minVal}
-        onChange={(e) => {
-          setMinVal(e.target.value);
-          onMinPriceChange(e.target.value);
-        }}
-        className="text-sm"
-      />
-      <Input
-        type="number"
-        placeholder="Max price"
-        value={maxVal}
-        onChange={(e) => {
-          setMaxVal(e.target.value);
-          onMaxPriceChange(e.target.value);
-        }}
-        className="text-sm"
-      />
+    <div className="grid grid-cols-2 gap-4">
+      <div className="space-y-1">
+        <label className="text-xs text-gray-500 font-medium ml-1">Minimum</label>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">₹</span>
+          <Input
+            type="number"
+            value={minStr}
+            onChange={(e) => setMinStr(e.target.value)}
+            onBlur={handleMinCommit}
+            onKeyDown={(e) => handleKeyDown(e, handleMinCommit)}
+            className="pl-7 text-sm"
+          />
+        </div>
+      </div>
+      <div className="space-y-1">
+        <label className="text-xs text-gray-500 font-medium ml-1">Maximum</label>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">₹</span>
+          <Input
+            type="number"
+            value={maxStr}
+            onChange={(e) => setMaxStr(e.target.value)}
+            onBlur={handleMaxCommit}
+            onKeyDown={(e) => handleKeyDown(e, handleMaxCommit)}
+            className="pl-7 text-sm"
+          />
+        </div>
+      </div>
     </div>
   );
 };
@@ -157,7 +218,7 @@ const FilterContent = ({
               </button>
             </Badge>
           )}
-          {(debouncedMinPrice > 0 || debouncedMaxPrice < 1000000) && (
+          {(debouncedMinPrice > 0 || debouncedMaxPrice < MAX_PRODUCT_PRICE) && (
             <Badge variant="secondary" className="bg-purple-100 text-purple-800 hover:bg-purple-200 inline-flex items-center gap-1">
               ₹{debouncedMinPrice.toLocaleString('en-IN')} - ₹{debouncedMaxPrice.toLocaleString('en-IN')}
               <button
@@ -219,25 +280,17 @@ const FilterContent = ({
               setMinPriceString(min.toString());
               setMaxPriceString(max.toString());
             }}
-            max={1000000}
+            max={MAX_PRODUCT_PRICE}
             step={500}
             className="w-full"
           />
         </div>
-        <div className="flex items-center justify-between text-sm font-medium text-gray-900 bg-gray-50 rounded-lg p-3">
-          <div className="text-center">
-            <div className="text-xs text-gray-500 mb-1">Minimum</div>
-            <div>₹{minPriceNumber.toLocaleString('en-IN')}</div>
-          </div>
-          <div className="text-gray-400">—</div>
-          <div className="text-center">
-            <div className="text-xs text-gray-500 mb-1">Maximum</div>
-            <div>₹{maxPriceNumber.toLocaleString('en-IN')}</div>
-          </div>
-        </div>
         <PriceInputs
-          onMinPriceChange={setMinPriceString}
-          onMaxPriceChange={setMaxPriceString}
+          minPrice={minPriceNumber}
+          maxPrice={maxPriceNumber}
+          onMinChange={(val) => setMinPriceString(val.toString())}
+          onMaxChange={(val) => setMaxPriceString(val.toString())}
+          maxLimit={MAX_PRODUCT_PRICE}
         />
       </div>
     </div>
@@ -294,7 +347,7 @@ export default function Products() {
     search: urlSearch,
     featured: urlFeatured,
     minPrice: 0,
-    maxPrice: 1000000,
+    maxPrice: MAX_PRODUCT_PRICE,
     sortBy: "newest",
     sortOrder: "desc"
   });
@@ -348,7 +401,7 @@ export default function Products() {
 
   // Convert strings to numbers for API calls only
   const minPriceNumber = minPriceString === "" ? 0 : parseInt(minPriceString) || 0;
-  const maxPriceNumber = maxPriceString === "" ? 1000000 : parseInt(maxPriceString) || 1000000;
+  const maxPriceNumber = maxPriceString === "" ? MAX_PRODUCT_PRICE : parseInt(maxPriceString) || MAX_PRODUCT_PRICE;
 
   // Debounce search and price inputs to reduce API calls
   const debouncedSearch = useDebounce(filters.search, 300);
@@ -417,7 +470,7 @@ export default function Products() {
       search: "",
       featured: false,
       minPrice: 0,
-      maxPrice: 1000000,
+      maxPrice: MAX_PRODUCT_PRICE,
       sortBy: "newest",
       sortOrder: "desc"
     });
@@ -437,7 +490,7 @@ export default function Products() {
     if (filters.categoryId) count++;
     if (filters.search) count++;
     if (filters.featured) count++;
-    if (debouncedMinPrice > 0 || debouncedMaxPrice < 1000000) count++;
+    if (debouncedMinPrice > 0 || debouncedMaxPrice < MAX_PRODUCT_PRICE) count++;
     return count;
   }, [filters.categoryId, filters.search, filters.featured, debouncedMinPrice, debouncedMaxPrice]);
 
@@ -595,7 +648,7 @@ export default function Products() {
                           Featured
                         </Badge>
                       )}
-                      {(debouncedMinPrice > 0 || debouncedMaxPrice < 1000000) && (
+                      {(debouncedMinPrice > 0 || debouncedMaxPrice < MAX_PRODUCT_PRICE) && (
                         <Badge variant="secondary" className="bg-purple-100 text-purple-800">
                           Price Range
                         </Badge>

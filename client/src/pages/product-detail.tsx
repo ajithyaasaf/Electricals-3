@@ -41,6 +41,28 @@ import { ReviewForm } from "@/components/reviews/review-form";
 import { useProductSEO } from "@/hooks/use-seo";
 import type { Product } from "shared/types";
 
+// Helper to format specification keys (e.g., ip_rating -> IP Rating)
+const formatSpecKey = (key: string): string => {
+  const acronyms = ["IP", "LED", "CRI", "GST", "UV", "RGB", "USB", "AC", "DC"];
+
+  return key
+    .split(/_|\s+/)
+    .map((word) => {
+      const upper = word.toUpperCase();
+      if (acronyms.includes(upper)) return upper;
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    })
+    .join(" ");
+};
+
+// Helper to format specification values (e.g., true -> Yes)
+const formatSpecValue = (value: any): string => {
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  if (Array.isArray(value)) return value.join(", ");
+  if (value === null || value === undefined) return "-";
+  return String(value);
+};
+
 export default function ProductDetail() {
   const { slug } = useParams<{ slug: string }>();
   const { addItem } = useCartContext();
@@ -416,7 +438,7 @@ export default function ProductDetail() {
                   <span className="text-sm font-medium text-green-700 bg-green-50 px-2.5 py-1 rounded-full border border-green-100">
                     Save {formatPrice(originalPrice! - price)}
                   </span>
-                  <p className="text-sm text-gray-500">Includes all taxes</p>
+                  <p className="text-sm text-gray-500">(Includes 18% GST)</p>
                 </div>
               )}
             </div>
@@ -603,27 +625,39 @@ export default function ProductDetail() {
           </TabsContent>
 
           <TabsContent value="specifications" className="mt-6">
-            <div className="bg-white rounded-lg p-6">
-              {product.specifications ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {Object.entries(product.specifications).map(
-                    ([key, value]) => (
-                      <div
-                        key={key}
-                        className="flex justify-between py-2 border-b border-gray-200"
-                      >
-                        <span className="font-medium text-gray-900">
-                          {key}:
-                        </span>
-                        <span className="text-gray-600">{String(value)}</span>
-                      </div>
-                    ),
-                  )}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+              {product.specifications && Object.keys(product.specifications).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 divide-y divide-gray-100 md:divide-y-0">
+                  {Object.entries(product.specifications).map(([key, value], index) => (
+                    <div
+                      key={key}
+                      className={`flex flex-col sm:flex-row sm:justify-between px-6 py-4 hover:bg-copper-50/10 transition-colors ${
+                        // Add borders for grid separation
+                        index % 2 === 0 ? "md:border-r border-gray-100" : ""
+                        } ${
+                        // Add bottom borders for all except last row(s)
+                        index < Object.keys(product.specifications!).length - (Object.keys(product.specifications!).length % 2 === 0 ? 2 : 1)
+                          ? "border-b border-gray-100"
+                          : ""
+                        }`}
+                    >
+                      <span className="text-sm font-medium text-gray-900 mb-1 sm:mb-0">
+                        {formatSpecKey(key)}
+                      </span>
+                      <span className="text-sm text-gray-600 sm:text-right font-mono sm:font-sans">
+                        {formatSpecValue(value)}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               ) : (
-                <p className="text-gray-600">
-                  No specifications available for this product.
-                </p>
+                <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                  <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 text-gray-300">
+                    <Clock className="w-8 h-8" />
+                  </div>
+                  <h4 className="text-lg font-medium text-gray-900 mb-1">No specifications found</h4>
+                  <p className="text-gray-500 max-w-xs">Detailed technical specifications haven't been added for this product yet.</p>
+                </div>
               )}
             </div>
           </TabsContent>

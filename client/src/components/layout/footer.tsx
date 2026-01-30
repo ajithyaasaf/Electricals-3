@@ -4,6 +4,8 @@ import { SiVisa, SiMastercard, SiAmericanexpress, SiPaypal } from "react-icons/s
 import { SiPaytm } from "react-icons/si";
 import logoUrl from "@assets/Logo_1763402801870.png";
 import { COMPANY_INFO, CONTACT_INFO, BUSINESS_POLICIES } from "@/lib/constants";
+import { formatPrice } from "@/lib/currency";
+import { SHIPPING_THRESHOLDS } from "@shared/logistics";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -150,7 +152,7 @@ export function Footer() {
                 <strong className="text-gray-300">{BUSINESS_POLICIES.serviceAreas.coverage}</strong>
               </p>
               <p className="text-xs text-gray-500">
-                *Free shipping on standard items ₹3,000+. Heavy/bulky items: ₹5,000+. Weight-based shipping from ₹30.
+                *Free shipping on standard items {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+. Heavy/bulky items: {formatPrice(SHIPPING_THRESHOLDS.FREE_HEAVY)}+. Weight-based shipping from ₹30.
               </p>
             </div>
           </div>
