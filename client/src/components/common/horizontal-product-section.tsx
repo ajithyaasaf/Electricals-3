@@ -203,9 +203,7 @@ export function HorizontalProductSection({
 
                         <div className="flex items-center justify-between">
                           <p className="text-xs text-gray-500 capitalize">{product.category}</p>
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            <div className="text-xs text-teal-600 font-medium">View →</div>
-                          </div>
+
                         </div>
                       </div>
                     </CardContent>

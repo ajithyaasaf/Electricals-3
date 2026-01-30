@@ -421,4 +421,4 @@ const WhyChooseSection: React.FC<WhyChooseSectionProps> = ({
   );
 };
 
-export default WhyChooseSection;
+export default WhyChooseSection;  

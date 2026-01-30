@@ -71,7 +71,6 @@ export function RecentlyViewed() {
     <HorizontalProductSection
       title="Your Recently Viewed Items"
       products={recentlyViewed}
-      viewAllLink="/account?tab=recently-viewed"
       showPrices={true}
     />
   );
