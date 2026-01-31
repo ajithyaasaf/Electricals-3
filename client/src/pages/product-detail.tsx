@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { useCartContext } from "@/contexts/cart-context";
+import { useWishlist } from "@/contexts/wishlist-context";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice, formatSavings } from "@/lib/currency";
@@ -73,7 +74,7 @@ export default function ProductDetail() {
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const [showImageModal, setShowImageModal] = useState(false);
   const [recentlyViewed, setRecentlyViewed] = useState(3);
   const [stockUrgency, setStockUrgency] = useState(false);
@@ -186,37 +187,7 @@ export default function ProductDetail() {
     },
   });
 
-  const toggleWishlistMutation = useMutation({
-    mutationFn: async () => {
-      if (isWishlisted) {
-        await apiRequest("DELETE", `/api/wishlist/${product?.id}`);
-      } else {
-        await apiRequest("POST", "/api/wishlist", {
-          productId: product?.id,
-        });
-      }
-    },
-    onSuccess: () => {
-      setIsWishlisted(!isWishlisted);
-      toast({
-        title: isWishlisted ? "Removed from wishlist" : "Added to wishlist",
-        description: `${product?.name} has been ${isWishlisted ? "removed from" : "added to"} your wishlist.`,
-      });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Please sign in",
-          description: "You need to sign in to manage your wishlist.",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 1000);
-        return;
-      }
-    },
-  });
+
 
   if (isLoading) {
     return (
@@ -264,21 +235,24 @@ export default function ProductDetail() {
   const hasDiscount = originalPrice && originalPrice > price;
   const rating = product.rating || 0;
   const reviewCount = product.reviewCount || 0;
+  const isWishlisted = isInWishlist(product.id);
 
   const handleAddToCart = () => {
     addToCartMutation.mutate();
   };
 
-  const handleToggleWishlist = () => {
-    if (!isAuthenticated) {
+  const handleToggleWishlist = async () => {
+    if (!product) return;
+
+    if (isWishlisted) {
+      await removeFromWishlist(product.id);
       toast({
-        title: "Please sign in",
-        description: "You need to sign in to manage your wishlist.",
-        variant: "destructive",
+        title: "Removed from wishlist",
+        description: `${product.name} has been removed from your wishlist.`,
       });
-      return;
+    } else {
+      await addToWishlist(product.id);
     }
-    toggleWishlistMutation.mutate();
   };
 
   return (
