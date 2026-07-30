@@ -169,24 +169,38 @@ export function registerOrderRoutes(app: Express) {
         });
       }
 
-      // Enrich cart items with product data
+      // Enrich cart items with product or service data
       const enrichedItems = await Promise.all(
         cartItems.map(async (item) => {
-          if (!item.productId) {
-            throw new Error("Cart item missing productId");
+          if (item.productId) {
+            const product = await storage.getProductById(item.productId);
+            if (!product) {
+              throw new Error(`Product "${item.productId}" not found`);
+            }
+            return {
+              productId: item.productId,
+              productName: product.name,
+              productSku: product.sku,
+              productImageUrl: product.imageUrls?.[0],
+              unitPrice: product.price,
+              quantity: item.quantity,
+            };
+          } else if (item.serviceId) {
+            const service = await storage.getServiceById(item.serviceId);
+            if (!service) {
+              throw new Error(`Service "${item.serviceId}" not found`);
+            }
+            return {
+              serviceId: item.serviceId,
+              productName: service.name,
+              productSku: `SVC-${service.id}`,
+              productImageUrl: service.imageUrls?.[0],
+              unitPrice: service.startingPrice,
+              quantity: item.quantity,
+            };
+          } else {
+            throw new Error("Cart item missing product or service identifier");
           }
-          const product = await storage.getProductById(item.productId);
-          if (!product) {
-            throw new Error(`Product "${item.productId}" not found`);
-          }
-          return {
-            productId: item.productId,
-            productName: product.name,
-            productSku: product.sku,
-            productImageUrl: product.imageUrls?.[0],
-            unitPrice: product.price,
-            quantity: item.quantity,
-          };
         })
       );
 

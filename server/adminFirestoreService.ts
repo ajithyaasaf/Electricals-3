@@ -592,7 +592,8 @@ import {
 } from './lib/orderStateMachine';
 
 export interface OrderItemInput {
-    productId: string;
+    productId?: string;
+    serviceId?: string;
     productName: string;
     productSku?: string;
     productImageUrl?: string;
@@ -649,12 +650,13 @@ export async function createOrderWithTransaction(
         }> = [];
 
         for (const item of items) {
-            const productRef = db.collection(COLLECTIONS.PRODUCTS).doc(item.productId);
-            const productSnap = await transaction.get(productRef);
+            if (item.productId) {
+                const productRef = db.collection(COLLECTIONS.PRODUCTS).doc(item.productId);
+                const productSnap = await transaction.get(productRef);
 
-            if (!productSnap.exists) {
-                throw new Error(`Product "${item.productName}" no longer exists.`);
-            }
+                if (!productSnap.exists) {
+                    throw new Error(`Product "${item.productName}" no longer exists.`);
+                }
 
             const productData = productSnap.data()!;
             const currentStock = productData.stock ?? 0;
@@ -673,6 +675,7 @@ export async function createOrderWithTransaction(
                 requestedQuantity: item.quantity,
                 productData, // Store for shipping calculation
             });
+            }
         }
 
         // Step 2: Calculate subtotal
