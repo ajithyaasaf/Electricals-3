@@ -18,6 +18,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useDebounce } from "@/hooks/use-debounce";
 import { SearchInput } from "@/components/common/search-input";
 import { useProducts, useCategories } from "@/features/products/hooks/useProducts";
+import { ELECTRICAL_CATEGORIES } from "@shared/data/categories";
 import { useEnterpriseNavigation } from "@/hooks/use-enterprise-navigation";
 import { useSEO, useCategorySEO } from "@/hooks/use-seo";
 import type { ProductFilters } from "@/features/products/types";
@@ -329,170 +330,130 @@ export default function Products() {
   // Enable enterprise navigation features
   const { navigationState } = useEnterpriseNavigation();
 
-  // Parse URL parameters - these update reactively
-  const urlParams = new URLSearchParams(searchParams);
-  const urlCategory = urlParams.get("category") || "";
-  const urlSearch = urlParams.get("search") || "";
-  const urlFeatured = urlParams.get("featured") === "true";
+  // Enterprise Single Source of Truth (SSoT) URL state management
+  const searchUrlParams = useMemo(() => new URLSearchParams(searchParams), [searchParams]);
+
+  const urlCategory = searchUrlParams.get("category") || "";
+  const urlSearch = searchUrlParams.get("search") || "";
+  const urlFeatured = searchUrlParams.get("featured") === "true";
+  const urlSortBy = searchUrlParams.get("sortBy") || "featured";
+  const urlSortOrder = searchUrlParams.get("sortOrder") || "desc";
+  const urlPage = searchUrlParams.get("page") ? parseInt(searchUrlParams.get("page")!) || 1 : 1;
 
   // SEO optimization for products page
   useSEO();
 
-  // Fetch categories using custom hook FIRST
-  const { data: categories = [] } = useCategories();
-
-  // Filter state - will be synchronized with URL
-  const [filters, setFilters] = useState<ProductFilters>({
-    categoryId: undefined,
-    search: urlSearch,
-    featured: urlFeatured,
-    minPrice: 0,
-    maxPrice: MAX_PRODUCT_PRICE,
-    sortBy: "featured",
-    sortOrder: "desc"
-  });
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-  const itemsPerPage = 20;
-
-  // Track origin of filter changes to prevent loops
-  const syncOriginRef = useRef<'url' | 'filters' | null>(null);
-
-  // Consolidated URL→filters synchronization
-  useEffect(() => {
-    // Wait for categories to load before syncing category filter
-    if (categories.length === 0) return;
-
-    // Derive complete filter state from URL - explicitly clear if not present
-    let categoryId: string | undefined = undefined;
-    if (urlCategory) {
-      const category = categories.find(c => c.slug === urlCategory);
-      if (category) {
-        categoryId = category.id;
-      }
+  // Fetch categories using custom hook
+  const { data: rawCategories = [] } = useCategories();
+  const categories = useMemo(() => {
+    if (Array.isArray(rawCategories) && rawCategories.length > 0) {
+      return rawCategories;
     }
+    return ELECTRICAL_CATEGORIES;
+  }, [rawCategories]);
 
-    // Only sync from URL, don't compare with current filter state
-    // This prevents loops when user clicks X to remove filters
-    // IMPORTANT: Explicitly set all URL-derived filters (including undefined) to clear them when absent
-    syncOriginRef.current = 'url';
-    setFilters(prev => ({
-      ...prev,
-      categoryId: categoryId,  // Explicitly set to undefined when urlCategory is empty
-      search: urlSearch,        // Explicitly set to empty string when not in URL
-      featured: urlFeatured     // Explicitly set to false when not in URL
-    }));
-  }, [categories, urlCategory, urlSearch, urlFeatured]);
+  // Derive current category object and ID directly from URL
+  const currentCategoryObj = useMemo(() => {
+    if (!urlCategory) return null;
+    return categories.find((c: any) => c.slug === urlCategory || c.id === urlCategory) || null;
+  }, [urlCategory, categories]);
 
-  // Reset sync origin after URL updates complete
-  useEffect(() => {
-    if (syncOriginRef.current !== null) {
-      const timer = setTimeout(() => {
-        syncOriginRef.current = null;
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  });
+  const categoryId = currentCategoryObj?.id || (urlCategory ? urlCategory : undefined);
 
-  // Keep price values as strings to prevent input focus loss
+  // Price filter input strings
   const [minPriceString, setMinPriceString] = useState("");
   const [maxPriceString, setMaxPriceString] = useState("");
 
-  // Convert strings to numbers for API calls only
   const minPriceNumber = minPriceString === "" ? 0 : parseInt(minPriceString) || 0;
   const maxPriceNumber = maxPriceString === "" ? MAX_PRODUCT_PRICE : parseInt(maxPriceString) || MAX_PRODUCT_PRICE;
 
-  // Debounce search and price inputs to reduce API calls
-  const debouncedSearch = useDebounce(filters.search, 300);
+  const itemsPerPage = 20;
+
+  // Debounce search and price inputs to prevent excessive API hits
+  const debouncedSearch = useDebounce(urlSearch, 300);
   const debouncedMinPrice = useDebounce(minPriceNumber, 500);
   const debouncedMaxPrice = useDebounce(maxPriceNumber, 500);
 
-  // No need to sync debounced values with filter state - the query uses debounced values directly
+  // Derived filter object for UI components
+  const filters = useMemo(() => ({
+    categoryId,
+    categorySlug: urlCategory,
+    search: urlSearch,
+    featured: urlFeatured,
+    minPrice: minPriceNumber,
+    maxPrice: maxPriceNumber,
+    sortBy: urlSortBy,
+    sortOrder: urlSortOrder
+  }), [categoryId, urlCategory, urlSearch, urlFeatured, minPriceNumber, maxPriceNumber, urlSortBy, urlSortOrder]);
 
-  // Memoize query parameters to prevent unnecessary re-renders
+  // Memoize query parameters for TanStack Query
   const queryParams = useMemo(() => ({
-    categoryId: filters.categoryId,
-    search: debouncedSearch, // Use debounced search
-    featured: filters.featured,
-    minPrice: debouncedMinPrice * 100, // Convert rupees to paise for DB comparison
-    maxPrice: debouncedMaxPrice * 100, // Convert rupees to paise for DB comparison
-    sortBy: filters.sortBy,
-    sortOrder: filters.sortOrder,
+    categoryId,
+    category: urlCategory || undefined,
+    search: debouncedSearch,
+    featured: urlFeatured,
+    minPrice: debouncedMinPrice * 100,
+    maxPrice: debouncedMaxPrice * 100,
+    sortBy: urlSortBy,
+    sortOrder: urlSortOrder,
     limit: itemsPerPage,
-    offset: (currentPage - 1) * itemsPerPage
-  }), [filters.categoryId, filters.featured, filters.sortBy, filters.sortOrder, debouncedSearch, debouncedMinPrice, debouncedMaxPrice, currentPage, itemsPerPage]);
+    offset: (urlPage - 1) * itemsPerPage
+  }), [categoryId, urlCategory, debouncedSearch, urlFeatured, debouncedMinPrice, debouncedMaxPrice, urlSortBy, urlSortOrder, urlPage]);
 
-  // Fetch products using custom hook
+  // Fetch products with TanStack Query
   const { data: productsData, isLoading, isFetching } = useProducts(queryParams);
 
-  // Update URL when filters change (but only from user actions, not URL sync)
-  useEffect(() => {
-    // Don't update URL if the change came from URL sync
-    if (syncOriginRef.current === 'url' || categories.length === 0) {
-      return;
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  // Clean, unified URL filter update handler
+  const updateFilter = useCallback((key: string | Record<string, any>, value?: any) => {
+    const params = new URLSearchParams(window.location.search);
+
+    const applySingle = (k: string, v: any) => {
+      if (k === "categoryId") {
+        if (!v) {
+          params.delete("category");
+        } else {
+          const catObj = categories.find((c: any) => c.id === v || c.slug === v);
+          params.set("category", catObj ? catObj.slug : String(v));
+        }
+      } else if (v === undefined || v === null || v === "" || v === false) {
+        params.delete(k);
+      } else {
+        params.set(k, String(v));
+      }
+    };
+
+    if (typeof key === "object" && key !== null) {
+      Object.entries(key).forEach(([k, v]) => applySingle(k, v));
+      params.delete("page");
+    } else {
+      applySingle(key as string, value);
+      if (key !== "page") {
+        params.delete("page");
+      }
     }
 
-    syncOriginRef.current = 'filters';
+    const newQuery = params.toString();
+    setLocation(`/products${newQuery ? `?${newQuery}` : ''}`);
+  }, [categories, setLocation]);
 
-    const params = new URLSearchParams();
-
-    if (filters.search) params.set("search", filters.search);
-    if (filters.categoryId) {
-      const category = categories.find(c => c.id === filters.categoryId);
-      if (category) params.set("category", category.slug);
-    }
-    if (filters.featured) params.set("featured", "true");
-
-    const newUrl = `/products${params.toString() ? `?${params.toString()}` : ""}`;
-    setLocation(newUrl, { replace: true });
-
-    // Will be reset to null in next render
-  }, [filters.search, filters.categoryId, filters.featured, categories, setLocation]);
-
-  const updateFilter = (key: string, value: any) => {
-    // Store current scroll position to prevent jumping
-    const scrollY = window.scrollY;
-
-    setFilters(prev => ({ ...prev, [key]: value }));
-    setCurrentPage(1);
-
-    // Restore scroll position after a brief delay to allow DOM updates
-    setTimeout(() => {
-      window.scrollTo({ top: scrollY, behavior: 'instant' });
-    }, 50);
-  };
-
-  const clearFilters = () => {
-    // Update filter state
-    setFilters({
-      categoryId: undefined,
-      search: "",
-      featured: false,
-      minPrice: 0,
-      maxPrice: MAX_PRODUCT_PRICE,
-      sortBy: "featured",
-      sortOrder: "desc"
-    });
+  const clearFilters = useCallback(() => {
     setMinPriceString("");
     setMaxPriceString("");
-    setCurrentPage(1);
-
-    // Also clear URL immediately to handle case when categories aren't ready
-    setLocation('/products', { replace: true });
-  };
+    setLocation('/products');
+  }, [setLocation]);
 
   const totalPages = Math.ceil((productsData?.total || 0) / itemsPerPage);
 
-  // Get active filters count for better UX
   const activeFiltersCount = useMemo(() => {
     let count = 0;
-    if (filters.categoryId) count++;
-    if (filters.search) count++;
-    if (filters.featured) count++;
+    if (urlCategory) count++;
+    if (urlSearch) count++;
+    if (urlFeatured) count++;
     if (debouncedMinPrice > 0 || debouncedMaxPrice < MAX_PRODUCT_PRICE) count++;
     return count;
-  }, [filters.categoryId, filters.search, filters.featured, debouncedMinPrice, debouncedMaxPrice]);
+  }, [urlCategory, urlSearch, urlFeatured, debouncedMinPrice, debouncedMaxPrice]);
 
 
 
@@ -659,8 +620,7 @@ export default function Products() {
                       value={`${filters.sortBy}-${filters.sortOrder}`}
                       onValueChange={(value) => {
                         const [sortBy, sortOrder] = value.split("-");
-                        updateFilter("sortBy", sortBy);
-                        updateFilter("sortOrder", sortOrder);
+                        updateFilter({ sortBy, sortOrder });
                       }}
                     >
                       <SelectTrigger className="w-40 border-gray-200 focus:border-copper-300 focus:ring-copper-200">
@@ -713,7 +673,7 @@ export default function Products() {
               <div className="mt-4 text-sm text-gray-600">
                 {productsData && (
                   <span>
-                    Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, productsData.total)} of {productsData.total} products
+                    Showing {((urlPage - 1) * itemsPerPage) + 1}-{Math.min(urlPage * itemsPerPage, productsData.total)} of {productsData.total} products
                   </span>
                 )}
               </div>
@@ -732,9 +692,9 @@ export default function Products() {
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
-                    disabled={currentPage === 1}
+                    disabled={urlPage === 1}
                     onClick={() => {
-                      setCurrentPage(currentPage - 1);
+                      updateFilter("page", urlPage - 1);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                   >
@@ -743,13 +703,13 @@ export default function Products() {
 
                   {[...Array(totalPages)].map((_, i) => {
                     const page = i + 1;
-                    if (page === 1 || page === totalPages || (page >= currentPage - 2 && page <= currentPage + 2)) {
+                    if (page === 1 || page === totalPages || (page >= urlPage - 2 && page <= urlPage + 2)) {
                       return (
                         <Button
                           key={page}
-                          variant={currentPage === page ? "default" : "outline"}
+                          variant={urlPage === page ? "default" : "outline"}
                           onClick={() => {
-                            setCurrentPage(page);
+                            updateFilter("page", page);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
                           className="w-10"
@@ -757,7 +717,7 @@ export default function Products() {
                           {page}
                         </Button>
                       );
-                    } else if (page === currentPage - 3 || page === currentPage + 3) {
+                    } else if (page === urlPage - 3 || page === urlPage + 3) {
                       return <span key={page} className="px-2">...</span>;
                     }
                     return null;
@@ -765,9 +725,9 @@ export default function Products() {
 
                   <Button
                     variant="outline"
-                    disabled={currentPage === totalPages}
+                    disabled={urlPage === totalPages}
                     onClick={() => {
-                      setCurrentPage(currentPage + 1);
+                      updateFilter("page", urlPage + 1);
                       window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}
                   >

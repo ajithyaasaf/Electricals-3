@@ -12,17 +12,9 @@ export function registerProductRoutes(app: Express) {
       let products: any[] = [];
       if (featured === "true") {
         products = await storage.getFeaturedProducts();
-      } else if (categoryId) {
-        products = await storage.getProductsByCategory(categoryId as string);
-      } else if (category) {
-        // Handle category slug - find category by slug first, then get products
-        const categories = await storage.getAllCategories();
-        const foundCategory = categories.find(cat => cat.slug === category);
-        if (foundCategory) {
-          products = await storage.getProductsByCategory(foundCategory.id);
-        } else {
-          products = [];
-        }
+      } else if (categoryId || category) {
+        const catTarget = (categoryId || category) as string;
+        products = await storage.getProductsByCategory(catTarget);
       } else if (search) {
         products = await storage.searchProducts(search as string);
       } else {

@@ -212,9 +212,36 @@ export class FirestoreStorage implements IStorage {
 
   async getProductsByCategory(categoryId: string): Promise<Product[]> {
     try {
-      return await productService.findByField('categoryId', categoryId);
+      // 1. Direct search by categoryId
+      let products = await productService.findByField('categoryId', categoryId);
+      if (products.length > 0) return products;
+
+      // 2. Static category mapping for standard slugs
+      const categorySlugMap: Record<string, string> = {
+        'wires-cables': 'cat-1',
+        'switch-sockets': 'cat-2',
+        'electric-accessories': 'cat-3',
+        'electrical-pipes-fittings': 'cat-4',
+        'distribution-box': 'cat-5',
+        'led-bulb-fittings': 'cat-6',
+      };
+
+      const mappedId = categorySlugMap[categoryId];
+      if (mappedId) {
+        products = await productService.findByField('categoryId', mappedId);
+        if (products.length > 0) return products;
+      }
+
+      // 3. Dynamic lookup via getAllCategories
+      const categories = await this.getAllCategories();
+      const categoryDoc = categories.find(c => c.slug === categoryId || c.id === categoryId);
+      if (categoryDoc) {
+        return await productService.findByField('categoryId', categoryDoc.id);
+      }
+
+      return [];
     } catch (error) {
-      console.log('Using development category products structure');
+      console.error('Error in getProductsByCategory:', error);
       return [];
     }
   }

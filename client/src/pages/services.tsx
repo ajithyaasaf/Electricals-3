@@ -20,15 +20,27 @@ export default function Services() {
   const [, setLocation] = useLocation();
   const isMobile = useIsMobile();
   
-  // Parse URL parameters
+  // Parse URL parameters - these update reactively
   const urlParams = new URLSearchParams(searchParams);
-  const initialCategory = urlParams.get("category") || "";
-  const initialSearch = urlParams.get("search") || "";
+  const urlCategory = urlParams.get("category") || "";
+  const urlSearch = urlParams.get("search") || "";
   
+  // Fetch categories (filter to service categories)
+  const { data: allCategories = [] } = useQuery<any[]>({
+    queryKey: ["/api/categories"],
+  });
+
+  const serviceCategories = (allCategories || []).filter((cat: any) => 
+    cat?.slug?.includes("services") || cat?.slug?.includes("consulting") || cat?.slug?.includes("maintenance") || cat?.type === "service"
+  );
+
+  // Derive categoryId matching urlCategory slug or ID
+  const currentServiceCat = (allCategories || []).find((c: any) => c.slug === urlCategory || c.id === urlCategory);
+  const categoryId = currentServiceCat?.id || (urlCategory ? urlCategory : undefined);
+
   // Filter state
   const [filters, setFilters] = useState({
-    categoryId: initialCategory ? CATEGORIES.find(c => c.slug === initialCategory)?.id : undefined,
-    search: initialSearch,
+    search: urlSearch,
     sortBy: "newest" as "name" | "price" | "rating" | "newest",
     sortOrder: "desc" as "asc" | "desc"
   });
@@ -37,19 +49,14 @@ export default function Services() {
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const itemsPerPage = 12;
 
-  // Fetch categories (filter to service categories)
-  const { data: allCategories = [] } = useQuery<any[]>({
-    queryKey: ["/api/categories"],
-  });
-
-  const serviceCategories = (allCategories || []).filter((cat: any) => 
-    cat?.slug?.includes("services") || cat?.slug?.includes("consulting") || cat?.slug?.includes("maintenance")
-  );
-
-  // Fetch services
+  // Fetch services with resolved categoryId or category slug
   const { data: servicesData, isLoading, isFetching } = useQuery<any>({
     queryKey: ["/api/services", {
-      ...filters,
+      categoryId,
+      category: urlCategory || undefined,
+      search: filters.search,
+      sortBy: filters.sortBy,
+      sortOrder: filters.sortOrder,
       limit: itemsPerPage,
       offset: (currentPage - 1) * itemsPerPage
     }],
@@ -62,32 +69,30 @@ export default function Services() {
     ? servicesData.length 
     : (servicesData?.total || servicesList.length);
 
-  // Update URL when filters change
-  useEffect(() => {
-    const params = new URLSearchParams();
-    
-    if (filters.search) params.set("search", filters.search);
-    if (filters.categoryId) {
-      const category = serviceCategories.find(c => c.id === filters.categoryId);
-      if (category) params.set("category", category.slug);
-    }
-    
-    const newUrl = `/services${params.toString() ? `?${params.toString()}` : ""}`;
-    setLocation(newUrl, { replace: true });
-  }, [filters, serviceCategories, setLocation]);
-
   const updateFilter = (key: string, value: any) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
+    if (key === "categoryId") {
+      const params = new URLSearchParams(window.location.search);
+      if (!value) {
+        params.delete("category");
+      } else {
+        const cat = (allCategories || []).find((c: any) => c.id === value || c.slug === value);
+        params.set("category", cat ? cat.slug : String(value));
+      }
+      const newQuery = params.toString();
+      setLocation(`/services${newQuery ? `?${newQuery}` : ''}`);
+    } else {
+      setFilters(prev => ({ ...prev, [key]: value }));
+    }
     setCurrentPage(1);
   };
 
   const clearFilters = () => {
     setFilters({
-      categoryId: undefined,
       search: "",
       sortBy: "newest",
       sortOrder: "desc"
     });
+    setLocation('/services');
     setCurrentPage(1);
   };
 
@@ -102,7 +107,7 @@ export default function Services() {
           <div className="flex items-center space-x-2">
             <Checkbox 
               id="all-services"
-              checked={!filters.categoryId}
+              checked={!categoryId}
               onCheckedChange={() => updateFilter("categoryId", undefined)}
             />
             <label htmlFor="all-services" className="text-sm text-gray-700">All Services</label>
@@ -111,9 +116,9 @@ export default function Services() {
             <div key={category.id} className="flex items-center space-x-2">
               <Checkbox 
                 id={`service-category-${category.id}`}
-                checked={filters.categoryId === category.id}
+                checked={categoryId === category.id || urlCategory === category.slug}
                 onCheckedChange={() => 
-                  updateFilter("categoryId", filters.categoryId === category.id ? undefined : category.id)
+                  updateFilter("categoryId", (categoryId === category.id || urlCategory === category.slug) ? undefined : category.id)
                 }
               />
               <label htmlFor={`service-category-${category.id}`} className="text-sm text-gray-700">
@@ -263,9 +268,9 @@ export default function Services() {
                     />
                   </Badge>
                 )}
-                {filters.categoryId && (
+                {categoryId && (
                   <Badge variant="secondary" className="flex items-center gap-1">
-                    {serviceCategories.find(c => c.id === filters.categoryId)?.name}
+                    {(allCategories || []).find((c: any) => c.id === categoryId || c.slug === categoryId)?.name || currentServiceCat?.name || "Category"}
                     <X 
                       className="w-3 h-3 cursor-pointer" 
                       onClick={() => updateFilter("categoryId", undefined)}
