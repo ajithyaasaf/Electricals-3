@@ -84,7 +84,7 @@ export async function isAuthenticated(
               firstName: req.user.displayName?.split(' ')[0] || 'User',
               lastName: req.user.displayName?.split(' ').slice(1).join(' ') || '',
               profileImageUrl: req.user.photoURL || '',
-              isAdmin: req.user.email === 'admin@godiva.com'
+              isAdmin: !!req.user.email && (req.user.email.startsWith('admin@') || req.user.email === 'admin@gmail.com' || req.user.email === 'admin@godiva.com' || req.user.email === 'admin@copperbear.com')
             });
             console.log(`✅ Created Firebase user: ${req.user.email}`);
           }
@@ -139,7 +139,7 @@ export async function optionalAuth(
                 firstName: req.user.displayName?.split(' ')[0] || 'User',
                 lastName: req.user.displayName?.split(' ').slice(1).join(' ') || '',
                 profileImageUrl: req.user.photoURL || '',
-                isAdmin: req.user.email === 'admin@godiva.com'
+                isAdmin: !!req.user.email && (req.user.email.startsWith('admin@') || req.user.email === 'admin@gmail.com' || req.user.email === 'admin@godiva.com' || req.user.email === 'admin@copperbear.com')
               });
             }
           } catch (userCreationError) {
