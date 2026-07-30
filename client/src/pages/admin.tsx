@@ -49,18 +49,30 @@ const productSchema = z.object({
   price: z.string().min(1, "Price is required"),
   originalPrice: z.string().optional(),
   sku: z.string().optional(),
-  stock: z.number().min(0, "Stock must be 0 or greater"),
+  stock: z.preprocess(
+    (val) => (val === "" || val === undefined || val === null ? 0 : Number(val)),
+    z.number().min(0, "Stock must be 0 or greater")
+  ),
   imageUrls: z.array(z.string()).optional(),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
   // Delivery fee calculation fields
   category: z.string().optional(),
   categoryId: z.string().optional(),
-  weightInKg: z.number().min(0, "Weight cannot be negative").default(0),
+  weightInKg: z.preprocess(
+    (val) => (val === "" || val === undefined || val === null ? 0 : Number(val)),
+    z.number().min(0, "Weight cannot be negative")
+  ),
   isBulky: z.boolean().default(false),
   // Review fields (manual until real-time reviews implemented)
-  rating: z.number().min(0, "Rating cannot be negative").max(5, "Rating cannot exceed 5").default(0),
-  reviewCount: z.number().min(0, "Review count cannot be negative").default(0),
+  rating: z.preprocess(
+    (val) => (val === "" || val === undefined || val === null ? 0 : Number(val)),
+    z.number().min(0, "Rating cannot be negative").max(5, "Rating cannot exceed 5")
+  ),
+  reviewCount: z.preprocess(
+    (val) => (val === "" || val === undefined || val === null ? 0 : Number(val)),
+    z.number().min(0, "Review count cannot be negative")
+  ),
   // Warranty information
   warranty: z.string().optional(),
   // Specifications (Dynamic key-value pairs)
@@ -618,7 +630,10 @@ function ProductsSection({
                             <Input
                               type="number"
                               {...field}
-                              onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                              onChange={(e) => {
+                                const val = e.target.value;
+                                field.onChange(val === "" ? "" : parseInt(val) || 0);
+                              }}
                               placeholder="0"
                             />
                           </FormControl>
@@ -729,7 +744,10 @@ function ProductsSection({
                                 step="0.01"
                                 min="0"
                                 {...field}
-                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  field.onChange(val === "" ? "" : parseFloat(val) || 0);
+                                }}
                                 placeholder="0.00"
                               />
                             </FormControl>
@@ -786,8 +804,13 @@ function ProductsSection({
                                 max="5"
                                 {...field}
                                 onChange={(e) => {
-                                  const value = parseFloat(e.target.value) || 0;
-                                  field.onChange(Math.min(5, Math.max(0, value)));
+                                  const val = e.target.value;
+                                  if (val === "") {
+                                    field.onChange("");
+                                  } else {
+                                    const value = parseFloat(val) || 0;
+                                    field.onChange(Math.min(5, Math.max(0, value)));
+                                  }
                                 }}
                                 placeholder="4.5"
                               />
@@ -809,7 +832,10 @@ function ProductsSection({
                                 type="number"
                                 min="0"
                                 {...field}
-                                onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  field.onChange(val === "" ? "" : parseInt(val) || 0);
+                                }}
                                 placeholder="21"
                               />
                             </FormControl>
