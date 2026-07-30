@@ -37,19 +37,17 @@ export const SmartLink = forwardRef<HTMLAnchorElement, SmartLinkProps>(
         return;
       }
       
-      // Always prevent default to maintain SPA behavior
+      // Always prevent default to maintain SPA behavior (stops full page reload)
       e.preventDefault();
       
       // Call original onClick if provided (e.g., closing mobile menu)
-      // This executes AFTER preventing default to ensure SPA navigation
+      // IMPORTANT: Do NOT check e.defaultPrevented here — it's always true because
+      // we already called e.preventDefault() above. Just run the side effect and continue.
       if (onClick) {
         onClick(e);
-        if (e.defaultPrevented) return; // If custom onClick prevented further navigation, stop
       }
       
       // Always use enterprise navigation to stay in SPA mode
-      // Even for same-route navigation, this ensures proper state updates
-      // without forcing full-page reloads
       navigateWithProgress(href, { 
         preload,
         replace 

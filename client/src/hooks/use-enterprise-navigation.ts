@@ -97,21 +97,18 @@ export function useEnterpriseNavigation() {
     newPath: string, 
     options: { replace?: boolean; preload?: boolean } = {}
   ) => {
-    const currentPath = location;
-    
-    // For same-path navigation, still trigger setLocation to ensure
-    // React Router/wouter properly updates and re-renders components
-    // This is important for mobile menu closing and filter updates
-    const isSamePath = currentPath === newPath;
+    // CRITICAL FIX: useLocation() from wouter returns ONLY the pathname (e.g. "/products"),
+    // NOT the full URL with query string. Compare the full current URL instead,
+    // so that navigating from /products → /products?category=wires-cables is treated
+    // as a real navigation (not "same path") and the query string is updated correctly.
+    const currentFullPath = window.location.pathname + window.location.search;
+    const isSamePath = currentFullPath === newPath;
 
-    // Save current scroll position
-    saveScrollPosition(currentPath);
+    // Save current scroll position (use location as key, it's just the pathname)
+    saveScrollPosition(location);
 
-    // For same-path navigation, skip loading animation for instant feel
+    // For same-path navigation (truly identical full URL), just close menu etc.
     if (isSamePath) {
-      // Still call setLocation to ensure proper state updates
-      // This is crucial for mobile menu closing and component re-renders
-      setLocation(newPath, { replace: options.replace || true });
       return;
     }
 
@@ -119,7 +116,7 @@ export function useEnterpriseNavigation() {
     setNavigationState(prev => ({
       ...prev,
       isNavigating: true,
-      previousLocation: currentPath,
+      previousLocation: currentFullPath,
       loadingProgress: 0,
     }));
 
@@ -138,15 +135,18 @@ export function useEnterpriseNavigation() {
     }, 100);
 
     try {
-      // Preload data if requested
-      if (options.preload !== false) {
-        await preloadRoute(newPath);
-      }
-
-      // Navigate
+      // NAVIGATE FIRST for instant feel — don't await preload before navigating
+      // This ensures clicking a menu item immediately shows the skeleton/loading state
       setLocation(newPath, { replace: options.replace });
 
-      // Complete loading
+      // Preload data in background AFTER navigation (non-blocking)
+      if (options.preload !== false) {
+        preloadRoute(newPath).catch((err) =>
+          console.warn('Background preload failed:', err)
+        );
+      }
+
+      // Complete loading progress bar
       setNavigationState(prev => ({
         ...prev,
         loadingProgress: 100,
@@ -163,7 +163,7 @@ export function useEnterpriseNavigation() {
             isNavigating: false,
             loadingProgress: 0,
           }));
-        }, 500);
+        }, 300);
       }, 50);
 
     } catch (error) {
