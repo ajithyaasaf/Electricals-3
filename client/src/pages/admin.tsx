@@ -21,8 +21,10 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/image-upload";
 import { formatPrice } from "@/lib/currency";
+import { ELECTRICAL_CATEGORIES } from "@shared/data/categories";
 import {
   Package,
   Users,
@@ -53,6 +55,7 @@ const productSchema = z.object({
   isActive: z.boolean().default(true),
   // Delivery fee calculation fields
   category: z.string().optional(),
+  categoryId: z.string().optional(),
   weightInKg: z.number().min(0, "Weight cannot be negative").default(0),
   isBulky: z.boolean().default(false),
   // Review fields (manual until real-time reviews implemented)
@@ -462,6 +465,7 @@ function ProductsSection({
                     isFeatured: false,
                     isActive: true,
                     category: "",
+                    categoryId: "",
                     weightInKg: 0,
                     isBulky: false,
                     rating: 0,
@@ -624,20 +628,89 @@ function ProductsSection({
                     />
                   </div>
 
-                  {/* Delivery Fee Configuration */}
-                  <div className="space-y-4 pt-4 border-t border-gray-200">
-                    <h3 className="text-sm font-semibold text-gray-700">Delivery Information</h3>
+                  {/* Visibility & Featured Status */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                    <FormField
+                      control={productForm.control}
+                      name="isFeatured"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-amber-200 bg-amber-50/50 p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm font-medium text-amber-900">
+                              Featured Product
+                            </FormLabel>
+                            <p className="text-xs text-amber-700">
+                              Show in Today's Deals & Home Banners
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
 
                     <FormField
                       control={productForm.control}
-                      name="category"
+                      name="isActive"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-emerald-200 bg-emerald-50/50 p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel className="text-sm font-medium text-emerald-900">
+                              Active / Published
+                            </FormLabel>
+                            <p className="text-xs text-emerald-700">
+                              Visible to customers on the website
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Category Selection */}
+                  <div className="space-y-4 pt-4 border-t border-gray-200">
+                    <h3 className="text-sm font-semibold text-gray-700">Category & Delivery Information</h3>
+
+                    <FormField
+                      control={productForm.control}
+                      name="categoryId"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Category</FormLabel>
-                          <FormControl>
-                            <Input {...field} placeholder="e.g., Wires and Cables" />
-                          </FormControl>
-                          <p className="text-xs text-gray-500">Used for default weight if not specified</p>
+                          <FormLabel>Product Category</FormLabel>
+                          <Select
+                            value={field.value || ""}
+                            onValueChange={(val) => {
+                              field.onChange(val);
+                              const selectedCat = ELECTRICAL_CATEGORIES.find((c: any) => c.id === val || c.slug === val);
+                              if (selectedCat) {
+                                productForm.setValue("category", selectedCat.name);
+                              }
+                            }}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a product category" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {ELECTRICAL_CATEGORIES.map((cat: any) => (
+                                <SelectItem key={cat.id} value={cat.id}>
+                                  {cat.name} ({cat.slug})
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <p className="text-xs text-gray-500">Select product category for catalog filtering</p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -1132,6 +1205,7 @@ function AdminDashboard() {
       isActive: product.isActive !== false,
       // Delivery fee fields with fallbacks for existing products
       category: product.category || "",
+      categoryId: product.categoryId || "",
       weightInKg: product.weightInKg || 0,
       isBulky: product.isBulky || false,
       imageUrls: product.imageUrls || [],
