@@ -448,8 +448,7 @@ export class ProductQueries {
   private static async searchAllProducts(searchTerm: string, limitCount: number): Promise<Product[]> {
     const q = query(
       collection(db, COLLECTIONS.PRODUCTS),
-      where('isActive', '==', true),
-      limit(limitCount * 2) // Get more to filter client-side
+      where('isActive', '==', true)
     );
     
     const querySnapshot = await getDocs(q);
@@ -458,26 +457,35 @@ export class ProductQueries {
       return convertFirestoreData<Product>(data);
     });
 
-    // Enhanced client-side filtering with fuzzy matching
-    return products.filter(product => {
-      const name = product.name.toLowerCase();
-      const description = product.description?.toLowerCase() || '';
-      const shortDescription = product.shortDescription?.toLowerCase() || '';
-      const categoryId = product.categoryId?.toLowerCase() || '';
+    const lowerSearchTerm = searchTerm.toLowerCase().trim();
+    const tokens = lowerSearchTerm.split(/\s+/).filter(t => t.length > 0);
+
+    const scoredProducts = products.map(product => {
+      const name = (product.name || '').toLowerCase();
+      const description = (product.description || '').toLowerCase();
+      const shortDescription = (product.shortDescription || '').toLowerCase();
+      const sku = (product.sku || '').toLowerCase();
+      const specs = product.specifications ? Object.values(product.specifications).join(' ').toLowerCase() : '';
+
+      const fullText = `${name} ${shortDescription} ${sku} ${description} ${specs}`;
       
-      // Exact matches get priority
-      if (name.includes(searchTerm) || 
-          description.includes(searchTerm) || 
-          shortDescription.includes(searchTerm)) {
-        return true;
-      }
-      
-      // Fuzzy word matching for better UX
-      const searchWords = searchTerm.split(' ').filter(word => word.length > 2);
-      const productText = `${name} ${description} ${shortDescription} ${categoryId}`;
-      
-      return searchWords.some(word => productText.includes(word));
-    }).slice(0, limitCount);
+      const allTokensMatch = tokens.every(token => fullText.includes(token));
+      if (!allTokensMatch) return { product, score: 0 };
+
+      let score = 10;
+      if (name.includes(lowerSearchTerm)) score += 100;
+      if (sku.includes(lowerSearchTerm)) score += 80;
+      if (shortDescription.includes(lowerSearchTerm)) score += 40;
+      if (product.isFeatured) score += 15;
+
+      return { product, score };
+    });
+
+    return scoredProducts
+      .filter(item => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(item => item.product)
+      .slice(0, limitCount);
   }
   
   private static async searchByCategory(searchTerm: string, limitCount: number): Promise<Product[]> {

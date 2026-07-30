@@ -373,13 +373,13 @@ export class AdminProductQueries {
 
         const db = getDb();
         const lowerSearchTerm = searchTerm.toLowerCase().trim();
+        const tokens = lowerSearchTerm.split(/\s+/).filter(t => t.length > 0);
 
         try {
-            // Get all active products and filter client-side
+            // Get active products for search across entire catalog
             const querySnapshot = await db
                 .collection(COLLECTIONS.PRODUCTS)
                 .where('isActive', '==', true)
-                .limit(limitCount * 2)
                 .get();
 
             const products = querySnapshot.docs.map(doc => {
@@ -387,16 +387,34 @@ export class AdminProductQueries {
                 return convertFirestoreData<Product>(data);
             });
 
-            // Client-side filtering
-            return products.filter(product => {
-                const name = product.name.toLowerCase();
-                const description = product.description?.toLowerCase() || '';
-                const shortDescription = product.shortDescription?.toLowerCase() || '';
+            // Score and filter products
+            const scoredProducts = products.map(product => {
+                const name = (product.name || '').toLowerCase();
+                const description = (product.description || '').toLowerCase();
+                const shortDescription = (product.shortDescription || '').toLowerCase();
+                const sku = (product.sku || '').toLowerCase();
+                const specs = product.specifications ? Object.values(product.specifications).join(' ').toLowerCase() : '';
 
-                return name.includes(lowerSearchTerm) ||
-                    description.includes(lowerSearchTerm) ||
-                    shortDescription.includes(lowerSearchTerm);
-            }).slice(0, limitCount);
+                const fullText = `${name} ${shortDescription} ${sku} ${description} ${specs}`;
+                
+                // Check if all tokens match somewhere in the text
+                const allTokensMatch = tokens.every(token => fullText.includes(token));
+                if (!allTokensMatch) return { product, score: 0 };
+
+                let score = 10;
+                if (name.includes(lowerSearchTerm)) score += 100;
+                if (sku.includes(lowerSearchTerm)) score += 80;
+                if (shortDescription.includes(lowerSearchTerm)) score += 40;
+                if (product.isFeatured) score += 15;
+
+                return { product, score };
+            });
+
+            return scoredProducts
+                .filter(item => item.score > 0)
+                .sort((a, b) => b.score - a.score)
+                .map(item => item.product)
+                .slice(0, limitCount);
         } catch (error) {
             console.warn('[AdminProducts] Search failed:', error);
             return [];
