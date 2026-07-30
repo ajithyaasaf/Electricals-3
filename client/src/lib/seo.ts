@@ -19,9 +19,7 @@ import { formatPrice } from "./currency";
 import { SHIPPING_THRESHOLDS } from "@shared/logistics";
 
 const generateLocationKeywords = () => {
-  const cities = [
-    // ... (unchanged)
-  ];
+  const cities: string[] = [];
   return cities.join(", ");
 };
 

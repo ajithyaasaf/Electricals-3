@@ -18,7 +18,7 @@ export function WishlistItem({ item }: WishlistItemProps) {
   const service = item.service;
   
   const name = product?.name || service?.name || 'Unknown Item';
-  const price = item.currentPrice || product?.price || service?.price || 0;
+  const price = item.currentPrice || product?.price || service?.startingPrice || 0;
   const originalPrice = item.originalPrice || price;
   const imageUrl = (product?.imageUrls?.[0] || service?.imageUrls?.[0]) || '';
   const slug = product?.slug || service?.slug || '';

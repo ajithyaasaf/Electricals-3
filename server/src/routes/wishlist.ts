@@ -56,8 +56,8 @@ async function enrichWishlistItems(items: any[]): Promise<WishlistItemWithDetail
       const service = await storage.getServiceById(item.serviceId);
       if (service) {
         enrichedItem.service = service;
-        enrichedItem.currentPrice = service.price;
-        enrichedItem.originalPrice = service.price;
+        enrichedItem.currentPrice = (service as any).startingPrice || (service as any).price || 0;
+        enrichedItem.originalPrice = (service as any).startingPrice || (service as any).price || 0;
         enrichedItem.isOnSale = false;
         enrichedItem.stockStatus = 'in_stock'; // Services are always available
         enrichedItem.priceDifference = 0;
@@ -106,8 +106,8 @@ async function enrichGuestWishlistItems(guestItems: GuestWishlistItem[]): Promis
       const service = await storage.getServiceById(item.serviceId);
       if (service) {
         enrichedItem.service = service;
-        enrichedItem.currentPrice = service.price;
-        enrichedItem.originalPrice = service.price;
+        enrichedItem.currentPrice = (service as any).startingPrice || (service as any).price || 0;
+        enrichedItem.originalPrice = (service as any).startingPrice || (service as any).price || 0;
         enrichedItem.isOnSale = false;
         enrichedItem.stockStatus = 'in_stock';
         enrichedItem.priceDifference = 0;
@@ -377,16 +377,17 @@ export function registerWishlistRoutes(app: Express) {
           
           if (wishlistItem) {
             // Ensure the wishlist item has all required properties
+            const itemAny = wishlistItem as any;
             const enrichedWishlistItem = {
               ...wishlistItem,
-              priority: wishlistItem.priority || 'medium',
-              tags: wishlistItem.tags || [],
-              addedFrom: wishlistItem.addedFrom || 'other',
-              isPublic: wishlistItem.isPublic || false,
-              notes: wishlistItem.notes || undefined,
-              reminderDate: wishlistItem.reminderDate || undefined,
-              priceAlert: wishlistItem.priceAlert || undefined,
-              sessionId: wishlistItem.sessionId || undefined,
+              priority: itemAny.priority || 'medium',
+              tags: itemAny.tags || [],
+              addedFrom: itemAny.addedFrom || 'other',
+              isPublic: itemAny.isPublic || false,
+              notes: itemAny.notes || undefined,
+              reminderDate: itemAny.reminderDate || undefined,
+              priceAlert: itemAny.priceAlert || undefined,
+              sessionId: itemAny.sessionId || undefined,
             };
             addedItems.push(enrichedWishlistItem);
           }

@@ -45,7 +45,7 @@ export function CartItem({
   }
 
   // Calculate prices
-  const unitPrice = item.unitPrice || productOrService.price;
+  const unitPrice = item.unitPrice || (isProduct ? item.product?.price : item.service?.startingPrice) || 0;
   const originalPrice = item.originalPrice || (isProduct && item.product?.originalPrice) || unitPrice;
   const totalPrice = unitPrice * quantity;
   const totalOriginalPrice = originalPrice * quantity;

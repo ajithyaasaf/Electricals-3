@@ -156,7 +156,7 @@ export function registerAnalyticsRoutes(app: Express) {
       allOrderItems.forEach((item: OrderItem) => {
         if (item.productId) {
           const productId = item.productId;
-          const revenue = item.price * item.quantity;
+          const revenue = item.totalPrice || (item.unitPrice * item.quantity);
           const quantity = item.quantity;
 
           productRevenue[productId] = (productRevenue[productId] || 0) + revenue;

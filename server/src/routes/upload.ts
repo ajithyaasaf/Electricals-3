@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Response } from "express";
 import multer from "multer";
 import { isAuthenticated } from "../../firebaseAuth";
 import { getImageService } from "../lib/image-service-factory";
@@ -72,7 +72,7 @@ export function registerUploadRoutes(app: Express) {
         isAuthenticated,
         upload.single('image'),
         handleMulterError,  // Add error handler
-        async (req: any, res) => {
+        async (req: any, res: Response) => {
             let uploadedMetadata: any = null;
 
             try {
@@ -153,7 +153,7 @@ export function registerUploadRoutes(app: Express) {
         isAuthenticated,
         upload.array('images', 10), // Max 10 images
         handleMulterError,  // Add error handler
-        async (req: any, res) => {
+        async (req: any, res: Response) => {
             try {
                 const userId = req.user?.uid;
 
@@ -231,7 +231,7 @@ export function registerUploadRoutes(app: Express) {
     app.delete(
         "/api/upload/image/:publicId(*)",
         isAuthenticated,
-        async (req: any, res) => {
+        async (req: any, res: Response) => {
             try {
                 const userId = req.user?.uid;
 
@@ -285,7 +285,7 @@ export function registerUploadRoutes(app: Express) {
         isAuthenticated,
         upload.single('image'),
         handleMulterError,  // Add error handler
-        async (req: any, res) => {
+        async (req: any, res: Response) => {
             try {
                 if (!req.file) {
                     return res.status(400).json({

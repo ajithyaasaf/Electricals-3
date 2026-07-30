@@ -8,6 +8,35 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Rate Limiter & Security Headers Middleware
+const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
+const MAX_REQUESTS_PER_WINDOW = 400;
+const ipRequestCounts = new Map<string, { count: number; resetTime: number }>();
+
+app.use((req: Request, res: Response, next: NextFunction) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+
+  if (req.path.startsWith("/api")) {
+    const ip = ((req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "unknown").split(",")[0].trim();
+    const now = Date.now();
+    const clientRecord = ipRequestCounts.get(ip);
+
+    if (!clientRecord || now > clientRecord.resetTime) {
+      ipRequestCounts.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    } else {
+      clientRecord.count += 1;
+      if (clientRecord.count > MAX_REQUESTS_PER_WINDOW) {
+        return res.status(429).json({
+          message: "Too many requests from this IP, please try again later."
+        });
+      }
+    }
+  }
+  next();
+});
+
 // Serve attached assets as static files
 app.use('/attached_assets', express.static('attached_assets'));
 

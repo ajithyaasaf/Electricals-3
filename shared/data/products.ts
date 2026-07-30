@@ -1,7 +1,7 @@
 // CopperBear Electrical Products Database - Customer Data
 import type { Product } from '@shared/types';
 
-export const ELECTRICAL_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
+const RAW_PRODUCTS = [
   // Wires & Cables - Finolex Brand
   {
     id: 'prod-001',
@@ -777,9 +777,15 @@ export const ELECTRICAL_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = [
       brand: 'Sturlite',
       warranty: '2 year warranty'
     },
-    isFeatured: true,
-    isActive: true,
-    rating: 4.9,
-    reviewCount: 21
   }
 ];
+
+export const ELECTRICAL_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = RAW_PRODUCTS.map((item) => ({
+  weightInKg: 0.5,
+  isBulky: false,
+  isFeatured: false,
+  isActive: true,
+  rating: 4.5,
+  reviewCount: 10,
+  ...item,
+}));

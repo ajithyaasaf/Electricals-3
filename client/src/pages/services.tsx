@@ -38,22 +38,29 @@ export default function Services() {
   const itemsPerPage = 12;
 
   // Fetch categories (filter to service categories)
-  const { data: allCategories = [] } = useQuery({
+  const { data: allCategories = [] } = useQuery<any[]>({
     queryKey: ["/api/categories"],
   });
 
-  const serviceCategories = allCategories.filter(cat => 
-    cat.slug.includes("services") || cat.slug.includes("consulting") || cat.slug.includes("maintenance")
+  const serviceCategories = (allCategories || []).filter((cat: any) => 
+    cat?.slug?.includes("services") || cat?.slug?.includes("consulting") || cat?.slug?.includes("maintenance")
   );
 
   // Fetch services
-  const { data: servicesData, isLoading } = useQuery({
+  const { data: servicesData, isLoading } = useQuery<any>({
     queryKey: ["/api/services", {
       ...filters,
       limit: itemsPerPage,
       offset: (currentPage - 1) * itemsPerPage
     }],
   });
+
+  const servicesList: any[] = Array.isArray(servicesData) 
+    ? servicesData 
+    : (servicesData?.services || []);
+  const totalServices: number = Array.isArray(servicesData) 
+    ? servicesData.length 
+    : (servicesData?.total || servicesList.length);
 
   // Update URL when filters change
   useEffect(() => {
@@ -84,7 +91,7 @@ export default function Services() {
     setCurrentPage(1);
   };
 
-  const totalPages = Math.ceil((servicesData?.total || 0) / itemsPerPage);
+  const totalPages = Math.ceil((totalServices || 0) / itemsPerPage);
 
   const FilterContent = () => (
     <div className="space-y-6">
@@ -271,7 +278,7 @@ export default function Services() {
               <div className="mt-4 text-sm text-gray-600">
                 {servicesData && (
                   <span>
-                    Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, servicesData.total)} of {servicesData.total} services
+                    Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, totalServices)} of {totalServices} services
                   </span>
                 )}
               </div>
@@ -293,9 +300,9 @@ export default function Services() {
                   </div>
                 ))}
               </div>
-            ) : servicesData?.services && servicesData.services.length > 0 ? (
+            ) : servicesList && servicesList.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {servicesData.services.map((service) => (
+                {servicesList.map((service: any) => (
                   <ServiceCard key={service.id} service={service} showCategory />
                 ))}
               </div>

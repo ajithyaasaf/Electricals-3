@@ -152,7 +152,7 @@ interface WishlistContextType {
     tags?: string[];
     addedFrom?: 'product_page' | 'listing_page' | 'search' | 'recommendation' | 'other';
   }) => Promise<boolean>;
-  removeFromWishlist: (itemId: string) => Promise<boolean>;
+  removeFromWishlist: (itemIdOrProductId?: string, serviceId?: string) => Promise<boolean>;
   updateWishlistItem: (itemId: string, updates: Partial<WishlistItemWithDetails>) => Promise<boolean>;
   clearWishlist: () => Promise<boolean>;
   moveToCart: (itemId: string, quantity?: number, removeFromWishlist?: boolean) => Promise<boolean>;
