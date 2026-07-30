@@ -685,9 +685,9 @@ export function OrdersManagement() {
     const [statusFilter, setStatusFilter] = useState<string>("all");
     const [searchQuery, setSearchQuery] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
     const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
     const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-    const pageSize = 20;
 
     // Fetch order stats for filter counts
     const { data: stats } = useQuery<Record<string, number>>({
@@ -713,6 +713,7 @@ export function OrdersManagement() {
     });
 
     const orders: Order[] = ordersResponse?.orders || [];
+    const serverTotal = ordersResponse?.pagination?.total ?? (statusFilter === "all" ? (stats ? Object.values(stats).reduce((a, b) => a + b, 0) : orders.length) : (stats?.[statusFilter] || orders.length));
     const hasMore = ordersResponse?.pagination?.hasMore || false;
 
     // Filter orders by search query (client-side)
@@ -726,6 +727,10 @@ export function OrdersManagement() {
             order.customerEmail?.toLowerCase().includes(query)
         );
     });
+
+    const totalOrdersCount = Object.values(stats || {}).reduce((sum, count) => sum + count, 0);
+    const displayTotalCount = searchQuery ? filteredOrders.length : serverTotal;
+    const totalPages = Math.ceil(displayTotalCount / pageSize) || 1;
 
     const handleViewDetails = (orderId: string) => {
         setSelectedOrderId(orderId);
@@ -748,14 +753,12 @@ export function OrdersManagement() {
         }
     };
 
-    const totalOrders = Object.values(stats || {}).reduce((sum, count) => sum + count, 0);
-
     return (
-        <Card>
+        <Card className="border-0 shadow-md">
             <CardHeader>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <CardTitle className="flex items-center gap-2">
-                        <Package className="w-5 h-5" />
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                        <Package className="w-5 h-5 text-teal-600" />
                         Order Management
                     </CardTitle>
                     <div className="flex items-center gap-2">
@@ -766,9 +769,10 @@ export function OrdersManagement() {
                                 refetch();
                                 queryClient.invalidateQueries({ queryKey: ["/api/orders/stats"] });
                             }}
+                            className="border-gray-200 hover:bg-gray-50 text-xs"
                         >
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            Refresh
+                            <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+                            Refresh Orders
                         </Button>
                     </div>
                 </div>
@@ -781,8 +785,9 @@ export function OrdersManagement() {
                         variant={statusFilter === "all" ? "default" : "outline"}
                         size="sm"
                         onClick={() => { setStatusFilter("all"); setCurrentPage(0); }}
+                        className={statusFilter === "all" ? "bg-teal-600 hover:bg-teal-700 text-white" : "border-gray-200"}
                     >
-                        All ({totalOrders})
+                        All ({totalOrdersCount})
                     </Button>
                     {(Object.keys(STATUS_CONFIG) as OrderStatus[]).map((status) => (
                         <Button
@@ -790,7 +795,7 @@ export function OrdersManagement() {
                             variant={statusFilter === status ? "default" : "outline"}
                             size="sm"
                             onClick={() => { setStatusFilter(status); setCurrentPage(0); }}
-                            className="flex items-center gap-1"
+                            className={`flex items-center gap-1.5 text-xs ${statusFilter === status ? "bg-teal-600 hover:bg-teal-700 text-white" : "border-gray-200"}`}
                         >
                             {STATUS_CONFIG[status].icon}
                             {STATUS_CONFIG[status].label} ({stats?.[status] || 0})
@@ -798,18 +803,42 @@ export function OrdersManagement() {
                     ))}
                 </div>
 
-                {/* Search */}
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-                    <Input
-                        placeholder="Search by order number, customer name, or email..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="pl-10"
-                    />
-                </div>
+                {/* Toolbar: Search + Items Per Page */}
+                <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 bg-gray-50/70 p-3 rounded-xl border border-gray-100">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <Input
+                            placeholder="Search by order number, customer name, or email..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setCurrentPage(0);
+                            }}
+                            className="pl-9 bg-white border-gray-200 text-sm focus-visible:ring-teal-500"
+                        />
+                    </div>
 
-                <Separator />
+                    <div className="flex items-center gap-2 text-xs text-gray-500 self-end md:self-auto">
+                        <span>Show per page:</span>
+                        <Select
+                            value={String(pageSize)}
+                            onValueChange={(val) => {
+                                setPageSize(Number(val));
+                                setCurrentPage(0);
+                            }}
+                        >
+                            <SelectTrigger className="w-20 bg-white border-gray-200 text-xs h-9">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="10">10</SelectItem>
+                                <SelectItem value="25">25</SelectItem>
+                                <SelectItem value="50">50</SelectItem>
+                                <SelectItem value="100">100</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </div>
 
                 {/* Orders Table */}
                 {isLoading ? (
@@ -819,90 +848,146 @@ export function OrdersManagement() {
                         ))}
                     </div>
                 ) : filteredOrders.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                        <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>No orders found</p>
+                    <div className="text-center py-12 text-gray-500 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                        <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                        <p className="font-medium text-gray-700">No orders found</p>
+                        <p className="text-xs text-gray-500 mt-1">Try adjusting your search query or status filter.</p>
+                        {searchQuery && (
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setSearchQuery("")}
+                                className="mt-4 text-xs"
+                            >
+                                Clear Search
+                            </Button>
+                        )}
                     </div>
                 ) : (
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Order #</TableHead>
-                                <TableHead>Customer</TableHead>
-                                <TableHead>Items</TableHead>
-                                <TableHead>Total</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead>Date</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {filteredOrders.map((order) => (
-                                <TableRow key={order.id}>
-                                    <TableCell className="font-mono font-medium">
-                                        {order.orderNumber || `#${order.id.slice(-8)}`}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div>
-                                            <p className="font-medium">{order.customerName || "N/A"}</p>
-                                            <p className="text-xs text-gray-500">{order.customerEmail}</p>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{order.itemCount} items</TableCell>
-                                    <TableCell className="font-semibold">
-                                        {formatPrice(order.total)}
-                                    </TableCell>
-                                    <TableCell>
-                                        <StatusUpdateSelect
-                                            orderId={order.id}
-                                            currentStatus={order.status}
-                                        />
-                                    </TableCell>
-                                    <TableCell className="text-sm text-gray-600">
-                                        {new Date(order.createdAt).toLocaleDateString()}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={() => handleViewDetails(order.id)}
-                                        >
-                                            <Eye className="w-4 h-4 mr-1" />
-                                            View
-                                        </Button>
-                                    </TableCell>
+                    <div className="overflow-x-auto rounded-lg border border-gray-200/80">
+                        <Table>
+                            <TableHeader className="bg-gray-50/80">
+                                <TableRow>
+                                    <TableHead className="font-semibold text-gray-700">Order #</TableHead>
+                                    <TableHead className="font-semibold text-gray-700">Customer</TableHead>
+                                    <TableHead className="font-semibold text-gray-700">Items</TableHead>
+                                    <TableHead className="font-semibold text-gray-700">Total</TableHead>
+                                    <TableHead className="font-semibold text-gray-700">Status</TableHead>
+                                    <TableHead className="font-semibold text-gray-700">Date</TableHead>
+                                    <TableHead className="text-right font-semibold text-gray-700 pr-4">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                )}
-
-                {/* Pagination */}
-                {(currentPage > 0 || hasMore) && (
-                    <div className="flex items-center justify-between pt-4">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
-                            disabled={currentPage === 0}
-                        >
-                            <ChevronLeft className="w-4 h-4 mr-1" />
-                            Previous
-                        </Button>
-                        <span className="text-sm text-gray-600">
-                            Page {currentPage + 1}
-                        </span>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage((p) => p + 1)}
-                            disabled={!hasMore}
-                        >
-                            Next
-                            <ChevronRight className="w-4 h-4 ml-1" />
-                        </Button>
+                            </TableHeader>
+                            <TableBody>
+                                {filteredOrders.map((order) => (
+                                    <TableRow key={order.id} className="hover:bg-teal-50/30 transition-colors">
+                                        <TableCell className="font-mono font-medium text-gray-900">
+                                            {order.orderNumber || `#${order.id.slice(-8)}`}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div>
+                                                <p className="font-medium text-gray-900">{order.customerName || "N/A"}</p>
+                                                <p className="text-xs text-gray-500">{order.customerEmail}</p>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="text-sm text-gray-600">{order.itemCount} items</TableCell>
+                                        <TableCell className="font-semibold text-gray-900">
+                                            {formatPrice(order.total)}
+                                        </TableCell>
+                                        <TableCell>
+                                            <StatusUpdateSelect
+                                                orderId={order.id}
+                                                currentStatus={order.status}
+                                            />
+                                        </TableCell>
+                                        <TableCell className="text-xs text-gray-500">
+                                            {new Date(order.createdAt).toLocaleDateString()}
+                                        </TableCell>
+                                        <TableCell className="text-right pr-4">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => handleViewDetails(order.id)}
+                                                className="h-8 px-2.5 text-xs text-teal-700 hover:text-teal-900 hover:bg-teal-50"
+                                            >
+                                                <Eye className="w-3.5 h-3.5 mr-1" />
+                                                View
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
                     </div>
                 )}
+
+                {/* Rich Pagination Controls */}
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-gray-100">
+                    <div className="text-xs text-gray-500 font-medium">
+                        {(() => {
+                            if (displayTotalCount === 0) return "No orders";
+                            if (displayTotalCount === 1) return "Showing 1 order";
+                            const start = currentPage * pageSize + 1;
+                            const end = Math.min((currentPage + 1) * pageSize, displayTotalCount);
+                            return start === end ? `Showing ${start} of ${displayTotalCount} orders` : `Showing ${start}–${end} of ${displayTotalCount} orders`;
+                        })()}
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div className="flex items-center gap-1.5">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+                                disabled={currentPage === 0}
+                                className="h-8 px-2.5 text-xs border-gray-200"
+                            >
+                                <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+                                Previous
+                            </Button>
+
+                            {/* Numbered Page Buttons */}
+                            <div className="flex items-center gap-1">
+                                {[...Array(totalPages)].map((_, i) => {
+                                    const pageNum = i;
+                                    if (
+                                        pageNum === 0 ||
+                                        pageNum === totalPages - 1 ||
+                                        (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                                    ) {
+                                        return (
+                                            <Button
+                                                key={pageNum}
+                                                variant={pageNum === currentPage ? "default" : "outline"}
+                                                size="sm"
+                                                onClick={() => setCurrentPage(pageNum)}
+                                                className={`h-8 w-8 p-0 text-xs ${pageNum === currentPage ? "bg-teal-600 hover:bg-teal-700 text-white font-semibold" : "border-gray-200 text-gray-600"}`}
+                                            >
+                                                {pageNum + 1}
+                                            </Button>
+                                        );
+                                    } else if (
+                                        pageNum === currentPage - 2 ||
+                                        pageNum === currentPage + 2
+                                    ) {
+                                        return <span key={pageNum} className="text-xs text-gray-400 px-1">...</span>;
+                                    }
+                                    return null;
+                                })}
+                            </div>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage((p) => Math.min(totalPages - 1, p + 1))}
+                                disabled={currentPage >= totalPages - 1 && !hasMore}
+                                className="h-8 px-2.5 text-xs border-gray-200"
+                            >
+                                Next
+                                <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </CardContent>
 
             {/* Order Details Modal */}

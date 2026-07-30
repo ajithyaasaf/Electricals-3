@@ -1111,10 +1111,14 @@ function ProductsSection({
 
             {/* Pagination Controls */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t border-gray-100">
-              <div className="text-xs text-gray-500">
-                Showing <span className="font-semibold text-gray-800">{totalItems > 0 ? startIndex + 1 : 0}</span> to{" "}
-                <span className="font-semibold text-gray-800">{Math.min(startIndex + pageSize, totalItems)}</span> of{" "}
-                <span className="font-semibold text-gray-800">{totalItems}</span> products
+              <div className="text-xs text-gray-500 font-medium">
+                {(() => {
+                  if (totalItems === 0) return "No products";
+                  if (totalItems === 1) return "Showing 1 product";
+                  const start = startIndex + 1;
+                  const end = Math.min(startIndex + pageSize, totalItems);
+                  return start === end ? `Showing ${start} of ${totalItems} products` : `Showing ${start}–${end} of ${totalItems} products`;
+                })()}
               </div>
 
               {totalPages > 1 && (
