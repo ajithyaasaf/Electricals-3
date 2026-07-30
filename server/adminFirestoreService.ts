@@ -460,9 +460,14 @@ export class AdminCartQueries {
 
     static async clearCart(userId: string): Promise<void> {
         const items = await this.getUserCart(userId);
+        if (items.length === 0) return;
+
+        const db = getDb();
+        const batch = db.batch();
         for (const item of items) {
-            await adminCartService.delete(item.id);
+            batch.delete(db.collection(COLLECTIONS.CART_ITEMS).doc(item.id));
         }
+        await batch.commit();
     }
 }
 
@@ -486,20 +491,30 @@ export class AdminOrderQueries {
     }
 
     /**
-     * Get order counts by status for admin dashboard
+     * Get order counts by status for admin dashboard - Parallelized query
      */
     static async getOrderStats(): Promise<Record<string, number>> {
         const db = getDb();
         const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
         const stats: Record<string, number> = {};
 
-        for (const status of statuses) {
-            const snapshot = await db
-                .collection(COLLECTIONS.ORDERS)
-                .where('status', '==', status)
-                .count()
-                .get();
-            stats[status] = snapshot.data().count;
+        const results = await Promise.all(
+            statuses.map(async (status) => {
+                try {
+                    const snapshot = await db
+                        .collection(COLLECTIONS.ORDERS)
+                        .where('status', '==', status)
+                        .count()
+                        .get();
+                    return { status, count: snapshot.data().count };
+                } catch (err) {
+                    return { status, count: 0 };
+                }
+            })
+        );
+
+        for (const r of results) {
+            stats[r.status] = r.count;
         }
 
         return stats;

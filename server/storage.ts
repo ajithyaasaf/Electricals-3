@@ -119,6 +119,45 @@ export interface IStorage {
   deleteWishlistItem(id: string): Promise<void>;
 }
 
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+class ServerMemoryCache {
+  private cache = new Map<string, CacheEntry<any>>();
+
+  get<T>(key: string, ttlMs: number): T | null {
+    const entry = this.cache.get(key);
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > ttlMs) {
+      this.cache.delete(key);
+      return null;
+    }
+    return entry.data as T;
+  }
+
+  set<T>(key: string, data: T): void {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  invalidate(prefix: string): void {
+    Array.from(this.cache.keys()).forEach((key) => {
+      if (key.startsWith(prefix)) {
+        this.cache.delete(key);
+      }
+    });
+  }
+}
+
+const serverCache = new ServerMemoryCache();
+const CACHE_TTL = {
+  CATEGORIES: 5 * 60 * 1000, // 5 minutes
+  FEATURED_PRODUCTS: 3 * 60 * 1000, // 3 minutes
+  ALL_PRODUCTS: 1 * 60 * 1000, // 1 minute
+  CATEGORY_PRODUCTS: 2 * 60 * 1000, // 2 minutes
+};
+
 export class FirestoreStorage implements IStorage {
   // User operations
   async createUser(data: CreateUser): Promise<string> {
@@ -144,6 +183,7 @@ export class FirestoreStorage implements IStorage {
 
   // Category operations
   async createCategory(data: CreateCategory): Promise<string> {
+    serverCache.invalidate('categories');
     return categoryService.create(data);
   }
 
@@ -152,10 +192,17 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getAllCategories(): Promise<Category[]> {
+    const cacheKey = 'categories:all';
+    const cached = serverCache.get<Category[]>(cacheKey, CACHE_TTL.CATEGORIES);
+    if (cached) return cached;
+
     try {
-      return await categoryService.getAll();
+      const categories = await categoryService.getAll();
+      if (categories.length > 0) {
+        serverCache.set(cacheKey, categories);
+      }
+      return categories;
     } catch (error) {
-      // If Firestore is not configured, fall back to seeded data structure
       console.log('Using development category structure');
       return [];
     }
@@ -167,22 +214,24 @@ export class FirestoreStorage implements IStorage {
   }
 
   async updateCategory(id: string, data: Partial<CreateCategory>): Promise<void> {
+    serverCache.invalidate('categories');
     return categoryService.update(id, data);
   }
 
   async deleteCategory(id: string): Promise<void> {
+    serverCache.invalidate('categories');
     return categoryService.delete(id);
   }
 
   // Product operations
   async createProduct(data: CreateProduct): Promise<string> {
+    serverCache.invalidate('products');
     return productService.create(data);
   }
 
   async getProductById(id: string): Promise<Product | null> {
     const product = await productService.getById(id);
     if (!product) {
-      // Fallback: search in all products if direct lookup fails
       const allProducts = await this.getAllProducts();
       const foundProduct = allProducts.find(p => p.id === id);
       if (foundProduct) {
@@ -193,8 +242,16 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getAllProducts(): Promise<Product[]> {
+    const cacheKey = 'products:all';
+    const cached = serverCache.get<Product[]>(cacheKey, CACHE_TTL.ALL_PRODUCTS);
+    if (cached) return cached;
+
     try {
-      return await productService.getAll(100);
+      const products = await productService.getAll(100);
+      if (products.length > 0) {
+        serverCache.set(cacheKey, products);
+      }
+      return products;
     } catch (error) {
       console.log('Using development product structure');
       return [];
@@ -202,8 +259,16 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getFeaturedProducts(): Promise<Product[]> {
+    const cacheKey = 'products:featured';
+    const cached = serverCache.get<Product[]>(cacheKey, CACHE_TTL.FEATURED_PRODUCTS);
+    if (cached) return cached;
+
     try {
-      return await ProductQueries.getFeaturedProducts();
+      const products = await ProductQueries.getFeaturedProducts();
+      if (products.length > 0) {
+        serverCache.set(cacheKey, products);
+      }
+      return products;
     } catch (error) {
       console.log('Using development featured products structure');
       return [];
@@ -211,10 +276,17 @@ export class FirestoreStorage implements IStorage {
   }
 
   async getProductsByCategory(categoryId: string): Promise<Product[]> {
+    const cacheKey = `products:cat:${categoryId}`;
+    const cached = serverCache.get<Product[]>(cacheKey, CACHE_TTL.CATEGORY_PRODUCTS);
+    if (cached) return cached;
+
     try {
       // 1. Direct search by categoryId
       let products = await productService.findByField('categoryId', categoryId);
-      if (products.length > 0) return products;
+      if (products.length > 0) {
+        serverCache.set(cacheKey, products);
+        return products;
+      }
 
       // 2. Static category mapping for standard slugs
       const categorySlugMap: Record<string, string> = {
@@ -229,14 +301,21 @@ export class FirestoreStorage implements IStorage {
       const mappedId = categorySlugMap[categoryId];
       if (mappedId) {
         products = await productService.findByField('categoryId', mappedId);
-        if (products.length > 0) return products;
+        if (products.length > 0) {
+          serverCache.set(cacheKey, products);
+          return products;
+        }
       }
 
       // 3. Dynamic lookup via getAllCategories
       const categories = await this.getAllCategories();
       const categoryDoc = categories.find(c => c.slug === categoryId || c.id === categoryId);
       if (categoryDoc) {
-        return await productService.findByField('categoryId', categoryDoc.id);
+        products = await productService.findByField('categoryId', categoryDoc.id);
+        if (products.length > 0) {
+          serverCache.set(cacheKey, products);
+        }
+        return products;
       }
 
       return [];
@@ -261,10 +340,12 @@ export class FirestoreStorage implements IStorage {
   }
 
   async updateProduct(id: string, data: Partial<CreateProduct>): Promise<void> {
+    serverCache.invalidate('products');
     return productService.update(id, data);
   }
 
   async deleteProduct(id: string): Promise<void> {
+    serverCache.invalidate('products');
     return productService.delete(id);
   }
 
