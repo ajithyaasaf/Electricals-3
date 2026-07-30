@@ -230,7 +230,7 @@ function AnalyticsSection({
   return (
     <div className="space-y-6">
       {/* Analytics Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <Card className="border-0 shadow-sm bg-gradient-to-br from-teal-500/10 to-emerald-500/5">
           <CardContent className="p-5">
             <div className="flex items-center justify-between">
@@ -277,31 +277,6 @@ function AnalyticsSection({
               </div>
               <div className="p-3 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-600/20">
                 <Users className="w-6 h-6" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-500/10 to-orange-500/5">
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-amber-800">Avg Order Value</p>
-                <p className="text-2xl font-bold text-gray-900 mt-1">
-                  {customerLoading ? (
-                    <Skeleton className="w-20 h-8" />
-                  ) : (
-                    `₹${customerData?.avgCustomerValue ? Math.round(customerData.avgCustomerValue) : 0}`
-                  )}
-                </p>
-                {!customerLoading && (
-                  <p className="text-xs text-amber-700 font-medium mt-1">
-                    {customerData?.avgOrdersPerCustomer?.toFixed(1) || 1.2} orders/customer
-                  </p>
-                )}
-              </div>
-              <div className="p-3 bg-amber-600 text-white rounded-xl shadow-md shadow-amber-600/20">
-                <ShoppingCart className="w-6 h-6" />
               </div>
             </div>
           </CardContent>
@@ -414,94 +389,30 @@ function AnalyticsSection({
         </Card>
       </div>
 
-      {/* Second Row Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Revenue Products Bar Chart */}
-        <Card className="border-0 shadow-md">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-bold text-gray-900">Top Revenue Products</CardTitle>
-            <p className="text-xs text-gray-500 mt-0.5">Highest earning products in catalog</p>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {topProductsLoading ? (
-              <Skeleton className="w-full h-[250px]" />
-            ) : (
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={topProductsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} interval={0} angle={-15} textAnchor="end" />
-                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}k`} />
-                    <RechartsTooltip
-                      formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, "Revenue"]}
-                      labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
-                      contentStyle={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #e2e8f0" }}
-                    />
-                    <Bar dataKey="Revenue" fill="#0d9488" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Inventory Sales Velocity Bar Chart */}
-        <Card className="border-0 shadow-md">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg font-bold text-gray-900">Inventory Sales Velocity</CardTitle>
-            <p className="text-xs text-gray-500 mt-0.5">Units sold per day (Fast vs Slow movers)</p>
-          </CardHeader>
-          <CardContent className="pt-4">
-            {inventoryLoading ? (
-              <Skeleton className="w-full h-[250px]" />
-            ) : (
-              <div className="h-[250px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={inventoryVelocityData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} interval={0} angle={-15} textAnchor="end" />
-                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
-                    <RechartsTooltip
-                      formatter={(val: any) => [`${val} units/day`, "Sales Velocity"]}
-                      contentStyle={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #e2e8f0" }}
-                    />
-                    <Bar dataKey="Velocity" fill="#059669" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Customer Insights Bottom Cards */}
+      {/* Top Revenue Products Bar Chart */}
       <Card className="border-0 shadow-md">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg font-bold text-gray-900">Customer Performance Metrics</CardTitle>
+          <CardTitle className="text-lg font-bold text-gray-900">Top Revenue Products</CardTitle>
+          <p className="text-xs text-gray-500 mt-0.5">Highest earning products in catalog</p>
         </CardHeader>
-        <CardContent>
-          {customerLoading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              {[...Array(4)].map((_, i) => <Skeleton key={i} className="w-full h-16" />)}
-            </div>
+        <CardContent className="pt-4">
+          {topProductsLoading ? (
+            <Skeleton className="w-full h-[260px]" />
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="p-4 bg-teal-50/60 rounded-2xl border border-teal-100">
-                <p className="text-2xl font-bold text-teal-700">{customerData?.totalCustomers || 0}</p>
-                <p className="text-xs font-medium text-teal-900 mt-0.5">Total Customers</p>
-              </div>
-              <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100">
-                <p className="text-2xl font-bold text-emerald-700">{customerData?.repeatCustomers || 0}</p>
-                <p className="text-xs font-medium text-emerald-900 mt-0.5">Repeat Customers</p>
-              </div>
-              <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
-                <p className="text-2xl font-bold text-blue-700">₹{customerData?.avgCustomerValue ? Math.round(customerData.avgCustomerValue).toLocaleString() : 0}</p>
-                <p className="text-xs font-medium text-blue-900 mt-0.5">Avg Lifetime Value</p>
-              </div>
-              <div className="p-4 bg-purple-50/60 rounded-2xl border border-purple-100">
-                <p className="text-2xl font-bold text-purple-700">{customerData?.avgOrdersPerCustomer?.toFixed(1) || "1.0"}</p>
-                <p className="text-xs font-medium text-purple-900 mt-0.5">Avg Orders per Customer</p>
-              </div>
+            <div className="h-[260px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={topProductsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} interval={0} angle={-10} textAnchor="end" />
+                  <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}k`} />
+                  <RechartsTooltip
+                    formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, "Revenue"]}
+                    labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                    contentStyle={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                  />
+                  <Bar dataKey="Revenue" fill="#0d9488" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           )}
         </CardContent>
