@@ -16,6 +16,7 @@ import { useWishlist } from "@/contexts/wishlist-context";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice, formatSavings } from "@/lib/currency";
+import { getProductLogistics } from "@shared/logistics";
 import {
   Star,
   Heart,
@@ -236,6 +237,7 @@ export default function ProductDetail() {
   const rating = product.rating || 0;
   const reviewCount = product.reviewCount || 0;
   const isWishlisted = isInWishlist(product.id);
+  const logistics = getProductLogistics(product);
 
   const handleAddToCart = () => {
     addToCartMutation.mutate();
@@ -494,20 +496,32 @@ export default function ProductDetail() {
               </div>
 
               {/* Guarantees */}
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200/50">
-                {product.warranty && (
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Shield className="w-4 h-4 text-copper-600" />
-                    <span>{product.warranty}</span>
+              <div className="space-y-3 pt-4 border-t border-gray-200/50">
+                {logistics.isBulky && (
+                  <div className="flex items-center gap-2.5 text-sm text-amber-900 bg-amber-50 p-3 rounded-xl border border-amber-200/80 font-medium">
+                    <Truck className="w-5 h-5 text-amber-600 flex-shrink-0" />
+                    <div>
+                      <p className="font-semibold text-xs text-amber-900 uppercase tracking-wider mb-0.5">Bulky / Heavy Delivery</p>
+                      <p className="text-xs text-amber-700 font-normal">(Flat ₹150 delivery fee)</p>
+                    </div>
                   </div>
                 )}
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <RotateCcw className="w-4 h-4 text-copper-600" />
-                  <span>7-Day Returns</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Shield className="w-4 h-4 text-copper-600" />
-                  <span>Secure Checkout</span>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {product.warranty && (
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Shield className="w-4 h-4 text-copper-600" />
+                      <span>{product.warranty}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <RotateCcw className="w-4 h-4 text-copper-600" />
+                    <span>7-Day Returns</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Shield className="w-4 h-4 text-copper-600" />
+                    <span>Secure Checkout</span>
+                  </div>
                 </div>
               </div>
             </div>
