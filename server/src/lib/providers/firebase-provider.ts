@@ -35,15 +35,13 @@ export class FirebaseProvider implements IImageService {
     private bucketName: string;
 
     constructor() {
-        // Initialize Firebase Storage
+        const serviceAccountRaw = process.env.FIREBASE_SERVICE_ACCOUNT_KEY || process.env.FIREBASE_SERVICE_ACCOUNT;
         this.storage = new Storage({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            credentials: process.env.FIREBASE_SERVICE_ACCOUNT
-                ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
-                : undefined,
+            projectId: process.env.FIREBASE_PROJECT_ID || process.env.VITE_FIREBASE_PROJECT_ID,
+            credentials: serviceAccountRaw ? JSON.parse(serviceAccountRaw) : undefined,
         });
 
-        this.bucketName = process.env.FIREBASE_STORAGE_BUCKET || '';
+        this.bucketName = process.env.FIREBASE_STORAGE_BUCKET || process.env.VITE_FIREBASE_STORAGE_BUCKET || '';
         if (!this.bucketName) {
             throw new Error('Firebase Storage bucket not configured');
         }
