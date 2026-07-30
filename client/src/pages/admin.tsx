@@ -35,6 +35,9 @@ import {
   BarChart3,
   TrendingUp,
   AlertTriangle,
+  Search,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -440,10 +443,38 @@ function ProductsSection({
   onProductSubmit,
   createProductMutation,
   handleEditProduct,
-  handleDeleteProduct,  // Add delete handler
+  handleDeleteProduct,
 }: ProductsSectionProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<any>(null);
+
+  // Pagination & Filtering state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+
+  // Filter products by search and category
+  const filteredProducts = (products || []).filter((product: any) => {
+    const matchesSearch =
+      !searchQuery ||
+      product.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.sku?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.category?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "all" ||
+      product.categoryId === selectedCategory ||
+      product.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  const totalItems = filteredProducts.length;
+  const totalPages = Math.ceil(totalItems / pageSize) || 1;
+  const safePage = Math.min(currentPage, totalPages);
+  const startIndex = (safePage - 1) * pageSize;
+  const paginatedProducts = filteredProducts.slice(startIndex, startIndex + pageSize);
 
   const confirmDelete = () => {
     if (productToDelete) {
@@ -921,74 +952,228 @@ function ProductsSection({
         </div>
       </CardHeader>
       <CardContent>
+        {/* Search & Filter Toolbar */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 mb-6 bg-gray-50/70 p-3 rounded-xl border border-gray-100">
+          {/* Search Bar */}
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Input
+              placeholder="Search products by name, SKU, or category..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1); // Reset to page 1 on search
+              }}
+              className="pl-9 bg-white border-gray-200 focus-visible:ring-teal-500 text-sm"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div className="w-full md:w-60">
+            <Select
+              value={selectedCategory}
+              onValueChange={(val) => {
+                setSelectedCategory(val);
+                setCurrentPage(1); // Reset to page 1 on filter
+              }}
+            >
+              <SelectTrigger className="bg-white border-gray-200 text-sm">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {ELECTRICAL_CATEGORIES.map((cat: any) => (
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Page Size Selector */}
+          <div className="flex items-center gap-2 text-xs text-gray-500 self-end md:self-auto">
+            <span>Show:</span>
+            <Select
+              value={String(pageSize)}
+              onValueChange={(val) => {
+                setPageSize(Number(val));
+                setCurrentPage(1);
+              }}
+            >
+              <SelectTrigger className="w-20 bg-white border-gray-200 text-xs h-9">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">10</SelectItem>
+                <SelectItem value="25">25</SelectItem>
+                <SelectItem value="50">50</SelectItem>
+                <SelectItem value="100">100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {productsLoading ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => <Skeleton key={i} className="w-full h-16" />)}
           </div>
-        ) : products.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Package className="w-12 h-12 mx-auto mb-2 opacity-30" />
-            <p>No products yet</p>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-12 text-gray-500 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+            <Package className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+            <p className="font-medium text-gray-700">No matching products found</p>
+            <p className="text-xs text-gray-500 mt-1">Try adjusting your search terms or category filter.</p>
+            {(searchQuery || selectedCategory !== "all") && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSelectedCategory("all");
+                  setCurrentPage(1);
+                }}
+                className="mt-4 text-xs"
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         ) : (
-          <div className="overflow-x-auto -mx-4 sm:mx-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="hidden sm:table-cell">Price</TableHead>
-                  <TableHead className="hidden sm:table-cell">Stock</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-[80px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products.map((product: any) => (
-                  <TableRow key={product.id}>
-                    <TableCell>
-                      <div>
-                        <span className="font-medium">{product.name}</span>
-                        <div className="sm:hidden text-sm text-gray-500">
-                          {formatPrice(product.price)} • Stock: {product.stock}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">{formatPrice(product.price)}</TableCell>
-                    <TableCell className="hidden sm:table-cell">{product.stock}</TableCell>
-                    <TableCell>
-                      <Badge variant={product.isActive ? "default" : "secondary"} className="text-xs">
-                        {product.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditProduct(product)}
-                          className="h-8 w-8"
-                          title="Edit product"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => {
-                            setProductToDelete(product);
-                            setDeleteDialogOpen(true);
-                          }}
-                          className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                          title="Delete product"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
+          <div>
+            <div className="overflow-x-auto -mx-4 sm:mx-0 rounded-lg border border-gray-200/80">
+              <Table>
+                <TableHeader className="bg-gray-50/80">
+                  <TableRow>
+                    <TableHead className="font-semibold text-gray-700">Name</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700">Price</TableHead>
+                    <TableHead className="hidden sm:table-cell font-semibold text-gray-700">Stock</TableHead>
+                    <TableHead className="font-semibold text-gray-700">Status</TableHead>
+                    <TableHead className="w-[100px] text-right font-semibold text-gray-700 pr-4">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {paginatedProducts.map((product: any) => (
+                    <TableRow key={product.id} className="hover:bg-teal-50/30 transition-colors">
+                      <TableCell>
+                        <div>
+                          <span className="font-medium text-gray-900">{product.name}</span>
+                          {product.category && (
+                            <span className="ml-2 text-[11px] font-normal px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                              {product.category}
+                            </span>
+                          )}
+                          <div className="sm:hidden text-xs text-gray-500 mt-1">
+                            {formatPrice(product.price)} • Stock: {product.stock}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell font-medium">{formatPrice(product.price)}</TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <span className={`font-mono text-xs px-2 py-1 rounded-md ${product.stock > 10 ? "bg-emerald-50 text-emerald-700 font-semibold" : product.stock > 0 ? "bg-amber-50 text-amber-700 font-semibold" : "bg-red-50 text-red-700 font-semibold"}`}>
+                          {product.stock} pcs
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={product.isActive ? "default" : "secondary"} className={`text-xs ${product.isActive ? "bg-teal-600 hover:bg-teal-700" : ""}`}>
+                          {product.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right pr-4">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditProduct(product)}
+                            className="h-8 w-8 text-gray-600 hover:text-teal-600 hover:bg-teal-50"
+                            title="Edit product"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setProductToDelete(product);
+                              setDeleteDialogOpen(true);
+                            }}
+                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                            title="Delete product"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Pagination Controls */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-4 pt-4 border-t border-gray-100">
+              <div className="text-xs text-gray-500">
+                Showing <span className="font-semibold text-gray-800">{totalItems > 0 ? startIndex + 1 : 0}</span> to{" "}
+                <span className="font-semibold text-gray-800">{Math.min(startIndex + pageSize, totalItems)}</span> of{" "}
+                <span className="font-semibold text-gray-800">{totalItems}</span> products
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={safePage <= 1}
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    className="h-8 px-2.5 text-xs border-gray-200"
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5 mr-1" />
+                    Previous
+                  </Button>
+
+                  {/* Page Number Buttons */}
+                  <div className="flex items-center gap-1">
+                    {[...Array(totalPages)].map((_, i) => {
+                      const pageNum = i + 1;
+                      // Display pagination numbers smartly
+                      if (
+                        pageNum === 1 ||
+                        pageNum === totalPages ||
+                        (pageNum >= safePage - 1 && pageNum <= safePage + 1)
+                      ) {
+                        return (
+                          <Button
+                            key={pageNum}
+                            variant={pageNum === safePage ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => setCurrentPage(pageNum)}
+                            className={`h-8 w-8 p-0 text-xs ${pageNum === safePage ? "bg-teal-600 hover:bg-teal-700 text-white font-semibold" : "border-gray-200 text-gray-600"}`}
+                          >
+                            {pageNum}
+                          </Button>
+                        );
+                      } else if (
+                        pageNum === safePage - 2 ||
+                        pageNum === safePage + 2
+                      ) {
+                        return <span key={pageNum} className="text-xs text-gray-400 px-1">...</span>;
+                      }
+                      return null;
+                    })}
+                  </div>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={safePage >= totalPages}
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    className="h-8 px-2.5 text-xs border-gray-200"
+                  >
+                    Next
+                    <ChevronRight className="w-3.5 h-3.5 ml-1" />
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
