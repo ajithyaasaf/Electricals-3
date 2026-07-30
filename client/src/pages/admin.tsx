@@ -389,7 +389,7 @@ function AnalyticsSection({
         </Card>
       </div>
 
-      {/* Top Revenue Products Bar Chart */}
+      {/* Top Revenue Products Bar Chart (Commented out per user request)
       <Card className="border-0 shadow-md">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg font-bold text-gray-900">Top Revenue Products</CardTitle>
@@ -417,6 +417,7 @@ function AnalyticsSection({
           )}
         </CardContent>
       </Card>
+      */}
     </div>
   );
 }
