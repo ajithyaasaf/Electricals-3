@@ -47,7 +47,7 @@ export default function Services() {
   );
 
   // Fetch services
-  const { data: servicesData, isLoading } = useQuery<any>({
+  const { data: servicesData, isLoading, isFetching } = useQuery<any>({
     queryKey: ["/api/services", {
       ...filters,
       limit: itemsPerPage,
@@ -285,7 +285,7 @@ export default function Services() {
             </div>
 
             {/* Services Grid */}
-            {isLoading ? (
+            {isLoading || isFetching ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[...Array(6)].map((_, i) => (
                   <div key={i} className="bg-gray-100 rounded-xl p-6">

@@ -424,7 +424,7 @@ export default function Products() {
   }), [filters.categoryId, filters.featured, filters.sortBy, filters.sortOrder, debouncedSearch, debouncedMinPrice, debouncedMaxPrice, currentPage, itemsPerPage]);
 
   // Fetch products using custom hook
-  const { data: productsData, isLoading } = useProducts(queryParams);
+  const { data: productsData, isLoading, isFetching } = useProducts(queryParams);
 
   // Update URL when filters change (but only from user actions, not URL sync)
   useEffect(() => {
@@ -720,7 +720,7 @@ export default function Products() {
             </div>
 
             {/* Products Grid */}
-            {isLoading ? (
+            {isLoading || isFetching ? (
               <ProductGridSkeleton count={12} />
             ) : (
               <ProductGrid products={(productsData?.products || []) as any} showCategory />

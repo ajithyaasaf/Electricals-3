@@ -72,8 +72,10 @@ import {
     Calendar,
     AlertTriangle,
     FileText,
+    Printer,
 } from "lucide-react";
 import { formatPrice } from "@/lib/currency";
+import { printInvoice } from "@/lib/invoiceGenerator";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -247,7 +249,7 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2">
-                        <FileText className="w-5 h-5" />
+                        <FileText className="w-5 h-5 text-teal-600" />
                         Order {details?.order?.orderNumber || `#${orderId.slice(-8)}`}
                     </DialogTitle>
                     <DialogDescription>
@@ -550,7 +552,17 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                     <p className="text-center text-gray-500 py-8">Failed to load order details</p>
                 )}
 
-                <DialogFooter>
+                <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
+                    {details?.order && details?.items ? (
+                        <Button
+                            variant="default"
+                            onClick={() => printInvoice(details.order, details.items)}
+                            className="bg-teal-600 hover:bg-teal-700 text-white flex items-center gap-2"
+                        >
+                            <Printer className="w-4 h-4" />
+                            Print Tax Invoice
+                        </Button>
+                    ) : <div />}
                     <Button variant="outline" onClick={onClose}>Close</Button>
                 </DialogFooter>
             </DialogContent>
@@ -718,6 +730,22 @@ export function OrdersManagement() {
     const handleViewDetails = (orderId: string) => {
         setSelectedOrderId(orderId);
         setDetailsModalOpen(true);
+    };
+
+    const handleQuickPrint = async (orderId: string) => {
+        try {
+            const res = await apiRequest("GET", `/api/orders/${orderId}`);
+            const data = await res.json();
+            if (data?.order && data?.items) {
+                printInvoice(data.order, data.items);
+            }
+        } catch (err) {
+            toast({
+                title: "Error",
+                description: "Failed to fetch order details for printing invoice.",
+                variant: "destructive"
+            });
+        }
     };
 
     const totalOrders = Object.values(stats || {}).reduce((sum, count) => sum + count, 0);
