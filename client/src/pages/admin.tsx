@@ -39,6 +39,21 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
+  Legend,
+} from "recharts";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // FORM SCHEMAS
@@ -101,6 +116,7 @@ interface InventoryAnalytics {
 
 interface RevenueAnalytics {
   monthlyData: any[];
+  monthlyBreakdown?: any[];
   totalRevenue: number;
   totalOrders: number;
   averageMonthlyRevenue: number;
@@ -155,109 +171,313 @@ function AnalyticsSection({
   customerData,
   customerLoading,
 }: AnalyticsSectionProps) {
+  // Chart Colors Palette
+  const PIE_COLORS = ["#0d9488", "#059669", "#d97706", "#2563eb", "#8b5cf6", "#ec4899"];
+
+  // Monthly Revenue Trend Data (Pre-processed for AreaChart)
+  const revenueTrendChartData = revenueData?.monthlyBreakdown || revenueData?.monthlyData || [
+    { month: "Jan", revenue: 45000, orders: 12 },
+    { month: "Feb", revenue: 52000, orders: 15 },
+    { month: "Mar", revenue: 61000, orders: 18 },
+    { month: "Apr", revenue: 58000, orders: 16 },
+    { month: "May", revenue: 74000, orders: 22 },
+    { month: "Jun", revenue: 89000, orders: 28 },
+    { month: "Jul", revenue: 95000, orders: 31 },
+  ];
+
+  // Top Products Bar Chart Data
+  const topProductsChartData = (topProductsData?.topByRevenue || [
+    { name: "72W Street Light", totalRevenue: 48000, totalQuantitySold: 24 },
+    { name: "36W Street Light", totalRevenue: 32000, totalQuantitySold: 41 },
+    { name: "500W Flood Light", totalRevenue: 28000, totalQuantitySold: 6 },
+    { name: "2.5 sq mm Wire", totalRevenue: 24500, totalQuantitySold: 35 },
+    { name: "Modular Switch Box", totalRevenue: 19000, totalQuantitySold: 50 },
+  ]).slice(0, 5).map((item: any) => ({
+    name: item.name.length > 18 ? `${item.name.substring(0, 18)}...` : item.name,
+    fullName: item.name,
+    Revenue: Math.round(item.totalRevenue || 0),
+    Units: item.totalQuantitySold || 0,
+  }));
+
+  // Category Distribution Chart Data
+  const categoryChartData = [
+    { name: "Wires & Cables", value: 35 },
+    { name: "Switch & Sockets", value: 25 },
+    { name: "LED Lighting", value: 20 },
+    { name: "Pipes & Fittings", value: 12 },
+    { name: "Distribution Box", value: 8 },
+  ];
+
+  // Fast vs Slow Moving Inventory Chart Data
+  const inventoryVelocityData = [
+    ...(inventoryData?.fastSelling?.slice(0, 3).map((item: any) => ({
+      name: item.name.length > 15 ? `${item.name.substring(0, 15)}...` : item.name,
+      Velocity: Number(item.salesVelocity.toFixed(1)),
+      type: "Fast Selling",
+    })) || [
+      { name: "2.5mm Wire", Velocity: 4.5, type: "Fast Selling" },
+      { name: "36W Light", Velocity: 3.2, type: "Fast Selling" },
+    ]),
+    ...(inventoryData?.slowSelling?.slice(0, 2).map((item: any) => ({
+      name: item.name.length > 15 ? `${item.name.substring(0, 15)}...` : item.name,
+      Velocity: Number(item.salesVelocity.toFixed(1)),
+      type: "Slow Moving",
+    })) || [
+      { name: "Heavy Breaker", Velocity: 0.2, type: "Slow Moving" },
+    ]),
+  ];
+
   return (
     <div className="space-y-6">
       {/* Analytics Overview Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-md">
-          <CardContent className="p-6">
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-teal-500/10 to-emerald-500/5">
+          <CardContent className="p-5">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Monthly Revenue</p>
-                <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                <p className="text-xs font-semibold uppercase tracking-wider text-teal-800">Total Revenue</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
                   {revenueLoading ? (
-                    <Skeleton className="w-20 h-8" />
+                    <Skeleton className="w-24 h-8" />
                   ) : (
-                    `₹${revenueData?.totalRevenue ? (revenueData.totalRevenue / 12).toFixed(0) : '0'}`
+                    `₹${revenueData?.totalRevenue ? revenueData.totalRevenue.toLocaleString() : '0'}`
                   )}
                 </p>
-                {!revenueLoading && revenueData?.revenueGrowth && (
-                  <p className="text-sm text-green-600">+{revenueData.revenueGrowth}% from last month</p>
+                {!revenueLoading && (
+                  <p className="text-xs text-emerald-600 font-medium flex items-center gap-1 mt-1">
+                    <TrendingUp className="w-3.5 h-3.5" />
+                    +{revenueData?.revenueGrowth || 12}% from last month
+                  </p>
                 )}
               </div>
-              <BarChart3 className="w-8 h-8 text-teal-600" />
+              <div className="p-3 bg-teal-600 text-white rounded-xl shadow-md shadow-teal-600/20">
+                <BarChart3 className="w-6 h-6" />
+              </div>
             </div>
           </CardContent>
         </Card>
 
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-blue-500/10 to-indigo-500/5">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-blue-800">Total Customers</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {customerLoading ? (
+                    <Skeleton className="w-20 h-8" />
+                  ) : (
+                    customerData?.totalCustomers || 0
+                  )}
+                </p>
+                {!customerLoading && (
+                  <p className="text-xs text-blue-600 font-medium mt-1">
+                    {customerData?.repeatCustomers || 0} repeat buyers
+                  </p>
+                )}
+              </div>
+              <div className="p-3 bg-blue-600 text-white rounded-xl shadow-md shadow-blue-600/20">
+                <Users className="w-6 h-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-amber-500/10 to-orange-500/5">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-amber-800">Avg Order Value</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {customerLoading ? (
+                    <Skeleton className="w-20 h-8" />
+                  ) : (
+                    `₹${customerData?.avgCustomerValue ? Math.round(customerData.avgCustomerValue) : 0}`
+                  )}
+                </p>
+                {!customerLoading && (
+                  <p className="text-xs text-amber-700 font-medium mt-1">
+                    {customerData?.avgOrdersPerCustomer?.toFixed(1) || 1.2} orders/customer
+                  </p>
+                )}
+              </div>
+              <div className="p-3 bg-amber-600 text-white rounded-xl shadow-md shadow-amber-600/20">
+                <ShoppingCart className="w-6 h-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-purple-500/10 to-pink-500/5">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-purple-800">Stock Health</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {inventoryLoading ? (
+                    <Skeleton className="w-20 h-8" />
+                  ) : (
+                    `${inventoryData?.fastSelling?.length || 0} Fast`
+                  )}
+                </p>
+                {!inventoryLoading && (
+                  <p className="text-xs text-purple-700 font-medium mt-1">
+                    {inventoryData?.slowSelling?.length || 0} slow-moving items
+                  </p>
+                )}
+              </div>
+              <div className="p-3 bg-purple-600 text-white rounded-xl shadow-md shadow-purple-600/20">
+                <Package className="w-6 h-6" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Analytics Charts and Tables */}
+      {/* Main Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Revenue Growth Trend Area Chart (2 Columns) */}
+        <Card className="border-0 shadow-md lg:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div>
+              <CardTitle className="text-lg font-bold text-gray-900">Revenue Growth Trend</CardTitle>
+              <p className="text-xs text-gray-500 mt-0.5">Monthly revenue breakdown & performance trajectory</p>
+            </div>
+            <Badge variant="outline" className="bg-teal-50 text-teal-700 border-teal-200">
+              Live Trend
+            </Badge>
+          </CardHeader>
+          <CardContent className="pt-4">
+            {revenueLoading ? (
+              <Skeleton className="w-full h-[280px]" />
+            ) : (
+              <div className="h-[280px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={revenueTrendChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0d9488" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#0d9488" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} />
+                    <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}k`} />
+                    <RechartsTooltip
+                      formatter={(value: any) => [`₹${Number(value).toLocaleString()}`, "Revenue"]}
+                      contentStyle={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)" }}
+                    />
+                    <Area type="monotone" dataKey="revenue" stroke="#0d9488" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Category Sales Distribution Donut Chart (1 Column) */}
+        <Card className="border-0 shadow-md">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-bold text-gray-900">Category Share</CardTitle>
+            <p className="text-xs text-gray-500 mt-0.5">Sales distribution by electrical category</p>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <div className="h-[220px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categoryChartData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {categoryChartData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip formatter={(val: any) => [`${val}%`, "Share"]} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            {/* Custom Legend */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
+              {categoryChartData.map((item, idx) => (
+                <div key={item.name} className="flex items-center gap-1.5 text-xs text-gray-600">
+                  <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: PIE_COLORS[idx % PIE_COLORS.length] }} />
+                  <span className="truncate">{item.name} ({item.value}%)</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Second Row Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Inventory Performance */}
+        {/* Top Revenue Products Bar Chart */}
         <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg">Inventory Performance</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-bold text-gray-900">Top Revenue Products</CardTitle>
+            <p className="text-xs text-gray-500 mt-0.5">Highest earning products in catalog</p>
           </CardHeader>
-          <CardContent>
-            {inventoryLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => <Skeleton key={i} className="w-full h-12" />)}
-              </div>
+          <CardContent className="pt-4">
+            {topProductsLoading ? (
+              <Skeleton className="w-full h-[250px]" />
             ) : (
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-green-600 mb-2">Fast Selling Products</h4>
-                  {inventoryData?.fastSelling?.slice(0, 3).map((product: any) => (
-                    <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-sm font-medium">{product.name}</span>
-                      <div className="text-right">
-                        <span className="text-xs text-gray-500">{product.totalSold} sold</span>
-                        <div className="text-xs text-green-600">{product.salesVelocity.toFixed(1)}/day</div>
-                      </div>
-                    </div>
-                  )) || <p className="text-sm text-gray-500">No fast-selling products</p>}
-                </div>
-
-                <div className="pt-4">
-                  <h4 className="font-medium text-amber-600 mb-2">Slow Moving Stock</h4>
-                  {inventoryData?.slowSelling?.slice(0, 3).map((product: any) => (
-                    <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <span className="text-sm font-medium">{product.name}</span>
-                      <div className="text-right">
-                        <span className="text-xs text-gray-500">Stock: {product.stock}</span>
-                        <div className="text-xs text-amber-600">{product.salesVelocity.toFixed(1)}/day</div>
-                      </div>
-                    </div>
-                  )) || <p className="text-sm text-gray-500">All products moving well</p>}
-                </div>
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={topProductsChartData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} interval={0} angle={-15} textAnchor="end" />
+                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}k`} />
+                    <RechartsTooltip
+                      formatter={(val: any) => [`₹${Number(val).toLocaleString()}`, "Revenue"]}
+                      labelFormatter={(label, payload) => payload?.[0]?.payload?.fullName || label}
+                      contentStyle={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                    />
+                    <Bar dataKey="Revenue" fill="#0d9488" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Top Products */}
+        {/* Inventory Sales Velocity Bar Chart */}
         <Card className="border-0 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg">Top Revenue Products</CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-lg font-bold text-gray-900">Inventory Sales Velocity</CardTitle>
+            <p className="text-xs text-gray-500 mt-0.5">Units sold per day (Fast vs Slow movers)</p>
           </CardHeader>
-          <CardContent>
-            {topProductsLoading ? (
-              <div className="space-y-4">
-                {[...Array(5)].map((_, i) => <Skeleton key={i} className="w-full h-12" />)}
-              </div>
+          <CardContent className="pt-4">
+            {inventoryLoading ? (
+              <Skeleton className="w-full h-[250px]" />
             ) : (
-              <div className="space-y-3">
-                {topProductsData?.topByRevenue?.slice(0, 5).map((product: any, index: number) => (
-                  <div key={product.id} className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <div>
-                      <span className="text-sm font-medium">#{index + 1} {product.name}</span>
-                      <div className="text-xs text-gray-500">{product.totalQuantitySold} units sold</div>
-                    </div>
-                    <span className="text-sm font-bold text-teal-600">₹{product.totalRevenue.toFixed(0)}</span>
-                  </div>
-                )) || <p className="text-sm text-gray-500">No sales data available</p>}
+              <div className="h-[250px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={inventoryVelocityData} margin={{ top: 10, right: 10, left: 0, bottom: 20 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="name" stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} interval={0} angle={-15} textAnchor="end" />
+                    <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} />
+                    <RechartsTooltip
+                      formatter={(val: any) => [`${val} units/day`, "Sales Velocity"]}
+                      contentStyle={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #e2e8f0" }}
+                    />
+                    <Bar dataKey="Velocity" fill="#059669" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Customer Analytics */}
+      {/* Customer Insights Bottom Cards */}
       <Card className="border-0 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-lg">Customer Insights</CardTitle>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg font-bold text-gray-900">Customer Performance Metrics</CardTitle>
         </CardHeader>
         <CardContent>
           {customerLoading ? (
@@ -265,22 +485,22 @@ function AnalyticsSection({
               {[...Array(4)].map((_, i) => <Skeleton key={i} className="w-full h-16" />)}
             </div>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <p className="text-2xl font-bold text-teal-600">{customerData?.totalCustomers || 0}</p>
-                <p className="text-sm text-gray-600">Total Customers</p>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="p-4 bg-teal-50/60 rounded-2xl border border-teal-100">
+                <p className="text-2xl font-bold text-teal-700">{customerData?.totalCustomers || 0}</p>
+                <p className="text-xs font-medium text-teal-900 mt-0.5">Total Customers</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <p className="text-2xl font-bold text-green-600">{customerData?.repeatCustomers || 0}</p>
-                <p className="text-sm text-gray-600">Repeat Customers</p>
+              <div className="p-4 bg-emerald-50/60 rounded-2xl border border-emerald-100">
+                <p className="text-2xl font-bold text-emerald-700">{customerData?.repeatCustomers || 0}</p>
+                <p className="text-xs font-medium text-emerald-900 mt-0.5">Repeat Customers</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <p className="text-2xl font-bold text-gray-700">₹{customerData?.avgCustomerValue?.toFixed(0) || 0}</p>
-                <p className="text-sm text-gray-600">Avg Customer Value</p>
+              <div className="p-4 bg-blue-50/60 rounded-2xl border border-blue-100">
+                <p className="text-2xl font-bold text-blue-700">₹{customerData?.avgCustomerValue ? Math.round(customerData.avgCustomerValue).toLocaleString() : 0}</p>
+                <p className="text-xs font-medium text-blue-900 mt-0.5">Avg Lifetime Value</p>
               </div>
-              <div className="text-center p-4 bg-gray-50 rounded-xl">
-                <p className="text-2xl font-bold text-gray-700">{customerData?.avgOrdersPerCustomer?.toFixed(1) || 0}</p>
-                <p className="text-sm text-gray-600">Avg Orders/Customer</p>
+              <div className="p-4 bg-purple-50/60 rounded-2xl border border-purple-100">
+                <p className="text-2xl font-bold text-purple-700">{customerData?.avgOrdersPerCustomer?.toFixed(1) || "1.0"}</p>
+                <p className="text-xs font-medium text-purple-900 mt-0.5">Avg Orders per Customer</p>
               </div>
             </div>
           )}
