@@ -91,7 +91,7 @@ export function HeroSection() {
                   size="sm"
                   className="bg-yellow-400 hover:bg-yellow-500 text-black font-semibold w-fit rounded-full px-6"
                 >
-                  <SmartLink href="/products?category=wiring-cables">Shop Now</SmartLink>
+                  <SmartLink href="/products?category=wires-cables">Shop Now</SmartLink>
                 </Button>
               </div>
             </div>

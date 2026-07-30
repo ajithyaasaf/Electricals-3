@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { SmartLink } from "@/components/navigation/smart-link";
 import { Zap, CreditCard, MapPin } from "lucide-react";
 import { SiVisa, SiMastercard, SiAmericanexpress, SiPaypal } from "react-icons/si";
 import { SiPaytm } from "react-icons/si";
@@ -11,11 +12,12 @@ export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const productLinks = [
-    { name: "Circuit Breakers", href: "/products?category=circuit-breakers" },
-    { name: "Wiring & Cables", href: "/products?category=wiring-cables" },
-    { name: "Electrical Tools", href: "/products?category=electrical-tools" },
-    { name: "Panels & Boxes", href: "/products?category=panels-boxes" },
-    { name: "Outlets & Switches", href: "/products?category=outlets-switches" },
+    { name: "Wires and Cables", href: "/products?category=wires-cables" },
+    { name: "Switch and Sockets", href: "/products?category=switch-sockets" },
+    { name: "Electric Accessories", href: "/products?category=electric-accessories" },
+    { name: "Pipes & Fittings", href: "/products?category=electrical-pipes-fittings" },
+    { name: "Distribution Box", href: "/products?category=distribution-box" },
+    { name: "Led Bulb & Fittings", href: "/products?category=led-bulb-fittings" },
     { name: "All Products", href: "/products" },
   ];
 
@@ -91,9 +93,9 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               {productLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="text-gray-400 hover:text-white transition-colors">
+                  <SmartLink href={link.href} className="text-gray-400 hover:text-white transition-colors">
                     {link.name}
-                  </Link>
+                  </SmartLink>
                 </li>
               ))}
             </ul>
