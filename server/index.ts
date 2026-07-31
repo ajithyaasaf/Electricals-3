@@ -13,6 +13,16 @@ const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000;
 const MAX_REQUESTS_PER_WINDOW = 400;
 const ipRequestCounts = new Map<string, { count: number; resetTime: number }>();
 
+// Periodic cleanup to prevent memory leaks from expired IP records
+setInterval(() => {
+  const now = Date.now();
+  Array.from(ipRequestCounts.entries()).forEach(([ip, record]) => {
+    if (now > record.resetTime) {
+      ipRequestCounts.delete(ip);
+    }
+  });
+}, 30 * 60 * 1000);
+
 app.use((req: Request, res: Response, next: NextFunction) => {
   res.setHeader("X-Content-Type-Options", "nosniff");
   res.setHeader("X-Frame-Options", "DENY");
