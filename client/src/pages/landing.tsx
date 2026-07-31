@@ -4,12 +4,22 @@ import { HeroSection } from "@/components/common/hero-section";
 import { BannerSlider } from "@/components/common/banner-slider";
 import { Testimonials } from "@/components/common/testimonials";
 import { DealsBanner } from "@/components/common/deals-banner";
+import { VisualCategoryCards } from "@/components/common/visual-category-cards";
+import { HorizontalProductSection } from "@/components/common/horizontal-product-section";
 import { useUserInterest } from "@/hooks/use-user-interest";
 import { useQuery } from "@tanstack/react-query";
+import { getOptimizedImageUrl } from "@/lib/performance";
 import WhyChooseSection from "@/components/common/why-choose-section";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Zap, Shield, Clock, Star, ArrowRight, Users, Award, MapPin } from "lucide-react";
+
+import circuitBreakersImg from "@assets/generated_images/Circuit_breakers_electrical_panel_ed1b7697.png";
+import wiringCablesImg from "@assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png";
+import toolsImg from "@assets/generated_images/Professional_electrical_tools_collection_b4db75d8.png";
+import lightingImg from "@assets/generated_images/LED_street_light_fixture_4dde50e8.png";
+import wireCoilImg from "@assets/generated_images/Finolex_2.5sqmm_wire_coil_072a94ff.png";
+import pipesFittingsImg from "@assets/generated_images/Electrical_material_samples_bb4fe5fd.png";
 
 export default function Landing() {
   const { topCategory, hasHistory } = useUserInterest();
@@ -24,7 +34,7 @@ export default function Landing() {
   });
 
   const { data: productsData } = useQuery({
-    queryKey: ["/api/products", { featured: true, limit: 8 }],
+    queryKey: ["/api/products", { featured: true, limit: 12 }],
   });
 
   const categoryProducts = (categoryDealsData as any)?.products || [];
@@ -33,6 +43,54 @@ export default function Landing() {
 
   const isPersonalized = hasHistory && categoryProducts.length > 0;
   const activeDeals = isPersonalized ? categoryProducts : (generalDeals.length > 0 ? generalDeals : featuredProducts);
+
+  const visualCategories = [
+    {
+      name: "Wires and Cables",
+      slug: "wires-cables",
+      image: wiringCablesImg,
+      description: "Flame retardant PVC insulated cables, Finolex & Kundan copper conductors",
+      itemCount: 180,
+      featured: true
+    },
+    {
+      name: "Switch and Sockets",
+      slug: "switch-sockets",
+      image: wireCoilImg,
+      description: "Modular switches, electrical sockets, plug points, and switching solutions",
+      itemCount: 150,
+      featured: true
+    },
+    {
+      name: "Electric Accessories",
+      slug: "electric-accessories",
+      image: toolsImg,
+      description: "Extension cords, plug adapters, electrical connectors, and testing accessories",
+      itemCount: 320,
+      featured: true
+    },
+    {
+      name: "Electrical Pipes and Fittings",
+      slug: "electrical-pipes-fittings",
+      image: pipesFittingsImg,
+      description: "PVC conduits, electrical pipes, junction boxes, and cable management fittings",
+      itemCount: 95
+    },
+    {
+      name: "Distribution Box",
+      slug: "distribution-box",
+      image: circuitBreakersImg,
+      description: "MCB boxes, distribution boards, consumer units, and electrical panels",
+      itemCount: 85
+    },
+    {
+      name: "Led Bulb and Fittings",
+      slug: "led-bulb-fittings",
+      image: lightingImg,
+      description: "LED bulbs, emergency lights, flood lights, street lights, and LED fittings",
+      itemCount: 200
+    }
+  ];
 
   const features = [
     {
@@ -150,44 +208,16 @@ export default function Landing() {
         className="bg-white"
       />
 
-      {/* Product Highlights */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">
-              Premium Electrical Products
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Discover our comprehensive selection of electrical products from trusted manufacturers.
-            </p>
-          </div>
+      {/* Visual Category Cards */}
+      <VisualCategoryCards categories={visualCategories} />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            {productHighlights.map((product, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{product.name}</h3>
-                  <p className="text-gray-600 mb-4">{product.description}</p>
-                  <Link href="/products" className="text-teal-600 hover:text-teal-700 font-medium inline-flex items-center">
-                    Shop Now <ArrowRight className="w-4 h-4 ml-1" />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="text-center">
-            <Button asChild size="lg" className="bg-teal-600 hover:bg-teal-700 text-white">
-              <Link href="/products">Browse All Products</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      {/* Featured Electrical Catalog */}
+      <HorizontalProductSection
+        title="Featured Electrical Catalog"
+        products={featuredProducts}
+        viewAllLink="/products"
+        showPrices={true}
+      />
 
       {/* CTA Section */}
       <section className="py-16 bg-teal-700">

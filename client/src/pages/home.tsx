@@ -25,6 +25,13 @@ import { formatPrice } from "@/lib/currency";
 import { useSEO } from "@/hooks/use-seo";
 import { useUserInterest } from "@/hooks/use-user-interest";
 
+import circuitBreakersImg from "@assets/generated_images/Circuit_breakers_electrical_panel_ed1b7697.png";
+import wiringCablesImg from "@assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png";
+import toolsImg from "@assets/generated_images/Professional_electrical_tools_collection_b4db75d8.png";
+import lightingImg from "@assets/generated_images/LED_street_light_fixture_4dde50e8.png";
+import wireCoilImg from "@assets/generated_images/Finolex_2.5sqmm_wire_coil_072a94ff.png";
+import pipesFittingsImg from "@assets/generated_images/Electrical_material_samples_bb4fe5fd.png";
+
 export default function Home() {
   const { user } = useFirebaseAuth();
   const { topCategory, hasHistory } = useUserInterest();
@@ -68,51 +75,51 @@ export default function Home() {
     queryKey: ["/api/products", { trending: true, limit: 12 }],
   });
 
-  // Visual category cards data
+  // Visual category cards data matching official CopperBear catalog categories
   const visualCategories = [
     {
-      name: "Circuit Breakers & Protection",
-      slug: "circuit-breakers",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
-      description: "Professional-grade circuit breakers, GFCI outlets, and electrical protection equipment",
-      itemCount: 240,
-      featured: true
-    },
-    {
-      name: "Wiring & Cable Solutions",
-      slug: "wiring-cables",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
-      description: "High-quality electrical wiring, cables, and connectivity solutions for all projects",
+      name: "Wires and Cables",
+      slug: "wires-cables",
+      image: wiringCablesImg,
+      description: "Flame retardant PVC insulated cables, Finolex & Kundan copper conductors",
       itemCount: 180,
       featured: true
     },
     {
-      name: "Professional Tools",
-      slug: "electrical-tools",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1504148455328-c376907d081c?ixlib=rb-4.0.3&auto=format&fit=crop", 400, 300),
-      description: "Premium electrical tools and equipment for professionals and contractors",
+      name: "Switch and Sockets",
+      slug: "switch-sockets",
+      image: wireCoilImg,
+      description: "Modular switches, electrical sockets, plug points, and switching solutions",
+      itemCount: 150,
+      featured: true
+    },
+    {
+      name: "Electric Accessories",
+      slug: "electric-accessories",
+      image: toolsImg,
+      description: "Extension cords, plug adapters, electrical connectors, and testing accessories",
       itemCount: 320,
       featured: true
     },
     {
-      name: "Panels & Boxes",
-      slug: "panels-boxes",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
-      description: "Electrical panels and junction boxes",
+      name: "Electrical Pipes and Fittings",
+      slug: "electrical-pipes-fittings",
+      image: pipesFittingsImg,
+      description: "PVC conduits, electrical pipes, junction boxes, and cable management fittings",
+      itemCount: 95
+    },
+    {
+      name: "Distribution Box",
+      slug: "distribution-box",
+      image: circuitBreakersImg,
+      description: "MCB boxes, distribution boards, consumer units, and electrical panels",
       itemCount: 85
     },
     {
-      name: "Outlets & Switches",
-      slug: "outlets-switches",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
-      description: "Modern outlets and switches",
-      itemCount: 150
-    },
-    {
-      name: "Lighting Solutions",
-      slug: "lighting",
-      image: getOptimizedImageUrl("https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop", 200, 150),
-      description: "LED lights and fixtures",
+      name: "Led Bulb and Fittings",
+      slug: "led-bulb-fittings",
+      image: lightingImg,
+      description: "LED bulbs, emergency lights, flood lights, street lights, and LED fittings",
       itemCount: 200
     }
   ];
