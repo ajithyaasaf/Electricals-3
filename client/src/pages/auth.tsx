@@ -82,7 +82,9 @@ export default function Auth() {
   // Redirect if already authenticated
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
-      setLocation("/");
+      const searchParams = new URLSearchParams(window.location.search);
+      const redirectUrl = searchParams.get("redirect") || "/";
+      setLocation(redirectUrl);
     }
   }, [isAuthenticated, authLoading, setLocation]);
 
