@@ -7,7 +7,7 @@ export function registerProductRoutes(app: Express) {
   // Get all products with filtering and pagination
   app.get("/api/products", async (req, res) => {
     try {
-      const { categoryId, category, search, featured, minPrice, maxPrice, sortBy = "newest", sortOrder = "desc", limit = 20, offset = 0 } = req.query;
+      const { categoryId, category, search, featured, bestsellers, new: isNew, trending, minPrice, maxPrice, sortBy = "newest", sortOrder = "desc", limit = 20, offset = 0 } = req.query;
 
       let products: any[] = [];
       if (featured === "true") {
@@ -26,78 +26,80 @@ export function registerProductRoutes(app: Express) {
         products = products.filter(p => p.originalPrice && p.originalPrice > p.price);
       }
 
+      // Handle specific section query parameters for diversity on homepage
+      if (bestsellers === "true") {
+        // Best Sellers: Sort by rating (highest rating & review count first)
+        products = [...products].sort((a, b) => {
+          const ratingDiff = (b.rating || 0) - (a.rating || 0);
+          if (Math.abs(ratingDiff) > 0.01) return ratingDiff;
+          return (b.reviewCount || 0) - (a.reviewCount || 0);
+        });
+      } else if (isNew === "true") {
+        // New Arrivals: Sort by ascending ID order (prod-001, prod-002...)
+        products = [...products].sort((a, b) => a.id.localeCompare(b.id));
+      } else if (trending === "true") {
+        // Trending Now: Sort by highest percentage discount & featured state
+        products = [...products].sort((a, b) => {
+          const discA = a.originalPrice ? (a.originalPrice - a.price) / a.originalPrice : 0;
+          const discB = b.originalPrice ? (b.originalPrice - b.price) / b.originalPrice : 0;
+          return discB - discA;
+        });
+      }
+
       // Apply price filtering
       if (minPrice || maxPrice) {
         const minPriceNum = minPrice ? parseFloat(minPrice as string) : 0;
         const maxPriceNum = maxPrice ? parseFloat(maxPrice as string) : Infinity;
 
-        console.log(`🔍 Price filtering: min=${minPriceNum}, max=${maxPriceNum}`);
-
         const originalCount = products.length;
         products = products.filter(product => {
           const price = parseFloat(product.price.toString());
-          const withinRange = price >= minPriceNum && price <= maxPriceNum;
-          if (!withinRange) {
-            console.log(`🚫 Product ${product.name} (₹${price}) excluded from range ₹${minPriceNum}-₹${maxPriceNum}`);
-          }
-          return withinRange;
+          return price >= minPriceNum && price <= maxPriceNum;
         });
-
-        console.log(`📊 Price filtering: ${originalCount} → ${products.length} products`);
       }
 
-      // Apply sorting
-      products = products.sort((a, b) => {
-        let comparison = 0;
+      // Apply sorting if explicit sortBy is passed and not handled above
+      if (!bestsellers && !isNew && !trending) {
+        products = products.sort((a, b) => {
+          let comparison = 0;
 
-        switch (sortBy) {
-          case "featured":
-            // Primary Sort: Featured items first (descending boolean: true > false)
-            // We treat true as 1 and false as 0 for comparison
-            const aFeatured = a.isFeatured ? 1 : 0;
-            const bFeatured = b.isFeatured ? 1 : 0;
-            comparison = aFeatured - bFeatured;
-            break;
+          switch (sortBy) {
+            case "featured":
+              const aFeatured = a.isFeatured ? 1 : 0;
+              const bFeatured = b.isFeatured ? 1 : 0;
+              comparison = aFeatured - bFeatured;
+              break;
 
-          case "name":
-            comparison = a.name.localeCompare(b.name);
-            break;
+            case "name":
+              comparison = a.name.localeCompare(b.name);
+              break;
 
-          case "price":
-            // Data Safety: Handle invalid/NaN prices mostly for safety
-            const priceA = parseFloat(a.price?.toString() || "0") || 0;
-            const priceB = parseFloat(b.price?.toString() || "0") || 0;
-            comparison = priceA - priceB;
-            break;
+            case "price":
+              const priceA = parseFloat(a.price?.toString() || "0") || 0;
+              const priceB = parseFloat(b.price?.toString() || "0") || 0;
+              comparison = priceA - priceB;
+              break;
 
-          case "rating":
-            // Data Safety: Handle null/undefined ratings as 0
-            const ratingA = a.rating || 0;
-            const ratingB = b.rating || 0;
-            comparison = ratingA - ratingB;
-            break;
+            case "rating":
+              const ratingA = a.rating || 0;
+              const ratingB = b.rating || 0;
+              comparison = ratingA - ratingB;
+              break;
 
-          case "newest":
-          default:
-            // Will fallback to secondary sort (id) which effectively works as newest
-            // since newer items usually have higher/later IDs or we can compare created dates if available
-            comparison = 0;
-            break;
-        }
+            case "newest":
+            default:
+              comparison = 0;
+              break;
+          }
 
-        // Apply sort order
-        const result = sortOrder === "desc" ? -comparison : comparison;
+          const result = sortOrder === "desc" ? -comparison : comparison;
+          if (result === 0) {
+            return b.id.localeCompare(a.id);
+          }
 
-        // TIE-BREAKER: Deterministic sorting
-        // If the primary comparison is equal (result === 0), use ID as a tie-breaker.
-        // We always sort by ID descending (newest first) for consistency across pages.
-        if (result === 0) {
-          // String ID comparison (assuming UUIDs or string IDs)
-          return b.id.localeCompare(a.id);
-        }
-
-        return result;
-      });
+          return result;
+        });
+      }
 
       // Apply pagination
       const limitNum = parseInt(limit as string);
