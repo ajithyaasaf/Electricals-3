@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/currency";
 import { Clock, Tag, Zap } from "lucide-react";
 import type { Product } from "@shared/types";
@@ -12,12 +13,39 @@ interface DealsBannerProps {
 
 export function DealsBanner({ products }: DealsBannerProps) {
   if (!products || products.length === 0) {
-    return null;
+    return (
+      <div className="bg-white py-4 sm:py-6">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2 bg-copper-100 rounded-lg">
+              <Tag className="w-5 h-5 text-copper-700" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Today's Deals</h2>
+            <Badge className="bg-gradient-to-r from-copper-600 to-copper-700 text-white border-0 shadow-sm px-3 py-1">
+              Limited Time Offers
+            </Badge>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="lg:col-span-2 h-[350px]">
+              <Skeleton className="w-full h-full rounded-2xl" />
+            </div>
+            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Skeleton className="w-full h-[165px] rounded-xl" />
+              <Skeleton className="w-full h-[165px] rounded-xl" />
+              <Skeleton className="w-full h-[165px] rounded-xl" />
+              <Skeleton className="w-full h-[165px] rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Helper to format product data for display
   const getDealData = (product: Product) => {
-    const originalPrice = product.originalPrice || product.price * 1.2; // Fallback for demo if data missing
+    const originalPrice = product.originalPrice && product.originalPrice > product.price 
+      ? product.originalPrice 
+      : Math.round(product.price * 1.35); 
     const salePrice = product.price;
     const discountPercent = Math.round(((originalPrice - salePrice) / originalPrice) * 100);
     return {
@@ -29,7 +57,7 @@ export function DealsBanner({ products }: DealsBannerProps) {
       originalPrice,
       salePrice,
       link: `/products/${product.slug}`,
-      category: "Special Offer" // We could fetch category name if needed, but keeping it simple
+      category: "Special Offer"
     };
   };
 

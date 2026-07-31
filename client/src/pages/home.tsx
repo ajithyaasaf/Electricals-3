@@ -109,8 +109,12 @@ export default function Home() {
     }
   ];
 
-  // Use real data
-  const deals = (dealsData as any)?.products || [];
+  // Fallback to featured or bestseller products so Today's Deals ALWAYS shows for first-time / guest visitors
+  const deals = (dealsData as any)?.products?.length > 0 
+    ? (dealsData as any).products 
+    : (productsData as any)?.products?.length > 0 
+      ? (productsData as any).products 
+      : (bestSellersData as any)?.products || [];
 
 
 
