@@ -23,9 +23,11 @@ import { getOptimizedImageUrl } from "@/lib/performance";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { formatPrice } from "@/lib/currency";
 import { useSEO } from "@/hooks/use-seo";
+import { useUserInterest } from "@/hooks/use-user-interest";
 
 export default function Home() {
   const { user } = useFirebaseAuth();
+  const { topCategory, hasHistory } = useUserInterest();
 
   // SEO optimization for homepage
   useSEO();
@@ -43,6 +45,12 @@ export default function Home() {
   // Fetch deals data (real discounted products)
   const { data: dealsData } = useQuery({
     queryKey: ["/api/products", { hasDiscount: true, limit: 4 }],
+  });
+
+  // Fetch personalized deals based on user browsing interest
+  const { data: categoryDealsData } = useQuery({
+    queryKey: ["/api/products", { category: topCategory, limit: 4 }],
+    enabled: !!topCategory,
   });
 
   // Fetch best sellers
@@ -109,14 +117,20 @@ export default function Home() {
     }
   ];
 
-  // Fallback to featured or bestseller products so Today's Deals ALWAYS shows for first-time / guest visitors
-  const deals = (dealsData as any)?.products?.length > 0 
-    ? (dealsData as any).products 
-    : (productsData as any)?.products?.length > 0 
-      ? (productsData as any).products 
-      : (bestSellersData as any)?.products || [];
+  // Smart personalization logic for Deals Banner
+  const categoryProducts = (categoryDealsData as any)?.products || [];
+  const generalDeals = (dealsData as any)?.products || [];
+  const featuredProducts = (productsData as any)?.products || [];
+  const bestsellerProducts = (bestSellersData as any)?.products || [];
 
-
+  const isPersonalized = hasHistory && categoryProducts.length > 0;
+  const activeDeals = isPersonalized
+    ? categoryProducts
+    : generalDeals.length > 0
+      ? generalDeals
+      : featuredProducts.length > 0
+        ? featuredProducts
+        : bestsellerProducts;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -137,8 +151,12 @@ export default function Home() {
       {/* Recently Viewed - Only show for returning users */}
       <RecentlyViewed />
 
-      {/* Deals Banner */}
-      <DealsBanner products={deals} />
+      {/* Deals Banner - Smart Personalized / Curated Default */}
+      <DealsBanner 
+        products={activeDeals} 
+        isPersonalized={isPersonalized} 
+        personalizedCategory={topCategory} 
+      />
 
       {/* Visual Category Cards - Amazon Style */}
       <VisualCategoryCards categories={visualCategories} />

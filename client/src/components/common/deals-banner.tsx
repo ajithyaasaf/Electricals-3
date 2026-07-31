@@ -9,6 +9,8 @@ import type { Product } from "@shared/types";
 
 interface DealsBannerProps {
   products: Product[];
+  isPersonalized?: boolean;
+  personalizedCategory?: string | null;
 }
 
 const DEFAULT_DEAL_PRODUCTS: Product[] = [
@@ -90,7 +92,7 @@ const DEFAULT_DEAL_PRODUCTS: Product[] = [
   }
 ];
 
-export function DealsBanner({ products }: DealsBannerProps) {
+export function DealsBanner({ products, isPersonalized = false, personalizedCategory }: DealsBannerProps) {
   const displayProducts = (products && products.length > 0) ? products : DEFAULT_DEAL_PRODUCTS;
 
   // Helper to format product data for display
@@ -109,7 +111,7 @@ export function DealsBanner({ products }: DealsBannerProps) {
       originalPrice,
       salePrice,
       link: `/products/${product.slug}`,
-      category: "Special Offer"
+      category: product.category || "Special Offer"
     };
   };
 
@@ -125,9 +127,16 @@ export function DealsBanner({ products }: DealsBannerProps) {
             <Tag className="w-5 h-5 text-copper-700" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Today's Deals</h2>
-          <Badge className="bg-gradient-to-r from-copper-600 to-copper-700 text-white border-0 shadow-sm px-3 py-1">
-            Limited Time Offers
-          </Badge>
+          {isPersonalized ? (
+            <Badge className="bg-gradient-to-r from-emerald-600 to-teal-700 text-white border-0 shadow-sm px-3 py-1 flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 fill-yellow-300 text-yellow-300" />
+              Recommended Deals for You
+            </Badge>
+          ) : (
+            <Badge className="bg-gradient-to-r from-copper-600 to-copper-700 text-white border-0 shadow-sm px-3 py-1">
+              Limited Time Offers
+            </Badge>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
