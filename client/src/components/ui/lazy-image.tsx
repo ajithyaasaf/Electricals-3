@@ -16,6 +16,11 @@ export function LazyImage({ src, alt, className, fallback, placeholder }: LazyIm
   const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    setIsLoaded(false);
+    setHasError(false);
+  }, [src]);
+
+  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
