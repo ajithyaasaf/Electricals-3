@@ -940,7 +940,7 @@ export default function Checkout() {
                           </label>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                          Pay cash when your order is delivered. Available across India. No additional charges.
+                          Pay cash when your order is delivered.
                         </p>
                       </div>
                     </div>
