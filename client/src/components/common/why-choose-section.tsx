@@ -87,7 +87,7 @@ const defaultData: WhyChooseData = {
     {
       id: "fast-service",
       icon: "Clock",
-      title: "Response",
+      title: "Rapid Response",
       benefit: "Emergency service available 24/7",
       stat: { value: "Quick", label: "Response time" }
     },

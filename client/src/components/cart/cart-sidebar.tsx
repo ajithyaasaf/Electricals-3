@@ -54,10 +54,10 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
       : 0;
 
     return (
-      <div className="group relative bg-white border border-gray-100 rounded-xl p-3 hover:border-copper-200 hover:shadow-md transition-all duration-200">
+      <div className="group relative bg-white border border-gray-100 rounded-xl p-3 hover:border-teal-200 hover:shadow-md transition-all duration-200">
         {/* Discount badge */}
         {hasDiscount && (
-          <Badge className="absolute -top-2 -left-2 bg-red-500 text-white text-xs px-2 py-0.5 z-10 shadow-sm">
+          <Badge className="absolute -top-2 -left-2 bg-teal-600 text-white text-xs px-2 py-0.5 z-10 shadow-sm">
             {discountPercent}% OFF
           </Badge>
         )}
@@ -86,14 +86,14 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
 
             {/* Category badge if available */}
             {productOrService.category && (
-              <span className="inline-block text-[10px] text-copper-600 bg-copper-50 px-1.5 py-0.5 rounded mt-1">
+              <span className="inline-block text-[10px] text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded mt-1">
                 {productOrService.category}
               </span>
             )}
 
             {/* Price section */}
             <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-base font-bold text-copper-700">
+              <span className="text-base font-bold text-teal-700">
                 {formatPrice(item.unitPrice * item.quantity)}
               </span>
               {hasDiscount && (
@@ -111,7 +111,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
                   size="sm"
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
                   disabled={item.quantity <= 1 || isLoading}
-                  className="h-7 w-7 p-0 rounded-md hover:bg-copper-100 transition-all disabled:opacity-40"
+                  className="h-7 w-7 p-0 rounded-md hover:bg-teal-100 transition-all disabled:opacity-40"
                 >
                   <Minus className="w-3 h-3 text-gray-700" />
                 </Button>
@@ -125,7 +125,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
                   size="sm"
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
                   disabled={item.quantity >= 99 || isLoading}
-                  className="h-7 w-7 p-0 rounded-md hover:bg-copper-100 transition-all disabled:opacity-40"
+                  className="h-7 w-7 p-0 rounded-md hover:bg-teal-100 transition-all disabled:opacity-40"
                 >
                   <Plus className="w-3 h-3 text-gray-700" />
                 </Button>
@@ -159,7 +159,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
 
         <SheetContent side="right" className="w-full sm:max-w-md flex flex-col p-0">
           {/* Header - Enhanced with gradient */}
-          <div className="bg-gradient-to-r from-copper-600 to-copper-700 text-white p-4">
+          <div className="bg-gradient-to-r from-teal-600 to-teal-700 text-white p-4">
             <SheetHeader>
               <SheetTitle className="flex items-center gap-2 text-white">
                 <ShoppingBag className="w-5 h-5" />
@@ -174,8 +174,8 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
           {cartItems.length === 0 ? (
             // Empty state - Enhanced
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-gray-50 to-white">
-              <div className="w-20 h-20 bg-copper-100 rounded-full flex items-center justify-center mb-4">
-                <ShoppingBag className="w-10 h-10 text-copper-500" />
+              <div className="w-20 h-20 bg-teal-100 rounded-full flex items-center justify-center mb-4">
+                <ShoppingBag className="w-10 h-10 text-teal-500" />
               </div>
               <h3 className="text-xl font-bold text-gray-900 mb-2">
                 Your cart is empty
@@ -245,7 +245,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
                 {/* Total */}
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-xl font-bold text-copper-700">{formatPrice(totals?.total || 0)}</span>
+                  <span className="text-xl font-bold text-teal-700">{formatPrice(totals?.total || 0)}</span>
                 </div>
 
                 {/* Savings banner */}
@@ -274,7 +274,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
 
                   <Button
                     variant="outline"
-                    className="w-full border-copper-300 text-copper-700 hover:bg-copper-50 h-10"
+                    className="w-full border-teal-300 text-teal-700 hover:bg-teal-50 h-10"
                     onClick={() => setIsOpen(false)}
                     asChild
                   >
@@ -296,7 +296,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
           {isLoading && (
             <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-50">
               <div className="flex flex-col items-center gap-2">
-                <div className="animate-spin w-8 h-8 border-3 border-copper-600 border-t-transparent rounded-full" />
+                <div className="animate-spin w-8 h-8 border-3 border-teal-600 border-t-transparent rounded-full" />
                 <span className="text-sm text-gray-600">Updating cart...</span>
               </div>
             </div>
