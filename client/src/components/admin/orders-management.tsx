@@ -333,7 +333,7 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                 )}
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm mb-4">
                                     <div>
                                         <p className="text-gray-600">Method</p>
                                         <p className="font-medium uppercase">{details.order.paymentMethod}</p>
@@ -351,8 +351,12 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                                     <p className="font-medium">{formatPrice(fin.subtotal)}</p>
                                                 </div>
                                                 <div>
-                                                    <p className="text-gray-600">Tax + Shipping</p>
-                                                    <p className="font-medium">{formatPrice(fin.tax + fin.shippingCost)}</p>
+                                                    <p className="text-gray-600">Tax (GST)</p>
+                                                    <p className="font-medium">{formatPrice(fin.tax)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-600">Shipping</p>
+                                                    <p className="font-medium">{fin.shippingCost > 0 ? formatPrice(fin.shippingCost) : 'Free'}</p>
                                                 </div>
                                             </>
                                         );
