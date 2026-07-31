@@ -129,8 +129,8 @@ export function printInvoice(order: InvoiceOrderData, items: InvoiceItemData[]) 
                 <div class="invoice-badge">TAX INVOICE</div>
                 <div style="margin-bottom: 4px;"><strong>Order ID:</strong> ${orderNum}</div>
                 <div style="margin-bottom: 4px;"><strong>Order Date:</strong> ${orderDate}</div>
-                <div style="margin-bottom: 4px;"><strong>Payment Method:</strong> ${(order.paymentMethod || 'COD').toUpperCase()}</div>
-                <div><strong>Payment Status:</strong> ${(order.paymentStatus || 'Completed').toUpperCase()}</div>
+                 <div><strong>Payment Method:</strong> ${(order.paymentMethod || 'COD').toUpperCase()}</div>
+                 <!-- <div><strong>Payment Status:</strong> ${(order.paymentStatus || 'Completed').toUpperCase()}</div> -->
               </td>
               <td class="meta-cell">
                 <div class="meta-label">Billed & Shipped To:</div>
