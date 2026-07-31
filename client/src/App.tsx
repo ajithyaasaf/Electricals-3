@@ -32,7 +32,7 @@ import Shipping from "@/pages/shipping";
 import Warranty from "@/pages/warranty";
 
 function Router() {
-  const { isAuthenticated, loading } = useFirebaseAuth();
+  const { loading } = useFirebaseAuth();
 
   return (
     <Switch>
@@ -46,28 +46,10 @@ function Router() {
             </div>
           </div>
         </Route>
-      ) : !isAuthenticated ? (
-        <>
-          <Route path="/" component={Landing} />
-          <Route path="/auth" component={Auth} />
-          <Route path="/products" component={Products} />
-          <Route path="/products/:slug" component={ProductDetail} />
-          <Route path="/services" component={Services} />
-          <Route path="/services/:slug" component={ServiceDetail} />
-          <Route path="/cart" component={Cart} />
-          <Route path="/wishlist" component={Wishlist} />
-          <Route path="/checkout" component={Checkout} />
-          <Route path="/account" component={Account} />
-          <Route path="/account/orders/:orderId" component={OrderDetail} />
-
-          <Route path="/returns" component={Returns} />
-          <Route path="/shipping" component={Shipping} />
-          <Route path="/warranty" component={Warranty} />
-          <Route path="/admin" component={Admin} />
-        </>
       ) : (
         <>
           <Route path="/" component={Home} />
+          <Route path="/landing" component={Landing} />
           <Route path="/auth" component={Auth} />
           <Route path="/products" component={Products} />
           <Route path="/products/:slug" component={ProductDetail} />
