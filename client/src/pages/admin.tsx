@@ -240,7 +240,7 @@ function AnalyticsSection({
                   {revenueLoading ? (
                     <Skeleton className="w-24 h-8" />
                   ) : (
-                    `₹${revenueData?.totalRevenue ? revenueData.totalRevenue.toLocaleString() : '0'}`
+                    formatPrice(revenueData?.totalRevenue || 0)
                   )}
                 </p>
                 {!revenueLoading && (
@@ -1536,8 +1536,9 @@ function AdminDashboard() {
   };
 
   // Calculate stats
-  const totalRevenue = orders.reduce((sum: number, order: any) =>
-    sum + normalizeOrderFinancials(order).total, 0);
+  const totalRevenue = orders
+    .filter((order: any) => order.status !== 'cancelled')
+    .reduce((sum: number, order: any) => sum + normalizeOrderFinancials(order).total, 0);
   const totalProducts = (productsData as any)?.total || 0;
   const totalOrders = orders.length;
 

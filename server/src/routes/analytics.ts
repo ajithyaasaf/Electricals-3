@@ -101,6 +101,7 @@ export function registerAnalyticsRoutes(app: Express) {
         let monthOrderCount = 0;
 
         orders.forEach(order => {
+          if (order.status === 'cancelled') return;
           const orderDate = new Date(order.createdAt);
           if (orderDate >= startOfMonth && orderDate <= endOfMonth) {
             const subtotal = order.subtotal || 0;
@@ -154,13 +155,19 @@ export function registerAnalyticsRoutes(app: Express) {
       }
 
       const products = await storage.getAllProducts();
+      const orders = await storage.getAllOrders();
       const allOrderItems = await storage.getAllOrderItems();
+
+      const cancelledOrderIds = new Set(
+        orders.filter((o: any) => o.status === 'cancelled').map((o: any) => o.id)
+      );
 
       // Calculate revenue and quantity for each product
       const productRevenue: { [key: string]: number } = {};
       const productQuantity: { [key: string]: number } = {};
 
       allOrderItems.forEach((item: OrderItem) => {
+        if (item.orderId && cancelledOrderIds.has(item.orderId)) return;
         if (item.productId) {
           const productId = item.productId;
           const revenue = item.totalPrice || (item.unitPrice * item.quantity);
