@@ -18,6 +18,17 @@ export const formatPrice = (amountInPaise: number): string => {
   }).format(amountInRupees);
 };
 
+export const formatIntegerPrice = (amountInPaise: number): string => {
+  const amountInRupees = Math.round(amountInPaise / 100);
+
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(amountInRupees);
+};
+
 export const formatPriceCompact = (amountInPaise: number): string => {
   const amountInRupees = amountInPaise / 100;
 

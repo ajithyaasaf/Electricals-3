@@ -11,7 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { formatPrice, normalizeOrderFinancials } from "@/lib/currency";
+import { formatPrice, formatIntegerPrice, normalizeOrderFinancials } from "@/lib/currency";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { AdminLogin } from "@/components/admin/admin-login";
 import { AdminLayout } from "@/components/admin/admin-layout";
@@ -240,7 +240,7 @@ function AnalyticsSection({
                   {revenueLoading ? (
                     <Skeleton className="w-24 h-8" />
                   ) : (
-                    formatPrice(revenueData?.totalRevenue || 0)
+                    formatIntegerPrice(revenueData?.totalRevenue || 0)
                   )}
                 </p>
                 {!revenueLoading && (

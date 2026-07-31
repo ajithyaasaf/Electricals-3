@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatPrice, normalizeOrderFinancials } from "@/lib/currency";
+import { formatPrice, formatIntegerPrice, normalizeOrderFinancials } from "@/lib/currency";
 import { TrendingUp, Package, ShoppingCart } from "lucide-react";
 
 export interface DashboardSectionProps {
@@ -29,7 +29,7 @@ export function DashboardSection({
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Revenue</p>
                 <p className="text-2xl lg:text-3xl font-bold text-gray-900">
-                  {formatPrice(totalRevenue)}
+                  {formatIntegerPrice(totalRevenue)}
                 </p>
               </div>
               <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-teal-500/30">
