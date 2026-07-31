@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { SmartLink } from '@/components/navigation/smart-link';
-import { ChevronLeft, ChevronRight, Zap, Shield, Wrench, Tag, Clock, Star } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Zap, Tag, Star } from 'lucide-react';
 import { formatPrice } from '@/lib/currency';
 import banner1 from '@assets/2_1763324658277.png';
 import banner2 from '@assets/1_1763324666642.png';
@@ -55,32 +55,6 @@ const bannerSlides: BannerSlide[] = [
   },
   {
     id: '3',
-    title: 'Professional Installation Services',
-    subtitle: 'Licensed Electricians Available',
-    description: 'Same-day electrical installation and repair services. All work comes with warranty protection.',
-    ctaText: 'Book Service Now',
-    ctaLink: '/services',
-    backgroundImage: banner1,
-    backgroundColor: 'from-teal-light-600 to-teal-600',
-    textColor: 'text-white',
-    badge: 'Same Day',
-    icon: <Wrench className="w-6 h-6" />
-  },
-  {
-    id: '4',
-    title: 'Safety First Equipment',
-    subtitle: 'GFCI & Circuit Protection',
-    description: 'Protect your property with professional-grade safety equipment. Circuit breakers, GFCI outlets, and more.',
-    ctaText: 'Shop Safety Equipment',
-    ctaLink: '/products?category=distribution-box',
-    backgroundImage: banner2,
-    backgroundColor: 'from-teal-500 to-teal-light-500',
-    textColor: 'text-white',
-    badge: 'Essential',
-    icon: <Shield className="w-6 h-6" />
-  },
-  {
-    id: '5',
     title: 'Contractor Special Pricing',
     subtitle: 'Bulk Orders Welcome',
     description: 'Special wholesale pricing for contractors and professionals. Volume discounts and priority delivery available.',
