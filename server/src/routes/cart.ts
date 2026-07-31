@@ -12,7 +12,7 @@ import {
   type CartItemWithDetails
 } from "@shared/cart-types";
 import type { Product, Service } from "@shared/types";
-import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics } from '@shared/logistics';
+import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics, calculateShippingFee } from '@shared/logistics';
 
 // Cart configuration - Updated based on client requirements
 const CART_CONFIG = {
@@ -1234,38 +1234,8 @@ function calculateCartTotals(items: CartItemWithDetails[], coupons: Coupon[] = [
     }
   });
 
-  // Calculate weight-based shipping
-  let totalWeight = 0;
-  let hasBulkyItems = false;
-
-  activeItems.forEach(item => {
-    const product = item.product;
-    const logistics = getProductLogistics(product);
-
-    totalWeight += logistics.weight * item.quantity;
-    if (logistics.isBulky) {
-      hasBulkyItems = true;
-    }
-  });
-
-  // Determine shipping cost using weight-based tiers
-  let shipping = 0;
-  const isHeavy = hasBulkyItems || totalWeight > 15; // > 15kg threshold
-
-  if (isHeavy) {
-    shipping = subtotal >= SHIPPING_THRESHOLDS.FREE_HEAVY
-      ? SHIPPING_FEES.FREE
-      : SHIPPING_FEES.HEAVY_FLAT;
-  } else {
-    // Standard shipping
-    if (subtotal >= SHIPPING_THRESHOLDS.FREE_STANDARD) {
-      shipping = SHIPPING_FEES.FREE;
-    } else if (subtotal >= SHIPPING_THRESHOLDS.SUBSIDIZED) {
-      shipping = SHIPPING_FEES.STANDARD_MID;
-    } else {
-      shipping = SHIPPING_FEES.STANDARD_LOW;
-    }
-  }
+  // Calculate shipping fee using centralized logistics engine
+  const shipping = calculateShippingFee(activeItems, subtotal);
 
   // Calculate GST on taxable amount (Subtotal - Coupon Discounts)
   const taxableAmount = Math.max(0, subtotal - couponDiscount);

@@ -154,7 +154,7 @@ export function Footer() {
                 <strong className="text-gray-300">{BUSINESS_POLICIES.serviceAreas.coverage}</strong>
               </p>
               <p className="text-xs text-gray-500">
-                *Free shipping on standard items {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+. Heavy/bulky items: {formatPrice(SHIPPING_THRESHOLDS.FREE_HEAVY)}+. Weight-based shipping from ₹50.
+                *Flat ₹40 Standard Shipping | Flat ₹150 Heavy Item Shipping. FREE Shipping on all orders over {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}.
               </p>
             </div>
           </div>

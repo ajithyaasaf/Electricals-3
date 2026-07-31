@@ -938,51 +938,22 @@ function ProductsSection({
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
                         control={productForm.control}
-                        name="weightInKg"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Weight (kg)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                onKeyDown={(e) => {
-                                  if (['e', 'E', '+', '-'].includes(e.key)) {
-                                    e.preventDefault();
-                                  }
-                                }}
-                                {...field}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  field.onChange(val === "" ? "" : parseFloat(val) || 0);
-                                }}
-                                placeholder="0.00"
-                              />
-                            </FormControl>
-                            <p className="text-xs text-gray-500">Actual product weight</p>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-
-                      <FormField
-                        control={productForm.control}
                         name="isBulky"
                         render={({ field }) => (
-                          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border border-gray-200 p-4">
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-lg border border-teal-100 bg-teal-50/50 p-4">
                             <FormControl>
                               <Checkbox
                                 checked={field.value}
                                 onCheckedChange={field.onChange}
+                                className="w-5 h-5 border-teal-600 data-[state=checked]:bg-teal-600 data-[state=checked]:text-white"
                               />
                             </FormControl>
-                            <div className="space-y-1 leading-none">
-                              <FormLabel className="text-sm font-medium">
-                                Bulky Item
+                            <div className="space-y-1">
+                              <FormLabel className="text-sm font-semibold text-gray-900 cursor-pointer">
+                                Heavy Item
                               </FormLabel>
-                              <p className="text-xs text-gray-500">
-                                Requires truck/special delivery
+                              <p className="text-xs text-gray-600">
+                                Check for heavy panels, distribution boxes, or long conduit pipes (Applies ₹150 flat delivery fee unless order qualifies for free delivery)
                               </p>
                             </div>
                           </FormItem>

@@ -29,7 +29,7 @@ import {
     OrderHistory, CreateOrderHistory,
     OrderStatus
 } from '@shared/types';
-import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics } from '@shared/logistics';
+import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics, calculateShippingFee } from '@shared/logistics';
 
 /**
  * Get Firestore Admin instance
@@ -697,45 +697,14 @@ export async function createOrderWithTransaction(
         const itemTotals = items.map(item => item.unitPrice * item.quantity);
         const subtotal = itemTotals.reduce((sum, total) => sum + total, 0);
 
-        // Step 3: Calculate weight-based shipping (MATCHING CART LOGIC)
-        let totalWeight = 0;
-        let hasBulkyItems = false;
-
-        stockChecks.forEach((check, index) => {
-            const product = {
+        // Step 3: Calculate shipping cost using centralized logistics engine
+        const preparedItems = stockChecks.map((check, index) => ({
+            product: {
                 ...check.productData,
                 id: items[index].productId,
-            };
-
-            // Use getProductLogistics for graceful fallback handling
-            // Will use product weight, or category defaults, or safe default (0.5kg)
-            const logistics = getProductLogistics(product);
-
-            totalWeight += logistics.weight * check.requestedQuantity;
-            if (logistics.isBulky) {
-                hasBulkyItems = true;
             }
-        });
-
-        // Determine shipping cost using weight-based tiers (EXACT SAME LOGIC AS CART)
-        let shippingCost = 0;
-        const isHeavy = hasBulkyItems || totalWeight > 15; // > 15kg threshold
-
-        if (isHeavy) {
-            // Heavy/Bulky items require special delivery (truck/auto)
-            shippingCost = subtotal >= SHIPPING_THRESHOLDS.FREE_HEAVY
-                ? SHIPPING_FEES.FREE
-                : SHIPPING_FEES.HEAVY_FLAT; // ₹150
-        } else {
-            // Standard shipping with tiered pricing
-            if (subtotal >= SHIPPING_THRESHOLDS.FREE_STANDARD) {
-                shippingCost = SHIPPING_FEES.FREE; // Free shipping over ₹3000
-            } else if (subtotal >= SHIPPING_THRESHOLDS.SUBSIDIZED) {
-                shippingCost = SHIPPING_FEES.STANDARD_MID; // ₹30 for ₹500-₹3000
-            } else {
-                shippingCost = SHIPPING_FEES.STANDARD_LOW; // ₹60 for under ₹500
-            }
-        }
+        }));
+        const shippingCost = calculateShippingFee(preparedItems, subtotal);
 
         // Convert from paise to rupees for database storage
         const shippingCostInRupees = shippingCost / 100;
@@ -746,10 +715,7 @@ export async function createOrderWithTransaction(
         // Step 5: Calculate total
         const total = subtotal + tax + shippingCostInRupees;
 
-        console.log('[ORDER] Weight-based shipping calculation:', {
-            totalWeight: `${totalWeight}kg`,
-            hasBulkyItems,
-            isHeavy,
+        console.log('[ORDER] Shipping calculation:', {
             subtotal: `₹${subtotal}`,
             shippingCost: `₹${shippingCostInRupees}`,
             tax: `₹${tax}`,

@@ -4,7 +4,7 @@ import { useFirebaseAuth } from '@/hooks/useFirebaseAuth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
 import type { Cart, CartItem, CartItemWithDetails } from '@shared/cart-types';
-import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics } from '@shared/logistics';
+import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics, calculateShippingFee } from '@shared/logistics';
 
 // Enhanced guest cart item interface with schema versioning and conflict resolution
 export interface GuestCartItem {
@@ -162,40 +162,8 @@ function calculateOptimisticTotals(items: CartItem[]): Cart['totals'] {
   const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
   const discount = items.reduce((sum, item) => sum + (item.discount || 0), 0);
 
-  // Calculate total weight and bulkiness
-  let totalWeight = 0;
-  let hasBulkyItems = false;
-
-  items.forEach(item => {
-    // Cast to access product if available (runtime check provided by getProductLogistics)
-    const product = (item as any).product;
-    const logistics = getProductLogistics(product);
-
-    totalWeight += logistics.weight * item.quantity;
-    if (logistics.isBulky) {
-      hasBulkyItems = true;
-    }
-  });
-
-  // Determine Shipping Cost
-  let shipping = 0;
-
-  // Heavy/Bulky Logic
-  const isHeavy = hasBulkyItems || totalWeight > 15; // > 15kg count as heavy order automatically
-
-  if (isHeavy) {
-    // Heavy items charge HEAVY_FLAT unless order is very large (FREE_HEAVY threshold)
-    shipping = subtotal >= SHIPPING_THRESHOLDS.FREE_HEAVY ? SHIPPING_FEES.FREE : SHIPPING_FEES.HEAVY_FLAT;
-  } else {
-    // Standard Shipping Logic
-    if (subtotal >= SHIPPING_THRESHOLDS.FREE_STANDARD) {
-      shipping = SHIPPING_FEES.FREE;
-    } else if (subtotal >= SHIPPING_THRESHOLDS.SUBSIDIZED) {
-      shipping = SHIPPING_FEES.STANDARD_MID;
-    } else {
-      shipping = SHIPPING_FEES.STANDARD_LOW;
-    }
-  }
+  // Determine Shipping Cost using centralized logistics engine
+  const shipping = calculateShippingFee(items, subtotal);
 
   // 18% GST
   const tax = Math.round(subtotal * 0.18);
