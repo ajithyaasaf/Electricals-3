@@ -130,12 +130,12 @@ export type OrderStatus = typeof ORDER_STATUSES[number];
 
 // Shipping Address schema - reusable
 export const ShippingAddressSchema = z.object({
-  firstName: z.string(),
+  firstName: z.string().min(1, "First name is required"),
   lastName: z.string().optional(),
-  street: z.string(),
-  city: z.string(),
-  state: z.string(),
-  zipCode: z.string(),
+  street: z.string().min(1, "Street address is required"),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zipCode: z.string().min(1, "PIN code is required"),
   country: z.string().default('India'),
   phone: z.string().optional(),
 });

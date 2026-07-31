@@ -98,6 +98,7 @@ export default function Checkout() {
   // Payment Verification State
   // Moved to BankTransferProofForm component
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
   // Get cart items from context
   const cartItems = cart?.items || [];
@@ -381,21 +382,55 @@ export default function Checkout() {
     }
   };
 
+  const validateShippingForm = (): boolean => {
+    const { firstName, email, phone, street, city, state, zipCode } = formData.shippingAddress;
+    const errors: Record<string, string> = {};
+
+    if (!firstName?.trim()) errors.firstName = "First name is required";
+    if (!email?.trim() || !/\S+@\S+\.\S+/.test(email)) errors.email = "Valid email address is required";
+    if (!phone?.trim() || phone.replace(/\D/g, "").length < 10) errors.phone = "10-digit mobile number is required";
+    if (!street?.trim()) errors.street = "Street address is required";
+    if (!city?.trim()) errors.city = "City is required";
+    if (!state?.trim()) errors.state = "State selection is required";
+    if (!zipCode?.trim() || zipCode.length < 6) errors.zipCode = "6-digit PIN code is required";
+
+    if (zipCode && zipCode.length === 6) {
+      const serviceabilityCheck = checkServiceability(zipCode);
+      if (!serviceabilityCheck.isServiceable) {
+        errors.zipCode = serviceabilityCheck.message;
+      }
+    }
+
+    setFormErrors(errors);
+
+    const errorKeys = Object.keys(errors);
+    if (errorKeys.length > 0) {
+      const firstKey = errorKeys[0];
+      const targetEl = document.getElementById(firstKey);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: "smooth", block: "center" });
+        targetEl.focus();
+      }
+      return false;
+    }
+    return true;
+  };
+
   const handleNext = () => {
-    if (validateStep(currentStep)) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      const missing = getMissingFields(currentStep);
-      // Only show "Incomplete information" if there are actually missing fields.
-      // If missing is empty, it means validation failed due to other reasons (like Serviceability)
-      // which have already shown their own specific toast errors.
-      if (missing.length > 0) {
+    if (currentStep === 1) {
+      if (validateShippingForm()) {
+        setCurrentStep(2);
+      }
+    } else if (currentStep === 2) {
+      if (!formData.paymentMethod) {
         toast({
-          title: "Incomplete information",
-          description: `Please fill in the following required fields: ${missing.join(", ")}`,
+          title: "Payment Method Required",
+          description: "Please select a payment method to proceed.",
           variant: "destructive",
         });
+        return;
       }
+      setCurrentStep(3);
     }
   };
 
@@ -410,7 +445,7 @@ export default function Checkout() {
       return;
     }
 
-    if (validateStep(1) && validateStep(2)) {
+    if (validateShippingForm() && formData.paymentMethod) {
       const orderData = {
         total: total,
         shippingAddress: {
@@ -643,15 +678,21 @@ export default function Checkout() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="firstName">First Name *</Label>
                         <Input
                           id="firstName"
                           value={formData.shippingAddress.firstName}
-                          onChange={(e) => updateFormData("shippingAddress", "firstName", e.target.value)}
-                          required
+                          onChange={(e) => {
+                            updateFormData("shippingAddress", "firstName", e.target.value);
+                            if (formErrors.firstName) setFormErrors(prev => ({ ...prev, firstName: "" }));
+                          }}
+                          className={formErrors.firstName ? "border-red-500 focus:ring-red-500 bg-red-50/20" : ""}
                         />
+                        {formErrors.firstName && (
+                          <p className="text-xs text-red-500 font-medium mt-1">{formErrors.firstName}</p>
+                        )}
                       </div>
-                      <div>
+                      <div className="space-y-2">
                         <Label htmlFor="lastName">Last Name</Label>
                         <Input
                           id="lastName"
@@ -661,76 +702,113 @@ export default function Checkout() {
                       </div>
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                       <Label htmlFor="email">Email *</Label>
                       <Input
                         id="email"
                         type="email"
                         value={formData.shippingAddress.email}
-                        onChange={(e) => updateFormData("shippingAddress", "email", e.target.value)}
-                        required
+                        onChange={(e) => {
+                          updateFormData("shippingAddress", "email", e.target.value);
+                          if (formErrors.email) setFormErrors(prev => ({ ...prev, email: "" }));
+                        }}
+                        className={formErrors.email ? "border-red-500 focus:ring-red-500 bg-red-50/20" : ""}
                       />
+                      {formErrors.email && (
+                        <p className="text-xs text-red-500 font-medium mt-1">{formErrors.email}</p>
+                      )}
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                       <Label htmlFor="phone">Phone *</Label>
                       <Input
                         id="phone"
                         type="tel"
                         value={formData.shippingAddress.phone}
-                        onChange={(e) => updateFormData("shippingAddress", "phone", e.target.value)}
-                        required
+                        onChange={(e) => {
+                          updateFormData("shippingAddress", "phone", e.target.value);
+                          if (formErrors.phone) setFormErrors(prev => ({ ...prev, phone: "" }));
+                        }}
+                        className={formErrors.phone ? "border-red-500 focus:ring-red-500 bg-red-50/20" : ""}
                       />
+                      {formErrors.phone && (
+                        <p className="text-xs text-red-500 font-medium mt-1">{formErrors.phone}</p>
+                      )}
                     </div>
 
-                    <div>
+                    <div className="space-y-2">
                       <Label htmlFor="street">Street Address *</Label>
                       <Input
                         id="street"
                         value={formData.shippingAddress.street}
-                        onChange={(e) => updateFormData("shippingAddress", "street", e.target.value)}
-                        required
+                        onChange={(e) => {
+                          updateFormData("shippingAddress", "street", e.target.value);
+                          if (formErrors.street) setFormErrors(prev => ({ ...prev, street: "" }));
+                        }}
+                        className={formErrors.street ? "border-red-500 focus:ring-red-500 bg-red-50/20" : ""}
                       />
+                      {formErrors.street && (
+                        <p className="text-xs text-red-500 font-medium mt-1">{formErrors.street}</p>
+                      )}
                     </div>
 
-                    <div className="grid grid-cols-3 gap-4">
-                      <div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="space-y-2">
                         <Label htmlFor="city">City *</Label>
                         <Input
                           id="city"
                           value={formData.shippingAddress.city}
-                          onChange={(e) => updateFormData("shippingAddress", "city", e.target.value)}
-                          required
+                          onChange={(e) => {
+                            updateFormData("shippingAddress", "city", e.target.value);
+                            if (formErrors.city) setFormErrors(prev => ({ ...prev, city: "" }));
+                          }}
+                          className={formErrors.city ? "border-red-500 focus:ring-red-500 bg-red-50/20" : ""}
                           data-testid="input-city"
                         />
+                        {formErrors.city && (
+                          <p className="text-xs text-red-500 font-medium mt-1">{formErrors.city}</p>
+                        )}
                       </div>
-                      <div>
+                      <div className="space-y-2" id="state">
                         <Label htmlFor="state">State *</Label>
                         <StateSelector
                           value={formData.shippingAddress.state}
-                          onValueChange={(value) => updateFormData("shippingAddress", "state", value)}
+                          onValueChange={(value) => {
+                            updateFormData("shippingAddress", "state", value);
+                            if (formErrors.state) setFormErrors(prev => ({ ...prev, state: "" }));
+                          }}
                           placeholder="Select state..."
                         />
+                        {formErrors.state && (
+                          <p className="text-xs text-red-500 font-medium mt-1">{formErrors.state}</p>
+                        )}
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="zipCode">Pin code *</Label>
                         <Input
                           id="zipCode"
                           value={formData.shippingAddress.zipCode}
-                          onChange={(e) => handlePincodeChange(e.target.value)}
-                          required
+                          onChange={(e) => {
+                            handlePincodeChange(e.target.value);
+                            if (formErrors.zipCode) setFormErrors(prev => ({ ...prev, zipCode: "" }));
+                          }}
                           data-testid="input-zipcode"
                           maxLength={6}
                           placeholder="625xxx"
                           className={
-                            pincodeServiceability.checked
-                              ? pincodeServiceability.isServiceable
-                                ? "border-green-500 focus:ring-green-500"
-                                : "border-red-500 focus:ring-red-500"
-                              : ""
+                            formErrors.zipCode
+                              ? "border-red-500 focus:ring-red-500 bg-red-50/20"
+                              : pincodeServiceability.checked
+                                ? pincodeServiceability.isServiceable
+                                  ? "border-green-500 focus:ring-green-500"
+                                  : "border-red-500 focus:ring-red-500"
+                                : ""
                           }
                         />
-                        {pincodeServiceability.checked && (
+                        {formErrors.zipCode && (
+                          <p className="text-xs text-red-500 font-medium mt-1">{formErrors.zipCode}</p>
+                        )}
+                        {pincodeServiceability.checked && !formErrors.zipCode && (
                           <div
                             className={`flex items-start gap-2 text-sm mt-2 ${pincodeServiceability.isServiceable
                               ? "text-green-700 bg-green-50 border border-green-200"
