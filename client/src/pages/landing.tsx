@@ -3,12 +3,37 @@ import { Footer } from "@/components/layout/footer";
 import { HeroSection } from "@/components/common/hero-section";
 import { BannerSlider } from "@/components/common/banner-slider";
 import { Testimonials } from "@/components/common/testimonials";
+import { DealsBanner } from "@/components/common/deals-banner";
+import { useUserInterest } from "@/hooks/use-user-interest";
+import { useQuery } from "@tanstack/react-query";
 import WhyChooseSection from "@/components/common/why-choose-section";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { Zap, Shield, Clock, Star, ArrowRight, Users, Award, MapPin } from "lucide-react";
 
 export default function Landing() {
+  const { topCategory, hasHistory } = useUserInterest();
+
+  const { data: dealsData } = useQuery({
+    queryKey: ["/api/products", { hasDiscount: true, limit: 4 }],
+  });
+
+  const { data: categoryDealsData } = useQuery({
+    queryKey: ["/api/products", { category: topCategory, limit: 4 }],
+    enabled: !!topCategory,
+  });
+
+  const { data: productsData } = useQuery({
+    queryKey: ["/api/products", { featured: true, limit: 8 }],
+  });
+
+  const categoryProducts = (categoryDealsData as any)?.products || [];
+  const generalDeals = (dealsData as any)?.products || [];
+  const featuredProducts = (productsData as any)?.products || [];
+
+  const isPersonalized = hasHistory && categoryProducts.length > 0;
+  const activeDeals = isPersonalized ? categoryProducts : (generalDeals.length > 0 ? generalDeals : featuredProducts);
+
   const features = [
     {
       icon: <Shield className="w-8 h-8 text-teal-600" />,
@@ -61,6 +86,13 @@ export default function Landing() {
 
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Today's Deals Banner */}
+      <DealsBanner 
+        products={activeDeals} 
+        isPersonalized={isPersonalized} 
+        personalizedCategory={topCategory} 
+      />
 
       {/* Why Choose CopperBear Section - Landing Version */}
       <WhyChooseSection 
