@@ -114,17 +114,17 @@ export default function Landing() {
     {
       name: "Circuit Breakers",
       description: "Professional-grade circuit breakers from top manufacturers",
-      image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=600&h=400&fit=crop&auto=format"
+      image: circuitBreakersImg
     },
     {
       name: "Electrical Tools", 
       description: "High-quality tools for electrical professionals and DIY enthusiasts",
-      image: "https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&h=400&fit=crop&auto=format"
+      image: toolsImg
     },
     {
       name: "Wiring & Cables",
       description: "Complete selection of electrical wiring and cables for all applications",
-      image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&h=400&fit=crop&auto=format"
+      image: wiringCablesImg
     }
   ];
 

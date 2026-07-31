@@ -54,7 +54,7 @@ export function ServiceCard({ service, showCategory = false }: ServiceCardProps)
     bookServiceMutation.mutate();
   };
 
-  const imageUrl = service.imageUrl || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
+  const imageUrl = service.imageUrl || "/api/placeholder/400/300";
   const rating = parseFloat(service.rating || "0");
   const reviewCount = service.reviewCount || 0;
   const startingPrice = parseFloat(service.startingPrice);

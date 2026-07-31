@@ -539,7 +539,7 @@ export default function Account() {
                             {order.items.slice(0, 2).map((item) => (
                               <div key={item.id} className="flex items-center space-x-3">
                                 <img
-                                  src={item.productImageUrl || item.product?.imageUrls?.[0] || "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100"}
+                                  src={item.productImageUrl || item.product?.imageUrls?.[0] || "/api/placeholder/100/100"}
                                   alt={item.productName || item.product?.name || "Product"}
                                   className="w-12 h-12 object-cover rounded"
                                 />

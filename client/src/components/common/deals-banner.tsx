@@ -2,10 +2,14 @@ import { Link } from "wouter";
 import { LazyImage } from "@/components/ui/lazy-image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { formatPrice } from "@/lib/currency";
 import { Clock, Tag, Zap } from "lucide-react";
 import type { Product } from "@shared/types";
+
+import streetLightImg from "@assets/generated_images/LED_street_light_fixture_4dde50e8.png";
+import wireCoilImg from "@assets/generated_images/Finolex_2.5sqmm_wire_coil_072a94ff.png";
+import toolsImg from "@assets/generated_images/Professional_electrical_tools_collection_b4db75d8.png";
+import breakersImg from "@assets/generated_images/Circuit_breakers_electrical_panel_ed1b7697.png";
 
 interface DealsBannerProps {
   products: Product[];
@@ -26,7 +30,7 @@ const DEFAULT_DEAL_PRODUCTS: Product[] = [
     isActive: true,
     isBulky: false,
     weightInKg: 1,
-    imageUrls: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop"],
+    imageUrls: [streetLightImg],
     isFeatured: true,
     rating: 4.8,
     reviewCount: 42,
@@ -35,9 +39,9 @@ const DEFAULT_DEAL_PRODUCTS: Product[] = [
   },
   {
     id: "deal-50w",
-    name: "50W Street Light",
-    slug: "50w-street-light",
-    description: "High lumens LED street light with IP65 waterproofing.",
+    name: "Finolex 2.5sqmm Copper Wire Coil (90m)",
+    slug: "finolex-2-5sqmm-wire-coil-red",
+    description: "100% pure copper electrical wire for heavy domestic power connections.",
     price: 950,
     originalPrice: 1980,
     category: "lighting",
@@ -45,7 +49,7 @@ const DEFAULT_DEAL_PRODUCTS: Product[] = [
     isActive: true,
     isBulky: false,
     weightInKg: 1,
-    imageUrls: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop"],
+    imageUrls: [wireCoilImg],
     isFeatured: true,
     rating: 4.6,
     reviewCount: 28,
@@ -54,9 +58,9 @@ const DEFAULT_DEAL_PRODUCTS: Product[] = [
   },
   {
     id: "deal-36w",
-    name: "36W Street Light",
-    slug: "36w-street-light",
-    description: "Energy efficient outdoor LED street lighting fixture.",
+    name: "Professional Electrician Tool Set",
+    slug: "professional-electrician-tool-kit",
+    description: "Insulated 1000V pliers, wire strippers, digital multimeter & tester kit.",
     price: 782,
     originalPrice: 1630,
     category: "lighting",
@@ -64,7 +68,7 @@ const DEFAULT_DEAL_PRODUCTS: Product[] = [
     isActive: true,
     isBulky: false,
     weightInKg: 1,
-    imageUrls: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop"],
+    imageUrls: [toolsImg],
     isFeatured: true,
     rating: 4.5,
     reviewCount: 19,
@@ -73,9 +77,9 @@ const DEFAULT_DEAL_PRODUCTS: Product[] = [
   },
   {
     id: "deal-30w",
-    name: "30W Street Light",
-    slug: "30w-street-light",
-    description: "Compact high-performance street light for commercial use.",
+    name: "Double Door MCB Distribution Box (12-Way)",
+    slug: "12-way-mcb-distribution-box",
+    description: "Heavy-duty powder coated steel distribution box for safe breaker installation.",
     price: 756,
     originalPrice: 1575,
     category: "lighting",
@@ -83,7 +87,7 @@ const DEFAULT_DEAL_PRODUCTS: Product[] = [
     isActive: true,
     isBulky: false,
     weightInKg: 1,
-    imageUrls: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop"],
+    imageUrls: [breakersImg],
     isFeatured: true,
     rating: 4.7,
     reviewCount: 15,

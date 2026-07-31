@@ -54,7 +54,7 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
     addToCartMutation.mutate();
   };
 
-  const imageUrl = product.imageUrls?.[0] || "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300";
+  const imageUrl = product.imageUrls?.[0] || "/api/placeholder/400/300";
   const rating = parseFloat(product.price ? "4.5" : "0"); // Placeholder logic if rating missing, reusing price field check just to be safe or use product.rating
   const validRating = parseFloat(product.rating || "0");
   const reviewCount = product.reviewCount || 0;

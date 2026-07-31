@@ -228,9 +228,9 @@ export default function ProductDetail() {
     );
   }
 
-  const images = product.imageUrls || [
-    "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=800",
-  ];
+  const images = product.imageUrls && product.imageUrls.length > 0 
+    ? product.imageUrls 
+    : ["/api/placeholder/800/800"];
   const price = product.price;
   const originalPrice = product.originalPrice;
   const hasDiscount = originalPrice && originalPrice > price;
@@ -554,13 +554,13 @@ export default function ProductDetail() {
             <div className="flex-shrink-0">
               <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
                 <img
-                  src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=200"
+                  src="/api/placeholder/200/200"
                   alt="Wire Connector"
                   className="w-full h-full object-cover rounded-lg"
                 />
               </div>
               <p className="text-xs text-center mt-2 font-medium">
-                {formatPrice(29900)}
+                {formatPrice(299)}
               </p>
             </div>
 
@@ -569,13 +569,13 @@ export default function ProductDetail() {
             <div className="flex-shrink-0">
               <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
                 <img
-                  src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=200"
+                  src="/api/placeholder/200/200"
                   alt="Electrical Tape"
                   className="w-full h-full object-cover rounded-lg"
                 />
               </div>
               <p className="text-xs text-center mt-2 font-medium">
-                {formatPrice(14900)}
+                {formatPrice(149)}
               </p>
             </div>
 
@@ -771,12 +771,12 @@ export default function ProductDetail() {
 
                     <div className="flex space-x-2 mb-3">
                       <img
-                        src="https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=100&h=100&fit=crop"
+                        src="/api/placeholder/100/100"
                         alt="Customer photo"
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                       <img
-                        src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=100&h=100&fit=crop"
+                        src="/api/placeholder/100/100"
                         alt="Customer photo"
                         className="w-16 h-16 object-cover rounded-lg"
                       />

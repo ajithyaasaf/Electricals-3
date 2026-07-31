@@ -184,7 +184,7 @@ export default function ServiceDetail() {
     );
   }
 
-  const imageUrl = service.imageUrls?.[0] || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600";
+  const imageUrl = service.imageUrls?.[0] || "/api/placeholder/800/600";
   const startingPrice = service.startingPrice;
   const rating = service.rating || 0;
   const reviewCount = service.reviewCount || 0;

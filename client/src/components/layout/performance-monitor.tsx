@@ -10,8 +10,8 @@ export function PerformanceMonitor() {
 
     // Preload critical resources
     const criticalImages = [
-      'https://images.unsplash.com/photo-1621905252507-b35492cc74b4', // Electrical equipment
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64', // Wiring
+      '/api/placeholder/400/300',
+      '/api/placeholder/800/600',
     ];
 
     criticalImages.forEach(src => {
