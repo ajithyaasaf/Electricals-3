@@ -11,35 +11,87 @@ interface DealsBannerProps {
   products: Product[];
 }
 
-export function DealsBanner({ products }: DealsBannerProps) {
-  if (!products || products.length === 0) {
-    return (
-      <div className="bg-white py-4 sm:py-6">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="p-2 bg-copper-100 rounded-lg">
-              <Tag className="w-5 h-5 text-copper-700" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Today's Deals</h2>
-            <Badge className="bg-gradient-to-r from-copper-600 to-copper-700 text-white border-0 shadow-sm px-3 py-1">
-              Limited Time Offers
-            </Badge>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6">
-            <div className="lg:col-span-2 h-[350px]">
-              <Skeleton className="w-full h-full rounded-2xl" />
-            </div>
-            <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Skeleton className="w-full h-[165px] rounded-xl" />
-              <Skeleton className="w-full h-[165px] rounded-xl" />
-              <Skeleton className="w-full h-[165px] rounded-xl" />
-              <Skeleton className="w-full h-[165px] rounded-xl" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
+const DEFAULT_DEAL_PRODUCTS: Product[] = [
+  {
+    id: "deal-72w",
+    name: "72W Street Light",
+    slug: "72w-street-light",
+    description: "SMD LED chip, CRI>80, 50000hrs life span, IP66, ADC12 Diecast housing...",
+    price: 2000,
+    originalPrice: 2925,
+    category: "lighting",
+    stock: 50,
+    isActive: true,
+    isBulky: false,
+    weightInKg: 1,
+    imageUrls: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop"],
+    isFeatured: true,
+    rating: 4.8,
+    reviewCount: 42,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "deal-50w",
+    name: "50W Street Light",
+    slug: "50w-street-light",
+    description: "High lumens LED street light with IP65 waterproofing.",
+    price: 950,
+    originalPrice: 1980,
+    category: "lighting",
+    stock: 30,
+    isActive: true,
+    isBulky: false,
+    weightInKg: 1,
+    imageUrls: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop"],
+    isFeatured: true,
+    rating: 4.6,
+    reviewCount: 28,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "deal-36w",
+    name: "36W Street Light",
+    slug: "36w-street-light",
+    description: "Energy efficient outdoor LED street lighting fixture.",
+    price: 782,
+    originalPrice: 1630,
+    category: "lighting",
+    stock: 25,
+    isActive: true,
+    isBulky: false,
+    weightInKg: 1,
+    imageUrls: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop"],
+    isFeatured: true,
+    rating: 4.5,
+    reviewCount: 19,
+    createdAt: new Date(),
+    updatedAt: new Date()
+  },
+  {
+    id: "deal-30w",
+    name: "30W Street Light",
+    slug: "30w-street-light",
+    description: "Compact high-performance street light for commercial use.",
+    price: 756,
+    originalPrice: 1575,
+    category: "lighting",
+    stock: 20,
+    isActive: true,
+    isBulky: false,
+    weightInKg: 1,
+    imageUrls: ["https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?ixlib=rb-4.0.3&auto=format&fit=crop"],
+    isFeatured: true,
+    rating: 4.7,
+    reviewCount: 15,
+    createdAt: new Date(),
+    updatedAt: new Date()
   }
+];
+
+export function DealsBanner({ products }: DealsBannerProps) {
+  const displayProducts = (products && products.length > 0) ? products : DEFAULT_DEAL_PRODUCTS;
 
   // Helper to format product data for display
   const getDealData = (product: Product) => {
@@ -61,8 +113,8 @@ export function DealsBanner({ products }: DealsBannerProps) {
     };
   };
 
-  const mainDeal = getDealData(products[0]);
-  const smallDeals = products.slice(1, 4).map(getDealData);
+  const mainDeal = getDealData(displayProducts[0]);
+  const smallDeals = displayProducts.slice(1, 4).map(getDealData);
 
   return (
     <div className="bg-white py-4 sm:py-6">
