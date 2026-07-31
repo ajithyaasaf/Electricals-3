@@ -286,7 +286,7 @@ export default function Checkout() {
   const subtotal = cart?.totals?.subtotal || 0;
   const shipping = cart?.totals?.shipping || 0;
   const tax = cart?.totals?.tax || 0;
-  const total = cart?.totals?.total || 0;
+  const total = cart?.totals?.total ?? (subtotal + shipping + tax);
 
   const updateFormData = (section: keyof CheckoutFormData, field: string, value: any) => {
     setFormData(prev => ({

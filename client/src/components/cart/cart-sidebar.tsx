@@ -245,7 +245,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
                 {/* Total */}
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-bold text-gray-900">Total</span>
-                  <span className="text-xl font-bold text-teal-700">{formatPrice(totals?.total || 0)}</span>
+                  <span className="text-xl font-bold text-teal-700">{formatPrice(totals?.total || ((totals?.subtotal || 0) + (totals?.shipping || 0) + (totals?.tax || 0) - (totals?.discount || 0)))}</span>
                 </div>
 
                 {/* Savings banner */}

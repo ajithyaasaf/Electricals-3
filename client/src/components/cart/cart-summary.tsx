@@ -98,7 +98,7 @@ export function CartSummary({
 
           <div className="flex justify-between text-lg font-semibold">
             <span>Total</span>
-            <span>{formatPrice(totals.total)}</span>
+            <span>{formatPrice(totals.total || (totals.subtotal + totals.shipping + totals.tax - totals.discount))}</span>
           </div>
 
           {totals.savings > 0 && (
