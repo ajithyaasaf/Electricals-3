@@ -454,6 +454,13 @@ export default function ProductDetail() {
                     </button>
                     <input
                       type="number"
+                      min="1"
+                      step="1"
+                      onKeyDown={(e) => {
+                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       value={quantity}
                       onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
                       className="w-16 text-center border-none focus:ring-0 font-medium text-gray-900"

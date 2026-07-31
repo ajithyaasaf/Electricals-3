@@ -433,8 +433,15 @@ const WhyChooseEditor: React.FC = () => {
                       <Label>Order</Label>
                       <Input
                         type="number"
+                        min="0"
+                        step="1"
+                        onKeyDown={(e) => {
+                          if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
                         value={feature.order}
-                        onChange={(e) => updateFeature(feature.id, { order: parseInt(e.target.value) })}
+                        onChange={(e) => updateFeature(feature.id, { order: parseInt(e.target.value) || 0 })}
                       />
                     </div>
                   </div>

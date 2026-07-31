@@ -671,7 +671,20 @@ function ProductsSection({
                         <FormItem>
                           <FormLabel>Product Name</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              {...field} 
+                              onChange={(e) => {
+                                field.onChange(e);
+                                if (!editingItem) {
+                                  const generatedSlug = e.target.value
+                                    .toLowerCase()
+                                    .trim()
+                                    .replace(/[^a-z0-9]+/g, '-')
+                                    .replace(/(^-|-$)+/g, '');
+                                  productForm.setValue("slug", generatedSlug, { shouldValidate: true });
+                                }
+                              }}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -683,10 +696,14 @@ function ProductsSection({
                       name="slug"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Slug</FormLabel>
+                          <FormLabel>SEO Slug (URL Identifier)</FormLabel>
                           <FormControl>
-                            <Input {...field} />
+                            <Input 
+                              {...field} 
+                              placeholder="e.g. finolex-2-5sqmm-copper-wire"
+                            />
                           </FormControl>
+                          <p className="text-[11px] text-gray-500">Auto-generated clean URL for Google SEO ranking</p>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -739,7 +756,18 @@ function ProductsSection({
                         <FormItem>
                           <FormLabel>Current Price (₹)</FormLabel>
                           <FormControl>
-                            <Input type="number" step="0.01" {...field} placeholder="0.00" />
+                            <Input 
+                              type="number" 
+                              step="0.01" 
+                              min="0"
+                              onKeyDown={(e) => {
+                                if (['e', 'E', '+', '-'].includes(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
+                              {...field} 
+                              placeholder="0.00" 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -756,6 +784,12 @@ function ProductsSection({
                             <Input
                               type="number"
                               step="0.01"
+                              min="0"
+                              onKeyDown={(e) => {
+                                if (['e', 'E', '+', '-'].includes(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
                               {...field}
                               value={field.value || ''}
                               placeholder="0.00"
@@ -792,6 +826,13 @@ function ProductsSection({
                           <FormControl>
                             <Input
                               type="number"
+                              min="0"
+                              step="1"
+                              onKeyDown={(e) => {
+                                if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                                  e.preventDefault();
+                                }
+                              }}
                               {...field}
                               onChange={(e) => {
                                 const val = e.target.value;
@@ -906,6 +947,11 @@ function ProductsSection({
                                 type="number"
                                 step="0.01"
                                 min="0"
+                                onKeyDown={(e) => {
+                                  if (['e', 'E', '+', '-'].includes(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 {...field}
                                 onChange={(e) => {
                                   const val = e.target.value;
@@ -965,6 +1011,11 @@ function ProductsSection({
                                 step="0.1"
                                 min="0"
                                 max="5"
+                                onKeyDown={(e) => {
+                                  if (['e', 'E', '+', '-'].includes(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 {...field}
                                 onChange={(e) => {
                                   const val = e.target.value;
@@ -994,6 +1045,12 @@ function ProductsSection({
                               <Input
                                 type="number"
                                 min="0"
+                                step="1"
+                                onKeyDown={(e) => {
+                                  if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                                    e.preventDefault();
+                                  }
+                                }}
                                 {...field}
                                 onChange={(e) => {
                                   const val = e.target.value;

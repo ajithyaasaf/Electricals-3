@@ -171,14 +171,20 @@ export function CartItem({
                 
                 <Input
                   type="number"
+                  min="1"
+                  max="99"
+                  step="1"
+                  onKeyDown={(e) => {
+                    if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   value={quantity}
                   onChange={(e) => {
                     const newQuantity = parseInt(e.target.value) || 1;
                     handleQuantityChange(newQuantity);
                   }}
                   className="w-16 h-8 text-center border-0 focus-visible:ring-0"
-                  min="1"
-                  max="99"
                   disabled={isUpdating}
                 />
                 

@@ -87,6 +87,10 @@ const PriceInputs = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, commitFn: () => void) => {
+    if (['e', 'E', '+', '-'].includes(e.key)) {
+      e.preventDefault();
+      return;
+    }
     if (e.key === 'Enter') {
       e.preventDefault();
       (e.currentTarget as HTMLInputElement).blur(); // Triggers onBlur which calls commitFn
