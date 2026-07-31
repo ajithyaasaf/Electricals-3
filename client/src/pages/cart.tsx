@@ -268,16 +268,6 @@ export default function Cart() {
                 isApplyingCoupon={false}
               />
 
-              {/* Continue Shopping */}
-              <div className="mt-6">
-                <Link href="/products">
-                  <Button variant="outline" className="w-full">
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Continue Shopping
-                  </Button>
-                </Link>
-              </div>
-
               {/* Trust Indicators */}
               <div className="mt-6 p-4 bg-white rounded-lg border">
                 <div className="space-y-3">

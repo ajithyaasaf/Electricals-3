@@ -199,7 +199,6 @@ export function CartSummary({
             <div>• Delivery in 1-2 business days</div>
             <div>• Shipping fees based on weight and product category</div>
             <div>• Returns: 5-7 days</div>
-            <div>• COD available (Madurai, no extra charges)</div>
           </div>
         </div>
 
