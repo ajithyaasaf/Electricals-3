@@ -1,4 +1,4 @@
-import { formatPrice } from "./currency";
+import { formatPrice, normalizeOrderFinancials } from "./currency";
 
 export interface InvoiceOrderData {
   id: string;
@@ -48,8 +48,9 @@ export function printInvoice(order: InvoiceOrderData, items: InvoiceItemData[]) 
   });
 
   const subtotalPaise = items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
-  const shippingPaise = order.shippingCost || 0;
-  const grandTotalPaise = order.total || (subtotalPaise + shippingPaise);
+  const financials = normalizeOrderFinancials({ subtotal: subtotalPaise, shippingCost: order.shippingCost });
+  const shippingPaise = financials.shippingCost;
+  const grandTotalPaise = financials.total;
 
   const itemsHtml = items.map((item, index) => `
     <tr>

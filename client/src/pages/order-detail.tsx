@@ -34,7 +34,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { apiRequest } from "@/lib/queryClient";
-import { formatPrice } from "@/lib/currency";
+import { formatPrice, normalizeOrderFinancials } from "@/lib/currency";
 import {
     Package,
     Truck,
@@ -392,7 +392,7 @@ export default function OrderDetail() {
                                 ) : (
                                     <div className="space-y-6">
                                         <p className="text-sm text-blue-800">
-                                            Please transfer <strong>{formatPrice(order.total)}</strong> to the account below and upload the proof.
+                                            Please transfer <strong>{formatPrice(normalizeOrderFinancials(order).total)}</strong> to the account below and upload the proof.
                                         </p>
 
                                         {/* Bank Details Card */}
@@ -549,37 +549,42 @@ export default function OrderDetail() {
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
-                            <div className="space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Subtotal</span>
-                                    <span>{formatPrice(order.subtotal)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Tax (GST)</span>
-                                    <span>{formatPrice(order.tax)}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-gray-600">Shipping</span>
-                                    <span>
-                                        {order.shippingCost === 0 ? (
-                                            <span className="text-green-600">Free</span>
-                                        ) : (
-                                            formatPrice(order.shippingCost)
-                                        )}
-                                    </span>
-                                </div>
-                                <Separator />
-                                <div className="flex justify-between text-base font-semibold">
-                                    <span>Total</span>
-                                    <span>{formatPrice(order.total)}</span>
-                                </div>
-                                <div className="flex justify-between pt-2">
-                                    <span className="text-gray-600">Payment Method</span>
-                                    <Badge variant="outline" className="uppercase">
-                                        {order.paymentMethod}
-                                    </Badge>
-                                </div>
-                            </div>
+                            {(() => {
+                                const financials = normalizeOrderFinancials(order);
+                                return (
+                                    <div className="space-y-2 text-sm">
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Subtotal</span>
+                                            <span>{formatPrice(financials.subtotal)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Tax (GST)</span>
+                                            <span>{formatPrice(financials.tax)}</span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span className="text-gray-600">Shipping</span>
+                                            <span>
+                                                {financials.shippingCost === 0 ? (
+                                                    <span className="text-green-600">Free</span>
+                                                ) : (
+                                                    formatPrice(financials.shippingCost)
+                                                )}
+                                            </span>
+                                        </div>
+                                        <Separator />
+                                        <div className="flex justify-between text-base font-semibold">
+                                            <span>Total</span>
+                                            <span>{formatPrice(financials.total)}</span>
+                                        </div>
+                                        <div className="flex justify-between pt-2">
+                                            <span className="text-gray-600">Payment Method</span>
+                                            <Badge variant="outline" className="uppercase">
+                                                {order.paymentMethod}
+                                            </Badge>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
                         </CardContent>
                     </Card>
                 </div>

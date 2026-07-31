@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
+import { formatPrice, normalizeOrderFinancials } from "@/lib/currency";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { AdminLogin } from "@/components/admin/admin-login";
 import { AdminLayout } from "@/components/admin/admin-layout";
@@ -23,7 +24,6 @@ import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/image-upload";
-import { formatPrice } from "@/lib/currency";
 import { ELECTRICAL_CATEGORIES } from "@shared/data/categories";
 import {
   Package,
@@ -1537,7 +1537,7 @@ function AdminDashboard() {
 
   // Calculate stats
   const totalRevenue = orders.reduce((sum: number, order: any) =>
-    sum + parseFloat(order.total || "0"), 0);
+    sum + normalizeOrderFinancials(order).total, 0);
   const totalProducts = (productsData as any)?.total || 0;
   const totalOrders = orders.length;
 

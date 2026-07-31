@@ -53,3 +53,32 @@ export const formatSavings = (originalPriceInPaise: number, currentPriceInPaise:
   const savings = originalPriceInPaise - currentPriceInPaise;
   return `Save ${formatPrice(savings)}`;
 };
+
+/**
+ * Normalizes order financial amounts to guarantee exact display in Paise,
+ * auto-correcting legacy orders where shipping cost was stored in Rupees.
+ */
+export const normalizeOrderFinancials = (order: {
+  subtotal?: number;
+  tax?: number;
+  shippingCost?: number;
+  total?: number;
+}) => {
+  const subtotal = order.subtotal || 0;
+  const tax = order.tax || 0;
+  let shippingCost = order.shippingCost || 0;
+
+  // Backward compatibility: If shippingCost was saved in Rupees (e.g. 40 or 150) instead of Paise (4000 or 15000), convert to Paise
+  if (shippingCost > 0 && shippingCost < 500) {
+    shippingCost = shippingCost * 100;
+  }
+
+  const total = subtotal + tax + shippingCost;
+
+  return {
+    subtotal,
+    tax,
+    shippingCost,
+    total,
+  };
+};

@@ -103,7 +103,14 @@ export function registerAnalyticsRoutes(app: Express) {
         orders.forEach(order => {
           const orderDate = new Date(order.createdAt);
           if (orderDate >= startOfMonth && orderDate <= endOfMonth) {
-            monthRevenue += parseFloat(order.total.toString());
+            const subtotal = order.subtotal || 0;
+            const tax = order.tax || 0;
+            let shippingCost = order.shippingCost || 0;
+            if (shippingCost > 0 && shippingCost < 500) {
+              shippingCost = shippingCost * 100;
+            }
+            const normalizedTotal = subtotal + tax + shippingCost;
+            monthRevenue += normalizedTotal;
             monthOrderCount++;
           }
         });

@@ -697,7 +697,7 @@ export async function createOrderWithTransaction(
         const itemTotals = items.map(item => item.unitPrice * item.quantity);
         const subtotal = itemTotals.reduce((sum, total) => sum + total, 0);
 
-        // Step 3: Calculate shipping cost using centralized logistics engine
+        // Step 3: Calculate shipping cost using centralized logistics engine (in Paise)
         const preparedItems = stockChecks.map((check, index) => ({
             product: {
                 ...check.productData,
@@ -706,26 +706,23 @@ export async function createOrderWithTransaction(
         }));
         const shippingCost = calculateShippingFee(preparedItems, subtotal);
 
-        // Convert from paise to rupees for database storage
-        const shippingCostInRupees = shippingCost / 100;
+        // Step 4: Calculate tax (18% GST in Paise)
+        const tax = Math.round(subtotal * 0.18);
 
-        // Step 4: Calculate tax (18% GST)
-        const tax = Math.round(subtotal * 0.18 * 100) / 100;
+        // Step 5: Calculate total (all values in Paise)
+        const total = subtotal + tax + shippingCost;
 
-        // Step 5: Calculate total
-        const total = subtotal + tax + shippingCostInRupees;
-
-        console.log('[ORDER] Shipping calculation:', {
-            subtotal: `₹${subtotal}`,
-            shippingCost: `₹${shippingCostInRupees}`,
-            tax: `₹${tax}`,
-            total: `₹${total}`
+        console.log('[ORDER] Financial calculation (Paise):', {
+            subtotal,
+            shippingCost,
+            tax,
+            total
         });
 
         // Step 6: Generate unique order number
         const orderNumber = generateOrderNumber();
 
-        // Step 7: Create order document (write phase)
+        // Step 7: Create order document (write phase - all financial fields in Paise)
         const orderRef = db.collection(COLLECTIONS.ORDERS).doc();
         transaction.set(orderRef, {
             orderNumber,
@@ -736,7 +733,7 @@ export async function createOrderWithTransaction(
             status: 'pending',
             subtotal,
             tax,
-            shippingCost: shippingCostInRupees,
+            shippingCost,
             total,
             shippingAddress: {
                 ...shippingAddress,

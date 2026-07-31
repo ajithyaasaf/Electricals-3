@@ -74,7 +74,7 @@ import {
     FileText,
     Printer,
 } from "lucide-react";
-import { formatPrice } from "@/lib/currency";
+import { formatPrice, normalizeOrderFinancials } from "@/lib/currency";
 import { printInvoice } from "@/lib/invoiceGenerator";
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -273,7 +273,7 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                             </div>
                             <div className="text-right">
                                 <p className="text-sm text-gray-600">Order Total</p>
-                                <p className="text-2xl font-bold">{formatPrice(details.order.total)}</p>
+                                <p className="text-2xl font-bold">{formatPrice(normalizeOrderFinancials(details.order).total)}</p>
                             </div>
                         </div>
 
@@ -342,14 +342,21 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                         <p className="text-gray-600">Status</p>
                                         <Badge variant="outline" className="capitalize">{details.order.paymentStatus.replace('_', ' ')}</Badge>
                                     </div>
-                                    <div>
-                                        <p className="text-gray-600">Subtotal</p>
-                                        <p className="font-medium">{formatPrice(details.order.subtotal)}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-gray-600">Tax + Shipping</p>
-                                        <p className="font-medium">{formatPrice(details.order.tax + details.order.shippingCost)}</p>
-                                    </div>
+                                    {(() => {
+                                        const fin = normalizeOrderFinancials(details.order);
+                                        return (
+                                            <>
+                                                <div>
+                                                    <p className="text-gray-600">Subtotal</p>
+                                                    <p className="font-medium">{formatPrice(fin.subtotal)}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-600">Tax + Shipping</p>
+                                                    <p className="font-medium">{formatPrice(fin.tax + fin.shippingCost)}</p>
+                                                </div>
+                                            </>
+                                        );
+                                    })()}
                                 </div>
 
                                 {/* Bank Transfer Specifics */}
@@ -891,7 +898,7 @@ export function OrdersManagement() {
                                         </TableCell>
                                         <TableCell className="text-sm text-gray-600">{order.itemCount} items</TableCell>
                                         <TableCell className="font-semibold text-gray-900">
-                                            {formatPrice(order.total)}
+                                            {formatPrice(normalizeOrderFinancials(order).total)}
                                         </TableCell>
                                         <TableCell>
                                             <StatusUpdateSelect

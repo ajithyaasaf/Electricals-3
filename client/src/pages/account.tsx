@@ -16,7 +16,7 @@ import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { signInWithGoogle, signOutUser } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { formatPrice } from "@/lib/currency";
+import { formatPrice, normalizeOrderFinancials } from "@/lib/currency";
 import {
   User,
   Package,
@@ -396,7 +396,7 @@ export default function Account() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-2xl font-bold text-gray-900">
-                  {formatPrice((orders as any[]).reduce((sum: number, order: any) => sum + (typeof order.total === 'number' ? order.total : 0), 0))}
+                  {formatPrice((orders as any[]).reduce((sum: number, order: any) => sum + normalizeOrderFinancials(order).total, 0))}
                 </p>
                 <p className="text-sm text-gray-600">Total Spent</p>
               </div>
@@ -530,7 +530,7 @@ export default function Account() {
                               {getStatusIcon(order.status)}
                               <span className="capitalize">{order.status}</span>
                             </Badge>
-                            <p className="font-semibold">{formatPrice(order.total || 0)}</p>
+                             <p className="font-semibold">{formatPrice(normalizeOrderFinancials(order).total)}</p>
                           </div>
                         </div>
 
