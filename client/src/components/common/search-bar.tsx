@@ -151,7 +151,7 @@ export function SearchBar() {
 
       {/* Instant Search Suggestions Dropdown */}
       {showSuggestions && searchQuery.trim().length > 1 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto scrollbar-modern">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-2xl z-[9999] max-h-96 overflow-y-auto scrollbar-modern">
           {isLoading ? (
             <div className="p-4 text-center text-gray-500">
               <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2 text-teal-600" />
@@ -159,8 +159,9 @@ export function SearchBar() {
             </div>
           ) : suggestions.length > 0 ? (
             <div className="py-2">
-              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-100">
-                Matching Products ({suggestions.length})
+              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                <span>Matching Products ({suggestions.length})</span>
+                <span className="text-[10px] text-teal-600 font-normal">Press Enter to view all</span>
               </div>
               {suggestions.map((product) => {
                 const img = product.imageUrls?.[0] || product.image || "/placeholder.png";

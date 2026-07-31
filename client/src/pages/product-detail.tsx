@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, Fragment } from "react";
 import { useParams } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/layout/header";
@@ -17,6 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice, formatSavings } from "@/lib/currency";
 import { getProductLogistics } from "@shared/logistics";
+import type { Product } from "@shared/types";
 import {
   Star,
   Heart,
@@ -28,6 +29,7 @@ import {
   RotateCcw,
   ArrowLeft,
   ZoomIn,
+  Sparkles,
   X,
   ChevronLeft,
   ChevronRight,
@@ -41,7 +43,6 @@ import { Link } from "wouter";
 import { ReviewList } from "@/components/reviews/review-list";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { useProductSEO } from "@/hooks/use-seo";
-import type { Product } from "shared/types";
 import { addToRecentlyViewed } from "@/components/common/recently-viewed";
 
 // Helper to format specification keys (e.g., ip_rating -> IP Rating)
@@ -114,6 +115,50 @@ export default function ProductDetail() {
     queryKey: ["/api/products", { categoryId: product?.categoryId, limit: 4 }],
     enabled: !!product?.categoryId,
   });
+
+  // Fetch general catalog products for bundle fallback
+  const { data: catalogProductsData } = useQuery<{ products: Product[] }>({
+    queryKey: ["/api/products", { limit: 12 }],
+  });
+
+  const bundleItems = useMemo<Product[]>(() => {
+    if (!product) return [];
+    const candidates = [
+      ...(relatedProducts?.products || []),
+      ...(catalogProductsData?.products || [])
+    ].filter((p, idx, self) => p.id !== product.id && self.findIndex(t => t.id === p.id) === idx);
+    return candidates.slice(0, 2);
+  }, [product, relatedProducts, catalogProductsData]);
+
+  const bundleTotalMrp = useMemo(() => {
+    if (!product) return 0;
+    const mainPrice = product.price || 0;
+    const bundleSum = bundleItems.reduce((acc: number, item: Product) => acc + (item.price || 0), 0);
+    return mainPrice + bundleSum;
+  }, [product, bundleItems]);
+
+  const bundleDiscount = useMemo(() => Math.round(bundleTotalMrp * 0.08), [bundleTotalMrp]);
+  const bundleFinalPrice = useMemo(() => Math.max(0, bundleTotalMrp - bundleDiscount), [bundleTotalMrp, bundleDiscount]);
+
+  const handleAddBundleToCart = async () => {
+    if (!product) return;
+    try {
+      await addItem(product.id, undefined, 1, undefined, product);
+      for (const item of bundleItems) {
+        await addItem(item.id, undefined, 1, undefined, item);
+      }
+      toast({
+        title: "🎉 Bundle Added to Cart!",
+        description: `Successfully added ${product.name} and complementary items to your cart!`,
+      });
+    } catch (err) {
+      toast({
+        title: "Error adding bundle",
+        description: "Failed to add all bundle items to cart.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Fetch reviews
   const { data: reviews = [] } = useQuery<any[]>({
@@ -535,76 +580,81 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* Frequently Bought Together (Refreshed) */}
-        <div className="mb-12 p-6 bg-white rounded-lg border border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Frequently Bought Together
-          </h2>
-          <div className="flex items-center space-x-4 overflow-x-auto pb-4">
-            {/* Main Product */}
-            <div className="flex-shrink-0">
-              <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                <img
-                  src={images[0]}
-                  alt={product.name}
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              </div>
-              <p className="text-xs text-center mt-2 font-medium">
-                {formatPrice(price)}
-              </p>
-            </div>
-
-            <div className="text-2xl text-gray-400">+</div>
-
-            {/* Complementary Products */}
-            <div className="flex-shrink-0">
-              <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                <img
-                  src="/api/placeholder/200/200"
-                  alt="Wire Connector"
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              </div>
-              <p className="text-xs text-center mt-2 font-medium">
-                {formatPrice(299)}
-              </p>
-            </div>
-
-            <div className="text-2xl text-gray-400">+</div>
-
-            <div className="flex-shrink-0">
-              <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center">
-                <img
-                  src="/api/placeholder/200/200"
-                  alt="Electrical Tape"
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              </div>
-              <p className="text-xs text-center mt-2 font-medium">
-                {formatPrice(149)}
-              </p>
-            </div>
-
-            <div className="text-2xl text-gray-400">=</div>
-
-            {/* Total Price */}
-            <div className="flex-shrink-0 text-center">
-              <div className="bg-green-100 p-4 rounded-lg">
-                <p className="text-sm text-gray-600">Bundle Price</p>
-                <p className="text-xl font-bold text-green-700">
-                  {formatPrice(price + 29900 + 14900 - 10000)}
+        {/* Frequently Bought Together (Dynamic & Functional) */}
+        {bundleItems.length > 0 && (
+          <div className="mb-12 p-6 bg-white rounded-xl border border-gray-200 shadow-sm">
+            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-amber-500" />
+              Frequently Bought Together
+            </h2>
+            <div className="flex flex-wrap md:flex-nowrap items-center gap-4">
+              {/* Main Product */}
+              <div className="flex flex-col items-center w-28">
+                <div className="w-24 h-24 bg-gray-50 border border-gray-100 rounded-xl overflow-hidden flex items-center justify-center p-2">
+                  <img
+                    src={images[0]}
+                    alt={product.name}
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <p className="text-xs text-center mt-2 font-medium line-clamp-1 text-gray-800" title={product.name}>
+                  {product.name}
                 </p>
-                <p className="text-xs text-green-600">
-                  Save {formatPrice(10000)}
+                <p className="text-xs font-bold text-teal-700 mt-0.5">
+                  {formatPrice(price)}
                 </p>
               </div>
-              <Button className="mt-3 bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2">
-                Add Bundle to Cart
-              </Button>
+
+              {bundleItems.map((bItem: Product) => (
+                <Fragment key={bItem.id}>
+                  <div className="text-xl font-bold text-gray-400">+</div>
+                  <div className="flex flex-col items-center w-28">
+                    <div className="w-24 h-24 bg-gray-50 border border-gray-100 rounded-xl overflow-hidden flex items-center justify-center p-2">
+                      <img
+                        src={bItem.imageUrls?.[0] || images[0]}
+                        alt={bItem.name}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                    <p className="text-xs text-center mt-2 font-medium line-clamp-1 text-gray-800" title={bItem.name}>
+                      {bItem.name}
+                    </p>
+                    <p className="text-xs font-bold text-teal-700 mt-0.5">
+                      {formatPrice(bItem.price)}
+                    </p>
+                  </div>
+                </Fragment>
+              ))}
+
+              <div className="text-xl font-bold text-gray-400">=</div>
+
+              {/* Total Bundle Box */}
+              <div className="flex-1 min-w-[200px] bg-gradient-to-br from-emerald-50 to-teal-50/60 border border-emerald-200 p-4 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-medium text-emerald-800 uppercase tracking-wider">Combo Bundle Price</p>
+                  <div className="flex items-baseline gap-2 mt-1">
+                    <span className="text-2xl font-extrabold text-emerald-700 tracking-tight">
+                      {formatPrice(bundleFinalPrice)}
+                    </span>
+                    <span className="text-sm text-gray-400 line-through">
+                      {formatPrice(bundleTotalMrp)}
+                    </span>
+                  </div>
+                  <p className="text-xs text-emerald-600 font-semibold mt-0.5">
+                    ✨ Bundle Savings: Save {formatPrice(bundleDiscount)}!
+                  </p>
+                </div>
+                <Button 
+                  onClick={handleAddBundleToCart}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-5 py-2.5 rounded-xl shadow-md shadow-emerald-100 flex items-center gap-2 whitespace-nowrap"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  Add Bundle to Cart
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Product Details Tabs */}
         <Tabs defaultValue="description" className="mb-12">

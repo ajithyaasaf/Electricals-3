@@ -137,7 +137,7 @@ export function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50 overflow-hidden">
+    <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
       {/* Top announcement bar - Madurai Launch Phase */}
       <div className="bg-copper-700 text-white text-center py-2 text-sm px-2">
         <span className="text-xs sm:text-sm truncate block">
@@ -146,7 +146,7 @@ export function Header() {
       </div>
 
       {/* Main header */}
-      <div className="w-full px-2 sm:px-4 lg:px-6 overflow-hidden">
+      <div className="w-full px-2 sm:px-4 lg:px-6">
         <div className="flex items-center justify-between py-2 sm:py-3 gap-1 sm:gap-2">
           {/* Logo */}
           <SmartLink href="/" className="flex items-center flex-shrink-0 min-w-0">
