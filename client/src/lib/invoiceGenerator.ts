@@ -109,7 +109,7 @@ export function printInvoice(order: InvoiceOrderData, items: InvoiceItemData[]) 
           <table class="header-table">
             <tr>
               <td style="vertical-align: top;">
-                <div class="logo-title">⚡ CopperBear</div>
+                <div class="logo-title">CopperBear</div>
                 <div style="font-size: 12px; color: #4b5563; font-weight: 500; margin-top: 2px;">Solutions That Spark & Flow</div>
               </td>
               <td class="company-details">
