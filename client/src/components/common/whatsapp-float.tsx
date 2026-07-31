@@ -1,4 +1,13 @@
+import { useLocation } from "wouter";
+
 export function WhatsAppFloat() {
+    const [location] = useLocation();
+    
+    // Hide WhatsApp float button on admin pages
+    if (location.startsWith("/admin")) {
+        return null;
+    }
+
     const phoneNumber = "918098727452";
     const defaultMessage = "Hi! I'm interested in your electrical products. Can you help me?";
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(defaultMessage)}`;
