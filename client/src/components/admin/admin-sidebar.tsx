@@ -28,9 +28,9 @@ export interface NavItem {
 // Default navigation items
 export const adminNavItems: NavItem[] = [
     { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
-    { id: "analytics", label: "Analytics", icon: <BarChart3 className="w-5 h-5" /> },
-    { id: "products", label: "Products", icon: <Package className="w-5 h-5" /> },
     { id: "orders", label: "Orders", icon: <ShoppingCart className="w-5 h-5" /> },
+    { id: "products", label: "Products", icon: <Package className="w-5 h-5" /> },
+    { id: "analytics", label: "Analytics", icon: <BarChart3 className="w-5 h-5" /> },
 ];
 
 interface AdminSidebarProps {
