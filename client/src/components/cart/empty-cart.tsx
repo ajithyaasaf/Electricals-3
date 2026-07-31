@@ -1,8 +1,8 @@
-// Empty Cart Component - Professional empty state with CTAs
 import { Link } from 'wouter';
-import { ShoppingCart, ArrowRight, Zap, Shield, Truck } from 'lucide-react';
+import { ShoppingCart, ArrowRight, Zap, Shield, Truck, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { CATEGORIES } from '@/lib/constants';
 
 interface EmptyCartProps {
   savedItemsCount?: number;
@@ -14,8 +14,8 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
     <div className={className}>
       {/* Empty Cart Illustration */}
       <div className="text-center py-12">
-        <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-          <ShoppingCart className="w-12 h-12 text-gray-400" />
+        <div className="mx-auto w-24 h-24 bg-teal-50 rounded-full flex items-center justify-center mb-6">
+          <ShoppingCart className="w-12 h-12 text-teal-600" />
         </div>
 
         <h2 className="text-2xl font-semibold text-gray-900 mb-2">
@@ -28,24 +28,41 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
           <Link href="/products">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-white">
+            <Button size="lg" className="bg-teal-600 hover:bg-teal-700 text-white font-medium">
               <span className="flex items-center gap-2">
-                Shop Products
+                Browse All Products
                 <ArrowRight className="w-4 h-4" />
               </span>
             </Button>
           </Link>
 
           <Link href="/services">
-            <Button variant="outline" size="lg">
+            <Button variant="outline" size="lg" className="border-teal-200 text-teal-700 hover:bg-teal-50">
               <span className="flex items-center gap-2">
                 Browse Services
                 <ArrowRight className="w-4 h-4" />
               </span>
             </Button>
           </Link>
+        </div>
+
+        {/* Popular Category Quick Links */}
+        <div className="max-w-2xl mx-auto mb-12 bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center justify-center gap-1.5">
+            <Tag className="w-3.5 h-3.5 text-teal-600" />
+            <span>Popular Categories</span>
+          </p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            {CATEGORIES.map((cat) => (
+              <Link key={cat.slug} href={`/products?category=${cat.slug}`}>
+                <span className="bg-gray-50 hover:bg-teal-50 text-gray-700 hover:text-teal-700 border border-gray-200 hover:border-teal-200 px-3 py-1.5 rounded-full text-xs font-medium transition-colors inline-block cursor-pointer">
+                  {cat.name}
+                </span>
+              </Link>
+            ))}
+          </div>
         </div>
 
         {/* Feature Highlights */}

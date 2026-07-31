@@ -6,13 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Loader2 } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
+import { formatPrice } from "@/lib/currency";
 
 interface Product {
   id: string;
   name: string;
+  slug?: string;
   price: number;
-  imageUrls: string[];
-  categoryId: string | null;
+  imageUrls?: string[];
+  image?: string;
+  category: string;
 }
 
 export function SearchBar() {
@@ -46,10 +49,12 @@ export function SearchBar() {
   }, []);
 
   // Fetch search suggestions
-  const { data: suggestions, isLoading } = useQuery<Product[]>({
-    queryKey: ['/api/products', { search: searchQuery, limit: 5 }],
-    enabled: searchQuery.length > 2 && showSuggestions,
+  const { data: searchResponse, isLoading } = useQuery<{ products: Product[] }>({
+    queryKey: ['/api/products', { search: searchQuery, limit: 6 }],
+    enabled: searchQuery.trim().length > 1 && showSuggestions,
   });
+
+  const suggestions = searchResponse?.products || [];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +62,7 @@ export function SearchBar() {
     const params = new URLSearchParams();
     
     if (searchQuery.trim()) {
-      params.set("search", searchQuery);
+      params.set("search", searchQuery.trim());
     }
     
     if (selectedCategory !== "all") {
@@ -74,12 +79,10 @@ export function SearchBar() {
     
     const params = new URLSearchParams();
     
-    // Add search query if present
     if (searchQuery.trim()) {
-      params.set("search", searchQuery);
+      params.set("search", searchQuery.trim());
     }
     
-    // Add category if not "all"
     if (value !== "all") {
       params.set("category", value);
     }
@@ -90,11 +93,11 @@ export function SearchBar() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setShowSuggestions(e.target.value.length > 2);
+    setShowSuggestions(e.target.value.trim().length > 1);
   };
 
   const handleSuggestionClick = (product: Product) => {
-    setLocation(`/products/${product.id}`);
+    setLocation(`/products/${product.slug || product.id}`);
     setShowSuggestions(false);
     setSearchQuery("");
   };
@@ -127,17 +130,17 @@ export function SearchBar() {
           
           <Input
             type="text"
-            placeholder="Search electrical products and services..."
+            placeholder="Search electrical products..."
             value={searchQuery}
             onChange={handleInputChange}
-            onFocus={() => searchQuery.length > 2 && setShowSuggestions(true)}
+            onFocus={() => searchQuery.trim().length > 1 && setShowSuggestions(true)}
             className="flex-1 rounded-none border-l-0 border-r-0 focus:ring-0 focus:ring-offset-0"
             data-testid="input-search"
           />
           
           <Button 
             type="submit"
-            className="rounded-l-none bg-copper-600 hover:bg-copper-700 text-white"
+            className="rounded-l-none bg-teal-600 hover:bg-teal-700 text-white"
             data-testid="button-search"
             aria-label="Search products"
           >
@@ -146,59 +149,60 @@ export function SearchBar() {
         </div>
       </form>
 
-      {/* Search Suggestions Dropdown */}
-      {showSuggestions && searchQuery.length > 2 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto scrollbar-modern">
+      {/* Instant Search Suggestions Dropdown */}
+      {showSuggestions && searchQuery.trim().length > 1 && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto scrollbar-modern">
           {isLoading ? (
             <div className="p-4 text-center text-gray-500">
-              <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
-              <p className="text-sm">Searching products...</p>
+              <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2 text-teal-600" />
+              <p className="text-sm">Searching electrical products...</p>
             </div>
-          ) : suggestions && suggestions.length > 0 ? (
+          ) : suggestions.length > 0 ? (
             <div className="py-2">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                Suggested Products
+              <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-100">
+                Matching Products ({suggestions.length})
               </div>
-              {suggestions.map((product) => (
-                <button
-                  key={product.id}
-                  onClick={() => handleSuggestionClick(product)}
-                  className="w-full px-3 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
-                  data-testid={`suggestion-${product.id}`}
-                >
-                  {product.imageUrls && product.imageUrls.length > 0 ? (
+              {suggestions.map((product) => {
+                const img = product.imageUrls?.[0] || product.image || "/placeholder.png";
+
+                return (
+                  <button
+                    key={product.id}
+                    onClick={() => handleSuggestionClick(product)}
+                    className="w-full px-3 py-2.5 flex items-center gap-3 hover:bg-teal-50/60 transition-colors text-left border-b border-gray-50 last:border-0"
+                    data-testid={`suggestion-${product.id}`}
+                  >
                     <img 
-                      src={product.imageUrls[0]} 
+                      src={img} 
                       alt={product.name}
-                      className="w-12 h-12 object-cover rounded border border-gray-200"
+                      className="w-10 h-10 object-cover rounded border border-gray-200 flex-shrink-0"
                     />
-                  ) : (
-                    <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
-                      <Search className="h-6 w-6 text-gray-400" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {product.name}
+                      </p>
+                      <p className="text-xs text-gray-500 capitalize">
+                        {product.category}
+                      </p>
                     </div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
-                      {product.name}
+                    <p className="text-sm font-bold text-teal-700 flex-shrink-0">
+                      {formatPrice(product.price)}
                     </p>
-                  </div>
-                  <p className="text-sm font-semibold text-copper-600">
-                    ₹{product.price.toLocaleString('en-IN')}
-                  </p>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <div className="p-4 text-center text-gray-500">
-              <Search className="h-8 w-8 mx-auto mb-2 opacity-30" />
-              <p className="text-sm">No products found for "{searchQuery}"</p>
+              <Search className="h-6 w-6 mx-auto mb-2 opacity-30 text-gray-400" />
+              <p className="text-sm">No electrical products found for "{searchQuery}"</p>
               <Button
                 onClick={handleSearch}
                 variant="outline"
                 size="sm"
-                className="mt-3"
+                className="mt-3 text-teal-700 border-teal-200 hover:bg-teal-50"
               >
-                Search all products
+                Browse all products
               </Button>
             </div>
           )}
