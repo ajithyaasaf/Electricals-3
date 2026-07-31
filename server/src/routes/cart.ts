@@ -39,11 +39,13 @@ const CART_CONFIG = {
   }
 };
 
-// Helper function to enrich guest cart items
-async function enrichGuestCartItems(guestItems: any[]) {
-  const enrichedItems = [];
+import { cache, CacheTTL, CacheKeys } from "../lib/cache";
 
-  for (const item of guestItems) {
+// Helper function to enrich guest cart items in parallel with caching
+async function enrichGuestCartItems(guestItems: any[]) {
+  if (!guestItems || guestItems.length === 0) return [];
+
+  const promises = guestItems.map(async (item) => {
     let enrichedItem = {
       id: item.id || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       productId: item.productId,
@@ -61,7 +63,15 @@ async function enrichGuestCartItems(guestItems: any[]) {
     };
 
     if (item.productId) {
-      const product = await storage.getProductById(item.productId);
+      const cacheKey = CacheKeys.products.byId(item.productId);
+      let product = cache.get<Product>(cacheKey);
+      if (!product) {
+        product = await storage.getProductById(item.productId);
+        if (product) {
+          cache.set(cacheKey, product, CacheTTL.PRODUCT_DETAIL);
+        }
+      }
+
       if (product) {
         enrichedItem.unitPrice = product.price;
         enrichedItem.originalPrice = product.originalPrice || product.price;
@@ -71,17 +81,16 @@ async function enrichGuestCartItems(guestItems: any[]) {
     if (item.serviceId) {
       const service = await storage.getServiceById(item.serviceId);
       if (service) {
-        enrichedItem.unitPrice = service.startingPrice;
-        enrichedItem.originalPrice = service.startingPrice;
+        enrichedItem.unitPrice = (service as any).startingPrice || 0;
+        enrichedItem.originalPrice = (service as any).startingPrice || 0;
       }
     }
 
-    if (enrichedItem.unitPrice > 0) {
-      enrichedItems.push(enrichedItem);
-    }
-  }
+    return enrichedItem.unitPrice > 0 ? enrichedItem : null;
+  });
 
-  return enrichedItems;
+  const results = await Promise.all(promises);
+  return results.filter(item => item !== null);
 }
 
 // Mock coupon data (replace with database)
@@ -142,14 +151,10 @@ export function registerCartRoutes(app: Express) {
         cartItems = await enrichGuestCartItems(guestItems);
       }
 
-      // Enrich cart items with product/service details
-      const enrichedItems: CartItemWithDetails[] = [];
+      // Enrich cart items with product/service details in parallel with server caching
+      console.log(`[CART] Processing ${cartItems.length} cart items for enrichment in parallel`);
 
-      console.log(`[CART] Processing ${cartItems.length} cart items for enrichment`);
-
-      for (const item of cartItems) {
-        console.log(`[CART] Processing item ${item.id} - ProductID: ${item.productId}, ServiceID: ${item.serviceId}`);
-
+      const enrichmentPromises = cartItems.map(async (item) => {
         let enrichedItem: CartItemWithDetails = {
           ...item,
           unitPrice: item.unitPrice || 0,
@@ -162,28 +167,32 @@ export function registerCartRoutes(app: Express) {
         };
 
         if (item.productId) {
-          const product = await storage.getProductById(item.productId);
+          const cacheKey = CacheKeys.products.byId(item.productId);
+          let product = cache.get<Product>(cacheKey);
+          if (!product) {
+            product = await storage.getProductById(item.productId);
+            if (product) {
+              cache.set(cacheKey, product, CacheTTL.PRODUCT_DETAIL);
+            }
+          }
+
           if (product) {
             enrichedItem.product = product;
-            // Always update prices from product data
             enrichedItem.unitPrice = product.price;
             enrichedItem.originalPrice = product.originalPrice || product.price;
-            // Calculate discount if original price is higher
             if (product.originalPrice && product.originalPrice > product.price) {
               enrichedItem.discount = product.originalPrice - product.price;
             }
           } else {
-            console.warn(`[CART] Product not found for ID: ${item.productId}, removing orphaned cart item ${item.id}`);
-            // Remove orphaned cart items with invalid product IDs
+            console.warn(`[CART] Product not found for ID: ${item.productId}, removing orphaned item ${item.id}`);
             if (userId) {
               try {
                 await storage.deleteCartItem(item.id);
-                console.log(`[CART] Successfully deleted orphaned cart item ${item.id}`);
-              } catch (error) {
-                console.error(`[CART] Failed to delete orphaned cart item ${item.id}:`, error);
+              } catch (err) {
+                console.error(`[CART] Failed to delete orphaned cart item ${item.id}:`, err);
               }
             }
-            continue; // Skip this item
+            return null;
           }
         }
 
@@ -194,22 +203,23 @@ export function registerCartRoutes(app: Express) {
             enrichedItem.unitPrice = service.startingPrice;
             enrichedItem.originalPrice = service.startingPrice;
           } else {
-            console.warn(`[CART] Service not found for ID: ${item.serviceId}, removing orphaned cart item ${item.id}`);
-            // Remove orphaned cart items with invalid service IDs
+            console.warn(`[CART] Service not found for ID: ${item.serviceId}, removing orphaned item ${item.id}`);
             if (userId) {
               try {
                 await storage.deleteCartItem(item.id);
-                console.log(`[CART] Successfully deleted orphaned cart item ${item.id}`);
-              } catch (error) {
-                console.error(`[CART] Failed to delete orphaned cart item ${item.id}:`, error);
+              } catch (err) {
+                console.error(`[CART] Failed to delete orphaned cart item ${item.id}:`, err);
               }
             }
-            continue; // Skip this item
+            return null;
           }
         }
 
-        enrichedItems.push(enrichedItem);
-      }
+        return enrichedItem;
+      });
+
+      const rawEnriched = await Promise.all(enrichmentPromises);
+      const enrichedItems: CartItemWithDetails[] = rawEnriched.filter((i): i is CartItemWithDetails => i !== null);
 
       // Calculate totals
       const totals = calculateCartTotals(enrichedItems, []);
@@ -737,55 +747,64 @@ export function registerCartRoutes(app: Express) {
       }
 
       // Enhanced validation of guest items
-      const validatedGuestItems = [];
-      const invalidItems = [];
+      // Validate guest items in parallel with cache lookups
+      const validationResults = await Promise.all(
+        guestItems.map(async (item) => {
+          const validationErrors: string[] = [];
 
-      for (const item of guestItems) {
-        const validationErrors = [];
-
-        // Basic structure validation
-        if (!item.productId && !item.serviceId) {
-          validationErrors.push('Missing productId or serviceId');
-        }
-
-        if (!item.quantity || item.quantity <= 0) {
-          validationErrors.push('Invalid quantity');
-        }
-
-        if (item.quantity > CART_CONFIG.maxQuantityPerItem) {
-          validationErrors.push(`Quantity exceeds maximum (${CART_CONFIG.maxQuantityPerItem})`);
-        }
-
-        // Verify product/service exists and is available
-        if (item.productId) {
-          const product = await storage.getProductById(item.productId);
-          if (!product) {
-            validationErrors.push('Product not found');
-          } else if (product.stock < item.quantity) {
-            validationErrors.push('Insufficient stock');
+          if (!item.productId && !item.serviceId) {
+            validationErrors.push('Missing productId or serviceId');
           }
-        }
-
-        if (item.serviceId) {
-          const service = await storage.getServiceById(item.serviceId);
-          if (!service) {
-            validationErrors.push('Service not found');
+          if (!item.quantity || item.quantity <= 0) {
+            validationErrors.push('Invalid quantity');
           }
-        }
+          if (item.quantity > CART_CONFIG.maxQuantityPerItem) {
+            validationErrors.push(`Quantity exceeds maximum (${CART_CONFIG.maxQuantityPerItem})`);
+          }
 
-        if (validationErrors.length === 0) {
-          validatedGuestItems.push({
-            ...item,
-            quantity: Math.min(parseInt(item.quantity), CART_CONFIG.maxQuantityPerItem),
-            lastUpdated: item.lastUpdated || Date.now(),
-            schemaVersion: item.schemaVersion || schemaVersion || '1.0.0'
-          });
-        } else {
-          invalidItems.push({ item, errors: validationErrors });
-        }
-      }
+          if (item.productId) {
+            const cacheKey = CacheKeys.products.byId(item.productId);
+            let product = cache.get<Product>(cacheKey);
+            if (!product) {
+              product = await storage.getProductById(item.productId);
+              if (product) {
+                cache.set(cacheKey, product, CacheTTL.PRODUCT_DETAIL);
+              }
+            }
+            if (!product) {
+              validationErrors.push('Product not found');
+            } else if (product.stock < item.quantity) {
+              validationErrors.push('Insufficient stock');
+            }
+          }
 
-      console.log(`[CART MIGRATION] 📋 Validation complete: ${validatedGuestItems.length} valid, ${invalidItems.length} invalid items`);
+          if (item.serviceId) {
+            const service = await storage.getServiceById(item.serviceId);
+            if (!service) {
+              validationErrors.push('Service not found');
+            }
+          }
+
+          if (validationErrors.length === 0) {
+            return {
+              valid: true,
+              item: {
+                ...item,
+                quantity: Math.min(parseInt(item.quantity), CART_CONFIG.maxQuantityPerItem),
+                lastUpdated: item.lastUpdated || Date.now(),
+                schemaVersion: item.schemaVersion || schemaVersion || '1.0.0'
+              }
+            };
+          } else {
+            return { valid: false, item, errors: validationErrors };
+          }
+        })
+      );
+
+      const validatedGuestItems = validationResults.filter(r => r.valid).map(r => r.item);
+      const invalidItems = validationResults.filter(r => !r.valid).map(r => ({ item: r.item, errors: r.errors }));
+
+      console.log(`[CART MIGRATION] 📋 Parallel validation complete: ${validatedGuestItems.length} valid, ${invalidItems.length} invalid items`);
 
       if (invalidItems.length > 0) {
         console.warn(`[CART MIGRATION] ⚠️ Invalid items filtered out:`, invalidItems);
@@ -804,46 +823,32 @@ export function registerCartRoutes(app: Express) {
       const existingCartItems = await storage.getUserCartItems(userId);
       console.log(`[CART MIGRATION] 📦 User ${userId} has ${existingCartItems.length} existing cart items`);
 
-      // Use the enhanced merge function - NO GUEST ITEMS VANISH
-      console.log(`[CART MIGRATION] 🔄 Merging carts using enhanced merge function`);
+      // Merge carts
       const mergedItems = mergeCarts(existingCartItems, validatedGuestItems);
       console.log(`[CART MIGRATION] 📊 Merge result: ${existingCartItems.length} auth + ${validatedGuestItems.length} guest = ${mergedItems.length} total items`);
 
-      // Clear existing cart and replace with merged items atomically
-      console.log(`[CART MIGRATION] 🗑️ Clearing existing cart items for atomic replacement`);
-      for (const item of existingCartItems) {
-        await storage.deleteCartItem(item.id);
-      }
+      // Clear existing cart items in parallel
+      await Promise.all(existingCartItems.map(item => storage.deleteCartItem(item.id)));
 
-      // Add all merged items to cart
+      // Add all merged items in parallel
       let addedCount = 0;
-      for (const mergedItem of mergedItems) {
-        try {
-          // Add item with proper enrichment
-          const itemId = await storage.addToCart(
-            userId,
-            mergedItem.productId,
-            mergedItem.serviceId,
-            Math.min(mergedItem.quantity, CART_CONFIG.maxQuantityPerItem)
-          );
-
-          // Update with additional properties if supported
-          if (mergedItem.customizations || mergedItem.notes) {
-            // Storage layer might not support these yet, but attempt update
-            try {
-              await storage.updateCartItem(itemId, {
-                // Add customizations and notes when storage supports them
-              });
-            } catch (updateError) {
-              console.log(`[CART MIGRATION] ℹ️ Additional properties not supported in storage layer`);
-            }
+      const addResults = await Promise.all(
+        mergedItems.map(async (mergedItem) => {
+          try {
+            await storage.addToCart(
+              userId,
+              mergedItem.productId,
+              mergedItem.serviceId,
+              Math.min(mergedItem.quantity, CART_CONFIG.maxQuantityPerItem)
+            );
+            return true;
+          } catch (err) {
+            console.error(`[CART MIGRATION] ❌ Failed to add merged item:`, mergedItem, err);
+            return false;
           }
-
-          addedCount++;
-        } catch (addError) {
-          console.error(`[CART MIGRATION] ❌ Failed to add merged item:`, mergedItem, addError);
-        }
-      }
+        })
+      );
+      addedCount = addResults.filter(Boolean).length;
 
       console.log(`[CART MIGRATION] ✅ Migration completed for user ${userId}: ${addedCount} items in final cart`);
 

@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { storage } from "../../storage";
 import { isAuthenticated } from "../../firebaseAuth";
 import type { OrderItem } from "@shared/types";
+import { cache, CacheTTL } from "../lib/cache";
 
 export function registerAnalyticsRoutes(app: Express) {
   // Get inventory tracking - fast vs slow selling products
@@ -9,10 +10,14 @@ export function registerAnalyticsRoutes(app: Express) {
     try {
       const userId = req.user.uid;
       const user = await storage.getUserById(userId);
-      
+
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
+
+      const cacheKey = "analytics:inventory";
+      const cached = cache.get<any>(cacheKey);
+      if (cached) return res.json(cached);
 
       // Get all products and orders from last 30 days
       const thirtyDaysAgo = new Date();
@@ -64,13 +69,16 @@ export function registerAnalyticsRoutes(app: Express) {
       // Sort by sales velocity (fastest first)
       productSalesData.sort((a, b) => b.salesVelocity - a.salesVelocity);
 
-      res.json({
+      const responseData = {
         totalProducts: products.length,
         fastSelling: productSalesData.filter(p => p.status === 'fast'),
         mediumSelling: productSalesData.filter(p => p.status === 'medium'),
         slowSelling: productSalesData.filter(p => p.status === 'slow'),
         allProducts: productSalesData
-      });
+      };
+
+      cache.set(cacheKey, responseData, CacheTTL.ANALYTICS);
+      res.json(responseData);
     } catch (error) {
       console.error("Error fetching inventory analytics:", error);
       res.status(500).json({ message: "Failed to fetch inventory analytics" });
@@ -86,6 +94,10 @@ export function registerAnalyticsRoutes(app: Express) {
       if (!user?.isAdmin) {
         return res.status(403).json({ message: "Admin access required" });
       }
+
+      const cacheKey = "analytics:revenue";
+      const cached = cache.get<any>(cacheKey);
+      if (cached) return res.json(cached);
 
       const orders = await storage.getAllOrders();
       const now = new Date();
@@ -131,13 +143,16 @@ export function registerAnalyticsRoutes(app: Express) {
         ? ((currentMonth.revenue - lastMonth.revenue) / lastMonth.revenue) * 100 
         : 0;
 
-      res.json({
+      const responseData = {
         monthlyData,
         totalRevenue: monthlyData.reduce((sum, month) => sum + month.revenue, 0),
         totalOrders: monthlyData.reduce((sum, month) => sum + month.orders, 0),
         averageMonthlyRevenue: monthlyData.reduce((sum, month) => sum + month.revenue, 0) / 12,
         revenueGrowth: Math.round(revenueGrowth * 100) / 100
-      });
+      };
+
+      cache.set(cacheKey, responseData, CacheTTL.ANALYTICS);
+      res.json(responseData);
     } catch (error) {
       console.error("Error fetching revenue analytics:", error);
       res.status(500).json({ message: "Failed to fetch revenue analytics" });

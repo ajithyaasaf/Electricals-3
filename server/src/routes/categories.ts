@@ -2,12 +2,18 @@ import type { Express } from "express";
 import { storage } from "../../storage";
 import { isAuthenticated } from "../../firebaseAuth";
 import { CreateCategorySchema } from "@shared/types";
+import { cache, CacheTTL } from "../lib/cache";
 
 export function registerCategoryRoutes(app: Express) {
-  // Get all categories
+  // Get all categories (cached 2 mins)
   app.get("/api/categories", async (req, res) => {
     try {
+      const cacheKey = "categories:all";
+      const cached = cache.get<any[]>(cacheKey);
+      if (cached) return res.json(cached);
+
       const categories = await storage.getAllCategories();
+      cache.set(cacheKey, categories, CacheTTL.CATEGORIES);
       res.json(categories);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -15,13 +21,18 @@ export function registerCategoryRoutes(app: Express) {
     }
   });
 
-  // Get single category by ID
+  // Get single category by ID (cached 2 mins)
   app.get("/api/categories/:id", async (req, res) => {
     try {
+      const cacheKey = `categories:id:${req.params.id}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) return res.json(cached);
+
       const category = await storage.getCategoryById(req.params.id);
       if (!category) {
         return res.status(404).json({ message: "Category not found" });
       }
+      cache.set(cacheKey, category, CacheTTL.CATEGORIES);
       res.json(category);
     } catch (error) {
       console.error("Error fetching category:", error);
@@ -42,6 +53,8 @@ export function registerCategoryRoutes(app: Express) {
       const categoryData = CreateCategorySchema.parse(req.body);
       const categoryId = await storage.createCategory(categoryData);
       const category = await storage.getCategoryById(categoryId);
+
+      cache.invalidateByPrefix("categories");
       res.json(category);
     } catch (error) {
       console.error("Error creating category:", error);

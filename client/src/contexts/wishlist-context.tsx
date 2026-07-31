@@ -481,7 +481,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     console.log('[WISHLIST CONTEXT] ✅ Wishlist cleared successfully on logout');
   }, []);
 
-  // Add item to wishlist
+  // Add item to wishlist — fully optimistic with server-side rollback
   const addToWishlist = useCallback(async (
     productId?: string,
     serviceId?: string,
@@ -494,151 +494,141 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
   ): Promise<boolean> => {
     try {
       if (isAuthenticated && user) {
-        // Add to authenticated user's wishlist
-        const response = await apiRequest('POST', '/api/wishlist', {
+        // ── Optimistic update: turn the heart red instantly ─────────────────
+        // Build a lightweight placeholder item so the reducer can add it now.
+        // The real item (with server-assigned ID) replaces it after the API call.
+        const tempId = `optimistic_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+        const optimisticItem: WishlistItemWithDetails = {
+          id: tempId,
           productId,
           serviceId,
+          userId: user.uid,
           notes: options?.notes,
           priority: options?.priority || 'medium',
           tags: options?.tags || [],
           addedFrom: options?.addedFrom || 'other',
-        });
-        const result = await response.json() as WishlistOperationResult;
+          isPublic: false,
+          currentPrice: 0,   // unknown until server replies
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        } as WishlistItemWithDetails;
 
-        if (result.success && result.item) {
-          dispatch({ type: 'ADD_ITEM', payload: result.item });
-          toast({
-            title: "Added to Wishlist",
-            description: "Item successfully added to your wishlist.",
+        dispatch({ type: 'ADD_ITEM', payload: optimisticItem });
+
+        // ── Background API call ─────────────────────────────────────────────
+        try {
+          const response = await apiRequest('POST', '/api/wishlist', {
+            productId,
+            serviceId,
+            notes: options?.notes,
+            priority: options?.priority || 'medium',
+            tags: options?.tags || [],
+            addedFrom: options?.addedFrom || 'other',
           });
-          return true;
-        } else {
-          if (result.message?.includes('already in wishlist')) {
-            toast({
-              title: "Already in Wishlist",
-              description: "This item is already in your wishlist.",
-              variant: "default",
-            });
+          const result = await response.json() as WishlistOperationResult;
+
+          if (result.success && result.item) {
+            // Replace the optimistic placeholder with the real server item
+            dispatch({ type: 'UPDATE_ITEM', payload: { itemId: tempId, updates: { ...result.item, id: result.item.id } } });
+            // If the server assigned a different ID we need to reconcile — easiest way is a
+            // lightweight state patch: remove temp, add real
+            if (result.item.id !== tempId) {
+              dispatch({ type: 'REMOVE_ITEM', payload: { itemId: tempId } });
+              dispatch({ type: 'ADD_ITEM', payload: result.item });
+            }
+            toast({ title: "Added to Wishlist", description: "Item successfully added to your wishlist." });
+            return true;
           } else {
-            toast({
-              title: "Error",
-              description: result.message || "Failed to add item to wishlist.",
-              variant: "destructive",
-            });
+            // Rollback optimistic add
+            dispatch({ type: 'REMOVE_ITEM', payload: { itemId: tempId } });
+            if (result.message?.includes('already in wishlist')) {
+              // Item is already there — server state is the truth; reload
+              loadWishlist().catch(() => {});
+              toast({ title: "Already in Wishlist", description: "This item is already saved to your wishlist.", variant: "default" });
+              return true;
+            }
+            toast({ title: "Error", description: result.message || "Failed to add item to wishlist.", variant: "destructive" });
+            return false;
           }
-          return false;
+        } catch (apiError: any) {
+          // Rollback optimistic add
+          dispatch({ type: 'REMOVE_ITEM', payload: { itemId: tempId } });
+
+          const msg = apiError instanceof Error ? apiError.message : String(apiError);
+          if (msg.includes('409') || msg.toLowerCase().includes('already in wishlist')) {
+            loadWishlist().catch(() => {});
+            toast({ title: "Already in Wishlist", description: "This item is already saved to your wishlist.", variant: "default" });
+            return true;
+          }
+          throw apiError; // Re-throw for the outer catch
         }
       } else {
-        // Add to guest wishlist
+        // ── Guest flow (localStorage) — still instant ──────────────────────
         const success = GuestWishlistManager.addItem(productId, serviceId, options);
-
         if (success) {
-          // Reload wishlist to get enriched data
-          await loadWishlist();
-          toast({
-            title: "Added to Wishlist",
-            description: "Item added to your wishlist. Sign in to save permanently.",
-          });
+          // Reload to get enriched data (non-blocking)
+          loadWishlist().catch(() => {});
+          toast({ title: "Added to Wishlist", description: "Item added to your wishlist. Sign in to save permanently." });
           return true;
         } else {
-          toast({
-            title: "Error",
-            description: "Failed to add item to wishlist.",
-            variant: "destructive",
-          });
+          toast({ title: "Error", description: "Failed to add item to wishlist.", variant: "destructive" });
           return false;
         }
       }
-    } catch (error: any) {
-      // Senior Dev "Plan B": Robust handling for state desynchronization
-      // If server says 409 Conflict, it means the item exists but our client state is stale.
-      // We should verify this, notify the user gently, and AUTO-HEAL the state.
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      const isDuplicate = errorMessage.includes('409') ||
-        errorMessage.toLowerCase().includes('already in wishlist');
-
-      if (isDuplicate) {
-        console.log('[WISHLIST CONTEXT] ℹ️ Item already in wishlist (caught via error), syncing state...');
-
-        toast({
-          title: "Already in Wishlist",
-          description: "This item is already saved to your wishlist.",
-          variant: "default",
-        });
-
-        // Critical Fix: Sync local state with server to reflect reality (turn heart red)
-        loadWishlist().catch(e => console.error("Failed to sync wishlist after duplicate error", e));
-
-        return true; // Treat as success since the goal (item in wishlist) is met
-      }
-
+    } catch (error) {
       console.error('[WISHLIST CONTEXT] ❌ Error adding to wishlist:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add item to wishlist.",
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: "Failed to add item to wishlist.", variant: "destructive" });
       return false;
     }
   }, [isAuthenticated, user, toast, loadWishlist]);
 
-  // Remove item from wishlist
+  // Remove item from wishlist — fully optimistic with rollback on failure
   const removeFromWishlist = useCallback(async (itemIdOrProductId?: string, serviceId?: string): Promise<boolean> => {
-    // Support both itemId (for authenticated) and productId/serviceId (for guest)
     const productId = itemIdOrProductId;
+
     if (!isAuthenticated) {
-      // Guest mode - remove from localStorage
-      try {
-        const success = GuestWishlistManager.removeItemByContext(productId, serviceId);
-        if (success) {
-          // Reload wishlist to get updated data
-          await loadWishlist();
-          return true;
-        }
-        return false;
-      } catch (error) {
+      // ── Guest mode: instant localStorage removal ──────────────────────
+      const success = GuestWishlistManager.removeItemByContext(productId, serviceId);
+      if (success) {
+        // Re-load enriched data non-blocking
+        loadWishlist().catch(() => {});
+        return true;
       }
-    }
-
-    // Find the item by productId or serviceId (Before try block for scope access)
-    const item = state.items.find(item =>
-      (productId && item.productId === productId) ||
-      (serviceId && item.serviceId === serviceId)
-    );
-
-    if (!item) {
       return false;
     }
 
+    // Find the target item
+    const item = state.items.find(i =>
+      (productId && i.productId === productId) ||
+      (serviceId && i.serviceId === serviceId)
+    );
+    if (!item) return false;
+
+    // ── Optimistic update: remove from UI immediately ─────────────────────
+    dispatch({ type: 'REMOVE_ITEM', payload: { itemId: item.id } });
+
     try {
-      dispatch({ type: 'SET_LOADING', payload: true });
-
-      // Fix: Correct API URL (removed /items/ segment)
       await apiRequest('DELETE', `/api/wishlist/${item.id}`);
-
-      // Update local state
-      dispatch({ type: 'REMOVE_ITEM', payload: { itemId: item.id } });
-
       return true;
     } catch (error: any) {
-      // Senior Dev Fix: Idempotent deletion
-      // If 404 (Not Found), it means the item is already gone from the server.
-      // We should treat this as success and ensure our local state is clean.
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      const msg = error instanceof Error ? error.message : String(error);
 
-      if (errorMessage.includes('404')) {
-        console.log('[WISHLIST CONTEXT] ℹ️ Item already removed on server (404), cleaning up local state...');
-        dispatch({ type: 'REMOVE_ITEM', payload: { itemId: item.id } });
+      if (msg.includes('404')) {
+        // Item already gone on the server — our optimistic delete was correct
         return true;
       }
 
-      console.error('Error removing from wishlist:', error);
+      // Rollback: put the item back
+      dispatch({ type: 'ADD_ITEM', payload: item });
+      console.error('[WISHLIST CONTEXT] ❌ Error removing from wishlist, rolled back:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove item from wishlist.",
+        variant: "destructive",
+      });
       return false;
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
     }
-  }, [isAuthenticated, state.items, loadWishlist]);
-
+  }, [isAuthenticated, state.items, loadWishlist, toast]);
   // Update wishlist item
   const updateWishlistItem = useCallback(async (
     itemId: string,

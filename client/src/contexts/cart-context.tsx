@@ -157,21 +157,36 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
   }
 }
 
-// Calculate optimistic totals for immediate UI feedback
+// Calculate optimistic totals for immediate UI feedback.
+// When unitPrice is 0 (freshly-added optimistic item), we fall back to the
+// product snapshot price (stored in paise, same unit as unitPrice) so that
+// the cart summary never flickers to ₹0 before the server confirms.
 function calculateOptimisticTotals(items: CartItem[]): Cart['totals'] {
-  const subtotal = items.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0);
+  const subtotal = items.reduce((sum, item) => {
+    // Use real unitPrice when available; fall back to snapshot price (in paise)
+    const price =
+      item.unitPrice > 0
+        ? item.unitPrice
+        : ((item as any).product?.price ?? 0);
+    return sum + price * item.quantity;
+  }, 0);
+
   const discount = items.reduce((sum, item) => sum + (item.discount || 0), 0);
 
-  // Determine Shipping Cost using centralized logistics engine
+  // Determine shipping cost using the centralised logistics engine
   const shipping = calculateShippingFee(items, subtotal);
 
-  // 18% GST
+  // 18% GST (rounded to nearest paisa)
   const tax = Math.round(subtotal * 0.18);
 
-  // Calculate savings (difference between original price and unit price)
+  // Savings = difference between original price and effective unit price × qty
   const savings = items.reduce((sum, item) => {
-    const originalPrice = item.originalPrice || item.unitPrice;
-    return sum + ((originalPrice - item.unitPrice) * item.quantity);
+    const effectivePrice =
+      item.unitPrice > 0
+        ? item.unitPrice
+        : ((item as any).product?.price ?? 0);
+    const originalPrice = item.originalPrice || effectivePrice;
+    return sum + (originalPrice - effectivePrice) * item.quantity;
   }, 0);
 
   const total = subtotal - discount + shipping + tax;
@@ -182,7 +197,7 @@ function calculateOptimisticTotals(items: CartItem[]): Cart['totals'] {
     shipping: Math.max(0, shipping),
     tax: Math.max(0, tax),
     total: Math.max(0, total),
-    savings: Math.max(0, savings)
+    savings: Math.max(0, savings),
   };
 }
 
@@ -897,7 +912,15 @@ export function CartProvider({ children }: CartProviderProps) {
     };
   }, [isAuthenticated, user?.uid]); // Only depend on auth state
 
-  // Process add-to-cart operations queue for authenticated users
+  // Process add-to-cart operations queue for authenticated users.
+  //
+  // Design rationale
+  // ─────────────────
+  // Previously we fired a full GET /api/cart after every batch.  This caused
+  // a 2-round-trip penalty (POST + GET) before the UI settled.  With the
+  // optimistic update already showing correct prices (via productSnapshot),
+  // we only do a single lazy reconciliation 1.5 s after the last operation
+  // to catch any server-side adjustments (coupons, stock changes, etc.).
   const processAddOperationQueue = useCallback(async () => {
     if (isProcessingAddOperations.current || addOperationQueueRef.current.length === 0) {
       return;
@@ -905,6 +928,7 @@ export function CartProvider({ children }: CartProviderProps) {
 
     isProcessingAddOperations.current = true;
 
+    // Process every queued operation sequentially
     while (addOperationQueueRef.current.length > 0) {
       const operation = addOperationQueueRef.current.shift();
       if (!operation) continue;
@@ -914,7 +938,7 @@ export function CartProvider({ children }: CartProviderProps) {
           productId: operation.productId,
           serviceId: operation.serviceId,
           quantity: operation.quantity,
-          customizations: operation.customizations
+          customizations: operation.customizations,
         });
         operation.resolve();
       } catch (error) {
@@ -923,21 +947,22 @@ export function CartProvider({ children }: CartProviderProps) {
       }
     }
 
-    // Refresh cart once after all operations are complete (direct call to avoid loop)
-    setIsLoading(true);
-    try {
-      const response = await apiRequest('GET', '/api/cart');
-      const cartData = await response.json();
-      dispatch({ type: 'SET_CART', payload: cartData });
-      currentCartRef.current = cartData;
-    } catch (error) {
-      console.error('[CART CONTEXT] ❌ Error refreshing cart after queue processing:', error);
-    } finally {
-      setIsLoading(false);
-    }
+    // Single background reconciliation after the batch — does NOT block the UI.
+    // We schedule it with a 1.5 s delay so rapid successive adds are batched
+    // into one GET rather than one per add.
+    setTimeout(async () => {
+      try {
+        const response = await apiRequest('GET', '/api/cart');
+        const cartData = await response.json();
+        dispatch({ type: 'SET_CART', payload: cartData });
+        currentCartRef.current = cartData;
+      } catch (err) {
+        console.error('[CART CONTEXT] Background reconciliation failed:', err);
+      }
+    }, 1500);
 
     isProcessingAddOperations.current = false;
-  }, []); // Remove loadAuthenticatedCart dependency
+  }, []);
 
   // Cart actions
   const addItem = useCallback(async (
@@ -960,14 +985,18 @@ export function CartProvider({ children }: CartProviderProps) {
     const optimisticItemId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     if (isAuthenticated) {
-      // Create optimistic item for authenticated users
+      // Create optimistic item for authenticated users.
+      // Use the productSnapshot price so the cart total is correct immediately.
+      const snapshotPrice: number = productSnapshot?.price ?? 0;
+      const snapshotOriginalPrice: number = productSnapshot?.originalPrice ?? snapshotPrice;
+
       const optimisticItem: CartItem = {
         id: optimisticItemId,
         productId,
         serviceId,
         quantity,
-        unitPrice: 0, // Will be updated when real data comes back
-        originalPrice: 0,
+        unitPrice: snapshotPrice,           // Real price (paise) from caller snapshot
+        originalPrice: snapshotOriginalPrice,
         discount: 0,
         appliedCoupons: [],
         customizations: customizations || {},
@@ -975,8 +1004,8 @@ export function CartProvider({ children }: CartProviderProps) {
         savedForLater: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        // Attach product snapshot for optimistic calculation
-        ...(productSnapshot ? { product: productSnapshot } : {})
+        // Keep the full snapshot for product detail display in cart UI
+        ...(productSnapshot ? { product: productSnapshot } : {}),
       } as CartItem;
 
       // Use reducer for deterministic state update
@@ -1016,14 +1045,19 @@ export function CartProvider({ children }: CartProviderProps) {
       // Guest user - atomic update with reducer to prevent race conditions
       console.log('[CART CONTEXT] Adding item to guest cart:', { productId, serviceId, quantity });
 
-      // Create optimistic item for immediate cart display
+      // Create optimistic item for immediate cart display.
+      // We set unitPrice from the productSnapshot so that calculateOptimisticTotals
+      // can produce correct totals instantly — no ₹0 flash.
+      const snapshotPrice: number = productSnapshot?.price ?? 0;
+      const snapshotOriginalPrice: number = productSnapshot?.originalPrice ?? snapshotPrice;
+
       const guestOptimisticItem: CartItem = {
         id: optimisticItemId,
         productId,
         serviceId,
         quantity,
-        unitPrice: 0, // Will be updated when real data loads
-        originalPrice: 0,
+        unitPrice: snapshotPrice,           // Real price from snapshot (in paise)
+        originalPrice: snapshotOriginalPrice,
         discount: 0,
         appliedCoupons: [],
         customizations: customizations || {},
@@ -1031,8 +1065,8 @@ export function CartProvider({ children }: CartProviderProps) {
         savedForLater: false,
         createdAt: new Date(),
         updatedAt: new Date(),
-        // Attach product snapshot for optimistic calculation
-        ...(productSnapshot ? { product: productSnapshot } : {})
+        // Keep the full snapshot for any UI component that needs product details
+        ...(productSnapshot ? { product: productSnapshot } : {}),
       } as CartItem;
 
       // Immediately update guest cart array and localStorage atomically

@@ -16,6 +16,7 @@ import { isAuthenticated } from "../../firebaseAuth";
 import { storage } from "../../storage";
 import { z } from "zod";
 import { getFirestore } from "firebase-admin/firestore";
+import { cache, CacheTTL } from "../lib/cache";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // ZOD SCHEMAS - Validation & Type Safety
@@ -223,6 +224,10 @@ export function registerSiteContentRoutes(app: Express) {
      */
     app.get("/api/site-content/:docId", async (req: Request, res: Response) => {
         try {
+            const cacheKey = `site-content:${req.params.docId}`;
+            const cached = cache.get<any>(cacheKey);
+            if (cached) return res.json(cached);
+
             const db = getDb();
             const docRef = db.collection(COLLECTION_NAME).doc(req.params.docId);
             const docSnap = await docRef.get();
@@ -239,13 +244,16 @@ export function registerSiteContentRoutes(app: Express) {
             // Remove internal fields from public response
             const { createdBy, updatedBy, ...publicData } = data || {};
 
-            res.json({
+            const responseData = {
                 success: true,
                 data: {
                     id: docSnap.id,
                     ...publicData,
                 }
-            });
+            };
+
+            cache.set(cacheKey, responseData, 60_000); // 1 minute TTL
+            res.json(responseData);
         } catch (error) {
             console.error("[SiteContent] Public GET error:", error);
             res.status(500).json({
@@ -312,6 +320,7 @@ export function registerSiteContentRoutes(app: Express) {
             };
 
             await docRef.set(updateData, { merge: true });
+            cache.invalidateByPrefix("site-content");
 
             // Fetch updated document
             const updatedDoc = await docRef.get();

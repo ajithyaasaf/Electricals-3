@@ -48,9 +48,11 @@ export function registerAdminRoutes(app: Express) {
 
 
 
-  // Placeholder image endpoint - using teal theme colors
+  // Placeholder image endpoint - using teal theme colors with 24-hour browser caching
   app.get("/api/placeholder/:width/:height", (req, res) => {
     const { width, height } = req.params;
+    res.setHeader("Cache-Control", "public, max-age=86400, immutable");
+    res.setHeader("Content-Type", "image/svg+xml");
     const svg = `
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="hsl(187, 94%, 97%)"/>
@@ -60,8 +62,6 @@ export function registerAdminRoutes(app: Express) {
       </svg>
     `;
     
-    res.setHeader('Content-Type', 'image/svg+xml');
-    res.setHeader('Cache-Control', 'public, max-age=31536000');
     res.send(svg);
   });
 }

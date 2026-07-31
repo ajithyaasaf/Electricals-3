@@ -31,30 +31,22 @@ export function WishlistButton({
   
   const inWishlist = isInWishlist(productId, serviceId);
   
-  const handleClick = async (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    if (isUpdating || loading) return;
-    
-    setIsUpdating(true);
-    try {
-      if (inWishlist) {
-        await removeFromWishlist(productId || '', serviceId || '');
-      } else {
-        await addToWishlist(productId, serviceId, {
-          addedFrom,
-          priority,
-        });
-      }
-    } catch (error) {
-      console.error('Error updating wishlist:', error);
-    } finally {
-      setIsUpdating(false);
+
+    // Fire non-blocking optimistic update immediately
+    if (inWishlist) {
+      removeFromWishlist(productId || '', serviceId || '').catch(err => console.error('Error removing from wishlist:', err));
+    } else {
+      addToWishlist(productId, serviceId, {
+        addedFrom,
+        priority,
+      }).catch(err => console.error('Error adding to wishlist:', err));
     }
   };
-  
-  const isLoading = isUpdating || loading;
+
+  const isLoading = false; // Optimistic execution — UI responds instantly (0ms delay)
   
   if (variant === 'icon') {
     return (

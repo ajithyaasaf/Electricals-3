@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { storage } from "../../storage";
 import { isAuthenticated } from "../../firebaseAuth";
 import { CreateServiceBookingSchema } from "@shared/types";
+import { cache, CacheTTL } from "../lib/cache";
 
 export function registerServiceRoutes(app: Express) {
   // Get service bookings
@@ -42,10 +43,14 @@ export function registerServiceRoutes(app: Express) {
   // Service Catalog Routes (Missing in original audit)
   // ------------------------------------------------------------------
 
-  // Get all services with filtering
+  // Get all services with filtering (cached 2 mins)
   app.get("/api/services", async (req, res) => {
     try {
       const { categoryId, search, sortBy = "newest", sortOrder = "desc", limit = 20, offset = 0 } = req.query;
+
+      const cacheKey = `services:all:${JSON.stringify(req.query)}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) return res.json(cached);
 
       let services: any[] = [];
 
@@ -94,12 +99,15 @@ export function registerServiceRoutes(app: Express) {
       const offsetNum = parseInt(offset as string);
       const paginatedServices = services.slice(offsetNum, offsetNum + limitNum);
 
-      res.json({
+      const responseData = {
         services: paginatedServices,
         total: services.length,
         limit: limitNum,
         offset: offsetNum
-      });
+      };
+
+      cache.set(cacheKey, responseData, CacheTTL.CATEGORIES);
+      res.json(responseData);
     } catch (error) {
       console.error("Error fetching services:", error);
       res.status(500).json({ message: "Failed to fetch services" });

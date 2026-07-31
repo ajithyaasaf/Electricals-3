@@ -29,6 +29,7 @@ import {
   STATUS_LABELS,
   VALID_TRANSITIONS,
 } from "../../lib/orderStateMachine";
+import { cache } from "../lib/cache";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // REQUEST SCHEMAS
@@ -112,7 +113,12 @@ export function registerOrderRoutes(app: Express) {
         return res.status(403).json({ message: "Admin access required" });
       }
 
+      const cacheKey = "orders:stats";
+      const cached = cache.get<any>(cacheKey);
+      if (cached) return res.json(cached);
+
       const stats = await AdminOrderQueries.getOrderStats();
+      cache.set(cacheKey, stats, 15_000); // 15 seconds TTL
       res.json(stats);
     } catch (error) {
       console.error("Error fetching order stats:", error);

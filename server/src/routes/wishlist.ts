@@ -23,12 +23,14 @@ const WISHLIST_CONFIG = {
   priceTrackingDays: 90,
 };
 
-// Helper function to enrich wishlist items with product/service details
+import { cache, CacheTTL, CacheKeys } from "../lib/cache";
+
+// Helper function to enrich wishlist items with product/service details in parallel with caching
 async function enrichWishlistItems(items: any[]): Promise<WishlistItemWithDetails[]> {
-  const enrichedItems: WishlistItemWithDetails[] = [];
-  
-  for (const item of items) {
-    let enrichedItem: WishlistItemWithDetails = { 
+  if (!items || items.length === 0) return [];
+
+  const promises = items.map(async (item) => {
+    let enrichedItem: WishlistItemWithDetails = {
       ...item,
       priority: item.priority || 'medium',
       tags: item.tags || [],
@@ -39,9 +41,17 @@ async function enrichWishlistItems(items: any[]): Promise<WishlistItemWithDetail
       priceAlert: item.priceAlert || undefined,
       sessionId: item.sessionId || undefined,
     };
-    
+
     if (item.productId) {
-      const product = await storage.getProductById(item.productId);
+      const cacheKey = CacheKeys.products.byId(item.productId);
+      let product = cache.get<Product>(cacheKey);
+      if (!product) {
+        product = await storage.getProductById(item.productId);
+        if (product) {
+          cache.set(cacheKey, product, CacheTTL.PRODUCT_DETAIL);
+        }
+      }
+
       if (product) {
         enrichedItem.product = product;
         enrichedItem.currentPrice = product.price;
@@ -51,7 +61,7 @@ async function enrichWishlistItems(items: any[]): Promise<WishlistItemWithDetail
         enrichedItem.priceDifference = enrichedItem.originalPrice - enrichedItem.currentPrice;
       }
     }
-    
+
     if (item.serviceId) {
       const service = await storage.getServiceById(item.serviceId);
       if (service) {
@@ -59,24 +69,23 @@ async function enrichWishlistItems(items: any[]): Promise<WishlistItemWithDetail
         enrichedItem.currentPrice = (service as any).startingPrice || (service as any).price || 0;
         enrichedItem.originalPrice = (service as any).startingPrice || (service as any).price || 0;
         enrichedItem.isOnSale = false;
-        enrichedItem.stockStatus = 'in_stock'; // Services are always available
+        enrichedItem.stockStatus = 'in_stock';
         enrichedItem.priceDifference = 0;
       }
     }
-    
-    if (enrichedItem.product || enrichedItem.service) {
-      enrichedItems.push(enrichedItem);
-    }
-  }
-  
-  return enrichedItems;
+
+    return (enrichedItem.product || enrichedItem.service) ? enrichedItem : null;
+  });
+
+  const results = await Promise.all(promises);
+  return results.filter((item): item is WishlistItemWithDetails => item !== null);
 }
 
 // Helper function to enrich guest wishlist items
 async function enrichGuestWishlistItems(guestItems: GuestWishlistItem[]): Promise<WishlistItemWithDetails[]> {
-  const enrichedItems: WishlistItemWithDetails[] = [];
-  
-  for (const item of guestItems) {
+  if (!guestItems || guestItems.length === 0) return [];
+
+  const promises = guestItems.map(async (item) => {
     let enrichedItem: WishlistItemWithDetails = {
       id: item.id,
       productId: item.productId,
@@ -89,9 +98,17 @@ async function enrichGuestWishlistItems(guestItems: GuestWishlistItem[]): Promis
       createdAt: new Date(item.addedAt),
       updatedAt: new Date(item.lastUpdated),
     };
-    
+
     if (item.productId) {
-      const product = await storage.getProductById(item.productId);
+      const cacheKey = CacheKeys.products.byId(item.productId);
+      let product = cache.get<Product>(cacheKey);
+      if (!product) {
+        product = await storage.getProductById(item.productId);
+        if (product) {
+          cache.set(cacheKey, product, CacheTTL.PRODUCT_DETAIL);
+        }
+      }
+
       if (product) {
         enrichedItem.product = product;
         enrichedItem.currentPrice = product.price;
@@ -101,7 +118,7 @@ async function enrichGuestWishlistItems(guestItems: GuestWishlistItem[]): Promis
         enrichedItem.priceDifference = enrichedItem.originalPrice - enrichedItem.currentPrice;
       }
     }
-    
+
     if (item.serviceId) {
       const service = await storage.getServiceById(item.serviceId);
       if (service) {
@@ -113,13 +130,12 @@ async function enrichGuestWishlistItems(guestItems: GuestWishlistItem[]): Promis
         enrichedItem.priceDifference = 0;
       }
     }
-    
-    if (enrichedItem.product || enrichedItem.service) {
-      enrichedItems.push(enrichedItem);
-    }
-  }
-  
-  return enrichedItems;
+
+    return (enrichedItem.product || enrichedItem.service) ? enrichedItem : null;
+  });
+
+  const results = await Promise.all(promises);
+  return results.filter((item): item is WishlistItemWithDetails => item !== null);
 }
 
 // Generate wishlist analytics

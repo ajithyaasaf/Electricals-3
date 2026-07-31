@@ -1,13 +1,21 @@
 import type { Express } from "express";
 import { storage } from "../../storage";
 import { isAuthenticated } from "../../firebaseAuth";
+import { cache } from "../lib/cache";
 
 export function registerAuthRoutes(app: Express) {
-  // Get current user
+  // Get current user (cached 30s)
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.uid;
+      const cacheKey = `users:id:${userId}`;
+      const cached = cache.get<any>(cacheKey);
+      if (cached) return res.json(cached);
+
       const user = await storage.getUserById(userId);
+      if (user) {
+        cache.set(cacheKey, user, 30_000);
+      }
       res.json(user);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -20,11 +28,13 @@ export function registerAuthRoutes(app: Express) {
     try {
       const userId = req.user.uid;
       const userData = req.body;
-      
+
       // Don't allow users to modify admin status through this endpoint
       delete userData.isAdmin;
-      
+
       await storage.updateUser(userId, userData);
+      cache.invalidateByPrefix(`users:id:${userId}`);
+
       const updatedUser = await storage.getUserById(userId);
       res.json(updatedUser);
     } catch (error) {

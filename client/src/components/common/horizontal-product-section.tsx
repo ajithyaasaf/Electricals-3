@@ -71,14 +71,14 @@ export function HorizontalProductSection({
     }
   };
 
-  const handleQuickAdd = async (e: React.MouseEvent, productId: string, productName: string) => {
+  const handleQuickAdd = async (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     try {
-      await addItem(productId, undefined, 1);
+      await addItem(product.id.toString(), undefined, 1, undefined, product);
       toast({
         title: "Added to Cart!",
-        description: `${productName} added to your cart.`,
+        description: `${product.name} added to your cart.`,
       });
     } catch (err) {
       console.error("Error adding to cart:", err);
@@ -212,7 +212,7 @@ export function HorizontalProductSection({
                         <Button
                           size="sm"
                           className="w-full bg-teal-50 hover:bg-teal-600 text-teal-700 hover:text-white font-medium text-xs h-8 transition-colors flex items-center justify-center gap-1.5"
-                          onClick={(e) => handleQuickAdd(e, product.id, product.name)}
+                          onClick={(e) => handleQuickAdd(e, product)}
                         >
                           <Plus className="w-3.5 h-3.5" />
                           <span>Add to Cart</span>

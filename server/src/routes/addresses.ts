@@ -6,6 +6,7 @@ import {
 } from "../../adminFirestoreService";
 import { CreateAddressSchema } from "@shared/types";
 import { ZodError } from "zod";
+import { cache } from "../lib/cache";
 
 export function registerAddressRoutes(app: Express) {
 
@@ -18,12 +19,16 @@ export function registerAddressRoutes(app: Express) {
         await Promise.all(updates);
     };
 
-    // Get user's addresses
+    // Get user's addresses (cached 15s)
     app.get("/api/addresses", isAuthenticated, async (req, res) => {
         try {
             if (!req.user?.uid) {
                 return res.status(401).json({ message: "Unauthorized" });
             }
+
+            const cacheKey = `addresses:${req.user.uid}`;
+            const cached = cache.get<any[]>(cacheKey);
+            if (cached) return res.json(cached);
 
             const addresses = await AdminAddressQueries.getUserAddresses(req.user.uid);
 
@@ -35,6 +40,7 @@ export function registerAddressRoutes(app: Express) {
                 return a.isDefault ? -1 : 1;
             });
 
+            cache.set(cacheKey, sortedAddresses, 15_000);
             res.json(sortedAddresses);
         } catch (error) {
             console.error("Error fetching addresses:", error);
@@ -48,6 +54,8 @@ export function registerAddressRoutes(app: Express) {
             if (!req.user?.uid) {
                 return res.status(401).json({ message: "Unauthorized" });
             }
+
+            cache.invalidateByPrefix(`addresses:${req.user.uid}`);
 
             const addressData = CreateAddressSchema.parse({
                 ...req.body,
