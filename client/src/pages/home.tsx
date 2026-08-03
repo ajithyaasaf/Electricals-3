@@ -33,7 +33,7 @@ import wireCoilImg from "@assets/generated_images/Finolex_2.5sqmm_wire_coil_072a
 import pipesFittingsImg from "@assets/generated_images/Electrical_material_samples_bb4fe5fd.png";
 
 export default function Home() {
-  const { user } = useFirebaseAuth();
+  const { user, isAuthenticated } = useFirebaseAuth();
   const { topCategory, hasHistory } = useUserInterest();
 
   // SEO optimization for homepage
@@ -271,33 +271,7 @@ export default function Home() {
         className="bg-gray-50"
       />
 
-      {/* Account Quick Access - More useful for logged-in users */}
-      <section className="py-12 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Your Account Dashboard</h3>
-            <p className="text-lg text-gray-600">Quick access to your orders, saved items, and account features</p>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            <Link href="/account" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-200 transition-colors">
-                <User className="text-teal-600 w-6 h-6" />
-              </div>
-              <h5 className="font-semibold text-gray-900 mb-1">My Orders</h5>
-              <p className="text-sm text-gray-600">Track your recent purchases</p>
-            </Link>
-
-            <Link href="/account?tab=addresses" className="bg-gray-50 hover:bg-gray-100 rounded-xl p-6 text-center transition-colors group">
-              <div className="w-12 h-12 bg-teal-light-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-teal-light-200 transition-colors">
-                <MapPin className="text-teal-light-600 w-6 h-6" />
-              </div>
-              <h5 className="font-semibold text-gray-900 mb-1">Address Management</h5>
-              <p className="text-sm text-gray-600">Manage your shipping addresses</p>
-            </Link>
-          </div>
-        </div>
-      </section>
 
       <Footer />
     </div>
