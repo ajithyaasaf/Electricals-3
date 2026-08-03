@@ -2,12 +2,14 @@ import { MapPin, Truck, Package, Clock } from 'lucide-react';
 import { BUSINESS_POLICIES } from '@/lib/constants';
 import { SHIPPING_THRESHOLDS } from '@shared/logistics';
 import { formatPrice } from '@/lib/currency';
+import { getDynamicDeliveryEstimate } from '@shared/delivery-zones';
 
 /**
  * SEO-optimized Service Areas Section
  * Phase 1: Madurai Launch with Future Expansion Roadmap
  */
 export function ServiceAreasSection() {
+  const deliveryEstimate = getDynamicDeliveryEstimate('625001');
   return (
     <section
       className="bg-gradient-to-br from-copper-50 to-amber-50 py-12"
@@ -50,7 +52,7 @@ export function ServiceAreasSection() {
                 <Truck className="w-4 h-4 mr-3 text-green-600 flex-shrink-0" />
                 <div>
                   <div className="font-semibold">Super Fast Delivery</div>
-                  <div className="text-xs text-gray-600">1-2 business days</div>
+                  <div className="text-xs text-gray-600">{deliveryEstimate.badgeText}</div>
                 </div>
               </div>
               <div className="flex items-center bg-white/50 p-2 rounded-lg">

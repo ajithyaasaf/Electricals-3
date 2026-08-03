@@ -152,11 +152,12 @@ export function checkServiceability(pincode: string): ServiceabilityResult {
 
     for (const zone of sortedZones) {
         if (zone.isServiceable(cleaned)) {
+            const dynamic = getDynamicDeliveryEstimate(cleaned);
             return {
                 isServiceable: true,
                 zone,
-                message: zone.message.available,
-                estimatedDelivery: `${zone.estimatedDays.min}-${zone.estimatedDays.max} days`,
+                message: dynamic.deliveryText,
+                estimatedDelivery: dynamic.isExpress ? 'Within 2 Hours' : 'Within 1 Day',
             };
         }
     }
@@ -165,6 +166,59 @@ export function checkServiceability(pincode: string): ServiceabilityResult {
     return {
         isServiceable: false,
         message: ZONE_MADURAI.message.unavailable, // Use primary zone's message
+    };
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// DYNAMIC REAL-TIME DELIVERY ESTIMATION
+// ═══════════════════════════════════════════════════════════════════════════
+
+export interface DynamicDeliveryEstimate {
+    isExpress: boolean;
+    deliveryText: string;
+    badgeText: string;
+}
+
+/**
+ * Calculates dynamic real-time delivery estimate based on IST clock and pincode
+ * - Mon-Sat (8 AM - 5 PM IST): ⚡ Express 2-Hour Delivery
+ * - Evenings, Nights & Sundays: 📦 Within 1 Day Delivery
+ */
+export function getDynamicDeliveryEstimate(pincode?: string): DynamicDeliveryEstimate {
+    if (pincode && pincode.trim().length === 6 && !pincode.trim().startsWith('625')) {
+        return {
+            isExpress: false,
+            deliveryText: 'Delivery not available in your area yet',
+            badgeText: 'Not Available',
+        };
+    }
+
+    // Get current time strictly in Indian Standard Time (IST = UTC + 5:30)
+    const now = new Date();
+    const utcTime = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istDate = new Date(utcTime + (330 * 60000));
+
+    const day = istDate.getDay(); // 0 = Sunday
+    const hour = istDate.getHours(); // 0 - 23
+
+    const startHour = 8;  // 8:00 AM IST
+    const endHour = 17;   // 5:00 PM IST (Cutoff for 2-hour delivery before 7 PM store closing)
+
+    const isSunday = (day === 0);
+    const isWithinExpressHours = (hour >= startHour && hour < endHour);
+
+    if (!isSunday && isWithinExpressHours) {
+        return {
+            isExpress: true,
+            deliveryText: '✓ Delivery available in Madurai (Within 2 Hours)',
+            badgeText: '⚡ Express 2-Hour Delivery in Madurai',
+        };
+    }
+
+    return {
+        isExpress: false,
+        deliveryText: '✓ Delivery available in Madurai (Within 1 Day)',
+        badgeText: 'Fast 1 Day Delivery in Madurai',
     };
 }
 

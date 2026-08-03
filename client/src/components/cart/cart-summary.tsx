@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatPrice } from '@/lib/currency';
 import { useToast } from '@/hooks/use-toast';
 import { POLICY_TEXT } from '@/lib/constants';
+import { getDynamicDeliveryEstimate } from '@shared/delivery-zones';
 import type { CartTotals, ShippingOption } from '@shared/cart-types';
 
 interface CartSummaryProps {
@@ -31,6 +32,7 @@ export function CartSummary({
   isApplyingCoupon = false,
   className
 }: CartSummaryProps) {
+  const deliveryEstimate = getDynamicDeliveryEstimate('625001');
   const [couponCode, setCouponCode] = useState('');
   const { toast } = useToast();
 
@@ -196,9 +198,9 @@ export function CartSummary({
           <h4 className="text-sm font-medium text-blue-900">Shipping & Returns</h4>
           <div className="text-xs text-blue-800 space-y-1">
             <div>• Currently delivering within Madurai (625xxx pincodes)</div>
-            <div>• Delivery in 1-2 business days</div>
-            <div>• Shipping fees based on weight and product category</div>
-            <div>• Returns: 5-7 days</div>
+            <div>• {deliveryEstimate.deliveryText}</div>
+            <div>• FREE Shipping on orders above ₹2,999</div>
+            <div>• Returns: 7 days</div>
           </div>
         </div>
 

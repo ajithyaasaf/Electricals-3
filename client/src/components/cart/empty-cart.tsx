@@ -3,6 +3,7 @@ import { ShoppingCart, ArrowRight, Zap, Shield, Truck, Tag } from 'lucide-react'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { CATEGORIES } from '@/lib/constants';
+import { getDynamicDeliveryEstimate } from '@shared/delivery-zones';
 
 interface EmptyCartProps {
   savedItemsCount?: number;
@@ -10,6 +11,7 @@ interface EmptyCartProps {
 }
 
 export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
+  const deliveryEstimate = getDynamicDeliveryEstimate('625001');
   return (
     <div className={className}>
       {/* Empty Cart Illustration */}
@@ -86,7 +88,7 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Fast Delivery</h3>
               <p className="text-sm text-gray-600">
-                Fast 1-2 day delivery in Madurai | Weight-based shipping from ₹50
+                {deliveryEstimate.badgeText} | Free shipping on orders ₹2,999+
               </p>
             </CardContent>
           </Card>

@@ -44,7 +44,10 @@ import { useToast } from "@/hooks/use-toast";
 import { formatPrice } from "@/lib/currency";
 import { SHIPPING_THRESHOLDS } from "@shared/logistics";
 
+import { getDynamicDeliveryEstimate } from "@shared/delivery-zones";
+
 export function Header() {
+  const deliveryEstimate = getDynamicDeliveryEstimate('625001');
   const { isAuthenticated, user, loading } = useFirebaseAuth();
   const { totalQuantity } = useCartContext();
   const { totalItems: wishlistCount } = useWishlist();
@@ -141,7 +144,7 @@ export function Header() {
       {/* Top announcement bar - Madurai Launch Phase */}
       <div className="bg-copper-700 text-white text-center py-2 text-sm px-2">
         <span className="text-xs sm:text-sm truncate block">
-          🚀 Madurai Launch! | 1-2 Day Delivery | Premium Products | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+
+          🚀 Madurai Launch! | {deliveryEstimate.badgeText} | Premium Products | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+
         </span>
       </div>
 

@@ -24,8 +24,10 @@ import { useCartContext } from "@/contexts/cart-context";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { signInWithGoogle } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { getDynamicDeliveryEstimate } from "@shared/delivery-zones";
 
 export default function Cart() {
+  const deliveryEstimate = getDynamicDeliveryEstimate('625001');
   const { isAuthenticated, loading: authLoading } = useFirebaseAuth();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("cart");
@@ -277,7 +279,7 @@ export default function Cart() {
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span>Fast 1-2 day delivery in Madurai</span>
+                    <span>{deliveryEstimate.badgeText}</span>
                   </div>
                   <div className="flex items-center gap-3 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />

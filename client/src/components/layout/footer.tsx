@@ -7,8 +7,10 @@ import logoUrl from "@assets/Logo_1763402801870.png";
 import { COMPANY_INFO, CONTACT_INFO, BUSINESS_POLICIES } from "@/lib/constants";
 import { formatPrice } from "@/lib/currency";
 import { SHIPPING_THRESHOLDS } from "@shared/logistics";
+import { getDynamicDeliveryEstimate } from "@shared/delivery-zones";
 
 export function Footer() {
+  const deliveryEstimate = getDynamicDeliveryEstimate('625001');
   const currentYear = new Date().getFullYear();
 
   const productLinks = [
@@ -141,7 +143,7 @@ export function Footer() {
               <div>
                 <p className="text-green-400 font-semibold mb-2">✓ Now Serving</p>
                 <p className="text-gray-300">{BUSINESS_POLICIES.serviceAreas.current}</p>
-                <p className="text-xs text-gray-400 mt-1">Fast 1-2 Days Delivery</p>
+                <p className="text-xs text-gray-400 mt-1">{deliveryEstimate.badgeText}</p>
               </div>
               <div>
                 <p className="text-yellow-400 font-semibold mb-2">⏳ Coming Soon</p>
