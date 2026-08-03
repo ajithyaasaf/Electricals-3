@@ -398,7 +398,7 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                         </div>
 
                                         {/* Action Buttons for Verification / Manual Admin Approval */}
-                                        {(details.order.paymentStatus === 'verification_pending' || details.order.paymentStatus === 'awaiting_payment' || details.order.paymentStatus === 'pending') && details.order.paymentStatus !== 'paid' && (
+                                        {(details.order.paymentStatus === 'verification_pending' || details.order.paymentStatus === 'awaiting_payment' || details.order.paymentStatus === 'pending') && (
                                             <div className="mt-4 flex gap-3">
                                                 <Button
                                                     className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
