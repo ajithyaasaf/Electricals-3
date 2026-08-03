@@ -332,191 +332,268 @@
   transform: translateY(-2px);
 }
 
-/* Mobile Responsive */
+/* ═══════════════════════════════════════════════════════════════
+   MOBILE REDESIGN — Clean, Minimal, Professional
+   Desktop styles above are preserved completely.
+   Mobile gets a full-screen card layout, no sliding panels.
+═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
+  /* Full-screen mobile wrapper */
   .auth-container {
-    border-radius: 20px;
-    min-height: auto;
-    height: auto;
-    flex-direction: column;
-    margin: 12px auto;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    overflow: visible;
-  }
-
-  .form-container {
+    all: unset;
+    display: block;
     width: 100%;
+    min-height: 100vh;
+    background: #f8fafc;
     position: relative;
-    height: auto;
-    min-height: auto;
   }
 
+  /* Hide the animated sliding toggle panel entirely on mobile */
+  .toggle-container,
+  .forgot-info-panel {
+    display: none !important;
+  }
+
+  /* All form panels: stack and show/hide cleanly without desktop CSS transforms */
+  .form-container,
   .sign-in,
   .sign-up,
   .forgot-password {
+    all: unset;
+    display: none;
     width: 100%;
-    position: relative;
-    left: 0;
-    opacity: 1;
+    position: relative !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
     transform: none !important;
-    height: auto;
-    min-height: auto;
+    opacity: 1 !important;
+    z-index: 1 !important;
+    animation: none !important;
+    transition: none !important;
   }
 
-  .sign-up {
-    display: none;
+  .sign-in {
+    display: block !important;
+  }
+
+  .sign-up,
+  .forgot-password {
+    display: none !important;
   }
 
   .auth-container.active .sign-in {
-    display: none;
+    display: none !important;
   }
 
   .auth-container.active .sign-up {
-    display: flex;
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 
-  .auth-container.forgot-mode .sign-in {
-    display: none;
+  .auth-container.forgot-mode .sign-in,
+  .auth-container.forgot-mode .sign-up {
+    display: none !important;
   }
 
   .auth-container.forgot-mode .forgot-password {
-    display: flex;
-    opacity: 1;
-    transform: none;
-  }
-
-  .toggle-container {
-    position: relative;
-    width: 100%;
-    left: 0;
-    height: auto;
-    min-height: auto;
-    transform: none !important;
-    border-radius: 0 0 20px 20px;
-  }
-
-  .auth-container.forgot-mode .toggle-container {
-    display: none;
-  }
-
-  .toggle {
-    left: 0;
-    width: 100%;
-    height: auto;
-    transform: none !important;
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    border-radius: 0 0 20px 20px;
-  }
-
-  .toggle-panel {
-    width: 100%;
-    padding: 24px 20px;
-    position: relative;
+    display: block !important;
+    opacity: 1 !important;
     transform: none !important;
   }
 
-  .toggle-left {
-    display: none;
-  }
-
-  .auth-container.active .toggle-left {
-    display: flex;
-  }
-
-  .auth-container.active .toggle-right {
-    display: none;
-  }
-
+  /* The actual form card */
   .auth-form {
-    padding: 28px 20px;
-    min-height: auto;
-    height: auto;
-    justify-content: flex-start;
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    min-height: 100vh;
+    padding: 0;
+    background: #f8fafc;
   }
 
-  .auth-input {
-    margin: 6px 0;
-    padding: 12px 14px;
-    font-size: 14px;
-    border-radius: 10px;
+  /* Brand header strip */
+  .auth-form::before {
+    content: '';
+    display: block;
+    height: 6px;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--accent)));
+    flex-shrink: 0;
   }
 
-  .auth-button {
-    padding: 14px 24px;
-    font-size: 14px;
-    margin-top: 16px;
-    border-radius: 12px;
-    width: 100%;
+
+  /* Title */
+
+  .auth-form h1 {
+    font-size: 26px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    margin-top: 32px !important;
+    margin-bottom: 4px !important;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  /* Subtitle text */
+  .auth-form > span,
+  .auth-form > p {
+    color: #6b7280 !important;
+    font-size: 14px !important;
+    text-align: left !important;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-bottom: 8px;
+  }
+
+  /* Social icons row */
+  .social-icons {
+    display: flex !important;
+    justify-content: flex-start !important;
+    gap: 12px !important;
+    margin: 20px 20px 4px 20px !important;
   }
 
   .social-icon {
-    height: 44px;
-    width: 44px;
+    height: 48px !important;
+    width: 48px !important;
+    border-radius: 12px !important;
+    border: 1px solid #e5e7eb !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  /* Divider text */
+  .auth-form > span {
+    display: block;
+    margin: 8px 0 !important;
+    font-size: 13px !important;
+    color: #9ca3af !important;
+  }
+
+  /* Input fields */
+  .auth-input {
+    background: #fff !important;
+    border: 1.5px solid #e5e7eb !important;
+    border-radius: 12px !important;
+    padding: 14px 16px !important;
+    font-size: 15px !important;
+    color: #111827 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
+  }
+
+  .auth-input:focus {
+    border-color: hsl(var(--primary)) !important;
+    box-shadow: 0 0 0 3px hsl(var(--primary) / 0.12) !important;
+    outline: none !important;
+  }
+
+  /* Input field group spacing */
+  .auth-form .space-y-3 {
+    padding-left: 20px;
+    padding-right: 20px;
+    gap: 12px !important;
+  }
+
+  .auth-form .space-y-3 > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .auth-form .space-y-4 {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  /* Main CTA button */
+  .auth-button {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent))) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 14px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.5px !important;
+    padding: 16px 20px !important;
+    margin: 24px 20px 0 20px !important;
+    width: calc(100% - 40px) !important;
+    box-shadow: 0 4px 14px hsl(var(--primary) / 0.35) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+    text-transform: uppercase !important;
+  }
+
+  .auth-button:active {
+    transform: scale(0.98) !important;
+  }
+
+  .auth-button:disabled {
+    opacity: 0.65 !important;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Forgot password link */
+  .auth-form [data-testid="button-forgot-password"] {
+    margin: 12px 20px 0 20px !important;
+    padding: 0 !important;
+    height: auto !important;
+    color: hsl(var(--primary)) !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+    display: block !important;
+  }
+
+  /* Mobile bottom switch section */
+  .mobile-switch {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    padding: 28px 20px 40px;
+    font-size: 14px;
+    color: #6b7280;
+  }
+
+  .mobile-switch button {
+    color: hsl(var(--primary));
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  /* Forgot password form icon */
+  .auth-form .text-center {
+    padding: 28px 20px 16px;
+  }
+
+  /* Error messages */
+  .auth-form p.text-red-600 {
+    font-size: 12px !important;
+    text-align: left !important;
+    padding-left: 4px;
   }
 }
 
 @media (max-width: 480px) {
-  .auth-container {
-    margin: 8px auto;
-    border-radius: 16px;
-  }
-
-  .auth-form {
-    padding: 24px 16px;
-  }
-
-  .toggle-panel {
-    padding: 20px 16px;
-  }
-
-  .toggle-panel h1 {
-    font-size: 20px;
-    margin-bottom: 8px;
-  }
-
-  .toggle-panel p {
-    font-size: 13px;
-    line-height: 1.4;
-    margin-bottom: 14px;
-  }
-
-  .auth-input {
-    margin: 5px 0;
-    padding: 12px 14px;
-    font-size: 14px;
-  }
-
   .auth-button {
-    padding: 13px 20px;
-    font-size: 13px;
-  }
-
-  .toggle-button {
-    padding: 10px 24px !important;
-    font-size: 12px !important;
-    min-width: 130px !important;
-  }
-}
-
-@media (max-width: 360px) {
-  .auth-form {
-    padding: 20px 12px;
-  }
-
-  .toggle-panel {
-    padding: 16px 12px;
+    border-radius: 12px !important;
   }
 
   .auth-input {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-
-  .toggle-panel h1 {
-    font-size: 18px;
-  }
-
-  .toggle-panel p {
-    font-size: 12px;
+    font-size: 16px !important; /* Prevents iOS auto-zoom */
   }
 }
+

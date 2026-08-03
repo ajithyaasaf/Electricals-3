@@ -188,10 +188,10 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 flex items-center justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-4xl px-2 sm:px-4">
-        {/* Back to Home Button */}
-        <div className="mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-blue-100 md:flex md:items-center md:justify-center md:p-4 md:p-6 lg:p-8">
+      <div className="w-full md:max-w-4xl md:px-2">
+        {/* Back to Home Button - Desktop only */}
+        <div className="mb-6 hidden md:block">
           <Link href="/" data-testid="link-back-home">
             <Button 
               variant="ghost" 
@@ -209,6 +209,14 @@ export default function Auth() {
           {/* Sign Up Form */}
           <div className="form-container sign-up">
             <form onSubmit={signUpForm.handleSubmit(handleSignUp)} className="auth-form">
+              {/* Mobile-only back to home header */}
+              <div className="md:hidden flex items-center justify-between px-0 pt-4 pb-2" style={{paddingLeft: 0, paddingRight: 0}}>
+                <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 font-medium ml-5">
+                  <ArrowLeft className="h-4 w-4" />
+                  Home
+                </Link>
+                <span className="text-xs font-bold tracking-widest uppercase text-copper-600 mr-5">CopperBear</span>
+              </div>
               <h1 className="text-3xl font-bold text-gray-800 mb-6">Create Account</h1>
               
               {/* Social Icons */}
@@ -298,12 +306,30 @@ export default function Auth() {
               >
                 {loading ? "Creating Account..." : "SIGN UP"}
               </Button>
+
+              <div className="mt-4 text-center md:hidden">
+                <p className="text-sm text-gray-600">
+                  Already have an account?{' '}
+                  <button type="button" className="text-copper-600 font-bold" onClick={() => setIsSignUp(false)}>
+                    Sign In
+                  </button>
+                </p>
+              </div>
             </form>
           </div>
+
 
           {/* Sign In Form */}
           <div className="form-container sign-in">
             <form onSubmit={signInForm.handleSubmit(handleSignIn)} className="auth-form">
+              {/* Mobile-only back to home header */}
+              <div className="md:hidden flex items-center justify-between px-0 pt-4 pb-2" style={{paddingLeft: 0, paddingRight: 0}}>
+                <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 font-medium ml-5">
+                  <ArrowLeft className="h-4 w-4" />
+                  Home
+                </Link>
+                <span className="text-xs font-bold tracking-widest uppercase text-copper-600 mr-5">CopperBear</span>
+              </div>
               <h1 className="text-3xl font-bold text-gray-800 mb-6">Sign In</h1>
               
               {/* Social Icons */}
@@ -379,12 +405,29 @@ export default function Auth() {
               >
                 {loading ? "Signing In..." : "SIGN IN"}
               </Button>
+
+              <div className="mt-4 text-center md:hidden">
+                <p className="text-sm text-gray-600">
+                  Don't have an account?{' '}
+                  <button type="button" className="text-copper-600 font-bold" onClick={() => setIsSignUp(true)}>
+                    Sign Up
+                  </button>
+                </p>
+              </div>
             </form>
           </div>
 
           {/* Forgot Password Form */}
           <div className="form-container forgot-password">
             <form onSubmit={forgotPasswordForm.handleSubmit(handleForgotPassword)} className="auth-form">
+              {/* Mobile-only back to home header */}
+              <div className="md:hidden flex items-center justify-between px-0 pt-4 pb-2" style={{paddingLeft: 0, paddingRight: 0}}>
+                <Link href="/" className="inline-flex items-center gap-1 text-sm text-gray-500 font-medium ml-5">
+                  <ArrowLeft className="h-4 w-4" />
+                  Home
+                </Link>
+                <span className="text-xs font-bold tracking-widest uppercase text-copper-600 mr-5">CopperBear</span>
+              </div>
               <h1 className="text-3xl font-bold text-gray-800 mb-6">Reset Password</h1>
               
               <div className="text-center mb-6">
