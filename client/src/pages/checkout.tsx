@@ -654,8 +654,8 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main checkout form */}
           <div className="lg:col-span-2">
-            <Tabs 
-              value={currentStep.toString()} 
+            <Tabs
+              value={currentStep.toString()}
               onValueChange={(val) => {
                 const step = parseInt(val, 10);
                 if (step === 1) {
@@ -1008,8 +1008,8 @@ export default function Checkout() {
                               onChange={(e) => updateRootField("paymentMethod", e.target.value)}
                               className="disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                             />
-                            <label 
-                              htmlFor="cod" 
+                            <label
+                              htmlFor="cod"
                               className={`text-sm font-medium flex items-center gap-2 w-full ${hasNonCodItems ? "text-gray-400 cursor-not-allowed" : "text-gray-900 cursor-pointer"}`}
                             >
                               <span className="text-lg">💵</span>
