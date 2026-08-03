@@ -52,7 +52,7 @@ export function ServiceAreasSection() {
                 <Truck className="w-4 h-4 mr-3 text-green-600 flex-shrink-0" />
                 <div>
                   <div className="font-semibold">Super Fast Delivery</div>
-                  <div className="text-xs text-gray-600">{deliveryEstimate.badgeText}</div>
+                  <div className="text-xs font-semibold text-green-700">⚡ Express 2-Hour / 1-Day Delivery</div>
                 </div>
               </div>
               <div className="flex items-center bg-white/50 p-2 rounded-lg">

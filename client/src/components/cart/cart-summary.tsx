@@ -198,7 +198,7 @@ export function CartSummary({
           <h4 className="text-sm font-medium text-blue-900">Shipping & Returns</h4>
           <div className="text-xs text-blue-800 space-y-1">
             <div>• Currently delivering within Madurai (625xxx pincodes)</div>
-            <div>• {deliveryEstimate.deliveryText}</div>
+            <div>• ⚡ Express 2-Hour Delivery (8 AM – 5 PM IST) / 1-Day Off-Hours</div>
             <div>• FREE Shipping on orders above ₹2,999</div>
             <div>• Returns: 7 days</div>
           </div>

@@ -88,7 +88,7 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
               </div>
               <h3 className="font-semibold text-gray-900 mb-2">Fast Delivery</h3>
               <p className="text-sm text-gray-600">
-                {deliveryEstimate.badgeText} | Free shipping on orders ₹2,999+
+                ⚡ Express 2-Hour Delivery in Madurai | Free shipping on orders ₹2,999+
               </p>
             </CardContent>
           </Card>

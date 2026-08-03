@@ -144,7 +144,7 @@ export function Header() {
       {/* Top announcement bar - Madurai Launch Phase */}
       <div className="bg-copper-700 text-white text-center py-2 text-sm px-2">
         <span className="text-xs sm:text-sm truncate block">
-          🚀 Madurai Launch! | {deliveryEstimate.badgeText} | Premium Products | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+
+          🚀 Madurai Launch! | ⚡ Express 2-Hour Delivery | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+
         </span>
       </div>
 
@@ -409,7 +409,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-3 min-h-[60px] min-w-[60px] transition-all duration-200"
+                    className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-2 sm:p-3 h-9 w-9 sm:min-h-[60px] sm:min-w-[60px] transition-all duration-200"
                   >
                     <User className="h-5 w-5" />
                     <span className="text-xs mt-1 hidden sm:block">
@@ -444,7 +444,7 @@ export function Header() {
             ) : (
               <Button
                 variant="ghost"
-                className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-3 min-h-[60px] min-w-[60px] transition-all duration-200"
+                className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-2 sm:p-3 h-9 w-9 sm:min-h-[60px] sm:min-w-[60px] transition-all duration-200"
                 onClick={handleSignIn}
                 disabled={loading}
               >
@@ -457,7 +457,7 @@ export function Header() {
             <SmartLink href="/wishlist" className="flex-shrink-0">
               <Button
                 variant="ghost"
-                className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-2 sm:p-3 min-h-[44px] min-w-[44px] sm:min-h-[60px] sm:min-w-[60px] transition-all duration-200 relative"
+                className="flex flex-col items-center justify-center text-gray-700 hover:text-copper-600 hover:bg-copper-50 rounded-lg p-2 sm:p-3 h-9 w-9 sm:min-h-[60px] sm:min-w-[60px] transition-all duration-200 relative"
                 data-testid="button-wishlist"
               >
                 <Heart className="h-5 w-5 flex-shrink-0" />
@@ -474,8 +474,7 @@ export function Header() {
 
             {/* Cart */}
             <Button
-              className="flex items-center gap-1 sm:gap-2 bg-lime-600 text-white hover:bg-lime-700 active:bg-lime-800 relative h-10 sm:h-11 px-3 sm:px-4 touch-manipulation flex-shrink-0"
-              style={{ minHeight: "44px" }}
+              className="flex items-center justify-center gap-1 sm:gap-2 bg-lime-600 text-white hover:bg-lime-700 active:bg-lime-800 relative h-9 sm:h-11 px-2.5 sm:px-4 touch-manipulation flex-shrink-0 rounded-lg"
               onClick={() => setCartOpen(true)}
               data-testid="button-cart"
             >

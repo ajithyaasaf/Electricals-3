@@ -143,7 +143,7 @@ export function Footer() {
               <div>
                 <p className="text-green-400 font-semibold mb-2">✓ Now Serving</p>
                 <p className="text-gray-300">{BUSINESS_POLICIES.serviceAreas.current}</p>
-                <p className="text-xs text-gray-400 mt-1">{deliveryEstimate.badgeText}</p>
+                <p className="text-xs font-semibold text-green-400 mt-1">⚡ Express 2-Hour Delivery Available</p>
               </div>
               <div>
                 <p className="text-yellow-400 font-semibold mb-2">⏳ Coming Soon</p>
