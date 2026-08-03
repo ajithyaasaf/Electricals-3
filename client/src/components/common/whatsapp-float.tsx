@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 
 export function WhatsAppFloat() {
     const [location] = useLocation();
-    
+
     // Hide WhatsApp float button on admin pages
     if (location.startsWith("/admin")) {
         return null;
