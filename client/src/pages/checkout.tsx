@@ -97,12 +97,8 @@ export default function Checkout() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Load initial values from localStorage if they exist
+  // Load initial form values from localStorage if they exist
   useEffect(() => {
-    const savedStep = localStorage.getItem("checkoutStep");
-    if (savedStep) {
-      setCurrentStep(parseInt(savedStep, 10));
-    }
     const savedForm = localStorage.getItem("checkoutFormData");
     if (savedForm) {
       try {
@@ -112,11 +108,6 @@ export default function Checkout() {
       }
     }
   }, []);
-
-  // Save current step to localStorage
-  useEffect(() => {
-    localStorage.setItem("checkoutStep", currentStep.toString());
-  }, [currentStep]);
 
   // Save form data to localStorage
   useEffect(() => {
@@ -148,13 +139,8 @@ export default function Checkout() {
   useEffect(() => {
     if (hasNonCodItems && formData.paymentMethod === "cod") {
       setFormData(prev => ({ ...prev, paymentMethod: "bank_transfer" }));
-      setCurrentStep(2); // Redirect user to Payment Step 2 so they can review their payment options
-      toast({
-        title: "Payment Method Updated",
-        description: "Cash on Delivery is unavailable because your cart contains items requiring online payment or bank transfer.",
-      });
     }
-  }, [hasNonCodItems, formData.paymentMethod, currentStep, toast]);
+  }, [hasNonCodItems, formData.paymentMethod]);
 
   const { data: addresses = [] } = useQuery<Address[]>({
     queryKey: ["/api/addresses"],
