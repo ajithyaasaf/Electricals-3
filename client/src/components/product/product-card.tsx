@@ -75,67 +75,67 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
             fallback="/api/placeholder/400/300"
           />
 
-          {/* Overlay Gradient for better text readability if needed, mostly for bottom, but here just subtle hover effect */}
+          {/* Overlay Gradient */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-300" />
 
           {/* Badges - refined positioning and look */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 flex flex-col gap-1.5 z-10">
             {product.isFeatured && (
-              <Badge className="bg-amber-500 hover:bg-amber-600 border-none shadow-sm text-[10px] uppercase tracking-wider px-2 py-0.5 h-auto">
+              <Badge className="bg-amber-500 hover:bg-amber-600 border-none shadow-sm text-[9px] sm:text-[10px] uppercase tracking-wider px-1.5 py-0.5 h-auto">
                 Best Seller
               </Badge>
             )}
             {hasDiscount && (
-              <Badge className="bg-green-600 hover:bg-green-700 border-none shadow-sm text-[10px] uppercase tracking-wider px-2 py-0.5 h-auto">
+              <Badge className="bg-green-600 hover:bg-green-700 border-none shadow-sm text-[9px] sm:text-[10px] uppercase tracking-wider px-1.5 py-0.5 h-auto">
                 {discountPercentage}% OFF
               </Badge>
             )}
             {product.stock === 0 && (
-              <Badge variant="destructive" className="shadow-sm text-[10px] uppercase tracking-wider px-2 py-0.5 h-auto">
+              <Badge variant="destructive" className="shadow-sm text-[9px] sm:text-[10px] uppercase tracking-wider px-1.5 py-0.5 h-auto">
                 Out of Stock
               </Badge>
             )}
           </div>
 
           {/* Wishlist Button - improved visibility */}
-          <div className="absolute top-3 right-3 z-10 transition-all duration-300">
+          <div className="absolute top-2 right-2 sm:top-3 sm:right-3 z-10 transition-all duration-300">
             <WishlistButton
               productId={product.id.toString()}
               variant="icon"
               size="sm"
               addedFrom="listing_page"
               showText={false}
-              className="bg-white/90 backdrop-blur-sm shadow-md hover:bg-white text-gray-700 hover:text-red-500 rounded-full h-8 w-8"
+              className="bg-white/90 backdrop-blur-sm shadow-md hover:bg-white text-gray-700 hover:text-red-500 rounded-full h-7 w-7 sm:h-8 sm:w-8"
             />
           </div>
         </div>
 
-        {/* Content Section - better padding and hierarchy */}
-        <div className="flex flex-col flex-grow p-4 md:p-5">
+        {/* Content Section - refined padding and typography */}
+        <div className="flex flex-col flex-grow p-3 sm:p-4 md:p-5">
           {/* Category Tag */}
           {showCategory && product.category && (
-            <div className="text-xs font-semibold tracking-wider text-copper-600 uppercase mb-2">
+            <div className="text-[10px] sm:text-xs font-semibold tracking-wider text-copper-600 uppercase mb-1 sm:mb-2">
               {product.category.name}
             </div>
           )}
 
           {/* Title */}
-          <h3 className="text-base font-medium text-gray-900 mb-2 line-clamp-2 leading-snug group-hover:text-copper-700 transition-colors">
+          <h3 className="text-xs sm:text-sm md:text-base font-semibold sm:font-medium text-gray-900 mb-1 sm:mb-2 line-clamp-2 leading-snug group-hover:text-copper-700 transition-colors">
             {product.name}
           </h3>
 
           {/* Rating */}
-          <div className="flex items-center gap-1 mb-3">
+          <div className="flex items-center gap-1 mb-2 sm:mb-3">
             <div className="flex text-yellow-400">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`w-3.5 h-3.5 ${i < Math.floor(validRating) ? "fill-current" : "text-gray-200"}`}
+                  className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${i < Math.floor(validRating) ? "fill-current" : "text-gray-200"}`}
                 />
               ))}
             </div>
             {reviewCount > 0 && (
-              <span className="text-xs text-gray-400 ml-1">({reviewCount})</span>
+              <span className="text-[10px] sm:text-xs text-gray-400 ml-0.5 sm:ml-1">({reviewCount})</span>
             )}
           </div>
 
@@ -143,14 +143,14 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
           <div className="flex-grow" />
 
           {/* Price and Action Section */}
-          <div className="pt-3 border-t border-gray-50 flex items-end justify-between gap-3 mt-2">
+          <div className="pt-2 sm:pt-3 border-t border-gray-50 flex items-end justify-between gap-2 mt-1 sm:mt-2">
             <div className="flex flex-col">
               {hasDiscount && (
-                <span className="text-xs text-gray-400 line-through">
+                <span className="text-[10px] sm:text-xs text-gray-400 line-through">
                   {formatPrice(originalPrice)}
                 </span>
               )}
-              <span className="text-lg font-bold text-gray-900 leading-none">
+              <span className="text-sm sm:text-base md:text-lg font-bold text-gray-900 leading-none">
                 {formatPrice(price)}
               </span>
             </div>
@@ -161,14 +161,14 @@ export const ProductCard = memo(function ProductCard({ product, showCategory = f
               disabled={addToCartMutation.isPending || product.stock === 0}
               size="sm"
               className={`
-                rounded-lg transition-all duration-300 shadow-none hover:shadow-md
+                h-8 w-8 sm:h-9 sm:w-auto p-0 sm:px-3 rounded-lg transition-all duration-300 shadow-none hover:shadow-md flex items-center justify-center
                 ${product.stock === 0
                   ? 'bg-gray-100 text-gray-400'
                   : 'bg-copper-50 text-copper-700 hover:bg-copper-600 hover:text-white border border-copper-100 hover:border-copper-600'
                 }
               `}
             >
-              <ShoppingCart className="w-4 h-4" />
+              <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               <span className="sr-only">Add to Cart</span>
             </Button>
           </div>
