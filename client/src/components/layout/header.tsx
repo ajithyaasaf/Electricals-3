@@ -67,7 +67,7 @@ export function Header() {
       title: "Account & Services",
       items: [
         { name: "Your Account", href: "/account" },
-        { name: "Order History", href: "/account/orders" },
+        { name: "Order History", href: "/account?tab=orders" },
         { name: "Wish Lists", href: "/wishlist" },
         { name: "Help & Support", href: "/help" },
       ],

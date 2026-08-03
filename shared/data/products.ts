@@ -783,6 +783,7 @@ const RAW_PRODUCTS = [
 export const ELECTRICAL_PRODUCTS: Omit<Product, 'createdAt' | 'updatedAt'>[] = RAW_PRODUCTS.map((item) => ({
   weightInKg: 0.5,
   isBulky: false,
+  isCodAvailable: true,
   isFeatured: false,
   isActive: true,
   rating: 4.5,

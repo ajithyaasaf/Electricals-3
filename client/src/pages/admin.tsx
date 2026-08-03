@@ -82,6 +82,7 @@ const productSchema = z.object({
     z.number().min(0, "Weight cannot be negative")
   ),
   isBulky: z.boolean().default(false),
+  isCodAvailable: z.boolean().default(true),
   // Review fields (manual until real-time reviews implemented)
   rating: z.preprocess(
     (val) => (val === "" || val === undefined || val === null ? 0 : Number(val)),
@@ -639,6 +640,7 @@ function ProductsSection({
                     imageUrls: [],
                     isFeatured: false,
                     isActive: true,
+                    isCodAvailable: true,
                     category: "",
                     categoryId: "",
                     weightInKg: 0,
@@ -959,6 +961,30 @@ function ProductsSection({
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={productForm.control}
+                        name="isCodAvailable"
+                        render={({ field }) => (
+                          <FormItem className="flex flex-row items-center space-x-3 space-y-0 rounded-lg border border-blue-100 bg-blue-50/50 p-4">
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                className="w-5 h-5 border-blue-600 data-[state=checked]:bg-blue-600 data-[state=checked]:text-white"
+                              />
+                            </FormControl>
+                            <div className="space-y-1">
+                              <FormLabel className="text-sm font-semibold text-gray-900 cursor-pointer">
+                                Cash on Delivery (COD)
+                              </FormLabel>
+                              <p className="text-xs text-gray-600">
+                                Allow customers to pay cash on delivery for this product (Uncheck to require online/bank transfer payment)
+                              </p>
+                            </div>
+                          </FormItem>
+                        )}
+                      />
                     </div>
                   </div>
 
@@ -1234,9 +1260,16 @@ function ProductsSection({
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={product.isActive ? "default" : "secondary"} className={`text-xs ${product.isActive ? "bg-teal-600 hover:bg-teal-700" : ""}`}>
-                          {product.isActive ? "Active" : "Inactive"}
-                        </Badge>
+                        <div className="flex flex-wrap gap-1 items-center">
+                          <Badge variant={product.isActive ? "default" : "secondary"} className={`text-xs ${product.isActive ? "bg-teal-600 hover:bg-teal-700" : ""}`}>
+                            {product.isActive ? "Active" : "Inactive"}
+                          </Badge>
+                          {product.isCodAvailable === false && (
+                            <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-800 border-amber-300 font-medium">
+                              No COD
+                            </Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right pr-4">
                         <div className="flex items-center justify-end gap-1">
@@ -1431,6 +1464,7 @@ function AdminDashboard() {
       stock: 0,
       isFeatured: false,
       isActive: true,
+      isCodAvailable: true,
       // Delivery fee defaults
       category: "",
       weightInKg: 0,
@@ -1579,6 +1613,7 @@ function AdminDashboard() {
       stock: product.stock || 0,
       isFeatured: product.isFeatured || false,
       isActive: product.isActive !== false,
+      isCodAvailable: product.isCodAvailable !== false,
       // Delivery fee fields with fallbacks for existing products
       category: product.category || "",
       categoryId: product.categoryId || "",

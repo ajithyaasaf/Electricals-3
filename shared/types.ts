@@ -58,6 +58,7 @@ export const ProductSchema = z.object({
   specifications: z.record(z.any()).optional(),
   weightInKg: z.number().default(0),
   isBulky: z.boolean().default(false),
+  isCodAvailable: z.boolean().default(true),
   isFeatured: z.boolean().default(false),
   isActive: z.boolean().default(true),
   rating: z.number().default(0),

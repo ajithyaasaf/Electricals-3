@@ -135,9 +135,26 @@ export default function Checkout() {
   const [currentOrderId, setCurrentOrderId] = useState<string | null>(null);
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
 
-  // Get cart items from context
+  // Get cart items from context and evaluate per-product COD rules
   const cartItems = cart?.items || [];
   const cartLoading = false;
+
+  const nonCodCartItems = cartItems.filter((item: any) => {
+    return item.product ? item.product.isCodAvailable === false : false;
+  });
+  const hasNonCodItems = nonCodCartItems.length > 0;
+
+  // Auto-switch payment method away from COD if non-COD items exist in cart
+  useEffect(() => {
+    if (hasNonCodItems && formData.paymentMethod === "cod") {
+      setFormData(prev => ({ ...prev, paymentMethod: "bank_transfer" }));
+      setCurrentStep(2); // Redirect user to Payment Step 2 so they can review their payment options
+      toast({
+        title: "Payment Method Updated",
+        description: "Cash on Delivery is unavailable because your cart contains items requiring online payment or bank transfer.",
+      });
+    }
+  }, [hasNonCodItems, formData.paymentMethod, currentStep, toast]);
 
   const { data: addresses = [] } = useQuery<Address[]>({
     queryKey: ["/api/addresses"],
@@ -467,6 +484,14 @@ export default function Checkout() {
         });
         return;
       }
+      if (formData.paymentMethod === "cod" && hasNonCodItems) {
+        toast({
+          title: "COD Unavailable",
+          description: "Cash on Delivery is not available for one or more items in your cart. Please select another payment method.",
+          variant: "destructive",
+        });
+        return;
+      }
       setCurrentStep(3);
     }
   };
@@ -474,6 +499,15 @@ export default function Checkout() {
   const handlePlaceOrder = () => {
     if (!isAuthenticated) {
       setShowLoginModal(true);
+      return;
+    }
+
+    if (formData.paymentMethod === "cod" && hasNonCodItems) {
+      toast({
+        title: "COD Unavailable",
+        description: "Cash on Delivery is not available for one or more items in your cart.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -557,7 +591,7 @@ export default function Checkout() {
                 </div>
 
                 <div className="flex justify-center gap-4 pt-4">
-                  <Link href="/account/orders">
+                  <Link href="/account?tab=orders">
                     <Button variant="outline">Do this later</Button>
                   </Link>
                 </div>
@@ -632,7 +666,20 @@ export default function Checkout() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main checkout form */}
           <div className="lg:col-span-2">
-            <Tabs value={currentStep.toString()} className="w-full">
+            <Tabs 
+              value={currentStep.toString()} 
+              onValueChange={(val) => {
+                const step = parseInt(val, 10);
+                if (step === 1) {
+                  setCurrentStep(1);
+                } else if (step === 2 && validateShippingForm()) {
+                  setCurrentStep(2);
+                } else if (step === 3 && validateShippingForm() && formData.paymentMethod && !(hasNonCodItems && formData.paymentMethod === "cod")) {
+                  setCurrentStep(3);
+                }
+              }}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="1" disabled={currentStep < 1}>
                   <Truck className="w-4 h-4 mr-2" />
@@ -958,22 +1005,50 @@ export default function Checkout() {
                           )}
                         </div>
 
-                        <div className="flex items-center space-x-2 mt-4">
-                          <input
-                            type="radio"
-                            id="cod"
-                            name="paymentMethod"
-                            value="cod"
-                            checked={formData.paymentMethod === "cod"}
-                            onChange={(e) => updateRootField("paymentMethod", e.target.value)}
-                          />
-                          <label htmlFor="cod" className="text-sm font-medium">
-                            Cash on Delivery (COD)
-                          </label>
+                        <div className={`mt-4 border rounded-lg p-4 transition-colors ${hasNonCodItems ? "bg-gray-50/80 border-gray-200 opacity-75" : "border-gray-200"}`}>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id="cod"
+                              name="paymentMethod"
+                              value="cod"
+                              disabled={hasNonCodItems}
+                              checked={formData.paymentMethod === "cod"}
+                              onChange={(e) => updateRootField("paymentMethod", e.target.value)}
+                              className="disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                            />
+                            <label 
+                              htmlFor="cod" 
+                              className={`text-sm font-medium flex items-center gap-2 w-full ${hasNonCodItems ? "text-gray-400 cursor-not-allowed" : "text-gray-900 cursor-pointer"}`}
+                            >
+                              <span className="text-lg">💵</span>
+                              <span>Cash on Delivery (COD)</span>
+                              {hasNonCodItems && (
+                                <span className="ml-auto text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-normal">
+                                  Unavailable
+                                </span>
+                              )}
+                            </label>
+                          </div>
+
+                          {hasNonCodItems ? (
+                            <div className="mt-3 bg-amber-50 border border-amber-200 p-3 rounded-lg text-xs text-amber-900 space-y-1 animate-in fade-in">
+                              <div className="flex items-center gap-1.5 font-semibold text-amber-900">
+                                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                                <span>COD is disabled because your cart contains items requiring prepaid payment:</span>
+                              </div>
+                              <ul className="list-disc list-inside pl-5 space-y-0.5 text-amber-800 font-medium">
+                                {nonCodCartItems.map((item: any) => (
+                                  <li key={item.id}>{item.product?.name || "Product"}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 ml-6">
+                              Pay cash when your order is delivered.
+                            </p>
+                          )}
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                          Pay cash when your order is delivered.
-                        </p>
                       </div>
                     </div>
 
@@ -1023,10 +1098,12 @@ export default function Checkout() {
 
                     <div>
                       <h3 className="font-medium mb-2">Payment Method</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-300">
-                        {formData.paymentMethod === "razorpay"
-                          ? "Razorpay (UPI, Cards, NetBanking, Wallets)"
-                          : "Cash on Delivery (COD)"}
+                      <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">
+                        {formData.paymentMethod === "bank_transfer"
+                          ? "Manual Bank Transfer / UPI"
+                          : formData.paymentMethod === "razorpay"
+                            ? "Razorpay (UPI, Cards, NetBanking, Wallets)"
+                            : "Cash on Delivery (COD)"}
                       </p>
                     </div>
 
@@ -1090,8 +1167,13 @@ export default function Checkout() {
                             {formatPrice(parseFloat(item.product?.price || "0") * item.quantity)}
                           </p>
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5">
-                          Qty: {item.quantity}
+                        <p className="text-xs text-gray-500 mt-0.5 flex items-center justify-between">
+                          <span>Qty: {item.quantity}</span>
+                          {item.product?.isCodAvailable === false && (
+                            <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-medium">
+                              No COD
+                            </span>
+                          )}
                         </p>
                       </div>
                     </div>

@@ -38,6 +38,7 @@ import {
   Eye,
   Share2,
   ChevronDown,
+  Banknote,
 } from "lucide-react";
 import { Link } from "wouter";
 import { ReviewList } from "@/components/reviews/review-list";
@@ -563,6 +564,12 @@ export default function ProductDetail() {
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Shield className="w-4 h-4 text-copper-600" />
                     <span>Secure Checkout</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Banknote className={`w-4 h-4 ${product.isCodAvailable !== false ? "text-emerald-600" : "text-amber-600"}`} />
+                    <span className={product.isCodAvailable !== false ? "text-gray-700" : "text-amber-800 font-medium"}>
+                      {product.isCodAvailable !== false ? "Cash on Delivery Available" : "Online / Bank Transfer Only"}
+                    </span>
                   </div>
                 </div>
               </div>

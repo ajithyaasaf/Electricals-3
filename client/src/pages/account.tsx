@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSearch, Link } from "wouter";
+import { useSearch, useLocation, Link } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { Button } from "@/components/ui/button";
@@ -58,11 +58,12 @@ export default function Account() {
   const { isAuthenticated, loading: authLoading, user } = useFirebaseAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [location] = useLocation();
   const searchParams = useSearch();
 
-  // Get active tab from URL
+  // Get active tab from URL (supports ?tab=orders or /account/orders)
   const urlParams = new URLSearchParams(searchParams);
-  const defaultTab = urlParams.get("tab") || "profile";
+  const defaultTab = urlParams.get("tab") || (location.startsWith("/account/orders") ? "orders" : "profile");
   const [activeTab, setActiveTab] = useState(defaultTab);
 
   // Profile editing state
