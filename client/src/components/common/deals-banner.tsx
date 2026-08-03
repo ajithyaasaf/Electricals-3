@@ -266,7 +266,7 @@ export function DealsBanner({ products, isPersonalized = false, personalizedCate
         {/* View All Deals Link */}
         <div className="text-center mt-6">
           <Link
-            href="/deals"
+            href="/products?featured=true"
             className="inline-flex items-center gap-2 text-gray-600 hover:text-copper-600 font-medium transition-colors border-b border-transparent hover:border-copper-600 pb-0.5"
           >
             <Zap className="w-4 h-4" />
