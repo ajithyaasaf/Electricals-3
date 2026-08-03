@@ -32,6 +32,11 @@ export default function Cart() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("cart");
 
+  // Smooth scroll to top when changing cart tabs
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeTab]);
+
   const {
     cart,
     isLoading,

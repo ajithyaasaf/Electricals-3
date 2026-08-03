@@ -66,6 +66,11 @@ export default function Account() {
   const defaultTab = urlParams.get("tab") || (location.startsWith("/account/orders") ? "orders" : "profile");
   const [activeTab, setActiveTab] = useState(defaultTab);
 
+  // Smooth scroll to top when changing account tabs
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [activeTab]);
+
   // Profile editing state
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({

@@ -98,6 +98,11 @@ export default function Checkout() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
+  // Smooth scroll to top when changing checkout steps
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentStep]);
+
   // Load initial form values from localStorage if they exist
   useEffect(() => {
     const savedForm = localStorage.getItem("checkoutFormData");
