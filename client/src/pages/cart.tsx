@@ -247,7 +247,7 @@ export default function Cart() {
 
           {/* Cart Summary Sidebar */}
           <div className="lg:col-span-1">
-            <div className="sticky top-4">
+            <div className="lg:sticky lg:top-24 h-fit space-y-6">
               <CartSummary
                 totals={
                   cart?.totals || {
