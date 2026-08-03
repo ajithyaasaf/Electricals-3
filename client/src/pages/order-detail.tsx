@@ -50,6 +50,7 @@ import {
     Phone,
     Mail,
     Copy,
+    MessageCircle,
 } from "lucide-react";
 import { BANK_DETAILS } from "@/lib/constants";
 import { BankTransferProofForm } from "@/components/payment/bank-transfer-proof-form";
@@ -622,9 +623,16 @@ export default function OrderDetail() {
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-4">
-                    <Link href="/support">
-                        <Button variant="outline">Need Help?</Button>
-                    </Link>
+                    <a
+                        href={`https://wa.me/918098727452?text=${encodeURIComponent(`Hi! I need help regarding my Order #${order.orderNumber || order.id}`)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                    >
+                        <Button variant="outline" className="flex items-center gap-2 border-emerald-300 text-emerald-800 hover:bg-emerald-50 font-medium">
+                            <MessageCircle className="w-4 h-4 text-emerald-600" />
+                            Need Help?
+                        </Button>
+                    </a>
                     {canCancel && (
                         <Button
                             variant="outline"
