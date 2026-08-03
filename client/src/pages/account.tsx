@@ -94,16 +94,47 @@ export default function Account() {
     }
   }, [isAuthenticated, authLoading, toast]);
 
-  // Initialize profile data
+  // Fetch user orders
+  const { data: ordersData, isLoading: ordersLoading } = useQuery({
+    queryKey: ["/api/orders"],
+    enabled: isAuthenticated,
+  });
+
+  // Extract orders array from paginated response or fallback to empty array
+  const orders = (ordersData as any)?.orders || [];
+
+  // Initialize profile data with smart fallback from orders
   useEffect(() => {
     if (user) {
+      let fName = (user as any).firstName || "";
+      let lName = (user as any).lastName || "";
+
+      if (!fName && user.displayName && user.displayName !== 'User') {
+        const parts = user.displayName.trim().split(' ');
+        fName = parts[0] || "";
+        lName = parts.slice(1).join(' ') || "";
+      }
+
+      // If still empty and user has past orders, auto-fill from last order's shipping address
+      if (!fName && orders && orders.length > 0) {
+        const lastOrder = orders[0];
+        if (lastOrder.shippingAddress?.firstName) {
+          fName = lastOrder.shippingAddress.firstName;
+          lName = lastOrder.shippingAddress.lastName || "";
+        } else if (lastOrder.customerName && lastOrder.customerName !== 'User') {
+          const parts = lastOrder.customerName.trim().split(' ');
+          fName = parts[0] || "";
+          lName = parts.slice(1).join(' ') || "";
+        }
+      }
+
       setProfileData({
-        firstName: user.displayName?.split(' ')[0] || "",
-        lastName: user.displayName?.split(' ')[1] || "",
+        firstName: fName,
+        lastName: lName,
         email: user.email || "",
       });
     }
-  }, [user]);
+  }, [user, orders]);
 
   const handleSignOut = async () => {
     try {
@@ -120,15 +151,6 @@ export default function Account() {
       });
     }
   };
-
-  // Fetch user orders
-  const { data: ordersData, isLoading: ordersLoading } = useQuery({
-    queryKey: ["/api/orders"],
-    enabled: isAuthenticated,
-  });
-
-  // Extract orders array from paginated response or fallback to empty array
-  const orders = (ordersData as any)?.orders || [];
 
   // Fetch service bookings
   const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
@@ -383,12 +405,11 @@ export default function Account() {
           </p>
         </div>
 
-        {/* Account Total Savings Card */}
+        {/* Single Total Savings Card */}
         {(() => {
           const totalSavingsInPaise = (orders as any[]).reduce((sum: number, order: any) => {
             let orderSavings = order.savings || order.discount || order.couponDiscount || 0;
 
-            // Calculate item-level savings from product discounts
             if (order.items && Array.isArray(order.items)) {
               const itemSavings = order.items.reduce((iSum: number, item: any) => {
                 const mrp = item.mrp || item.originalPrice || 0;
