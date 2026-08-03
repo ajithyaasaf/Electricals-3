@@ -385,25 +385,28 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                                         <FileText className="w-4 h-4" />
                                                         View Screenshot
                                                     </a>
-                                                ) : (
+                                                ) : details.order.paymentStatus === 'verification_pending' || details.order.paymentStatus === 'paid' ? (
                                                     <p className="text-xs text-emerald-800 bg-emerald-50 p-2 rounded border border-emerald-200 font-medium">
                                                         ✓ 1-Click Customer Payment Confirmation
+                                                    </p>
+                                                ) : (
+                                                    <p className="text-xs text-amber-800 bg-amber-50 p-2 rounded border border-amber-200 font-medium">
+                                                        ⏳ Awaiting Customer Payment Confirmation
                                                     </p>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {/* Action Buttons for Verification */}
-                                        {details.order.paymentStatus === 'verification_pending' && (
+                                        {/* Action Buttons for Verification / Manual Admin Approval */}
+                                        {(details.order.paymentStatus === 'verification_pending' || details.order.paymentStatus === 'awaiting_payment' || details.order.paymentStatus === 'pending') && details.order.paymentStatus !== 'paid' && (
                                             <div className="mt-4 flex gap-3">
                                                 <Button
-                                                    className="w-full bg-green-600 hover:bg-green-700 text-white"
+                                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-medium"
                                                     onClick={() => approvePaymentMutation.mutate()}
                                                     disabled={approvePaymentMutation.isPending}
                                                 >
-                                                    {approvePaymentMutation.isPending ? "Approving..." : "Approve Payment & Order"}
+                                                    {approvePaymentMutation.isPending ? "Approving..." : "Approve Payment & Confirm Order"}
                                                 </Button>
-                                                {/* Reject handled via normal status update to Cancelled */}
                                             </div>
                                         )}
                                     </div>
