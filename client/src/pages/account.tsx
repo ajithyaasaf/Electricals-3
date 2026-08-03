@@ -172,6 +172,7 @@ export default function Account() {
     label: "Home",
     firstName: "",
     lastName: "",
+    email: "",
     street: "",
     city: "",
     state: "",
@@ -262,6 +263,7 @@ export default function Account() {
       label: address.label || "Home",
       firstName: address.firstName,
       lastName: address.lastName || "",
+      email: address.email || "",
       street: address.street,
       city: address.city,
       state: address.state,
@@ -656,6 +658,15 @@ export default function Account() {
                         </div>
                       </div>
                       <div className="space-y-2">
+                        <Label>Email</Label>
+                        <Input
+                          type="email"
+                          placeholder="john@example.com"
+                          value={addressForm.email}
+                          onChange={(e) => setAddressForm({ ...addressForm, email: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
                         <Label>Street Address</Label>
                         <Input
                           placeholder="123 Main St"
@@ -747,6 +758,7 @@ export default function Account() {
                         </div>
                         <div className="text-sm text-gray-600 space-y-1">
                           <p>{address.firstName} {address.lastName}</p>
+                          {address.email && <p className="flex items-center"><Mail className="w-3 h-3 mr-1" /> {address.email}</p>}
                           <p>{address.street}</p>
                           <p>{address.city}, {address.state} {address.zipCode}</p>
                           <p>{address.country}</p>

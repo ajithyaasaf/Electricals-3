@@ -64,7 +64,7 @@ interface CheckoutFormData {
 }
 
 export default function Checkout() {
-  const { isAuthenticated, loading: authLoading } = useFirebaseAuth();
+  const { isAuthenticated, loading: authLoading, user } = useFirebaseAuth();
   const { cart } = useCartContext();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -178,6 +178,7 @@ export default function Checkout() {
           ...prev.shippingAddress,
           firstName: selected.firstName,
           lastName: selected.lastName || "",
+          email: selected.email || prev.shippingAddress.email || user?.email || "",
           phone: selected.phone || "",
           street: selected.street,
           city: selected.city,
@@ -211,6 +212,7 @@ export default function Checkout() {
             label: "Home", // Default label
             firstName: formData.shippingAddress.firstName,
             lastName: formData.shippingAddress.lastName,
+            email: formData.shippingAddress.email,
             street: formData.shippingAddress.street,
             city: formData.shippingAddress.city,
             state: formData.shippingAddress.state,
@@ -724,7 +726,10 @@ export default function Checkout() {
                                 <p className="text-sm text-gray-600">
                                   {formData.shippingAddress.city}, {formData.shippingAddress.state} {formData.shippingAddress.zipCode}
                                 </p>
-                                <p className="text-sm text-gray-600 mt-1">Phone: {formData.shippingAddress.phone}</p>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  {formData.shippingAddress.email && <span>Email: {formData.shippingAddress.email} • </span>}
+                                  Phone: {formData.shippingAddress.phone}
+                                </p>
                               </div>
                               <Button
                                 variant="ghost"

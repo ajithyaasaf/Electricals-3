@@ -133,6 +133,7 @@ export type OrderStatus = typeof ORDER_STATUSES[number];
 export const ShippingAddressSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().optional(),
+  email: z.string().optional(),
   street: z.string().min(1, "Street address is required"),
   city: z.string().min(1, "City is required"),
   state: z.string().min(1, "State is required"),
