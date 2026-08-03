@@ -89,12 +89,12 @@ export const COMPANY_INFO = {
 };
 
 export const BANK_DETAILS = {
-  accountName: "Tamilnadu electric solutions",
+  accountName: "Savitha Jain",
   accountNumber: "438300081011334D",
   bankName: "Punjab National Bank",
   branch: "West Masi street, Madurai",
   ifscCode: "PUNB0438300",
-  upiId: "mijain009-4@okicici",
+  upiId: "savithamukesh687-1@oksbi",
 };
 
 export const MAX_PRODUCT_PRICE = 10000;

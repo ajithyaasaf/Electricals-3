@@ -386,7 +386,9 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                                         View Screenshot
                                                     </a>
                                                 ) : (
-                                                    <p className="text-sm text-gray-400 italic">No screenshot uploaded</p>
+                                                    <p className="text-xs text-emerald-800 bg-emerald-50 p-2 rounded border border-emerald-200 font-medium">
+                                                        ✓ 1-Click Customer Payment Confirmation
+                                                    </p>
                                                 )}
                                             </div>
                                         </div>

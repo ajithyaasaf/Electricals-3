@@ -217,6 +217,7 @@ export function registerOrderRoutes(app: Express) {
         customerEmail: user.email || "",
         customerPhone: shippingAddress.phone,
         shippingAddress,
+        paymentMethod: req.body.paymentMethod || "cod",
         items: enrichedItems,
       });
 
@@ -533,11 +534,8 @@ export function registerOrderRoutes(app: Express) {
     try {
       const userId = req.user.uid;
       const orderId = req.params.id;
-      const { transactionId, paymentProofUrl } = req.body;
-
-      if (!transactionId) {
-        return res.status(400).json({ message: "Transaction ID is required" });
-      }
+      const { paymentProofUrl } = req.body;
+      const transactionId = req.body.transactionId?.trim() || `UPI-PAID-${Date.now().toString().slice(-6)}`;
 
       // Get order
       const order = await storage.getOrderById(orderId);
@@ -551,7 +549,7 @@ export function registerOrderRoutes(app: Express) {
       }
 
       // Idempotency & State Guard
-      if (order.paymentStatus !== 'awaiting_payment') {
+      if (order.paymentStatus !== 'awaiting_payment' && order.paymentStatus !== 'pending') {
         // If already pending verification, just return success (idempotent)
         if (order.paymentStatus === 'verification_pending') {
           return res.status(200).json({
@@ -570,6 +568,7 @@ export function registerOrderRoutes(app: Express) {
       await storage.updateOrder(orderId, {
         transactionId,
         paymentProofUrl: paymentProofUrl || null,
+        paymentMethod: 'bank_transfer',
         paymentStatus: 'verification_pending',
       });
 

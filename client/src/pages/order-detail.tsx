@@ -53,6 +53,7 @@ import {
 } from "lucide-react";
 import { BANK_DETAILS } from "@/lib/constants";
 import { BankTransferProofForm } from "@/components/payment/bank-transfer-proof-form";
+import { UpiPaymentCard } from "@/components/checkout/upi-payment-card";
 
 // ═══════════════════════════════════════════════════════════════════════════
 // TYPES
@@ -391,35 +392,7 @@ export default function OrderDetail() {
                                     </div>
                                 ) : (
                                     <div className="space-y-6">
-                                        <p className="text-sm text-blue-800">
-                                            Please transfer <strong>{formatPrice(normalizeOrderFinancials(order).total)}</strong> to the account below and upload the proof.
-                                        </p>
-
-                                        {/* Bank Details Card */}
-                                        <div className="bg-white p-4 rounded border border-blue-100">
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                                                <div>
-                                                    <p className="text-gray-500 text-xs uppercase">Bank Name</p>
-                                                    <p className="font-medium">{BANK_DETAILS.bankName}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-gray-500 text-xs uppercase">Account Name</p>
-                                                    <p className="font-medium">{BANK_DETAILS.accountName}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-gray-500 text-xs uppercase">Account Number</p>
-                                                    <p className="font-mono font-medium tracking-wide">{BANK_DETAILS.accountNumber}</p>
-                                                </div>
-                                                <div>
-                                                    <p className="text-gray-500 text-xs uppercase">IFSC Code</p>
-                                                    <p className="font-mono font-medium">{BANK_DETAILS.ifscCode}</p>
-                                                </div>
-                                                <div className="col-span-1 md:col-span-2">
-                                                    <p className="text-gray-500 text-xs uppercase">UPI ID</p>
-                                                    <p className="font-medium">{BANK_DETAILS.upiId}</p>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <UpiPaymentCard amount={normalizeOrderFinancials(order).total} orderId={order.id} />
 
                                         <BankTransferProofForm
                                             orderId={order.id}
@@ -578,8 +551,12 @@ export default function OrderDetail() {
                                         </div>
                                         <div className="flex justify-between pt-2">
                                             <span className="text-gray-600">Payment Method</span>
-                                            <Badge variant="outline" className="uppercase">
-                                                {order.paymentMethod}
+                                            <Badge variant="outline" className="font-medium bg-gray-50 text-gray-800">
+                                                {order.paymentMethod === 'bank_transfer'
+                                                    ? 'UPI / Bank Transfer'
+                                                    : order.paymentMethod === 'razorpay'
+                                                        ? 'Online (Razorpay)'
+                                                        : 'Cash On Delivery (COD)'}
                                             </Badge>
                                         </div>
                                     </div>

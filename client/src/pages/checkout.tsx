@@ -24,6 +24,7 @@ import { Address } from "@shared/types";
 import { checkServiceability, getServiceabilityMessage } from "@shared/delivery-zones";
 import { BANK_DETAILS } from "@/lib/constants";
 import { BankTransferProofForm } from "@/components/payment/bank-transfer-proof-form";
+import { UpiPaymentCard } from "@/components/checkout/upi-payment-card";
 import {
   Select,
   SelectContent,
@@ -230,14 +231,15 @@ export default function Checkout() {
       const response = await apiRequest("POST", "/api/orders", orderData);
       return response.json();
     },
-    onSuccess: (order) => {
+    onSuccess: (data: any) => {
+      const order = data?.order || data;
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
       localStorage.removeItem("checkoutStep");
       localStorage.removeItem("checkoutFormData");
       toast({
         title: "Order placed successfully!",
-        description: `Your order #${order.orderNumber} has been confirmed.`,
+        description: `Your order #${order.orderNumber || order.id} has been confirmed.`,
       });
       setCurrentOrderId(order.id);
       setOrderComplete(true);
@@ -537,45 +539,17 @@ export default function Checkout() {
                   <p className="text-gray-600 mt-2">Order ID: {currentOrderId}</p>
                 </div>
 
-                <div className="text-left bg-blue-50 p-6 rounded-lg border border-blue-200">
-                  <p className="text-sm text-blue-800 mb-4">
-                    Please transfer <strong>{formatPrice(total)}</strong> to the bank account below and submit the transaction details.
-                  </p>
+                <div className="text-left max-w-2xl mx-auto w-full">
+                  <UpiPaymentCard amount={total} orderId={currentOrderId || undefined} />
 
-                  {/* Bank Details Card */}
-                  <div className="bg-white p-4 rounded border border-blue-100 mb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-500 text-xs uppercase">Bank Name</p>
-                        <p className="font-medium">{BANK_DETAILS.bankName}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500 text-xs uppercase">Account Name</p>
-                        <p className="font-medium">{BANK_DETAILS.accountName}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500 text-xs uppercase">Account Number</p>
-                        <p className="font-mono font-medium tracking-wide">{BANK_DETAILS.accountNumber}</p>
-                      </div>
-                      <div>
-                        <p className="text-gray-500 text-xs uppercase">IFSC Code</p>
-                        <p className="font-mono font-medium">{BANK_DETAILS.ifscCode}</p>
-                      </div>
-                      <div className="col-span-1 md:col-span-2">
-                        <p className="text-gray-500 text-xs uppercase">UPI ID</p>
-                        <p className="font-medium">{BANK_DETAILS.upiId}</p>
-                      </div>
-                    </div>
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <BankTransferProofForm
+                      orderId={currentOrderId!}
+                      onSuccess={() => {
+                        setLocation(`/account/orders/${currentOrderId}`);
+                      }}
+                    />
                   </div>
-
-                  <Separator className="my-4 bg-blue-200" />
-
-                  <BankTransferProofForm
-                    orderId={currentOrderId!}
-                    onSuccess={() => {
-                      setLocation(`/account/orders/${currentOrderId}`);
-                    }}
-                  />
                 </div>
 
                 <div className="flex justify-center gap-4 pt-4">
