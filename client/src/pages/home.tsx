@@ -159,10 +159,10 @@ export default function Home() {
       <RecentlyViewed />
 
       {/* Deals Banner - Smart Personalized / Curated Default */}
-      <DealsBanner 
-        products={activeDeals} 
-        isPersonalized={isPersonalized} 
-        personalizedCategory={topCategory} 
+      <DealsBanner
+        products={activeDeals}
+        isPersonalized={isPersonalized}
+        personalizedCategory={topCategory}
       />
 
       {/* Visual Category Cards - Amazon Style */}
@@ -270,9 +270,6 @@ export default function Home() {
         realtimePath="siteContent/whyChooseSection"
         className="bg-gray-50"
       />
-
-
-
       <Footer />
     </div>
   );
