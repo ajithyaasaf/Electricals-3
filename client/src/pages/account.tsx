@@ -47,7 +47,8 @@ import {
   TrendingUp,
   Plus,
   Trash2,
-  Pencil
+  Pencil,
+  Sparkles
 } from "lucide-react";
 import { ORDER_STATUSES, BOOKING_STATUSES } from "@/lib/constants";
 import type { OrderWithItems, BookingWithService } from "@/lib/types";
@@ -382,38 +383,49 @@ export default function Account() {
           </p>
         </div>
 
-        {/* Account Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold text-gray-900">{(orders as any[]).length}</p>
-                <p className="text-sm text-gray-600">Total Orders</p>
-              </div>
-              <div className="w-12 h-12 bg-copper-100 rounded-lg flex items-center justify-center">
-                <Package className="w-6 h-6 text-copper-600" />
-              </div>
+        {/* Account Total Savings Card */}
+        {(() => {
+          const totalSavingsInPaise = (orders as any[]).reduce((sum: number, order: any) => {
+            let orderSavings = order.savings || order.discount || order.couponDiscount || 0;
+
+            // Calculate item-level savings from product discounts
+            if (order.items && Array.isArray(order.items)) {
+              const itemSavings = order.items.reduce((iSum: number, item: any) => {
+                const mrp = item.mrp || item.originalPrice || 0;
+                const price = item.price || item.unitPrice || 0;
+                return mrp > price ? iSum + ((mrp - price) * (item.quantity || 1)) : iSum;
+              }, 0);
+              orderSavings = Math.max(orderSavings, itemSavings);
+            }
+
+            return sum + orderSavings;
+          }, 0);
+
+          return (
+            <div className="mb-8">
+              <Card className="p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50/60 border-emerald-200/80 hover:shadow-md transition-all">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                        Total Savings
+                      </span>
+                    </div>
+                    <p className="text-3xl font-extrabold text-emerald-950 pt-1">
+                      {formatPrice(totalSavingsInPaise)}
+                    </p>
+                    <p className="text-xs text-emerald-700 font-medium">
+                      Total money saved on discounts, coupons & exclusive deals across your orders
+                    </p>
+                  </div>
+                  <div className="w-14 h-14 bg-emerald-600/10 rounded-2xl border border-emerald-300/40 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <Sparkles className="w-7 h-7 text-emerald-600" />
+                  </div>
+                </div>
+              </Card>
             </div>
-          </Card>
-
-
-
-
-
-          <Card className="p-6 hover:shadow-lg transition-shadow">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatPrice((orders as any[]).reduce((sum: number, order: any) => sum + normalizeOrderFinancials(order).total, 0))}
-                </p>
-                <p className="text-sm text-gray-600">Total Spent</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </Card>
-        </div>
+          );
+        })()}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3">
