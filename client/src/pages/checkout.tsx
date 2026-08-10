@@ -963,11 +963,10 @@ export default function Checkout() {
                                 <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                                 <div className="space-y-1">
                                   <p className="text-xs text-amber-800 font-medium">
-                                    Important: Order confirmation depends on payment verification.
+                                    Important: Order processing begins once payment is verified.
                                   </p>
                                   <p className="text-xs text-amber-700">
-                                    Verification time may vary depending on bank processing and admin availability.
-                                    You will be asked to upload payment proof after placing the order.
+                                    After completing payment via UPI or Bank transfer, simply confirm on the next screen. Our team will verify and process your order promptly.
                                   </p>
                                 </div>
                               </div>

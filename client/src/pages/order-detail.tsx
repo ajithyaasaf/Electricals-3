@@ -387,7 +387,7 @@ export default function OrderDetail() {
                                     <div className="flex items-center gap-3 text-blue-800">
                                         <Clock className="w-5 h-5" />
                                         <p>
-                                            We have received your payment proof and are verifying the details.
+                                            We have received your payment confirmation and are verifying the details.
                                             This usually takes 1-2 hours. You will be notified once approved.
                                         </p>
                                     </div>
@@ -399,7 +399,7 @@ export default function OrderDetail() {
                                             orderId={order.id}
                                             onSuccess={() => {
                                                 queryClient.invalidateQueries({ queryKey: [`/api/orders/${order.id}`] });
-                                                toast({ title: "Payment Proof Submitted" });
+                                                toast({ title: "Payment Confirmation Submitted" });
                                             }}
                                         />
                                     </div>
