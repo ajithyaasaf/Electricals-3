@@ -556,12 +556,6 @@ export default function Checkout() {
                     />
                   </div>
                 </div>
-
-                <div className="flex justify-center gap-4 pt-4">
-                  <Link href="/account?tab=orders">
-                    <Button variant="outline">Do this later</Button>
-                  </Link>
-                </div>
               </div>
             ) : (
 
@@ -1021,18 +1015,7 @@ export default function Checkout() {
                       </div>
                     </div>
 
-                    <div>
-                      <div className="flex items-center space-x-2 mb-4">
-                        <Checkbox
-                          id="sameAsShipping"
-                          checked={formData.sameAsShipping}
-                          onCheckedChange={(checked) => updateRootField("sameAsShipping", checked)}
-                        />
-                        <Label htmlFor="sameAsShipping">Billing address same as shipping</Label>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between">
+                    <div className="flex justify-between pt-2">
                       <Button
                         variant="outline"
                         onClick={() => setCurrentStep(1)}
