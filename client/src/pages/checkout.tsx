@@ -95,12 +95,34 @@ export default function Checkout() {
     saveAddress: false,
   });
 
-  const [currentStep, setCurrentStep] = useState(1);
+  // Step persistence in sessionStorage (restores exact step on refresh)
+  const [currentStep, setCurrentStep] = useState<number>(() => {
+    try {
+      const savedStep = sessionStorage.getItem("checkoutCurrentStep");
+      if (savedStep) {
+        const stepNum = parseInt(savedStep, 10);
+        if (stepNum >= 1 && stepNum <= 3) return stepNum;
+      }
+    } catch (e) {
+      console.error("Failed to read checkout step from sessionStorage", e);
+    }
+    return 1;
+  });
+
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   // Smooth scroll to top when changing checkout steps
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentStep]);
+
+  // Persist current step to sessionStorage
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("checkoutCurrentStep", String(currentStep));
+    } catch (e) {
+      console.error("Failed to save checkout step to sessionStorage", e);
+    }
   }, [currentStep]);
 
   // Load initial form values from localStorage if they exist
@@ -119,6 +141,16 @@ export default function Checkout() {
   useEffect(() => {
     localStorage.setItem("checkoutFormData", JSON.stringify(formData));
   }, [formData]);
+
+  // Step validity guard: if user is on step > 1 but shipping address is missing required fields, revert to step 1
+  useEffect(() => {
+    if (currentStep > 1) {
+      const { firstName, phone, street, zipCode } = formData.shippingAddress;
+      if (!firstName?.trim() || !phone?.trim() || !street?.trim() || !zipCode?.trim()) {
+        setCurrentStep(1);
+      }
+    }
+  }, [currentStep, formData.shippingAddress]);
 
   const [orderComplete, setOrderComplete] = useState(false);
   const [pincodeServiceability, setPincodeServiceability] = useState<{
@@ -196,7 +228,29 @@ export default function Checkout() {
     }
   };
 
-  // Auto-select default address
+  // Check if the current form address already exists in user's saved addresses
+  const isAddressAlreadySaved = Boolean(
+    selectedAddressId ||
+    (formData.shippingAddress.street?.trim() && addresses.some(a =>
+      a.street?.trim().toLowerCase() === formData.shippingAddress.street?.trim().toLowerCase() &&
+      a.zipCode?.trim() === formData.shippingAddress.zipCode?.trim()
+    ))
+  );
+
+  // Auto-sync selected address ID if form data matches an existing saved address
+  useEffect(() => {
+    if (isAuthenticated && addresses.length > 0 && formData.shippingAddress.street) {
+      const matchingAddr = addresses.find(a =>
+        a.street?.trim().toLowerCase() === formData.shippingAddress.street?.trim().toLowerCase() &&
+        a.zipCode?.trim() === formData.shippingAddress.zipCode?.trim()
+      );
+      if (matchingAddr && selectedAddressId !== matchingAddr.id) {
+        setSelectedAddressId(matchingAddr.id);
+      }
+    }
+  }, [isAuthenticated, addresses, formData.shippingAddress.street, formData.shippingAddress.zipCode]);
+
+  // Auto-select default address on initial load
   useEffect(() => {
     if (isAuthenticated && addresses.length > 0 && !formData.shippingAddress.street) {
       const defaultAddr = addresses.find(a => a.isDefault) || addresses[0];
@@ -209,8 +263,8 @@ export default function Checkout() {
   // Create order mutation
   const createOrderMutation = useMutation({
     mutationFn: async (orderData: any) => {
-      // 1. If saveAddress is true, save the address first
-      if (formData.saveAddress && isAuthenticated) {
+      // 1. If saveAddress is true and address is new, save the address
+      if (formData.saveAddress && isAuthenticated && !isAddressAlreadySaved) {
         try {
           // Assuming 'addresses' is available from a useQuery hook for user addresses
           const userAddresses = (queryClient.getQueryData(["/api/addresses"]) as any[]) || [];
@@ -240,14 +294,18 @@ export default function Checkout() {
       const order = data?.order || data;
       queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
       queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
-      localStorage.removeItem("checkoutStep");
-      localStorage.removeItem("checkoutFormData");
+      try {
+        sessionStorage.removeItem("checkoutCurrentStep");
+        localStorage.removeItem("checkoutFormData");
+      } catch (e) {
+        console.error("Failed to clear checkout storage", e);
+      }
       toast({
         title: "Order placed successfully!",
-        description: `Your order #${order.orderNumber || order.id} has been confirmed.`,
+        description: `Your order #${order.orderNumber || order.id} has been created.`,
       });
-      setCurrentOrderId(order.id);
-      setOrderComplete(true);
+      // Best Practice: Direct navigation to the persistent order route
+      setLocation(`/account/orders/${order.id}`);
     },
     onError: (error: any) => {
       if (isUnauthorizedError(error)) {
@@ -874,7 +932,7 @@ export default function Checkout() {
                       </div>
                     </div>
 
-                    {isAuthenticated && !selectedAddressId && (
+                    {isAuthenticated && !isAddressAlreadySaved && (
                       <div className="flex items-center space-x-2 pt-2">
                         <Checkbox
                           id="saveAddress"
