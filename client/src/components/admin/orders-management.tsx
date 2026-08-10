@@ -915,8 +915,22 @@ export function OrdersManagement() {
                                                 currentStatus={order.status}
                                             />
                                         </TableCell>
-                                        <TableCell className="text-xs text-gray-500">
-                                            {new Date(order.createdAt).toLocaleDateString()}
+                                        <TableCell className="text-gray-600 text-xs whitespace-nowrap">
+                                            <div className="font-medium text-gray-900">
+                                                {new Date(order.createdAt).toLocaleDateString("en-IN", {
+                                                    day: "2-digit",
+                                                    month: "2-digit",
+                                                    year: "numeric"
+                                                })}
+                                            </div>
+                                            <div className="text-[11px] text-gray-500 flex items-center gap-1 mt-0.5">
+                                                <Clock className="w-3 h-3 text-gray-400 shrink-0" />
+                                                {new Date(order.createdAt).toLocaleTimeString("en-IN", {
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                    hour12: true
+                                                })}
+                                            </div>
                                         </TableCell>
                                         <TableCell className="text-right pr-4">
                                             <Button
