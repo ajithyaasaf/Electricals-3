@@ -157,7 +157,7 @@ export function checkServiceability(pincode: string): ServiceabilityResult {
                 isServiceable: true,
                 zone,
                 message: dynamic.deliveryText,
-                estimatedDelivery: dynamic.isExpress ? 'Within 2 Hours' : 'Within 1 Day',
+                estimatedDelivery: dynamic.isExpress ? 'Within 60 to 90 Minutes' : 'Within 1 Day',
             };
         }
     }
@@ -181,7 +181,7 @@ export interface DynamicDeliveryEstimate {
 
 /**
  * Calculates dynamic real-time delivery estimate based on IST clock and pincode
- * - Mon-Sat (8 AM - 5 PM IST): ⚡ Express 2-Hour Delivery
+ * - Mon-Sat (8 AM - 5 PM IST): ⚡ Delivery within 60 to 90 Minutes
  * - Evenings, Nights & Sundays: 📦 Within 1 Day Delivery
  */
 export function getDynamicDeliveryEstimate(pincode?: string): DynamicDeliveryEstimate {
@@ -202,7 +202,7 @@ export function getDynamicDeliveryEstimate(pincode?: string): DynamicDeliveryEst
     const hour = istDate.getHours(); // 0 - 23
 
     const startHour = 8;  // 8:00 AM IST
-    const endHour = 17;   // 5:00 PM IST (Cutoff for 2-hour delivery before 7 PM store closing)
+    const endHour = 17;   // 5:00 PM IST (Cutoff for express delivery before 7 PM store closing)
 
     const isSunday = (day === 0);
     const isWithinExpressHours = (hour >= startHour && hour < endHour);
@@ -210,8 +210,8 @@ export function getDynamicDeliveryEstimate(pincode?: string): DynamicDeliveryEst
     if (!isSunday && isWithinExpressHours) {
         return {
             isExpress: true,
-            deliveryText: '✓ Delivery available in Madurai (Within 2 Hours)',
-            badgeText: '⚡ Express 2-Hour Delivery in Madurai',
+            deliveryText: '✓ Delivery available in Madurai (Within 60 to 90 Minutes)',
+            badgeText: '⚡ Delivery within 60 to 90 Minutes in Madurai',
         };
     }
 

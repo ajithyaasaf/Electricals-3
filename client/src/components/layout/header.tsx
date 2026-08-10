@@ -144,7 +144,7 @@ export function Header() {
       {/* Top announcement bar - Madurai Launch Phase */}
       <div className="bg-copper-700 text-white text-center py-2 text-sm px-2">
         <span className="text-xs sm:text-sm truncate block">
-          🚀 Madurai Launch! | ⚡ Express 2-Hour Delivery | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+
+          🚀 Madurai Launch! | ⚡ Delivery within 60 to 90 Minutes | Free Shipping {formatPrice(SHIPPING_THRESHOLDS.FREE_STANDARD)}+
         </span>
       </div>
 
