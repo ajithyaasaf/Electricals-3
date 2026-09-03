@@ -439,21 +439,36 @@ export class AdminCartQueries {
         return adminCartService.findByField('userId', userId);
     }
 
-    static async addToCart(userId: string, productId?: string, serviceId?: string, quantity = 1): Promise<string> {
+    static async addToCart(
+        userId: string,
+        productId?: string,
+        serviceId?: string,
+        quantity = 1,
+        customizations?: Record<string, any>
+    ): Promise<string> {
         const existingItems = await this.getUserCart(userId);
-        const existingItem = existingItems.find(item =>
-            item.productId === productId && item.serviceId === serviceId
-        );
+        const existingItem = existingItems.find(item => {
+            if (item.productId !== productId || item.serviceId !== serviceId) return false;
+            const itemColor = (item.customizations as any)?.color || '';
+            const newColor = customizations?.color || '';
+            const itemFormat = (item.customizations as any)?.format || '';
+            const newFormat = customizations?.format || '';
+            return itemColor === newColor && itemFormat === newFormat;
+        });
 
         if (existingItem) {
             await adminCartService.update(existingItem.id, {
-                quantity: existingItem.quantity + quantity
+                quantity: existingItem.quantity + quantity,
+                ...(customizations && Object.keys(customizations).length > 0 ? { customizations } : {})
             });
             return existingItem.id;
         } else {
             const cartItemData: any = { userId, quantity };
             if (productId) cartItemData.productId = productId;
             if (serviceId) cartItemData.serviceId = serviceId;
+            if (customizations && Object.keys(customizations).length > 0) {
+                cartItemData.customizations = customizations;
+            }
             return adminCartService.create(cartItemData);
         }
     }
@@ -614,6 +629,7 @@ export interface OrderItemInput {
     productImageUrl?: string;
     unitPrice: number;
     quantity: number;
+    customizations?: Record<string, any>;
 }
 
 export interface CreateOrderInput {
@@ -662,6 +678,7 @@ export async function createOrderWithTransaction(
             currentStock: number;
             requestedQuantity: number;
             productData: any; // Full product data for shipping calculation
+            isCutMeter?: boolean;
         }> = [];
 
         for (const item of items) {
@@ -675,8 +692,15 @@ export async function createOrderWithTransaction(
 
             const productData = productSnap.data()!;
             const currentStock = productData.stock ?? 0;
+            const isCutMeter = item.customizations?.format === 'meter' || item.customizations?.isCutWire || item.productName.includes('(Cut:');
 
-            if (currentStock < item.quantity) {
+            if (isCutMeter) {
+                if (currentStock < 1) {
+                    throw new Error(
+                        `Insufficient stock for "${item.productName}": at least 1 coil is needed in inventory to cut from.`
+                    );
+                }
+            } else if (currentStock < item.quantity) {
                 throw new Error(
                     `Insufficient stock for "${item.productName}": ` +
                     `requested ${item.quantity}, available ${currentStock}.`
@@ -689,6 +713,7 @@ export async function createOrderWithTransaction(
                 currentStock,
                 requestedQuantity: item.quantity,
                 productData, // Store for shipping calculation
+                isCutMeter: !!isCutMeter,
             });
             }
         }
@@ -706,11 +731,11 @@ export async function createOrderWithTransaction(
         }));
         const shippingCost = calculateShippingFee(preparedItems, subtotal);
 
-        // Step 4: Calculate tax (18% GST in Paise)
-        const tax = Math.round(subtotal * 0.18);
+        // Step 4: Calculate tax (18% GST in Paise, rounded to nearest Rupee as per Section 170 CGST Act)
+        const tax = Math.round((subtotal * 0.18) / 100) * 100;
 
-        // Step 5: Calculate total (all values in Paise)
-        const total = subtotal + tax + shippingCost;
+        // Step 5: Calculate total (all values in Paise, rounded to nearest Rupee)
+        const total = Math.round((subtotal + tax + shippingCost) / 100) * 100;
 
         console.log('[ORDER] Financial calculation (Paise):', {
             subtotal,
@@ -721,6 +746,7 @@ export async function createOrderWithTransaction(
 
         // Step 6: Generate unique order number
         const orderNumber = generateOrderNumber();
+        const hasCutItems = items.some(i => i.customizations?.format === 'meter' || i.customizations?.isCutWire || i.productName.includes('(Cut:'));
 
         // Step 7: Create order document (write phase - all financial fields in Paise)
         const orderRef = db.collection(COLLECTIONS.ORDERS).doc();
@@ -735,6 +761,10 @@ export async function createOrderWithTransaction(
             tax,
             shippingCost,
             total,
+            hasCutItems,
+            advancePaidAmount: 0,
+            balanceDueAmount: total,
+            advanceNotes: '',
             shippingAddress: {
                 ...shippingAddress,
                 country: shippingAddress.country || 'India',
@@ -759,6 +789,7 @@ export async function createOrderWithTransaction(
                 quantity: item.quantity,
                 totalPrice: item.unitPrice * item.quantity,
                 discountAmount: 0,
+                customizations: item.customizations || null,
                 createdAt: FieldValue.serverTimestamp(),
                 updatedAt: FieldValue.serverTimestamp(),
             });
@@ -771,10 +802,13 @@ export async function createOrderWithTransaction(
 
         if (shouldDeductStock) {
             for (const check of stockChecks) {
-                transaction.update(check.ref, {
-                    stock: FieldValue.increment(-check.requestedQuantity),
-                    updatedAt: FieldValue.serverTimestamp(),
-                });
+                // For custom cut meters, do not deduct full coils from stock
+                if (!check.isCutMeter) {
+                    transaction.update(check.ref, {
+                        stock: FieldValue.increment(-check.requestedQuantity),
+                        updatedAt: FieldValue.serverTimestamp(),
+                    });
+                }
             }
         }
 
@@ -1051,5 +1085,56 @@ export async function expireUnpaidOrders(): Promise<number> {
     }
 
     return count;
+}
+
+/**
+ * Update advance payment details for an order (Admin only)
+ */
+export async function updateOrderAdvancePayment(
+    orderId: string,
+    advancePaidPaise: number,
+    notes: string,
+    adminUser: { userId: string; email?: string }
+): Promise<Order> {
+    const db = getDb();
+    const orderRef = db.collection(COLLECTIONS.ORDERS).doc(orderId);
+
+    await db.runTransaction(async (transaction) => {
+        const orderSnap = await transaction.get(orderRef);
+        if (!orderSnap.exists) {
+            throw new Error('Order not found');
+        }
+
+        const orderData = orderSnap.data()!;
+        const total = orderData.total || 0;
+
+        // Clamp advance between 0 and total
+        const validAdvance = Math.max(0, Math.min(advancePaidPaise, total));
+        const balanceDue = total - validAdvance;
+
+        transaction.update(orderRef, {
+            advancePaidAmount: validAdvance,
+            balanceDueAmount: balanceDue,
+            advanceNotes: notes || '',
+            updatedAt: FieldValue.serverTimestamp(),
+        });
+
+        // Log to order history
+        const historyRef = db.collection(COLLECTIONS.ORDER_HISTORY).doc();
+        transaction.set(historyRef, {
+            orderId,
+            previousStatus: orderData.status,
+            newStatus: orderData.status,
+            changedBy: adminUser.userId,
+            changedByEmail: adminUser.email || null,
+            changedByRole: 'admin',
+            reason: `Advance payment updated: ₹${(validAdvance / 100).toFixed(2)} recorded. Balance due: ₹${(balanceDue / 100).toFixed(2)}. Notes: ${notes || 'None'}`,
+            createdAt: FieldValue.serverTimestamp(),
+        });
+    });
+
+    const updated = await adminOrderService.getById(orderId);
+    if (!updated) throw new Error('Order not found after advance update');
+    return updated;
 }
 

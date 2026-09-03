@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useLocation } from "wouter";
 import { SmartLink } from "@/components/navigation/smart-link";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import logoUrl from "@assets/Logo_1763402801870.png";
 import { CATEGORIES } from "@/lib/constants";
+import { useCategories } from "@/features/products/hooks/useProducts";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOutUser } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
@@ -64,8 +65,13 @@ export function Header() {
   // Use cart count from cart context
   const cartCount = totalQuantity || 0;
 
+  const { data: dbCategories = [] } = useCategories();
+  const dynamicCategories = useMemo(() => {
+    return dbCategories.length > 0 ? dbCategories : CATEGORIES;
+  }, [dbCategories]);
+
   // Amazon-style hierarchical navigation for electrical products
-  const mobileNavigation = [
+  const mobileNavigation = useMemo(() => [
     {
       title: "Account & Services",
       items: [
@@ -78,14 +84,10 @@ export function Header() {
     {
       title: "Electrical Products",
       expandable: true,
-      items: [
-        { name: "Wires and Cables", href: "/products?category=wires-cables" },
-        { name: "Switch and Sockets", href: "/products?category=switch-sockets" },
-        { name: "Electric Accessories", href: "/products?category=electric-accessories" },
-        { name: "Electrical Pipes and Fittings", href: "/products?category=electrical-pipes-fittings" },
-        { name: "Distribution Box", href: "/products?category=distribution-box" },
-        { name: "Led Bulb and Fittings", href: "/products?category=led-bulb-fittings" },
-      ],
+      items: dynamicCategories.map((c) => ({
+        name: c.name,
+        href: `/products?category=${c.slug}`,
+      })),
     },
     {
       title: "Special Offers",
@@ -94,23 +96,23 @@ export function Header() {
         { name: "Bulk Purchasing", href: "https://wa.me/919080927452?text=Hi%2C%20I%27m%20interested%20in%20bulk%20purchasing%20for%20electrical%20products.%20Please%20share%20details%20about%20bulk%20pricing%20and%20discounts." },
       ],
     },
-  ];
+  ], [dynamicCategories]);
 
   // Priority navigation items - always visible
-  const priorityNavigation = [
+  const priorityNavigation = useMemo(() => [
     { name: "All Products", href: "/products" },
-    { name: "Wires and Cables", href: "/products?category=wires-cables" },
-    { name: "Switch and Sockets", href: "/products?category=switch-sockets" },
+    ...dynamicCategories.slice(0, 2).map((c) => ({
+      name: c.name,
+      href: `/products?category=${c.slug}`,
+    })),
     { name: "Today's Deals", href: "/products?featured=true" },
-  ];
+  ], [dynamicCategories]);
 
   // Secondary navigation items - shown based on screen size
-  const secondaryNavigation = [
-    { name: "Electric Accessories", href: "/products?category=electric-accessories" },
-    { name: "Electrical Pipes and Fittings", href: "/products?category=electrical-pipes-fittings" },
-    { name: "Distribution Box", href: "/products?category=distribution-box" },
-    { name: "Led Bulb and Fittings", href: "/products?category=led-bulb-fittings" },
-  ];
+  const secondaryNavigation = useMemo(() => dynamicCategories.slice(2).map((c) => ({
+    name: c.name,
+    href: `/products?category=${c.slug}`,
+  })), [dynamicCategories]);
 
   const toggleSection = (sectionTitle: string) => {
     setExpandedSections((prev) => ({
@@ -255,7 +257,7 @@ export function Header() {
                           <h3 className="text-sm font-bold text-gray-900">Shop by Category</h3>
                         </div>
                         <div className="grid grid-cols-2 gap-3">
-                          {CATEGORIES.slice(0, 6).map((category) => (
+                          {dynamicCategories.slice(0, 6).map((category) => (
                             <SmartLink
                               key={category.id}
                               href={`/products?category=${category.slug}`}

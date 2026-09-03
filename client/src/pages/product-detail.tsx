@@ -17,6 +17,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice, formatSavings } from "@/lib/currency";
 import { getProductLogistics } from "@shared/logistics";
+import { WIRE_COLORS, isWireProduct, getWirePerMeterPrice } from "@shared/data/products";
 import type { Product } from "@shared/types";
 import {
   Star,
@@ -38,6 +39,10 @@ import {
   Eye,
   Share2,
   ChevronDown,
+  Check,
+  Scissors,
+  Package,
+  Info,
   Banknote,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -77,6 +82,9 @@ export default function ProductDetail() {
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [wireColor, setWireColor] = useState<string>("Red");
+  const [purchaseFormat, setPurchaseFormat] = useState<"coil" | "meter">("coil");
+  const [cutMeters, setCutMeters] = useState<number>(10);
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const [showImageModal, setShowImageModal] = useState(false);
   const [recentlyViewed, setRecentlyViewed] = useState(3);
@@ -206,6 +214,42 @@ export default function ProductDetail() {
     setImageZoom({ x: 50, y: 50, scale: 1 });
   };
 
+  const images = (product?.imageUrls && product.imageUrls.length > 0)
+    ? product.imageUrls 
+    : ["/api/placeholder/800/800"];
+
+  const isWire = isWireProduct(product);
+  const allowMeterCut = isWire && (product?.wireConfig?.allowMeterCut !== false);
+
+  const availableColors = useMemo(() => {
+    if (!isWire || !product) return [];
+    if (product?.wireConfig?.availableColors !== undefined) {
+      if (product.wireConfig.availableColors.length === 0) return [];
+      return WIRE_COLORS.filter((c) =>
+        product.wireConfig!.availableColors.some(
+          (ac) => ac.toLowerCase() === c.name.toLowerCase() || ac.toLowerCase() === c.id.toLowerCase()
+        )
+      );
+    }
+    return WIRE_COLORS;
+  }, [isWire, product]);
+
+  // Keep wireColor in sync with availableColors
+  useEffect(() => {
+    if (availableColors.length > 0 && !availableColors.some(c => c.name === wireColor)) {
+      setWireColor(availableColors[0].name);
+    }
+  }, [availableColors, wireColor]);
+
+  // If meter cutting is not allowed, reset to coil
+  useEffect(() => {
+    if (!allowMeterCut && purchaseFormat === "meter") {
+      setPurchaseFormat("coil");
+    }
+  }, [allowMeterCut, purchaseFormat]);
+
+  const perMeterPrice = getWirePerMeterPrice(product);
+
   const nextImage = () => {
     setSelectedImageIndex((prev) => (prev + 1) % images.length);
   };
@@ -216,14 +260,70 @@ export default function ProductDetail() {
 
   const addToCartMutation = useMutation({
     mutationFn: async () => {
-      await addItem(product?.id, undefined, quantity, undefined, product);
+      if (isWire) {
+        const colorLabel = availableColors.length > 0 ? wireColor : undefined;
+        const colorSuffix = colorLabel ? ` - ${colorLabel}` : '';
+
+        if (purchaseFormat === 'meter' && allowMeterCut) {
+          await addItem(
+            product?.id,
+            undefined,
+            cutMeters,
+            {
+              color: colorLabel,
+              format: 'meter',
+              lengthInMeters: cutMeters,
+              pricePerMeter: perMeterPrice,
+              isCutWire: true,
+            },
+            {
+              ...product,
+              price: perMeterPrice,
+              originalPrice: perMeterPrice,
+              name: `${product?.name}${colorSuffix} (${cutMeters}m Cut)`,
+            }
+          );
+        } else {
+          await addItem(
+            product?.id,
+            undefined,
+            quantity,
+            {
+              color: colorLabel,
+              format: 'coil',
+              isCutWire: false,
+            },
+            {
+              ...product,
+              name: `${product?.name}${colorSuffix} (Full 90m Coil)`,
+            }
+          );
+        }
+      } else {
+        await addItem(product?.id, undefined, quantity, undefined, product);
+      }
     },
     onSuccess: () => {
-      toast({
-        title: "Added to cart",
-        description: `${quantity} ${product?.name} added to your cart.`,
-        duration: 2000,
-      });
+      const colorLabel = availableColors.length > 0 ? ` (${wireColor})` : '';
+      if (isWire && purchaseFormat === 'meter' && allowMeterCut) {
+        toast({
+          title: "Cut Wire Added to Cart",
+          description: `${cutMeters}m of ${product?.name}${colorLabel} added to your cart.`,
+          duration: 3000,
+        });
+      } else if (isWire) {
+        toast({
+          title: "Coil Added to Cart",
+          description: `${quantity} Coil(s) of ${product?.name}${colorLabel} added to your cart.`,
+          duration: 3000,
+        });
+      } else {
+        toast({
+          title: "Added to cart",
+          description: `${quantity} ${product?.name} added to your cart.`,
+          duration: 2000,
+        });
+      }
     },
     onError: (error) => {
       toast({
@@ -274,9 +374,6 @@ export default function ProductDetail() {
     );
   }
 
-  const images = product.imageUrls && product.imageUrls.length > 0 
-    ? product.imageUrls 
-    : ["/api/placeholder/800/800"];
   const price = product.price;
   const originalPrice = product.originalPrice;
   const hasDiscount = originalPrice && originalPrice > price;
@@ -284,6 +381,10 @@ export default function ProductDetail() {
   const reviewCount = product.reviewCount || 0;
   const isWishlisted = isInWishlist(product.id);
   const logistics = getProductLogistics(product);
+
+  const isMeterCut = isWire && allowMeterCut && purchaseFormat === "meter";
+  const currentPriceDisplay = isMeterCut ? perMeterPrice : price;
+  const currentTotalAmount = isMeterCut ? cutMeters * perMeterPrice : quantity * price;
 
   const handleAddToCart = () => {
     addToCartMutation.mutate();
@@ -484,59 +585,238 @@ export default function ProductDetail() {
             )}
 
             {/* Purchase Options */}
-            <div className="space-y-6 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">
+            <div className="space-y-6 bg-gray-50/50 p-6 rounded-2xl border border-gray-100">              {/* Wire Configurator: Color Swatches & Buying Format */}
+              {isWire && (
+                <>
+                  {/* Step 1: Color Selection (Shown when product has color variants) */}
+                  {availableColors.length > 0 && (
+                    <div className="space-y-3 pb-5 border-b border-gray-200/70">
+                      <div className="flex items-center justify-between">
+                        <label className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                          <span>Wire Color:</span>
+                          <span className="text-xs font-bold text-copper-700 bg-copper-50 px-2.5 py-0.5 rounded-full border border-copper-200">
+                            {wireColor}
+                          </span>
+                        </label>
+                        <span className="text-xs text-gray-500 font-medium">
+                          {WIRE_COLORS.find(c => c.name === wireColor)?.purpose || ''}
+                        </span>
+                      </div>
 
-              {/* Quantity Selector */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                    <button
-                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      disabled={quantity <= 1}
-                      className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
-                    >
-                      <Minus className="w-4 h-4 text-gray-600" />
-                    </button>
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      onKeyDown={(e) => {
-                        if (['e', 'E', '+', '-', '.'].includes(e.key)) {
-                          e.preventDefault();
-                        }
-                      }}
-                      value={quantity}
-                      onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                      className="w-16 text-center border-none focus:ring-0 font-medium text-gray-900"
-                    />
-                    <button
-                      onClick={() => setQuantity(quantity + 1)}
-                      disabled={quantity >= (product.stock || 0)}
-                      className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
-                    >
-                      <Plus className="w-4 h-4 text-gray-600" />
-                    </button>
+                      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                        {availableColors.map((color) => {
+                          const isSelected = wireColor === color.name;
+                          return (
+                            <button
+                              key={color.id}
+                              type="button"
+                              onClick={() => setWireColor(color.name)}
+                              className={`flex flex-col items-center p-2 rounded-xl border-2 transition-all relative ${
+                                isSelected
+                                  ? "border-copper-600 bg-copper-50/50 shadow-sm ring-1 ring-copper-500"
+                                  : "border-gray-200 hover:border-gray-300 bg-white"
+                              }`}
+                            >
+                              <span
+                                className="w-6 h-6 rounded-full shadow-inner flex items-center justify-center mb-1 border"
+                                style={{ backgroundColor: color.hex, borderColor: color.borderHex }}
+                              >
+                                {isSelected && (
+                                  <Check className={`w-3.5 h-3.5 ${color.id === 'white' || color.id === 'yellow' ? 'text-gray-900' : 'text-white'}`} />
+                                )}
+                              </span>
+                              <span className="text-xs font-bold text-gray-800">{color.name}</span>
+                              <span className="text-[10px] text-gray-500 text-center leading-tight mt-0.5 line-clamp-1">{color.purpose}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Step 2: Buying Format (Shown when meter cutting is allowed) */}
+                  {allowMeterCut && (
+                    <div className="space-y-3 pb-5 border-b border-gray-200/70">
+                      <label className="text-sm font-semibold text-gray-900 block">
+                        Buying Format:
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setPurchaseFormat("coil")}
+                          className={`p-3 rounded-xl border-2 text-left transition-all ${
+                            purchaseFormat === "coil"
+                              ? "border-copper-600 bg-copper-50/60 shadow-sm ring-1 ring-copper-500"
+                              : "border-gray-200 hover:border-gray-300 bg-white"
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <Package className={`w-4 h-4 ${purchaseFormat === "coil" ? "text-copper-600" : "text-gray-500"}`} />
+                            <span className="font-bold text-sm text-gray-900">Full 90m Coil</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500">Factory sealed 90 meters</p>
+                          <p className="text-sm font-bold text-copper-700 mt-1">
+                            {formatPrice(price)} <span className="text-[11px] font-normal text-gray-500">/ coil</span>
+                          </p>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => setPurchaseFormat("meter")}
+                          className={`p-3 rounded-xl border-2 text-left transition-all ${
+                            purchaseFormat === "meter"
+                              ? "border-copper-600 bg-copper-50/60 shadow-sm ring-1 ring-copper-500"
+                              : "border-gray-200 hover:border-gray-300 bg-white"
+                          }`}
+                        >
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <Scissors className={`w-4 h-4 ${purchaseFormat === "meter" ? "text-copper-600" : "text-gray-500"}`} />
+                            <span className="font-bold text-sm text-gray-900">Cut by Meter</span>
+                          </div>
+                          <p className="text-[11px] text-gray-500">Custom cut (min 5m)</p>
+                          <p className="text-sm font-bold text-copper-700 mt-1">
+                            {formatPrice(perMeterPrice)} <span className="text-[11px] font-normal text-gray-500">/ meter</span>
+                          </p>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Quantity / Cut Length Selector */}
+              {isMeterCut ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-semibold text-gray-900">Cut Length (Meters):</label>
+                    <span className="text-xs text-gray-500 font-medium">Minimum: 5 meters</span>
                   </div>
 
-                  {product.stock && product.stock < 10 && (
-                    <span className="text-red-600 text-sm font-medium animate-pulse">
-                      Only {product.stock} left in stock!
-                    </span>
+                  {/* Quick Presets */}
+                  <div className="flex items-center gap-2">
+                    {[10, 20, 25, 50].map((preset) => (
+                      <button
+                        key={preset}
+                        type="button"
+                        onClick={() => setCutMeters(preset)}
+                        className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                          cutMeters === preset
+                            ? "bg-copper-600 text-white shadow-sm"
+                            : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-100"
+                        }`}
+                      >
+                        {preset}m
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center gap-4 pt-1">
+                    <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                      <button
+                        type="button"
+                        onClick={() => setCutMeters(Math.max(5, cutMeters - 5))}
+                        disabled={cutMeters <= 5}
+                        className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      >
+                        <Minus className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <div className="flex items-center px-1">
+                        <input
+                          type="number"
+                          min="5"
+                          step="1"
+                          value={cutMeters}
+                          onChange={(e) => setCutMeters(Math.max(1, parseInt(e.target.value) || 5))}
+                          onBlur={() => setCutMeters(Math.max(5, cutMeters))}
+                          className="w-16 text-center border-none focus:ring-0 font-bold text-gray-900"
+                        />
+                        <span className="text-xs text-gray-500 font-medium pr-2">m</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setCutMeters(cutMeters + 5)}
+                        className="p-3 hover:bg-gray-50 transition-colors"
+                      >
+                        <Plus className="w-4 h-4 text-gray-600" />
+                      </button>
+                    </div>
+
+                    <div className="text-sm">
+                      <span className="text-gray-500">Cut Total: </span>
+                      <span className="font-bold text-gray-900 text-lg">
+                        {formatPrice(cutMeters * perMeterPrice)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {cutMeters >= 90 && (
+                    <div className="flex items-start gap-2 text-xs text-amber-800 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+                      <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                      <p>
+                        <strong>Tip:</strong> A full factory-sealed 90m coil is {formatPrice(price)} — cheaper per meter than custom cutting!
+                      </p>
+                    </div>
                   )}
                 </div>
-              </div>
+              ) : (
+                /* Standard Quantity Selector */
+                <div>
+                  <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    {isWire ? "Coil Quantity (90m rolls)" : "Quantity"}
+                  </label>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+                      <button
+                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                        disabled={quantity <= 1}
+                        className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      >
+                        <Minus className="w-4 h-4 text-gray-600" />
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        step="1"
+                        onKeyDown={(e) => {
+                          if (['e', 'E', '+', '-', '.'].includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        value={quantity}
+                        onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                        className="w-16 text-center border-none focus:ring-0 font-bold text-gray-900"
+                      />
+                      <button
+                        onClick={() => setQuantity(quantity + 1)}
+                        disabled={quantity >= (product.stock || 0)}
+                        className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                      >
+                        <Plus className="w-4 h-4 text-gray-600" />
+                      </button>
+                    </div>
+
+                    {product.stock && product.stock < 10 && (
+                      <span className="text-red-600 text-sm font-medium animate-pulse">
+                        Only {product.stock} left in stock!
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Primary Actions */}
-              <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex flex-col sm:flex-row gap-4 pt-2">
                 <Button
                   onClick={handleAddToCart}
                   disabled={!product.stock}
-                  className="flex-1 h-12 text-lg font-semibold bg-copper-600 hover:bg-copper-700 text-white rounded-xl shadow-lg shadow-copper-100 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                  className="flex-1 h-12 text-base font-semibold bg-copper-600 hover:bg-copper-700 text-white rounded-xl shadow-lg shadow-copper-100 transition-all hover:scale-[1.02] active:scale-[0.98]"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
-                  {product.stock ? "Add to Cart" : "Out of Stock"}
+                  {!product.stock
+                    ? "Out of Stock"
+                    : isMeterCut
+                    ? `Add Cut Wire (${formatPrice(cutMeters * perMeterPrice)})`
+                    : `Add to Cart (${formatPrice(quantity * price)})`}
                 </Button>
 
                 <Button

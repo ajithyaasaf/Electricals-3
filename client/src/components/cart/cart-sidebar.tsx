@@ -1,6 +1,6 @@
 // Cart Sidebar - Real-time cart preview with quick actions
 import { useState } from 'react';
-import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Package, Sparkles } from 'lucide-react';
+import { Trash2, Minus, Plus, ShoppingBag, ArrowRight, Package, Sparkles, Scissors } from 'lucide-react';
 import { Link } from 'wouter';
 import {
   Sheet,
@@ -17,6 +17,7 @@ import { formatPrice } from '@/lib/currency';
 import { useCartContext } from '@/contexts/cart-context';
 import { cn } from '@/lib/utils';
 import { SHIPPING_THRESHOLDS } from '@shared/logistics';
+import { getWireColorHex } from '@shared/data/products';
 
 interface CartSidebarProps {
   children: React.ReactNode;
@@ -44,10 +45,10 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
 
   // Quick item component for sidebar - Enhanced design
   const QuickCartItem = ({ item }: { item: any }) => {
-    const productOrService = item.product || item.service;
-    if (!productOrService) return null;
-
-    const originalPrice = item.originalPrice || productOrService.originalPrice || 0;
+    const productOrService = item.product || item.service || (item.name ? item : null);
+    const itemName = productOrService?.name || item.name || (item.customizations?.format === 'meter' ? 'Custom Cut Wire' : 'Electrical Product');
+    const itemImage = productOrService?.imageUrls?.[0] || item.imageUrls?.[0] || item.image;
+    const originalPrice = item.originalPrice || productOrService?.originalPrice || item.unitPrice || 0;
     const hasDiscount = originalPrice > item.unitPrice;
     const discountPercent = hasDiscount
       ? Math.round(((originalPrice - item.unitPrice) / originalPrice) * 100)
@@ -65,10 +66,10 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
         <div className="flex gap-3">
           {/* Product Image - Enhanced */}
           <div className="w-16 h-16 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
-            {productOrService.imageUrls?.[0] ? (
+            {itemImage ? (
               <img
-                src={productOrService.imageUrls[0]}
-                alt={productOrService.name}
+                src={itemImage}
+                alt={itemName}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
               />
             ) : (
@@ -81,21 +82,51 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
           <div className="flex-grow min-w-0">
             {/* Product Name */}
             <h4 className="text-sm font-semibold text-gray-900 truncate leading-tight">
-              {productOrService.name}
+              {itemName}
             </h4>
 
-            {/* Category badge if available */}
-            {productOrService.category && (
-              <span className="inline-block text-[10px] text-teal-600 bg-teal-50 px-1.5 py-0.5 rounded mt-1">
-                {productOrService.category}
-              </span>
+            {/* Category & Customization Metadata */}
+            {(productOrService?.category || item.customizations?.color || item.customizations?.format) && (
+              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                {productOrService?.category && (
+                  <span className="text-[10px] text-teal-700 bg-teal-50 px-1.5 py-0.5 rounded font-medium border border-teal-100">
+                    {productOrService.category}
+                  </span>
+                )}
+                {item.customizations?.color && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded border border-gray-200">
+                    <span
+                      className="w-2 h-2 rounded-full border border-black/10 shrink-0"
+                      style={{ backgroundColor: getWireColorHex(item.customizations.color) }}
+                    />
+                    <span>{item.customizations.color}</span>
+                  </span>
+                )}
+                {item.customizations?.format === 'meter' && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium text-copper-700 bg-copper-50 px-1.5 py-0.5 rounded border border-copper-200">
+                    <Scissors className="w-2.5 h-2.5 text-copper-700" />
+                    <span>{item.quantity}m Cut</span>
+                  </span>
+                )}
+                {item.customizations?.format === 'coil' && (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200">
+                    <Package className="w-2.5 h-2.5 text-gray-500" />
+                    <span>90m Coil</span>
+                  </span>
+                )}
+              </div>
             )}
 
             {/* Price section */}
-            <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               <span className="text-base font-bold text-teal-700">
                 {formatPrice(item.unitPrice * item.quantity)}
               </span>
+              {item.customizations?.format === 'meter' && (
+                <span className="text-[11px] text-gray-500 font-medium">
+                  ({formatPrice(item.unitPrice)}/m)
+                </span>
+              )}
               {hasDiscount && (
                 <span className="text-xs text-gray-400 line-through">
                   {formatPrice(originalPrice * item.quantity)}
@@ -110,22 +141,24 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
                   variant="ghost"
                   size="sm"
                   onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                  disabled={item.quantity <= 1 || isLoading}
+                  disabled={item.quantity <= (item.customizations?.format === 'meter' ? 5 : 1) || isLoading}
                   className="h-7 w-7 p-0 rounded-md hover:bg-teal-100 transition-all disabled:opacity-40"
+                  title={item.customizations?.format === 'meter' && item.quantity <= 5 ? "Minimum cut is 5 meters" : "Decrease"}
                 >
                   <Minus className="w-3 h-3 text-gray-700" />
                 </Button>
 
-                <span className="text-sm font-semibold px-3 min-w-[2rem] text-center">
-                  {item.quantity}
+                <span className="text-xs font-semibold px-2 min-w-[2.75rem] text-center text-gray-800">
+                  {item.quantity}{item.customizations?.format === 'meter' ? 'm' : ''}
                 </span>
 
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                  disabled={item.quantity >= 99 || isLoading}
+                  disabled={item.quantity >= (item.customizations?.format === 'meter' ? 89 : 99) || isLoading}
                   className="h-7 w-7 p-0 rounded-md hover:bg-teal-100 transition-all disabled:opacity-40"
+                  title={item.customizations?.format === 'meter' ? "Increase length (+1m)" : "Increase"}
                 >
                   <Plus className="w-3 h-3 text-gray-700" />
                 </Button>

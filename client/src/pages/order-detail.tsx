@@ -51,6 +51,7 @@ import {
     Mail,
     Copy,
     MessageCircle,
+    Scissors,
 } from "lucide-react";
 import { BANK_DETAILS } from "@/lib/constants";
 import { BankTransferProofForm } from "@/components/payment/bank-transfer-proof-form";
@@ -71,6 +72,7 @@ interface OrderItem {
     unitPrice: number;
     quantity: number;
     totalPrice: number;
+    customizations?: Record<string, any>;
 }
 
 interface OrderHistory {
@@ -92,6 +94,10 @@ interface Order {
     subtotal: number;
     tax: number;
     shippingCost: number;
+    advancePaidAmount?: number;
+    balanceDueAmount?: number;
+    hasCutItems?: boolean;
+    advanceNotes?: string;
     shippingAddress: {
         firstName: string;
         lastName: string;
@@ -472,11 +478,38 @@ export default function OrderDetail() {
                                 )}
                                 <div className="flex-1">
                                     <h4 className="font-medium">{item.productName}</h4>
+                                    {item.customizations?.color && (
+                                        <div className="flex items-center gap-1.5 mt-1 flex-wrap">
+                                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">
+                                                <span className="w-2 h-2 rounded-full border border-black/10" style={{
+                                                    backgroundColor:
+                                                        item.customizations.color.toLowerCase() === 'white' ? '#f3f4f6' :
+                                                        item.customizations.color.toLowerCase() === 'yellow' ? '#eab308' :
+                                                        item.customizations.color.toLowerCase() === 'blue' ? '#3b82f6' :
+                                                        item.customizations.color.toLowerCase() === 'black' ? '#1f2937' :
+                                                        item.customizations.color.toLowerCase() === 'green' ? '#22c55e' : '#ef4444'
+                                                }} />
+                                                Color: {item.customizations.color}
+                                            </span>
+                                            {item.customizations.format === 'meter' && (
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-copper-700 bg-copper-50 px-1.5 py-0.5 rounded border border-copper-200">
+                                                    <Scissors className="w-3 h-3 text-copper-700" />
+                                                    <span>{item.quantity} Meters Cut</span>
+                                                </span>
+                                            )}
+                                            {item.customizations.format === 'coil' && (
+                                                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded">
+                                                    <Package className="w-3 h-3 text-gray-500" />
+                                                    <span>90m Full Coil</span>
+                                                </span>
+                                            )}
+                                        </div>
+                                    )}
                                     {item.productSku && (
-                                        <p className="text-xs text-gray-500">SKU: {item.productSku}</p>
+                                        <p className="text-xs text-gray-500 mt-0.5">SKU: {item.productSku}</p>
                                     )}
                                     <p className="text-sm text-gray-600 mt-1">
-                                        {formatPrice(item.unitPrice)} × {item.quantity}
+                                        {formatPrice(item.unitPrice)} {item.customizations?.format === 'meter' ? '/ meter' : ''} × {item.quantity} {item.customizations?.format === 'meter' ? 'm' : ''}
                                     </p>
                                 </div>
                                 <div className="text-right">
@@ -550,6 +583,28 @@ export default function OrderDetail() {
                                             <span>Total</span>
                                             <span>{formatPrice(financials.total)}</span>
                                         </div>
+                                        {order.advancePaidAmount && order.advancePaidAmount > 0 ? (
+                                            <>
+                                                <div className="flex justify-between text-sm text-emerald-700 font-medium">
+                                                    <span>Advance Paid (Recorded)</span>
+                                                    <span>- {formatPrice(order.advancePaidAmount)}</span>
+                                                </div>
+                                                <div className="flex justify-between text-base font-bold text-copper-800 bg-copper-50/80 p-2.5 rounded-lg border border-copper-200">
+                                                    <span>Balance Due on Delivery</span>
+                                                    <span>{formatPrice(order.balanceDueAmount !== undefined ? order.balanceDueAmount : (financials.total - order.advancePaidAmount))}</span>
+                                                </div>
+                                            </>
+                                        ) : order.hasCutItems ? (
+                                            <div className="p-2.5 bg-amber-50 rounded-lg border border-amber-200 text-xs text-amber-800 space-y-1">
+                                                <p className="font-semibold flex items-center gap-1.5">
+                                                    <Scissors className="w-3.5 h-3.5 text-amber-700" />
+                                                    <span>Custom Cut Wire Order</span>
+                                                </p>
+                                                <p>
+                                                    Our dispatch team will contact you to confirm cut lengths and collect an advance deposit before dispatch.
+                                                </p>
+                                            </div>
+                                        ) : null}
                                         <div className="flex justify-between pt-2">
                                             <span className="text-gray-600">Payment Method</span>
                                             <Badge variant="outline" className="font-medium bg-gray-50 text-gray-800">

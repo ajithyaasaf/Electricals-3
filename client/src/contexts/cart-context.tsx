@@ -67,11 +67,19 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
         };
       }
 
-      // Check if item already exists
-      const existingItemIndex = state.items.findIndex(item =>
-        (item.productId === action.payload.productId && item.productId) ||
-        (item.serviceId === action.payload.serviceId && item.serviceId)
-      );
+      // Check if item already exists with matching customizations (e.g., distinct colors/formats for wire)
+      const existingItemIndex = state.items.findIndex(item => {
+        const sameProduct = (item.productId === action.payload.productId && !!item.productId) ||
+          (item.serviceId === action.payload.serviceId && !!item.serviceId);
+        if (!sameProduct) return false;
+
+        const itemColor = item.customizations?.color || '';
+        const payloadColor = action.payload.customizations?.color || '';
+        const itemFormat = item.customizations?.format || '';
+        const payloadFormat = action.payload.customizations?.format || '';
+
+        return itemColor === payloadColor && itemFormat === payloadFormat;
+      });
 
       let newItems: CartItem[];
       if (existingItemIndex >= 0) {
@@ -99,7 +107,15 @@ function cartReducer(state: Cart | null, action: CartAction): Cart | null {
 
       const updatedItems = state.items.map(item =>
         item.id === action.payload.itemId
-          ? { ...item, quantity: action.payload.quantity, updatedAt: new Date() }
+          ? {
+              ...item,
+              quantity: action.payload.quantity,
+              customizations: {
+                ...item.customizations,
+                ...(item.customizations?.format === 'meter' ? { lengthInMeters: action.payload.quantity } : {})
+              },
+              updatedAt: new Date()
+            }
           : item
       );
 
@@ -176,8 +192,8 @@ function calculateOptimisticTotals(items: CartItem[]): Cart['totals'] {
   // Determine shipping cost using the centralised logistics engine
   const shipping = calculateShippingFee(items, subtotal);
 
-  // 18% GST (rounded to nearest paisa)
-  const tax = Math.round(subtotal * 0.18);
+  // 18% GST (Section 170 CGST Act: rounded to nearest Rupee / 100 paise)
+  const tax = Math.round((subtotal * 0.18) / 100) * 100;
 
   // Savings = difference between original price and effective unit price × qty
   const savings = items.reduce((sum, item) => {
@@ -189,7 +205,8 @@ function calculateOptimisticTotals(items: CartItem[]): Cart['totals'] {
     return sum + (originalPrice - effectivePrice) * item.quantity;
   }, 0);
 
-  const total = subtotal - discount + shipping + tax;
+  // Total payable rounded to nearest Rupee
+  const total = Math.round((subtotal - discount + shipping + tax) / 100) * 100;
 
   return {
     subtotal: Math.max(0, subtotal),
@@ -522,6 +539,7 @@ export function CartProvider({ children }: CartProviderProps) {
     reject: (error: Error) => void;
   }>>([]);
   const isProcessingAddOperations = useRef(false);
+  const tempIdMapRef = useRef<Map<string, string>>(new Map());
 
   // Load guest cart from localStorage on mount with enhanced validation
   useEffect(() => {
@@ -934,12 +952,21 @@ export function CartProvider({ children }: CartProviderProps) {
       if (!operation) continue;
 
       try {
-        await apiRequest('POST', '/api/cart/items', {
+        const response = await apiRequest('POST', '/api/cart/items', {
           productId: operation.productId,
           serviceId: operation.serviceId,
           quantity: operation.quantity,
           customizations: operation.customizations,
         });
+        const resData = await response.json().catch(() => ({}));
+        const serverItemId = resData.cartItemId || resData.itemId;
+        if (serverItemId) {
+          tempIdMapRef.current.set(operation.id, serverItemId);
+          dispatch({
+            type: 'OPTIMISTIC_UPDATE_ITEM',
+            payload: { itemId: operation.id, updates: { id: serverItemId } }
+          });
+        }
         operation.resolve();
       } catch (error) {
         console.error('[CART CONTEXT] Error processing add operation:', error);
@@ -1071,9 +1098,17 @@ export function CartProvider({ children }: CartProviderProps) {
 
       // Immediately update guest cart array and localStorage atomically
       setGuestCart(prev => {
-        const existingIndex = prev.findIndex(item =>
-          item.productId === productId && item.serviceId === serviceId
-        );
+        const existingIndex = prev.findIndex(item => {
+          const sameProduct = item.productId === productId && item.serviceId === serviceId;
+          if (!sameProduct) return false;
+
+          const itemColor = item.customizations?.color || '';
+          const newColor = customizations?.color || '';
+          const itemFormat = item.customizations?.format || '';
+          const newFormat = customizations?.format || '';
+
+          return itemColor === newColor && itemFormat === newFormat;
+        });
 
         let newCart: GuestCartItem[];
 
@@ -1129,11 +1164,16 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }, [isAuthenticated, processAddOperationQueue, loadGuestCartAsCart, toast, user]);
 
-  const removeItem = useCallback(async (itemId: string) => {
-    // Immediate optimistic removal for instant UI feedback
+  const removeItem = useCallback(async (rawItemId: string) => {
+    const itemId = tempIdMapRef.current.get(rawItemId) || rawItemId;
+    console.log('[CART CONTEXT] 🗑️ Removing item:', { itemId, rawItemId, isAuthenticated });
+
     if (isAuthenticated) {
-      // Optimistically remove from cart display using reducer
-      dispatch({ type: 'REMOVE_ITEM', payload: { itemId } });
+      // Immediate optimistic update for authenticated users using reducer
+      dispatch({ type: 'REMOVE_ITEM', payload: { itemId: rawItemId } });
+      if (itemId !== rawItemId) {
+        dispatch({ type: 'REMOVE_ITEM', payload: { itemId } });
+      }
 
       try {
         await apiRequest('DELETE', `/api/cart/items/${itemId}`);
@@ -1197,7 +1237,14 @@ export function CartProvider({ children }: CartProviderProps) {
     try {
       if (isAuthenticated) {
         console.log('[CART CONTEXT] 📡 Sending server update for authenticated user...');
-        await apiRequest('PATCH', `/api/cart/items/${itemId}`, { quantity: finalQuantity });
+        const currentItem = currentCartRef.current?.items?.find(i => i.id === itemId) ||
+          cart?.items?.find(i => i.id === itemId);
+
+        await apiRequest('PATCH', `/api/cart/items/${itemId}`, { 
+          quantity: finalQuantity,
+          productId: currentItem?.productId,
+          customizations: currentItem?.customizations
+        });
 
         // Instead of reloading the entire cart, just verify the item was updated correctly
         // This prevents overwriting the optimistic UI update
@@ -1242,18 +1289,32 @@ export function CartProvider({ children }: CartProviderProps) {
     }
   }, [isAuthenticated, loadAuthenticatedCart, loadGuestCartAsCart, removeItem, toast]);
 
-  const updateQuantity = useCallback(async (itemId: string, quantity: number) => {
-    console.log('[CART CONTEXT] 🔄 Updating quantity:', { itemId, quantity, isAuthenticated });
+  const updateQuantity = useCallback(async (rawItemId: string, quantity: number) => {
+    const itemId = tempIdMapRef.current.get(rawItemId) || rawItemId;
+    console.log('[CART CONTEXT] 🔄 Updating quantity:', { itemId, rawItemId, quantity, isAuthenticated });
 
     // Immediately update UI optimistically for both authenticated and guest users using reducer
-    console.log('[CART CONTEXT] 📦 Optimistic quantity update:', { itemId, quantity });
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { itemId, quantity } });
+    console.log('[CART CONTEXT] 📦 Optimistic quantity update:', { itemId, rawItemId, quantity });
+    dispatch({ type: 'UPDATE_QUANTITY', payload: { itemId: rawItemId, quantity } });
+    if (itemId !== rawItemId) {
+      dispatch({ type: 'UPDATE_QUANTITY', payload: { itemId, quantity } });
+    }
 
     if (!isAuthenticated) {
       // For guest cart, also update localStorage synchronously
       setGuestCart(prev => {
         const updated = prev.map(item =>
-          item.id === itemId ? { ...item, quantity, lastUpdated: Date.now() } : item
+          (item.id === itemId || item.id === rawItemId)
+            ? {
+                ...item,
+                quantity,
+                customizations: {
+                  ...item.customizations,
+                  ...(item.customizations?.format === 'meter' ? { lengthInMeters: quantity } : {})
+                },
+                lastUpdated: Date.now()
+              }
+            : item
         );
 
         // CRITICAL: Immediately persist to localStorage
@@ -1406,11 +1467,20 @@ export function CartProvider({ children }: CartProviderProps) {
   // Memoized derived selectors for optimal performance
   const cartStats = useMemo(() => {
     const itemsCount = cart?.items?.length || 0;
-    const totalQuantity = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+    const totalQuantity = cart?.items?.reduce((sum, item) => {
+      // Wire cuts count as 1 physical item in cart badge count
+      if (item.customizations?.format === 'meter') return sum + 1;
+      return sum + (item.quantity || 1);
+    }, 0) || 0;
 
     // For guest users, also include items not yet synced to Cart object
     const guestItemsCount = !isAuthenticated ? guestCart.length : 0;
-    const guestTotalQuantity = !isAuthenticated ? guestCart.reduce((sum, item) => sum + item.quantity, 0) : 0;
+    const guestTotalQuantity = !isAuthenticated
+      ? guestCart.reduce((sum, item) => {
+          if (item.customizations?.format === 'meter') return sum + 1;
+          return sum + (item.quantity || 1);
+        }, 0)
+      : 0;
 
     // Use guest data if cart is not loaded yet (instant feedback)
     const finalItemsCount = cart ? itemsCount : guestItemsCount;

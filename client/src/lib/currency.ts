@@ -9,11 +9,12 @@
 export const formatPrice = (amountInPaise: number): string => {
   // Convert paise to rupees (divide by 100)
   const amountInRupees = amountInPaise / 100;
+  const hasDecimals = amountInRupees % 1 !== 0;
 
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
-    minimumFractionDigits: 0,
+    minimumFractionDigits: hasDecimals ? 2 : 0,
     maximumFractionDigits: 2,
   }).format(amountInRupees);
 };

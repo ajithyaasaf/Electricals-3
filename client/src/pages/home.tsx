@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { Link } from "wouter";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
@@ -19,6 +20,7 @@ import { LazyImage } from "@/components/ui/lazy-image";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Zap, Wrench, ClipboardCheck, Tag, Clock, Shield, Phone, User, Heart, Calendar, Settings, MapPin } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
+import { useCategories } from "@/features/products/hooks/useProducts";
 import { getOptimizedImageUrl } from "@/lib/performance";
 import { useFirebaseAuth } from "@/hooks/useFirebaseAuth";
 import { formatPrice } from "@/lib/currency";
@@ -75,54 +77,35 @@ export default function Home() {
     queryKey: ["/api/products", { trending: true, limit: 12 }],
   });
 
-  // Visual category cards data matching official CopperBear catalog categories
-  const visualCategories = [
-    {
-      name: "Wires and Cables",
-      slug: "wires-cables",
-      image: wiringCablesImg,
-      description: "Flame retardant PVC insulated cables, Finolex & Kundan copper conductors",
-      itemCount: 180,
-      featured: true
-    },
-    {
-      name: "Switch and Sockets",
-      slug: "switch-sockets",
-      image: wireCoilImg,
-      description: "Modular switches, electrical sockets, plug points, and switching solutions",
-      itemCount: 150,
-      featured: true
-    },
-    {
-      name: "Electric Accessories",
-      slug: "electric-accessories",
-      image: toolsImg,
-      description: "Extension cords, plug adapters, electrical connectors, and testing accessories",
-      itemCount: 320,
-      featured: true
-    },
-    {
-      name: "Electrical Pipes and Fittings",
-      slug: "electrical-pipes-fittings",
-      image: pipesFittingsImg,
-      description: "PVC conduits, electrical pipes, junction boxes, and cable management fittings",
-      itemCount: 95
-    },
-    {
-      name: "Distribution Box",
-      slug: "distribution-box",
-      image: circuitBreakersImg,
-      description: "MCB boxes, distribution boards, consumer units, and electrical panels",
-      itemCount: 85
-    },
-    {
-      name: "Led Bulb and Fittings",
-      slug: "led-bulb-fittings",
-      image: lightingImg,
-      description: "LED bulbs, emergency lights, flood lights, street lights, and LED fittings",
-      itemCount: 200
-    }
-  ];
+  // Dynamic categories from database
+  const { data: dbCategories = [] } = useCategories();
+
+  // Visual category cards data matching active store categories
+  const visualCategories = useMemo(() => {
+    const defaultMeta: Record<string, { image: string; description: string; count: number }> = {
+      "wires-cables": { image: wiringCablesImg, description: "Flame retardant PVC insulated cables, Finolex & Kundan copper conductors", count: 180 },
+      "switch-sockets": { image: wireCoilImg, description: "Modular switches, electrical sockets, plug points, and switching solutions", count: 150 },
+      "electric-accessories": { image: toolsImg, description: "Extension cords, plug adapters, electrical connectors, and testing accessories", count: 320 },
+      "electrical-pipes-fittings": { image: pipesFittingsImg, description: "PVC conduits, electrical pipes, junction boxes, and cable management fittings", count: 95 },
+      "distribution-box": { image: circuitBreakersImg, description: "MCB boxes, distribution boards, consumer units, and electrical panels", count: 85 },
+      "led-bulb-fittings": { image: lightingImg, description: "LED bulbs, emergency lights, flood lights, street lights, and LED fittings", count: 200 },
+    };
+
+    const categoriesList = dbCategories.length > 0 ? dbCategories : CATEGORIES;
+    const fallbackImgs = [wiringCablesImg, wireCoilImg, toolsImg, pipesFittingsImg, circuitBreakersImg, lightingImg];
+
+    return categoriesList.map((cat, idx) => {
+      const meta = defaultMeta[cat.slug];
+      return {
+        name: cat.name,
+        slug: cat.slug,
+        image: meta?.image || cat.imageUrl || fallbackImgs[idx % fallbackImgs.length],
+        description: cat.description || meta?.description || "High performance electrical supplies",
+        itemCount: meta?.count || 50,
+        featured: idx < 3,
+      };
+    });
+  }, [dbCategories]);
 
   // Smart personalization logic for Deals Banner
   const categoryProducts = (categoryDealsData as any)?.products || [];

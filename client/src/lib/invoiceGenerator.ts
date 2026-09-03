@@ -12,6 +12,9 @@ export interface InvoiceOrderData {
   status: string;
   shippingCost?: number;
   total: number;
+  advancePaidAmount?: number;
+  balanceDueAmount?: number;
+  hasCutItems?: boolean;
   shippingAddress: {
     firstName: string;
     lastName?: string;
@@ -31,6 +34,7 @@ export interface InvoiceItemData {
   unitPrice: number;
   quantity: number;
   totalPrice?: number;
+  customizations?: Record<string, any>;
 }
 
 export function printInvoice(order: InvoiceOrderData, items: InvoiceItemData[]) {
@@ -52,18 +56,26 @@ export function printInvoice(order: InvoiceOrderData, items: InvoiceItemData[]) 
   const shippingPaise = financials.shippingCost;
   const grandTotalPaise = financials.total;
 
-  const itemsHtml = items.map((item, index) => `
+  const itemsHtml = items.map((item, index) => {
+    const isCut = (item.customizations as any)?.format === 'meter' ||
+      (item.customizations as any)?.isCutWire ||
+      item.productName.includes('(Cut:');
+    const meters = (item.customizations as any)?.lengthInMeters || item.quantity;
+
+    return `
     <tr>
       <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">${index + 1}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
         <strong style="color: #111827;">${item.productName}</strong>
         ${item.productSku ? `<br><small style="color: #6b7280;">SKU: ${item.productSku}</small>` : ''}
+        ${isCut ? `<br><span style="display:inline-block; font-size:11px; color:#b45309; background:#fef3c7; padding:2px 6px; border-radius:4px; margin-top:4px; font-weight:600;">✂ Custom Cut: ${meters} Meters</span>` : ''}
       </td>
-      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right;">${formatPrice(item.unitPrice)}</td>
-      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center;">${item.quantity}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right;">${formatPrice(item.unitPrice)}${isCut ? ' / m' : ''}</td>
+      <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: center; font-weight: 600;">${isCut ? `${meters}m` : item.quantity}</td>
       <td style="padding: 10px; border-bottom: 1px solid #e5e7eb; text-align: right; font-weight: 600;">${formatPrice(item.unitPrice * item.quantity)}</td>
     </tr>
-  `).join("");
+  `;
+  }).join("");
 
   const invoiceHtml = `
     <!DOCTYPE html>
@@ -100,8 +112,9 @@ export function printInvoice(order: InvoiceOrderData, items: InvoiceItemData[]) 
       </head>
       <body>
         <div class="no-print" style="margin-bottom: 20px; text-align: right;">
-          <button onclick="window.print()" style="background: #0d9488; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; items-center: center; gap: 8px;">
-            🖨️ Print / Download PDF
+          <button onclick="window.print()" style="background: #0d9488; color: white; border: none; padding: 10px 24px; border-radius: 6px; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+            <span>Print / Download PDF</span>
           </button>
         </div>
 
@@ -173,13 +186,24 @@ export function printInvoice(order: InvoiceOrderData, items: InvoiceItemData[]) 
               <td class="summary-label">Grand Total:</td>
               <td class="summary-val">${formatPrice(grandTotalPaise)}</td>
             </tr>
+            ${(order.advancePaidAmount && order.advancePaidAmount > 0) ? `
+            <tr style="color: #047857; font-weight: 600;">
+              <td class="summary-label">Advance Paid (Verified):</td>
+              <td class="summary-val">- ${formatPrice(order.advancePaidAmount)}</td>
+            </tr>
+            <tr style="font-size: 14px; font-weight: bold; color: #b45309; background-color: #fef3c7;">
+              <td class="summary-label" style="padding: 6px 8px;">Balance Due on Delivery:</td>
+              <td class="summary-val" style="padding: 6px 8px;">${formatPrice(order.balanceDueAmount !== undefined ? order.balanceDueAmount : (grandTotalPaise - order.advancePaidAmount))}</td>
+            </tr>
+            ` : ''}
           </table>
 
           <div class="terms-box">
             <strong>Terms & Conditions:</strong><br>
             1. All electrical products carry manufacturer warranty as applicable.<br>
             2. Returns accepted within 7 days in original, undamaged packaging.<br>
-            3. This is a computer-generated tax invoice and requires no physical signature.
+            3. Custom cut wire lengths are cut per customer order and are non-returnable.<br>
+            4. This is a computer-generated tax invoice and requires no physical signature.
           </div>
 
           <div class="footer">

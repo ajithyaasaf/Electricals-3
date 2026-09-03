@@ -4,7 +4,8 @@ import { Zap, CreditCard, MapPin } from "lucide-react";
 import { SiVisa, SiMastercard, SiAmericanexpress, SiPaypal } from "react-icons/si";
 import { SiPaytm } from "react-icons/si";
 import logoUrl from "@assets/Logo_1763402801870.png";
-import { COMPANY_INFO, CONTACT_INFO, BUSINESS_POLICIES } from "@/lib/constants";
+import { COMPANY_INFO, CONTACT_INFO, BUSINESS_POLICIES, CATEGORIES } from "@/lib/constants";
+import { useCategories } from "@/features/products/hooks/useProducts";
 import { formatPrice } from "@/lib/currency";
 import { SHIPPING_THRESHOLDS } from "@shared/logistics";
 import { getDynamicDeliveryEstimate } from "@shared/delivery-zones";
@@ -13,13 +14,14 @@ export function Footer() {
   const deliveryEstimate = getDynamicDeliveryEstimate('625001');
   const currentYear = new Date().getFullYear();
 
+  const { data: dbCategories = [] } = useCategories();
+  const categoriesList = dbCategories.length > 0 ? dbCategories : CATEGORIES;
+
   const productLinks = [
-    { name: "Wires and Cables", href: "/products?category=wires-cables" },
-    { name: "Switch and Sockets", href: "/products?category=switch-sockets" },
-    { name: "Electric Accessories", href: "/products?category=electric-accessories" },
-    { name: "Pipes & Fittings", href: "/products?category=electrical-pipes-fittings" },
-    { name: "Distribution Box", href: "/products?category=distribution-box" },
-    { name: "Led Bulb & Fittings", href: "/products?category=led-bulb-fittings" },
+    ...categoriesList.slice(0, 6).map((c) => ({
+      name: c.name,
+      href: `/products?category=${c.slug}`,
+    })),
     { name: "All Products", href: "/products" },
   ];
 

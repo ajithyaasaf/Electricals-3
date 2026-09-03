@@ -18,7 +18,7 @@ import { signInWithGoogle } from "@/lib/firebase";
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { formatPrice } from "@/lib/currency";
-import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle, AlertCircle, ShoppingBag, Package, Shield } from "lucide-react";
+import { ArrowLeft, CreditCard, Truck, Lock, CheckCircle, AlertCircle, ShoppingBag, Package, Shield, Scissors } from "lucide-react";
 import { StateSelector } from "@/components/common/state-selector";
 import { Address } from "@shared/types";
 import { checkServiceability, getServiceabilityMessage } from "@shared/delivery-zones";
@@ -172,6 +172,11 @@ export default function Checkout() {
     return item.product ? item.product.isCodAvailable === false : false;
   });
   const hasNonCodItems = nonCodCartItems.length > 0;
+  const hasCutWire = cartItems.some((item: any) =>
+    item.customizations?.format === 'meter' ||
+    item.customizations?.isCutWire ||
+    item.product?.name?.includes('(Cut:')
+  );
 
   // Auto-switch payment method away from COD if non-COD items exist in cart
   useEffect(() => {
@@ -1174,11 +1179,39 @@ export default function Checkout() {
                             {item.product?.name}
                           </p>
                           <p className="text-sm font-semibold text-gray-900 tabular-nums">
-                            {formatPrice(parseFloat(item.product?.price || "0") * item.quantity)}
+                            {formatPrice((item.unitPrice || parseFloat(item.product?.price || "0")) * item.quantity)}
                           </p>
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5 flex items-center justify-between">
-                          <span>Qty: {item.quantity}</span>
+                        {/* Wire Customization Badges */}
+                        {item.customizations?.color && (
+                          <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-gray-700 bg-gray-100 px-1.5 py-0.5 rounded">
+                              <span className="w-2 h-2 rounded-full border border-black/10" style={{
+                                backgroundColor:
+                                  item.customizations.color.toLowerCase() === 'white' ? '#f3f4f6' :
+                                  item.customizations.color.toLowerCase() === 'yellow' ? '#eab308' :
+                                  item.customizations.color.toLowerCase() === 'blue' ? '#3b82f6' :
+                                  item.customizations.color.toLowerCase() === 'black' ? '#1f2937' :
+                                  item.customizations.color.toLowerCase() === 'green' ? '#22c55e' : '#ef4444'
+                              }} />
+                              {item.customizations.color}
+                            </span>
+                            {item.customizations.format === 'meter' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-copper-700 bg-copper-50 px-1.5 py-0.5 rounded border border-copper-200">
+                                <Scissors className="w-3 h-3 text-copper-700" />
+                                <span>{item.quantity}m Cut</span>
+                              </span>
+                            )}
+                            {item.customizations.format === 'coil' && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded">
+                                <Package className="w-3 h-3 text-gray-500" />
+                                <span>90m Coil</span>
+                              </span>
+                            )}
+                          </div>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1 flex items-center justify-between">
+                          <span>Qty: {item.quantity} {item.customizations?.format === 'meter' ? 'meters' : ''}</span>
                           {item.product?.isCodAvailable === false && (
                             <span className="text-[10px] text-amber-800 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200 font-medium">
                               No COD
@@ -1189,6 +1222,18 @@ export default function Checkout() {
                     </div>
                   ))}
                 </div>
+
+                {hasCutWire && (
+                  <div className="mb-4 p-3 bg-amber-50/90 border border-amber-200 rounded-xl space-y-1">
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-amber-900">
+                      <Scissors className="w-3.5 h-3.5 text-amber-700" />
+                      <span>Custom-Cut Wire in Order</span>
+                    </div>
+                    <p className="text-[11px] text-amber-800 leading-relaxed">
+                      Custom lengths are precision-cut specifically for your order. Our dispatch team may contact you via WhatsApp / Phone to confirm cut lengths and verify an advance deposit before cutting.
+                    </p>
+                  </div>
+                )}
 
                 <Separator />
 

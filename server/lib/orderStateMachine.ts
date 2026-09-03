@@ -1,14 +1,14 @@
 /**
- * Order State Machine
- * 
- * Defines valid order status transitions and provides helper functions
- * to validate and manage order lifecycle.
- * 
- * State Flow:
- * pending → confirmed → processing → shipped → delivered (TERMINAL)
- *    ↓         ↓           ↓           ↓
- * cancelled  cancelled  cancelled  cancelled (rare, delivery failed)
- */
+* Order State Machine
+* 
+* Defines valid order status transitions and provides helper functions
+* to validate and manage order lifecycle.
+* 
+* State Flow:
+* pending → confirmed → processing → shipped → delivered (TERMINAL)
+*    ↓         ↓           ↓           ↓
+* cancelled  cancelled  cancelled  cancelled (rare, delivery failed)
+*/
 
 import type { OrderStatus } from '@shared/types';
 import { SHIPPING_THRESHOLDS } from '@shared/logistics';
@@ -238,9 +238,10 @@ export function calculateOrderTotals(
     } = options;
 
     const subtotal = itemTotals.reduce((sum, itemTotal) => sum + itemTotal, 0);
-    const tax = Math.round(subtotal * taxRate * 100) / 100; // Round to 2 decimals
+    // Section 170 of CGST Act, 2017: Round off tax and total payable to nearest rupee
+    const tax = Math.round(subtotal * taxRate);
     const shippingCost = subtotal >= freeShippingThreshold ? 0 : baseShippingCost;
-    const total = subtotal + tax + shippingCost;
+    const total = Math.round(subtotal + tax + shippingCost);
 
     return {
         subtotal,

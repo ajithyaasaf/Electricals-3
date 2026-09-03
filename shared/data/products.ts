@@ -1,6 +1,70 @@
 // CopperBear Electrical Products Database - Customer Data
 import type { Product } from '@shared/types';
 
+export interface WireColorOption {
+  id: string;
+  name: string;
+  hex: string;
+  borderHex: string;
+  purpose: string;
+}
+
+export const WIRE_COLORS: WireColorOption[] = [
+  { id: 'red', name: 'Red', hex: '#EF4444', borderHex: '#DC2626', purpose: 'Phase / Live' },
+  { id: 'yellow', name: 'Yellow', hex: '#EAB308', borderHex: '#CA8A04', purpose: 'Phase / Inverter' },
+  { id: 'blue', name: 'Blue', hex: '#3B82F6', borderHex: '#2563EB', purpose: 'Phase 3' },
+  { id: 'black', name: 'Black', hex: '#1F2937', borderHex: '#111827', purpose: 'Neutral' },
+  { id: 'green', name: 'Green', hex: '#22C55E', borderHex: '#16A34A', purpose: 'Earth / Ground' },
+  { id: 'white', name: 'White', hex: '#F9FAFB', borderHex: '#D1D5DB', purpose: 'Control / Inverter' },
+];
+
+export function getWireColorHex(colorName?: string | null): string {
+  if (!colorName) return '#ef4444';
+  const found = WIRE_COLORS.find(c => c.name.toLowerCase() === colorName.toLowerCase() || c.id === colorName.toLowerCase());
+  return found ? found.hex : '#ef4444';
+}
+
+/**
+ * Check if a product is a wire or cable product eligible for color and meter cutting
+ */
+export function isWireProduct(product: Partial<Product> | null | undefined): boolean {
+  if (!product) return false;
+  if (product.categoryId === 'cat-1') return true;
+  if (product.category && product.category.toLowerCase().includes('wire')) return true;
+  if (product.name && (product.name.toLowerCase().includes('wire') || product.name.toLowerCase().includes('cable'))) return true;
+  if (product.specifications?.unit === 'per coil') return true;
+  return false;
+}
+
+/**
+ * Get per-meter price for a wire product in Paise
+ */
+export function getWirePerMeterPrice(product: Partial<Product> | null | undefined): number {
+  if (!product || !product.price) return 2000;
+
+  // If explicitly configured in wireConfig
+  if (product.wireConfig?.customMeterPrice && product.wireConfig.customMeterPrice > 0) {
+    return product.wireConfig.customMeterPrice;
+  }
+
+  // If explicitly specified in specifications
+  if (product.specifications?.pricePerMeter && typeof product.specifications.pricePerMeter === 'number') {
+    return product.specifications.pricePerMeter;
+  }
+
+  // Standard by size gauge
+  const size = (product.specifications?.size || product.name || '').toLowerCase();
+  if (size.includes('1.0')) return 1500; // ₹15.00
+  if (size.includes('1.5')) return 2300; // ₹23.00
+  if (size.includes('2.5')) return 3600; // ₹36.00
+  if (size.includes('4.0')) return 5600; // ₹56.00
+
+  // Calculate from coil price (90 meters per coil + 15% cutting margin rounded to nearest rupee)
+  const baseRatePerMeterPaise = product.price / 90;
+  const withMarginPaise = baseRatePerMeterPaise * 1.15;
+  return Math.max(1000, Math.round(withMarginPaise / 100) * 100);
+}
+
 const RAW_PRODUCTS = [
   // Wires & Cables - Finolex Brand
   {

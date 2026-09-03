@@ -41,6 +41,15 @@ export const CreateCategorySchema = CategorySchema.omit({
 export type Category = z.infer<typeof CategorySchema>;
 export type CreateCategory = z.infer<typeof CreateCategorySchema>;
 
+// Wire and Cable selling configuration
+export const WireConfigSchema = z.object({
+  allowMeterCut: z.boolean().default(true),
+  availableColors: z.array(z.string()).default([]),
+  customMeterPrice: z.number().optional().nullable(),
+});
+
+export type WireConfig = z.infer<typeof WireConfigSchema>;
+
 // Product types
 export const ProductSchema = z.object({
   id: z.string(),
@@ -56,6 +65,7 @@ export const ProductSchema = z.object({
   categoryId: z.string().optional(),
   imageUrls: z.array(z.string()).default([]),
   specifications: z.record(z.any()).optional(),
+  wireConfig: WireConfigSchema.optional(),
   weightInKg: z.number().default(0),
   isBulky: z.boolean().default(false),
   isCodAvailable: z.boolean().default(true),
@@ -112,6 +122,7 @@ export const CartItemSchema = z.object({
   productId: z.string().optional(),
   serviceId: z.string().optional(),
   quantity: z.number().default(1),
+  customizations: z.record(z.any()).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -189,6 +200,12 @@ export const OrderSchema = z.object({
   // Item count for quick display without fetching items
   itemCount: z.number().default(0),
 
+  // Advance Payment tracking (e.g., for custom cut wire orders)
+  advancePaidAmount: z.number().default(0), // in Paise
+  balanceDueAmount: z.number().default(0), // in Paise (total - advancePaidAmount)
+  hasCutItems: z.boolean().default(false), // true if contains cut-to-length items
+  advanceNotes: z.string().optional(), // UPI ref, notes, etc.
+
   // Admin notes (internal)
   adminNotes: z.string().optional(),
 
@@ -225,6 +242,9 @@ export const OrderItemSchema = z.object({
 
   // For discounts (future enhancement)
   discountAmount: z.number().default(0),
+
+  // Customization metadata (e.g. color, cut meter length)
+  customizations: z.record(z.any()).optional(),
 
   createdAt: z.date(),
   updatedAt: z.date(),

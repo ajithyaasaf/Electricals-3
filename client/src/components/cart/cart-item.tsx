@@ -1,6 +1,6 @@
 // Cart Item Component - Enterprise-grade cart item with responsive mobile/desktop layout
 import { useState } from 'react';
-import { Minus, Plus, Trash2, Save, ArrowRight } from 'lucide-react';
+import { Minus, Plus, Trash2, Save, ArrowRight, Scissors, Package } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { formatPrice } from '@/lib/currency';
 import { cn } from '@/lib/utils';
 import type { CartItemWithDetails } from '@shared/cart-types';
+import { getWireColorHex } from '@shared/data/products';
 
 interface CartItemProps {
   item: CartItemWithDetails;
@@ -35,8 +36,8 @@ export function CartItem({
   const [notes, setNotes] = useState(item.notes || '');
 
   // Get product or service details
-  const productOrService = item.product || item.service;
-  const isProduct = !!item.product;
+  const productOrService: any = item.product || item.service || ((item as any).name ? item : null);
+  const isProduct = !!item.product || (!item.service && !!item.productId);
 
   if (!productOrService) {
     return null;
@@ -50,9 +51,13 @@ export function CartItem({
   const savings = totalOriginalPrice - totalPrice;
   const hasDiscount = savings > 0;
 
+  const isMeterCut = item.customizations?.format === 'meter';
+  const minQuantity = isMeterCut ? 5 : 1;
+  const maxQuantity = isMeterCut ? 89 : 99;
+
   // Handle quantity changes
   const handleQuantityChange = (newQuantity: number) => {
-    if (newQuantity >= 1 && newQuantity <= 99) {
+    if (newQuantity >= minQuantity && newQuantity <= maxQuantity) {
       setQuantity(newQuantity);
       onUpdateQuantity(item.id, newQuantity);
     }
@@ -110,12 +115,36 @@ export function CartItem({
 
             {/* Customizations */}
             {item.customizations && Object.keys(item.customizations).length > 0 && (
-              <div className="flex flex-wrap gap-1 pt-0.5">
-                {Object.entries(item.customizations).map(([key, value]) => (
-                  <Badge key={key} variant="outline" className="text-[10px] text-gray-600 bg-gray-50 px-1.5 py-0">
-                    {key}: {String(value)}
-                  </Badge>
-                ))}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                {item.customizations.color && (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-800 bg-gray-100 px-2 py-0.5 rounded-full border border-gray-200">
+                    <span
+                      className="w-2.5 h-2.5 rounded-full border border-black/10 shadow-sm shrink-0"
+                      style={{ backgroundColor: getWireColorHex(item.customizations.color) }}
+                    />
+                    <span>Color: {item.customizations.color}</span>
+                  </span>
+                )}
+                {item.customizations.format === 'meter' && (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-copper-800 bg-copper-50 px-2 py-0.5 rounded-full border border-copper-200">
+                    <Scissors className="w-3 h-3 text-copper-700" />
+                    <span>Custom Cut: {quantity} Meters</span>
+                  </span>
+                )}
+                {item.customizations.format === 'coil' && (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-700 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-200">
+                    <Package className="w-3 h-3 text-gray-500" />
+                    <span>Full 90m Coil</span>
+                  </span>
+                )}
+                {/* Fallback for other generic customizations */}
+                {Object.entries(item.customizations)
+                  .filter(([k]) => !['color', 'format', 'lengthInMeters', 'pricePerMeter', 'isCutWire'].includes(k))
+                  .map(([key, value]) => (
+                    <Badge key={key} variant="outline" className="text-[10px] text-gray-600 bg-gray-50 px-1.5 py-0">
+                      {key}: {String(value)}
+                    </Badge>
+                  ))}
               </div>
             )}
 
@@ -139,7 +168,7 @@ export function CartItem({
             </div>
           )}
           <div className="text-[11px] text-gray-500 font-normal">
-            {formatPrice(unitPrice)} each
+            {formatPrice(unitPrice)} {item.customizations?.format === 'meter' ? '/ meter' : 'each'}
           </div>
         </div>
 
@@ -150,14 +179,14 @@ export function CartItem({
         
         {/* Quantity Picker Box */}
         <div className="inline-flex items-center border border-gray-200 rounded-lg bg-gray-50/80 p-0.5 shadow-sm gap-0.5">
-          {quantity <= 1 ? (
+          {quantity <= minQuantity ? (
             <Button
               variant="ghost"
               size="icon"
               onClick={() => onRemove(item.id)}
               disabled={isUpdating}
               className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 rounded-md"
-              title="Remove item"
+              title={isMeterCut ? "Remove cut wire" : "Remove item"}
             >
               <Trash2 className="w-3.5 h-3.5" />
             </Button>
@@ -168,32 +197,35 @@ export function CartItem({
               onClick={() => handleQuantityChange(quantity - 1)}
               disabled={isUpdating}
               className="h-7 w-7 text-gray-600 hover:text-gray-900 hover:bg-gray-200/60 rounded-md"
-              title="Decrease quantity"
+              title={isMeterCut ? "Decrease length (-1m)" : "Decrease quantity"}
             >
               <Minus className="w-3.5 h-3.5" />
             </Button>
           )}
 
-          <Input
-            type="number"
-            min="1"
-            max="99"
-            value={quantity}
-            onChange={(e) => {
-              const val = parseInt(e.target.value) || 1;
-              handleQuantityChange(val);
-            }}
-            className="w-9 h-7 text-center font-bold text-xs text-gray-900 border-0 bg-transparent p-0 focus-visible:ring-0"
-            disabled={isUpdating}
-          />
+          <div className="flex items-center justify-center px-1">
+            <Input
+              type="number"
+              min={minQuantity}
+              max={maxQuantity}
+              value={quantity}
+              onChange={(e) => {
+                const val = parseInt(e.target.value) || minQuantity;
+                handleQuantityChange(val);
+              }}
+              className="w-8 h-7 text-center font-bold text-xs text-gray-900 border-0 bg-transparent p-0 focus-visible:ring-0"
+              disabled={isUpdating}
+            />
+            {isMeterCut && <span className="text-xs font-semibold text-gray-500 pr-0.5">m</span>}
+          </div>
 
           <Button
             variant="ghost"
             size="icon"
             onClick={() => handleQuantityChange(quantity + 1)}
-            disabled={quantity >= 99 || isUpdating}
+            disabled={quantity >= maxQuantity || isUpdating}
             className="h-7 w-7 text-gray-600 hover:text-gray-900 hover:bg-gray-200/60 rounded-md"
-            title="Increase quantity"
+            title={isMeterCut ? "Increase length (+1m)" : "Increase quantity"}
           >
             <Plus className="w-3.5 h-3.5" />
           </Button>

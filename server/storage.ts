@@ -76,7 +76,7 @@ export interface IStorage {
   getUserCartItems(userId: string): Promise<CartItem[]>;
   updateCartItem(id: string, data: Partial<CreateCartItem>): Promise<void>;
   deleteCartItem(id: string): Promise<void>;
-  addToCart(userId: string, productId?: string, serviceId?: string, quantity?: number): Promise<string>;
+  addToCart(userId: string, productId?: string, serviceId?: string, quantity?: number, customizations?: Record<string, any>): Promise<string>;
 
   // Order operations
   createOrder(data: CreateOrder): Promise<string>;
@@ -400,8 +400,8 @@ export class FirestoreStorage implements IStorage {
     return cartService.delete(id);
   }
 
-  async addToCart(userId: string, productId?: string, serviceId?: string, quantity = 1): Promise<string> {
-    return CartQueries.addToCart(userId, productId, serviceId, quantity);
+  async addToCart(userId: string, productId?: string, serviceId?: string, quantity = 1, customizations?: Record<string, any>): Promise<string> {
+    return CartQueries.addToCart(userId, productId, serviceId, quantity, customizations);
   }
 
   // Order operations

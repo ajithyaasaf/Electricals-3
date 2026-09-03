@@ -24,7 +24,11 @@ import { z } from "zod";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ImageUpload } from "@/components/admin/image-upload";
+import { Switch } from "@/components/ui/switch";
+import { CategoriesManagement } from "@/components/admin/categories-management";
 import { ELECTRICAL_CATEGORIES } from "@shared/data/categories";
+import { WIRE_COLORS } from "@shared/data/products";
+import type { Category } from "@shared/types";
 import {
   Package,
   Users,
@@ -38,6 +42,8 @@ import {
   Search,
   ChevronLeft,
   ChevronRight,
+  Scissors,
+  Zap,
 } from "lucide-react";
 import {
   ResponsiveContainer,
@@ -99,6 +105,12 @@ const productSchema = z.object({
     key: z.string().min(1, "Key is required"),
     value: z.string().min(1, "Value is required")
   })).optional().default([]),
+  // Wire & Cable selling options
+  wireConfig: z.object({
+    allowMeterCut: z.boolean().default(true),
+    availableColors: z.array(z.string()).default(["Red", "Yellow", "Blue", "Black", "Green", "White"]),
+    customMeterPrice: z.string().optional(),
+  }).optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -581,6 +593,18 @@ function ProductsSection({
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<any>(null);
 
+  // Dynamic category list
+  const { data: dbCategories = [] } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
+    queryFn: async () => {
+      const res = await fetch("/api/categories");
+      if (!res.ok) return ELECTRICAL_CATEGORIES as Category[];
+      return res.json();
+    },
+  });
+
+  const categoriesList = dbCategories.length > 0 ? dbCategories : (ELECTRICAL_CATEGORIES as Category[]);
+
   // Pagination & Filtering state
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -912,7 +936,7 @@ function ProductsSection({
                             value={field.value || ""}
                             onValueChange={(val) => {
                               field.onChange(val);
-                              const selectedCat = ELECTRICAL_CATEGORIES.find((c: any) => c.id === val || c.slug === val);
+                              const selectedCat = categoriesList.find((c: any) => c.id === val || c.slug === val);
                               if (selectedCat) {
                                 productForm.setValue("category", selectedCat.name);
                               }
@@ -924,7 +948,7 @@ function ProductsSection({
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {ELECTRICAL_CATEGORIES.map((cat: any) => (
+                              {categoriesList.map((cat: any) => (
                                 <SelectItem key={cat.id} value={cat.id}>
                                   {cat.name} ({cat.slug})
                                 </SelectItem>
@@ -936,6 +960,166 @@ function ProductsSection({
                         </FormItem>
                       )}
                     />
+
+                    {/* Wire & Cable Sales Configuration (Contextual - only for wire category) */}
+                    {(() => {
+                      const watchedCategoryId = productForm.watch("categoryId");
+                      const watchedCategory = productForm.watch("category");
+                      const selectedCatObj = categoriesList.find((c: any) => c.id === watchedCategoryId || c.name === watchedCategory);
+                      const isWireCategory = 
+                        watchedCategoryId === "cat-1" ||
+                        selectedCatObj?.slug?.includes("wire") ||
+                        selectedCatObj?.name?.toLowerCase().includes("wire") ||
+                        watchedCategory?.toLowerCase().includes("wire");
+
+                      if (!isWireCategory) return null;
+
+                      const currentColors: string[] = productForm.watch("wireConfig.availableColors") || [];
+
+                      return (
+                        <div className="space-y-4 pt-4 border-t border-amber-200 bg-amber-50/40 p-4 rounded-xl border border-amber-200">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-amber-500/10 rounded-lg text-amber-700">
+                              <Zap className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <h3 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                                Wire & Cable Selling Settings
+                                <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-300 text-[10px] font-semibold">
+                                  Wire Category
+                                </Badge>
+                              </h3>
+                              <p className="text-xs text-gray-600">Configure customer buying options for wires in your store</p>
+                            </div>
+                          </div>
+
+                          {/* 1. Allow Cut by Meter */}
+                          <FormField
+                            control={productForm.control}
+                            name="wireConfig.allowMeterCut"
+                            render={({ field }) => (
+                              <FormItem className="flex flex-row items-center justify-between rounded-lg border border-amber-200/80 bg-white p-3.5 shadow-xs">
+                                <div className="space-y-0.5 pr-3">
+                                  <FormLabel className="text-sm font-semibold text-gray-900 cursor-pointer flex items-center gap-1.5">
+                                    <Scissors className="w-4 h-4 text-amber-600" />
+                                    Allow Customers to Buy by the Meter
+                                  </FormLabel>
+                                  <p className="text-xs text-gray-500">
+                                    When enabled, buyers can purchase custom cut wire lengths (5m+) or full 90m coils. Turn off if this cable is only sold as full bundles.
+                                  </p>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value !== false}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* 2. Available Colors */}
+                          <div className="space-y-2 bg-white p-3.5 rounded-lg border border-amber-200/80 shadow-xs">
+                            <div className="flex items-center justify-between">
+                              <label className="text-sm font-semibold text-gray-900">
+                                Available Wire Colors ({currentColors.length} selected)
+                              </label>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 px-2 text-[11px] text-teal-700 hover:bg-teal-50"
+                                  onClick={() => productForm.setValue("wireConfig.availableColors", WIRE_COLORS.map(c => c.name))}
+                                >
+                                  Select All
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 px-2 text-[11px] text-gray-500 hover:bg-gray-100"
+                                  onClick={() => productForm.setValue("wireConfig.availableColors", [])}
+                                >
+                                  Clear All
+                                </Button>
+                              </div>
+                            </div>
+                            <p className="text-xs text-gray-500 mb-2">
+                              Check the colors currently in stock for this product. Uncheck any colors that are out of stock or not produced:
+                            </p>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1">
+                              {WIRE_COLORS.map((color) => {
+                                const isChecked = currentColors.includes(color.name);
+                                return (
+                                  <label
+                                    key={color.id}
+                                    className={`flex items-center gap-2.5 p-2 rounded-lg border text-xs font-medium cursor-pointer transition-colors ${
+                                      isChecked
+                                        ? "border-amber-400 bg-amber-50/60 text-gray-900 shadow-2xs"
+                                        : "border-gray-200 bg-gray-50/50 text-gray-500 hover:bg-gray-100"
+                                    }`}
+                                  >
+                                    <Checkbox
+                                      checked={isChecked}
+                                      onCheckedChange={(checked) => {
+                                        if (checked) {
+                                          productForm.setValue("wireConfig.availableColors", [...currentColors, color.name]);
+                                        } else {
+                                          productForm.setValue(
+                                            "wireConfig.availableColors",
+                                            currentColors.filter((c: string) => c !== color.name)
+                                          );
+                                        }
+                                      }}
+                                    />
+                                    <span
+                                      className="w-3.5 h-3.5 rounded-full border shadow-2xs flex-shrink-0"
+                                      style={{ backgroundColor: color.hex, borderColor: color.borderHex }}
+                                    />
+                                    <span>{color.name}</span>
+                                    <span className="text-[10px] text-gray-400 ml-auto hidden sm:inline">{color.purpose}</span>
+                                  </label>
+                                );
+                              })}
+                            </div>
+                            {currentColors.length === 0 && (
+                              <p className="text-[11px] text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 mt-2">
+                                Note: With 0 colors selected, the product will be treated as a single-sheath wire without a color picker.
+                              </p>
+                            )}
+                          </div>
+
+                          {/* 3. Custom Per-Meter Price (Optional) */}
+                          <FormField
+                            control={productForm.control}
+                            name="wireConfig.customMeterPrice"
+                            render={({ field }) => (
+                              <FormItem className="bg-white p-3.5 rounded-lg border border-amber-200/80 shadow-xs">
+                                <FormLabel className="text-sm font-semibold text-gray-900">
+                                  Custom Price per Meter (₹) — <span className="text-gray-400 font-normal">Optional</span>
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    step="0.01"
+                                    min="0"
+                                    placeholder="Leave blank for automatic calculation"
+                                    {...field}
+                                    value={field.value || ""}
+                                  />
+                                </FormControl>
+                                <p className="text-xs text-gray-500">
+                                  Leave blank to auto-calculate from coil price: ₹{((parseFloat(productForm.watch("price") || "0") / 90) * 1.15).toFixed(2)}/meter (standard 15% cutting margin).
+                                </p>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+                      );
+                    })()}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
@@ -1168,7 +1352,7 @@ function ProductsSection({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Categories</SelectItem>
-                {ELECTRICAL_CATEGORIES.map((cat: any) => (
+                {categoriesList.map((cat: any) => (
                   <SelectItem key={cat.id} value={cat.id}>
                     {cat.name}
                   </SelectItem>
@@ -1474,6 +1658,11 @@ function AdminDashboard() {
       rating: 0,
       reviewCount: 0,
       specifications: [],
+      wireConfig: {
+        allowMeterCut: true,
+        availableColors: ["Red", "Yellow", "Blue", "Black", "Green", "White"],
+        customMeterPrice: "",
+      },
     },
   });
 
@@ -1486,6 +1675,16 @@ function AdminDashboard() {
         price: Math.round(parseFloat(data.price as any) * 100), // ₹ → paise
         originalPrice: data.originalPrice
           ? Math.round(parseFloat(data.originalPrice as any) * 100)
+          : undefined,
+        wireConfig: data.wireConfig
+          ? {
+              allowMeterCut: data.wireConfig.allowMeterCut !== false,
+              availableColors: data.wireConfig.availableColors || [],
+              customMeterPrice:
+                data.wireConfig.customMeterPrice && parseFloat(data.wireConfig.customMeterPrice) > 0
+                  ? Math.round(parseFloat(data.wireConfig.customMeterPrice) * 100)
+                  : null,
+            }
           : undefined,
       };
 
@@ -1630,6 +1829,15 @@ function AdminDashboard() {
           value: String(value)
         }))
         : [],
+      wireConfig: {
+        allowMeterCut: product.wireConfig?.allowMeterCut !== false,
+        availableColors: product.wireConfig?.availableColors !== undefined
+          ? product.wireConfig.availableColors
+          : ["Red", "Yellow", "Blue", "Black", "Green", "White"],
+        customMeterPrice: product.wireConfig?.customMeterPrice
+          ? (product.wireConfig.customMeterPrice / 100).toString()
+          : "",
+      },
     });
     setProductDialogOpen(true);
   };
@@ -1643,6 +1851,8 @@ function AdminDashboard() {
         return { title: "Analytics", description: "Detailed insights and reports" };
       case "products":
         return { title: "Products", description: "Manage your product catalog" };
+      case "categories":
+        return { title: "Categories", description: "Manage store taxonomy and product categories" };
       case "orders":
         return { title: "Orders", description: "View and manage customer orders" };
       default:
@@ -1698,6 +1908,10 @@ function AdminDashboard() {
           handleEditProduct={handleEditProduct}
           handleDeleteProduct={handleDeleteProduct}
         />
+      )}
+
+      {activeSection === "categories" && (
+        <CategoriesManagement products={products} />
       )}
 
       {activeSection === "orders" && (

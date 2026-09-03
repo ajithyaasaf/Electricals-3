@@ -15,6 +15,7 @@ import {
     X,
     ChevronLeft,
     Settings,
+    Layers,
 } from "lucide-react";
 
 // Navigation item type
@@ -30,6 +31,7 @@ export const adminNavItems: NavItem[] = [
     { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard className="w-5 h-5" /> },
     { id: "orders", label: "Orders", icon: <ShoppingCart className="w-5 h-5" /> },
     { id: "products", label: "Products", icon: <Package className="w-5 h-5" /> },
+    { id: "categories", label: "Categories", icon: <Layers className="w-5 h-5" /> },
     { id: "analytics", label: "Analytics", icon: <BarChart3 className="w-5 h-5" /> },
 ];
 

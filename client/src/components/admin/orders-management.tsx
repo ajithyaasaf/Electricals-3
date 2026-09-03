@@ -9,7 +9,7 @@
  * - Order history timeline
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,6 +73,8 @@ import {
     AlertTriangle,
     FileText,
     Printer,
+    Scissors,
+    Banknote,
 } from "lucide-react";
 import { formatPrice, normalizeOrderFinancials } from "@/lib/currency";
 import { printInvoice } from "@/lib/invoiceGenerator";
@@ -92,6 +94,7 @@ interface OrderItem {
     unitPrice: number;
     quantity: number;
     totalPrice: number;
+    customizations?: Record<string, any>;
 }
 
 interface OrderHistory {
@@ -118,6 +121,11 @@ interface Order {
     tax: number;
     shippingCost: number;
     total: number;
+    advancePaidAmount?: number;
+    balanceDueAmount?: number;
+    hasCutItems?: boolean;
+    advanceNotes?: string;
+    adminNotes?: string;
     shippingAddress: {
         firstName: string;
         lastName: string;
@@ -200,6 +208,8 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
     const queryClient = useQueryClient();
     const [trackingNumber, setTrackingNumber] = useState("");
     const [trackingCarrier, setTrackingCarrier] = useState("");
+    const [advanceAmountRupees, setAdvanceAmountRupees] = useState<string>("");
+    const [advanceNotes, setAdvanceNotes] = useState<string>("");
 
     const { data: details, isLoading } = useQuery<OrderDetails>({
         queryKey: ["/api/orders", orderId, "details"],
@@ -239,6 +249,48 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
         },
         onError: (error: any) => {
             toast({ title: "Approval Failed", description: error.message, variant: "destructive" });
+        },
+    });
+
+    // Sync advance fields when order details load
+    const orderData = details?.order;
+    useEffect(() => {
+        if (orderData) {
+            setAdvanceAmountRupees(
+                orderData.advancePaidAmount ? String(orderData.advancePaidAmount / 100) : ""
+            );
+            setAdvanceNotes(orderData.advanceNotes || "");
+        }
+    }, [orderData?.id, orderData?.advancePaidAmount, orderData?.advanceNotes]);
+
+    const updateAdvanceMutation = useMutation({
+        mutationFn: async () => {
+            const rupees = parseFloat(advanceAmountRupees) || 0;
+            const advancePaise = Math.round(rupees * 100);
+            const response = await apiRequest("PUT", `/api/orders/${orderId}/advance-payment`, {
+                advanceAmount: advancePaise,
+                notes: advanceNotes,
+            });
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.message || "Failed to update advance payment");
+            }
+            return response.json();
+        },
+        onSuccess: () => {
+            toast({
+                title: "Advance Payment Saved",
+                description: `Updated advance payment for order.`,
+            });
+            queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+            queryClient.invalidateQueries({ queryKey: ["/api/orders", orderId, "details"] });
+        },
+        onError: (error: any) => {
+            toast({
+                title: "Update Failed",
+                description: error.message || "Failed to save advance payment.",
+                variant: "destructive",
+            });
         },
     });
 
@@ -333,19 +385,24 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                 )}
                             </CardHeader>
                             <CardContent>
-                                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm mb-4">
-                                    <div>
-                                        <p className="text-gray-600">Method</p>
-                                        <p className="font-medium uppercase">{details.order.paymentMethod}</p>
-                                    </div>
-                                    <div>
-                                        <p className="text-gray-600">Status</p>
-                                        <Badge variant="outline" className="capitalize">{details.order.paymentStatus.replace('_', ' ')}</Badge>
-                                    </div>
-                                    {(() => {
-                                        const fin = normalizeOrderFinancials(details.order);
-                                        return (
-                                            <>
+                                {(() => {
+                                    const fin = normalizeOrderFinancials(details.order);
+                                    const advancePaise = details.order.advancePaidAmount || 0;
+                                    const balanceDuePaise = details.order.balanceDueAmount !== undefined
+                                        ? details.order.balanceDueAmount
+                                        : Math.max(0, fin.total - advancePaise);
+
+                                    return (
+                                        <>
+                                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm mb-4">
+                                                <div>
+                                                    <p className="text-gray-600">Method</p>
+                                                    <p className="font-medium uppercase">{details.order.paymentMethod}</p>
+                                                </div>
+                                                <div>
+                                                    <p className="text-gray-600">Status</p>
+                                                    <Badge variant="outline" className="capitalize">{details.order.paymentStatus.replace('_', ' ')}</Badge>
+                                                </div>
                                                 <div>
                                                     <p className="text-gray-600">Subtotal</p>
                                                     <p className="font-medium">{formatPrice(fin.subtotal)}</p>
@@ -358,10 +415,89 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                                     <p className="text-gray-600">Shipping</p>
                                                     <p className="font-medium">{fin.shippingCost > 0 ? formatPrice(fin.shippingCost) : 'Free'}</p>
                                                 </div>
-                                            </>
-                                        );
-                                    })()}
-                                </div>
+                                            </div>
+
+                                            {/* Advance & Balance Summary Banner */}
+                                            {(advancePaise > 0 || details.order.hasCutItems) && (
+                                                <div className="mb-4 p-3 bg-emerald-50/80 border border-emerald-200 rounded-xl grid grid-cols-3 gap-3 text-sm">
+                                                    <div>
+                                                        <p className="text-xs text-gray-500 font-medium">Order Total</p>
+                                                        <p className="text-base font-bold text-gray-900">{formatPrice(fin.total)}</p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-emerald-700 font-medium">Advance Collected</p>
+                                                        <p className="text-base font-bold text-emerald-800">
+                                                            {advancePaise > 0 ? formatPrice(advancePaise) : "₹0 (Pending)"}
+                                                        </p>
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs text-amber-800 font-medium">Balance on Delivery</p>
+                                                        <p className="text-base font-bold text-amber-900">{formatPrice(balanceDuePaise)}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Advance Payment Tracker for Admin */}
+                                            <div className="mt-2 p-4 bg-gray-50/80 rounded-xl border border-gray-200 space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-700 flex items-center gap-1.5">
+                                                        <Banknote className="w-4 h-4 text-emerald-600" />
+                                                        Advance Payment Tracker (UPI / Deposit)
+                                                    </h4>
+                                                    {details.order.hasCutItems && (
+                                                        <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-800 border-amber-300 font-medium inline-flex items-center gap-1">
+                                                            <Scissors className="w-3 h-3 text-amber-700" />
+                                                            <span>Cut Wire Order</span>
+                                                        </Badge>
+                                                    )}
+                                                </div>
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    <div>
+                                                        <Label className="text-xs text-gray-600">Advance Collected (₹)</Label>
+                                                        <Input
+                                                            type="number"
+                                                            min="0"
+                                                            step="1"
+                                                            placeholder="e.g. 500"
+                                                            value={advanceAmountRupees}
+                                                            onChange={(e) => setAdvanceAmountRupees(e.target.value)}
+                                                            className="mt-1 bg-white"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Label className="text-xs text-gray-600">Payment Notes / Ref #</Label>
+                                                        <Input
+                                                            placeholder="e.g. Received via GPay UPI"
+                                                            value={advanceNotes}
+                                                            onChange={(e) => setAdvanceNotes(e.target.value)}
+                                                            className="mt-1 bg-white"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center justify-between pt-1">
+                                                    <p className="text-xs text-gray-500">
+                                                        Balance on Delivery:{" "}
+                                                        <strong className="text-gray-900 font-bold">
+                                                            {formatPrice(
+                                                                Math.max(0, fin.total - (parseFloat(advanceAmountRupees || "0") * 100))
+                                                            )}
+                                                        </strong>
+                                                    </p>
+                                                    <Button
+                                                        size="sm"
+                                                        onClick={() => updateAdvanceMutation.mutate()}
+                                                        disabled={updateAdvanceMutation.isPending}
+                                                        className="bg-teal-600 hover:bg-teal-700 text-white text-xs h-8"
+                                                    >
+                                                        {updateAdvanceMutation.isPending ? "Saving..." : "Save Advance"}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </>
+                                    );
+                                })()}
 
                                 {/* Bank Transfer Specifics */}
                                 {details.order.paymentMethod === 'bank_transfer' && (
@@ -423,29 +559,91 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                             </CardHeader>
                             <CardContent>
                                 <div className="space-y-3">
-                                    {details.items.map((item) => (
-                                        <div key={item.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                                            {item.productImageUrl ? (
-                                                <img
-                                                    src={item.productImageUrl}
-                                                    alt={item.productName}
-                                                    className="w-16 h-16 object-cover rounded"
-                                                />
-                                            ) : (
-                                                <div className="w-16 h-16 bg-gray-200 rounded flex items-center justify-center">
-                                                    <Package className="w-6 h-6 text-gray-400" />
+                                    {details.items.map((item) => {
+                                        const isCutWire = (item.customizations as any)?.format === 'meter' ||
+                                            (item.customizations as any)?.isCutWire ||
+                                            item.productName.includes('(Cut:');
+                                        const color = (item.customizations as any)?.color;
+                                        const meters = (item.customizations as any)?.lengthInMeters || item.quantity;
+
+                                        const colorDotMap: Record<string, string> = {
+                                            Red: "bg-red-500",
+                                            Yellow: "bg-amber-400",
+                                            Blue: "bg-blue-500",
+                                            Black: "bg-gray-900",
+                                            Green: "bg-emerald-500",
+                                            White: "bg-gray-100 border border-gray-400",
+                                        };
+
+                                        return (
+                                            <div key={item.id} className="p-3.5 bg-gray-50/80 rounded-xl border border-gray-200 space-y-2.5">
+                                                <div className="flex items-start gap-4">
+                                                    {item.productImageUrl ? (
+                                                        <img
+                                                            src={item.productImageUrl}
+                                                            alt={item.productName}
+                                                            className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                                                            <Package className="w-6 h-6 text-gray-400" />
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-semibold text-gray-900">{item.productName}</p>
+                                                        {item.productSku && <p className="text-xs text-gray-500">SKU: {item.productSku}</p>}
+                                                        
+                                                        {/* Visual Badges for Admin */}
+                                                        <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                            {color && (
+                                                                <Badge variant="outline" className="text-xs px-2 py-0.5 gap-1.5 bg-white border-gray-300">
+                                                                    <span className={`w-2.5 h-2.5 rounded-full ${colorDotMap[color] || 'bg-gray-400'}`} />
+                                                                    <span className="font-medium text-gray-700">Color: {color}</span>
+                                                                </Badge>
+                                                            )}
+                                                            {isCutWire ? (
+                                                                <Badge variant="outline" className="text-xs px-2 py-0.5 gap-1 bg-amber-50 text-amber-900 border-amber-300 font-semibold">
+                                                                    <Scissors className="w-3 h-3 text-amber-700" />
+                                                                    <span>{meters}m Cut Wire</span>
+                                                                </Badge>
+                                                            ) : (
+                                                                <Badge variant="outline" className="text-xs px-2 py-0.5 bg-white text-gray-600 border-gray-300">
+                                                                    Standard Pack / Coil
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+
+                                                        <p className="text-xs text-gray-600 mt-1.5">
+                                                            {isCutWire ? (
+                                                                <span>Unit Rate: <strong>{formatPrice(item.unitPrice)} / meter</strong> × <strong>{meters} meters</strong></span>
+                                                            ) : (
+                                                                <span>Unit Price: <strong>{formatPrice(item.unitPrice)}</strong> × <strong>{item.quantity} {item.quantity === 1 ? 'unit' : 'units'}</strong></span>
+                                                            )}
+                                                        </p>
+                                                    </div>
+                                                    <div className="text-right">
+                                                        <p className="font-bold text-gray-900 text-base">{formatPrice(item.totalPrice)}</p>
+                                                        {isCutWire && (
+                                                            <span className="text-[10px] text-amber-800 bg-amber-100/80 px-1.5 py-0.5 rounded font-medium inline-block mt-0.5">
+                                                                Cut Length
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            )}
-                                            <div className="flex-1">
-                                                <p className="font-medium">{item.productName}</p>
-                                                {item.productSku && <p className="text-xs text-gray-500">SKU: {item.productSku}</p>}
-                                                <p className="text-sm text-gray-600">
-                                                    {formatPrice(item.unitPrice)} × {item.quantity}
-                                                </p>
+
+                                                {/* Actionable Warehouse Dispatch Instruction */}
+                                                {isCutWire && (
+                                                    <div className="flex items-center gap-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-xs text-amber-900">
+                                                        <Scissors className="w-4 h-4 text-amber-700 shrink-0" />
+                                                        <div>
+                                                            <span className="font-bold">Warehouse Action: </span>
+                                                            <span>Cut <strong>1 continuous length of {meters} meters</strong> from the <strong>{color || 'specified'}</strong> coil. Do not pack 14 individual pieces.</span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <p className="font-semibold">{formatPrice(item.totalPrice)}</p>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </CardContent>
                         </Card>
@@ -897,7 +1095,20 @@ export function OrdersManagement() {
                                 {filteredOrders.map((order) => (
                                     <TableRow key={order.id} className="hover:bg-teal-50/30 transition-colors">
                                         <TableCell className="font-mono font-medium text-gray-900">
-                                            {order.orderNumber || `#${order.id.slice(-8)}`}
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span>{order.orderNumber || `#${order.id.slice(-8)}`}</span>
+                                                {(order.hasCutItems || order.adminNotes?.includes('Cut:')) && (
+                                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-amber-50 text-amber-800 border-amber-300 font-semibold inline-flex items-center gap-1">
+                                                        <Scissors className="w-2.5 h-2.5 text-amber-700" />
+                                                        <span>Cut Wire</span>
+                                                    </Badge>
+                                                )}
+                                                {order.advancePaidAmount && order.advancePaidAmount > 0 ? (
+                                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-emerald-50 text-emerald-800 border-emerald-300 font-semibold">
+                                                        Adv ₹{Math.round(order.advancePaidAmount / 100)}
+                                                    </Badge>
+                                                ) : null}
+                                            </div>
                                         </TableCell>
                                         <TableCell>
                                             <div>

@@ -21,9 +21,11 @@ import {
   getOrderDetails,
   approveBankTransferPayment,
   expireUnpaidOrders,
+  updateOrderAdvancePayment,
   AdminOrderQueries,
   AdminCartQueries,
 } from "../../adminFirestoreService";
+import { getWirePerMeterPrice } from "@shared/data/products";
 import {
   canCustomerCancel,
   STATUS_LABELS,
@@ -183,13 +185,26 @@ export function registerOrderRoutes(app: Express) {
             if (!product) {
               throw new Error(`Product "${item.productId}" not found`);
             }
+            const isCutMeter = item.customizations?.format === 'meter' || item.customizations?.isCutWire;
+            let displayName = product.name;
+            let finalUnitPrice = product.price;
+
+            if (isCutMeter) {
+              const colorLabel = item.customizations?.color ? ` - ${item.customizations.color}` : '';
+              displayName = `${product.name}${colorLabel} (Cut: ${item.quantity}m)`;
+              finalUnitPrice = item.customizations?.pricePerMeter || getWirePerMeterPrice(product);
+            } else if (item.customizations?.color) {
+              displayName = `${product.name} - ${item.customizations.color} (Full 90m Coil)`;
+            }
+
             return {
               productId: item.productId,
-              productName: product.name,
+              productName: displayName,
               productSku: product.sku,
               productImageUrl: product.imageUrls?.[0],
-              unitPrice: product.price,
+              unitPrice: finalUnitPrice,
               quantity: item.quantity,
+              customizations: item.customizations || undefined,
             };
           } else if (item.serviceId) {
             const service = await storage.getServiceById(item.serviceId);
@@ -625,6 +640,41 @@ export function registerOrderRoutes(app: Express) {
       }
 
       res.status(500).json({ message: "Failed to approve payment" });
+    }
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // PUT /api/orders/:id/advance-payment - Record advance payment (Admin only)
+  // ─────────────────────────────────────────────────────────────────────────
+  app.put("/api/orders/:id/advance-payment", isAuthenticated, async (req: any, res: Response) => {
+    try {
+      const userId = req.user.uid;
+      const orderId = req.params.id;
+
+      const user = await storage.getUserById(userId);
+      if (!user?.isAdmin) {
+        return res.status(403).json({ message: "Admin access required" });
+      }
+
+      const { advanceAmount, notes } = req.body;
+      if (typeof advanceAmount !== "number" || isNaN(advanceAmount)) {
+        return res.status(400).json({ message: "Valid advanceAmount (in Paise) is required" });
+      }
+
+      const updatedOrder = await updateOrderAdvancePayment(
+        orderId,
+        Math.round(advanceAmount),
+        notes || "",
+        { userId, email: user.email }
+      );
+
+      res.json({
+        message: "Advance payment updated successfully.",
+        order: updatedOrder,
+      });
+    } catch (error: any) {
+      console.error("Error updating advance payment:", error);
+      res.status(500).json({ message: error.message || "Failed to update advance payment" });
     }
   });
 

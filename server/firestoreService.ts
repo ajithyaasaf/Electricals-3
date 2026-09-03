@@ -567,17 +567,29 @@ export class CartQueries {
     return cartService.findByField('userId', userId);
   }
 
-  static async addToCart(userId: string, productId?: string, serviceId?: string, quantity = 1): Promise<string> {
-    // Check if item already exists in cart
+  static async addToCart(
+    userId: string,
+    productId?: string,
+    serviceId?: string,
+    quantity = 1,
+    customizations?: Record<string, any>
+  ): Promise<string> {
+    // Check if item already exists in cart with matching customizations
     const existingItems = await CartQueries.getUserCart(userId);
-    const existingItem = existingItems.find(item => 
-      item.productId === productId && item.serviceId === serviceId
-    );
+    const existingItem = existingItems.find(item => {
+      if (item.productId !== productId || item.serviceId !== serviceId) return false;
+      const itemColor = (item.customizations as any)?.color || '';
+      const newColor = customizations?.color || '';
+      const itemFormat = (item.customizations as any)?.format || '';
+      const newFormat = customizations?.format || '';
+      return itemColor === newColor && itemFormat === newFormat;
+    });
 
     if (existingItem) {
       // Update quantity
       await cartService.update(existingItem.id, { 
-        quantity: existingItem.quantity + quantity 
+        quantity: existingItem.quantity + quantity,
+        ...(customizations && Object.keys(customizations).length > 0 ? { customizations } : {})
       });
       return existingItem.id;
     } else {
@@ -593,6 +605,10 @@ export class CartQueries {
       
       if (serviceId !== undefined) {
         cartItemData.serviceId = serviceId;
+      }
+
+      if (customizations && Object.keys(customizations).length > 0) {
+        cartItemData.customizations = customizations;
       }
       
       return cartService.create(cartItemData);

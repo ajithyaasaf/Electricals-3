@@ -13,6 +13,7 @@ import {
 } from "@shared/cart-types";
 import type { Product, Service } from "@shared/types";
 import { SHIPPING_FEES, SHIPPING_THRESHOLDS, getProductLogistics, calculateShippingFee } from '@shared/logistics';
+import { getWirePerMeterPrice } from "@shared/data/products";
 
 // Cart configuration - Updated based on client requirements
 const CART_CONFIG = {
@@ -46,7 +47,7 @@ async function enrichGuestCartItems(guestItems: any[]) {
   if (!guestItems || guestItems.length === 0) return [];
 
   const promises = guestItems.map(async (item) => {
-    let enrichedItem = {
+    let enrichedItem: any = {
       id: item.id || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       productId: item.productId,
       serviceId: item.serviceId,
@@ -55,8 +56,8 @@ async function enrichGuestCartItems(guestItems: any[]) {
       originalPrice: 0,
       discount: 0,
       appliedCoupons: [],
-      customizations: {},
-      notes: '',
+      customizations: item.customizations || {},
+      notes: item.notes || '',
       savedForLater: false,
       createdAt: new Date(item.addedAt || Date.now()),
       updatedAt: new Date()
@@ -67,20 +68,34 @@ async function enrichGuestCartItems(guestItems: any[]) {
       let product = cache.get<Product>(cacheKey);
       if (!product) {
         product = await storage.getProductById(item.productId);
+        if (!product) {
+          product = await storage.getProductBySlug(item.productId);
+        }
         if (product) {
           cache.set(cacheKey, product, CacheTTL.PRODUCT_DETAIL);
         }
       }
 
       if (product) {
-        enrichedItem.unitPrice = product.price;
-        enrichedItem.originalPrice = product.originalPrice || product.price;
+        enrichedItem.product = product;
+        if (product.originalPrice && product.originalPrice > product.price) {
+          enrichedItem.discount = product.originalPrice - product.price;
+        }
+        if (item.customizations?.format === 'meter') {
+          const perMeter = item.customizations.pricePerMeter || getWirePerMeterPrice(product);
+          enrichedItem.unitPrice = perMeter;
+          enrichedItem.originalPrice = perMeter;
+        } else {
+          enrichedItem.unitPrice = product.price;
+          enrichedItem.originalPrice = product.originalPrice || product.price;
+        }
       }
     }
 
     if (item.serviceId) {
       const service = await storage.getServiceById(item.serviceId);
       if (service) {
+        enrichedItem.service = service;
         enrichedItem.unitPrice = (service as any).startingPrice || 0;
         enrichedItem.originalPrice = (service as any).startingPrice || 0;
       }
@@ -178,10 +193,16 @@ export function registerCartRoutes(app: Express) {
 
           if (product) {
             enrichedItem.product = product;
-            enrichedItem.unitPrice = product.price;
-            enrichedItem.originalPrice = product.originalPrice || product.price;
-            if (product.originalPrice && product.originalPrice > product.price) {
-              enrichedItem.discount = product.originalPrice - product.price;
+            if (item.customizations?.format === 'meter') {
+              const perMeter = item.customizations.pricePerMeter || getWirePerMeterPrice(product);
+              enrichedItem.unitPrice = perMeter;
+              enrichedItem.originalPrice = perMeter;
+            } else {
+              enrichedItem.unitPrice = product.price;
+              enrichedItem.originalPrice = product.originalPrice || product.price;
+              if (product.originalPrice && product.originalPrice > product.price) {
+                enrichedItem.discount = product.originalPrice - product.price;
+              }
             }
           } else {
             console.warn(`[CART] Product not found for ID: ${item.productId}, removing orphaned item ${item.id}`);
@@ -249,48 +270,8 @@ export function registerCartRoutes(app: Express) {
     try {
       const { items = [] } = req.body;
 
-      // Enrich guest cart items with product/service details
-      const enrichedItems: CartItemWithDetails[] = [];
-
-      for (const item of items) {
-        let enrichedItem: CartItemWithDetails = {
-          id: item.id || `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          productId: item.productId,
-          serviceId: item.serviceId,
-          quantity: item.quantity || 1,
-          unitPrice: 0,
-          originalPrice: 0,
-          discount: 0,
-          appliedCoupons: [],
-          customizations: {},
-          notes: '',
-          savedForLater: false,
-          createdAt: new Date(item.addedAt || Date.now()),
-          updatedAt: new Date()
-        };
-
-        if (item.productId) {
-          const product = await storage.getProductById(item.productId);
-          if (product) {
-            enrichedItem.product = product;
-            enrichedItem.unitPrice = product.price;
-            enrichedItem.originalPrice = product.originalPrice || product.price;
-          }
-        }
-
-        if (item.serviceId) {
-          const service = await storage.getServiceById(item.serviceId);
-          if (service) {
-            enrichedItem.service = service;
-            enrichedItem.unitPrice = service.startingPrice;
-            enrichedItem.originalPrice = service.startingPrice;
-          }
-        }
-
-        if (enrichedItem.unitPrice > 0) {
-          enrichedItems.push(enrichedItem);
-        }
-      }
+      // Enrich guest cart items using centralized helper with wire cut pricing & customization support
+      const enrichedItems = await enrichGuestCartItems(items);
 
       // Calculate totals
       const totals = calculateCartTotals(enrichedItems, []);
@@ -339,11 +320,19 @@ export function registerCartRoutes(app: Express) {
         if (!product) {
           return res.status(404).json({ message: "Product not found" });
         }
-        if (product.stock < quantity) {
-          return res.status(400).json({ message: "Insufficient stock" });
+        if (req.body?.customizations?.format === 'meter') {
+          if (product.stock < 1) {
+            return res.status(400).json({ message: "Insufficient wire stock to cut from" });
+          }
+          unitPrice = req.body.customizations.pricePerMeter || getWirePerMeterPrice(product);
+          originalPrice = unitPrice;
+        } else {
+          if (product.stock < quantity) {
+            return res.status(400).json({ message: "Insufficient stock" });
+          }
+          unitPrice = product.price;
+          originalPrice = product.originalPrice || product.price;
         }
-        unitPrice = product.price;
-        originalPrice = product.originalPrice || product.price;
       }
 
       if (serviceId) {
@@ -355,19 +344,25 @@ export function registerCartRoutes(app: Express) {
         originalPrice = service.startingPrice;
       }
 
+      let cartItemId: string | undefined;
+
       if (userId) {
         // Add to authenticated user cart
-        const cartItemId = await storage.addToCart(userId, productId, serviceId, quantity);
+        cartItemId = await storage.addToCart(userId, productId, serviceId, quantity, customizations);
 
-        // Update with cart properties
+        // Update with cart properties including customizations
         await storage.updateCartItem(cartItemId, {
           quantity,
-          // Add cart properties when storage supports them
+          ...(customizations && Object.keys(customizations).length > 0 ? { customizations } : {})
         });
       }
 
       // Return success and let client refresh cart
-      res.json({ message: "Item added to cart successfully" });
+      res.json({
+        message: "Item added to cart successfully",
+        cartItemId,
+        itemId: cartItemId
+      });
 
     } catch (error) {
       console.error("Error adding item to cart:", error);
@@ -383,7 +378,24 @@ export function registerCartRoutes(app: Express) {
       const updates = req.body;
 
       if (userId) {
-        const cartItem = await storage.getCartItemById(itemId);
+        let cartItem = await storage.getCartItemById(itemId);
+
+        // Fallback: If itemId is a temporary optimistic ID or was not found by direct ID lookup,
+        // find the matching item in user's active cart
+        if (!cartItem) {
+          const userItems = await storage.getUserCartItems(userId);
+          cartItem = userItems.find(item => {
+            if (updates.productId && item.productId !== updates.productId) return false;
+            if (updates.customizations) {
+              const itemColor = (item.customizations as any)?.color || '';
+              const updateColor = updates.customizations?.color || '';
+              const itemFormat = (item.customizations as any)?.format || '';
+              const updateFormat = updates.customizations?.format || '';
+              if (itemColor !== updateColor || itemFormat !== updateFormat) return false;
+            }
+            return !updates.productId || item.productId === updates.productId;
+          }) || (userItems.length === 1 && (!updates.productId || userItems[0].productId === updates.productId) ? userItems[0] : null);
+        }
 
         if (!cartItem || cartItem.userId !== userId) {
           return res.status(404).json({ message: "Cart item not found" });
@@ -396,11 +408,11 @@ export function registerCartRoutes(app: Express) {
           });
         }
 
-        console.log(`[CART UPDATE] Updating cart item ${itemId} with:`, updates);
-        await storage.updateCartItem(itemId, updates);
+        console.log(`[CART UPDATE] Updating cart item ${cartItem.id} with:`, updates);
+        await storage.updateCartItem(cartItem.id, updates);
 
         // Get updated item to verify
-        const updatedItem = await storage.getCartItemById(itemId);
+        const updatedItem = await storage.getCartItemById(cartItem.id);
         console.log(`[CART UPDATE] Item updated successfully. New quantity: ${updatedItem?.quantity}`);
       }
 
@@ -423,7 +435,24 @@ export function registerCartRoutes(app: Express) {
       console.log(`[CART UPDATE PUT] Processing item update for user ${userId}, item ${itemId}:`, updates);
 
       if (userId) {
-        const cartItem = await storage.getCartItemById(itemId);
+        let cartItem = await storage.getCartItemById(itemId);
+
+        // Fallback: If itemId is a temporary optimistic ID or was not found by direct ID lookup,
+        // find the matching item in user's active cart
+        if (!cartItem) {
+          const userItems = await storage.getUserCartItems(userId);
+          cartItem = userItems.find(item => {
+            if (updates.productId && item.productId !== updates.productId) return false;
+            if (updates.customizations) {
+              const itemColor = (item.customizations as any)?.color || '';
+              const updateColor = updates.customizations?.color || '';
+              const itemFormat = (item.customizations as any)?.format || '';
+              const updateFormat = updates.customizations?.format || '';
+              if (itemColor !== updateColor || itemFormat !== updateFormat) return false;
+            }
+            return !updates.productId || item.productId === updates.productId;
+          }) || (userItems.length === 1 && (!updates.productId || userItems[0].productId === updates.productId) ? userItems[0] : null);
+        }
 
         if (!cartItem || cartItem.userId !== userId) {
           console.log(`[CART UPDATE PUT] Cart item not found or unauthorized: ${itemId} for user ${userId}`);
@@ -437,11 +466,11 @@ export function registerCartRoutes(app: Express) {
           });
         }
 
-        console.log(`[CART UPDATE PUT] Updating cart item ${itemId} with:`, updates);
-        await storage.updateCartItem(itemId, updates);
+        console.log(`[CART UPDATE PUT] Updating cart item ${cartItem.id} with:`, updates);
+        await storage.updateCartItem(cartItem.id, updates);
 
         // Get updated item to verify
-        const updatedItem = await storage.getCartItemById(itemId);
+        const updatedItem = await storage.getCartItemById(cartItem.id);
         console.log(`[CART UPDATE PUT] Item updated successfully. New quantity: ${updatedItem?.quantity}`);
       }
 
@@ -839,7 +868,8 @@ export function registerCartRoutes(app: Express) {
               userId,
               mergedItem.productId,
               mergedItem.serviceId,
-              Math.min(mergedItem.quantity, CART_CONFIG.maxQuantityPerItem)
+              Math.min(mergedItem.quantity, CART_CONFIG.maxQuantityPerItem),
+              mergedItem.customizations
             );
             return true;
           } catch (err) {
@@ -969,7 +999,8 @@ export function registerCartRoutes(app: Express) {
                   userId,
                   operation.productId,
                   operation.serviceId,
-                  Math.min(operation.quantity || 1, CART_CONFIG.maxQuantityPerItem)
+                  Math.min(operation.quantity || 1, CART_CONFIG.maxQuantityPerItem),
+                  operation.customizations
                 );
                 results.push({ type: 'add', success: true, item: operation });
               }
@@ -1243,11 +1274,12 @@ function calculateCartTotals(items: CartItemWithDetails[], coupons: Coupon[] = [
   const shipping = calculateShippingFee(activeItems, subtotal);
 
   // Calculate GST on taxable amount (Subtotal - Coupon Discounts)
+  // Under Section 170 of CGST Act, 2017: Tax and total payable are rounded off to the nearest Rupee (100 paise)
   const taxableAmount = Math.max(0, subtotal - couponDiscount);
-  const tax = taxableAmount * CART_CONFIG.taxRate;
+  const tax = Math.round((taxableAmount * CART_CONFIG.taxRate) / 100) * 100;
 
-  // Final total
-  const total = taxableAmount + shipping + tax;
+  // Final total (rounded to nearest Rupee)
+  const total = Math.round((taxableAmount + shipping + tax) / 100) * 100;
 
   // Total Savings = Product Savings (MRP diff) + Coupon Savings
   const savings = productSavings + couponDiscount;

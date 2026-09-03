@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Loader2 } from "lucide-react";
 import { CATEGORIES } from "@/lib/constants";
+import { useCategories } from "@/features/products/hooks/useProducts";
 import { formatPrice } from "@/lib/currency";
 
 interface Product {
@@ -23,6 +24,8 @@ export function SearchBar() {
   const searchParams = useSearch();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const { data: dbCategories = [] } = useCategories();
+  const categoriesList = dbCategories.length > 0 ? dbCategories : CATEGORIES;
   const [showSuggestions, setShowSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -116,7 +119,7 @@ export function SearchBar() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Electrical</SelectItem>
-              {CATEGORIES.map((category) => (
+              {categoriesList.map((category) => (
                 <SelectItem 
                   key={category.slug} 
                   value={category.slug}
