@@ -52,15 +52,24 @@ export function getWirePerMeterPrice(product: Partial<Product> | null | undefine
     return product.specifications.pricePerMeter;
   }
 
-  // Standard by size gauge
+  const coilLength = Math.max(1, Number(product.wireConfig?.coilLength) || 90);
+
+  // If explicitly configured with custom coilLength other than 90, calculate dynamically from coil price:
+  if (product.wireConfig?.coilLength && product.wireConfig.coilLength !== 90) {
+    const baseRatePerMeterPaise = product.price / coilLength;
+    const withMarginPaise = baseRatePerMeterPaise * 1.15;
+    return Math.max(500, Math.round(withMarginPaise / 100) * 100);
+  }
+
+  // Standard by size gauge (for standard 90m coils)
   const size = (product.specifications?.size || product.name || '').toLowerCase();
   if (size.includes('1.0')) return 1500; // ₹15.00
   if (size.includes('1.5')) return 2300; // ₹23.00
   if (size.includes('2.5')) return 3600; // ₹36.00
   if (size.includes('4.0')) return 5600; // ₹56.00
 
-  // Calculate from coil price (90 meters per coil + 15% cutting margin rounded to nearest rupee)
-  const baseRatePerMeterPaise = product.price / 90;
+  // Calculate from coil price (with 15% cutting margin rounded to nearest rupee)
+  const baseRatePerMeterPaise = product.price / coilLength;
   const withMarginPaise = baseRatePerMeterPaise * 1.15;
   return Math.max(1000, Math.round(withMarginPaise / 100) * 100);
 }

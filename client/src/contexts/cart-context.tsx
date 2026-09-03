@@ -1053,13 +1053,23 @@ export function CartProvider({ children }: CartProviderProps) {
               description: "Item added successfully",
             });
           },
-          reject: (error) => {
+          reject: (error: any) => {
             // Remove optimistic item on error
             dispatch({ type: 'REMOVE_ITEM', payload: { itemId: optimisticItemId } });
             reject(error);
+            let message = "Failed to add item to cart";
+            if (error?.message) {
+              try {
+                const jsonPart = error.message.replace(/^\d+:\s*/, '');
+                const parsed = JSON.parse(jsonPart);
+                if (parsed.message) message = parsed.message;
+              } catch {
+                message = error.message;
+              }
+            }
             toast({
               title: "Error",
-              description: "Failed to add item to cart",
+              description: message,
               variant: "destructive",
             });
           }

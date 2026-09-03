@@ -113,7 +113,7 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
                 {item.customizations?.format === 'coil' && (
                   <span className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-200">
                     <Package className="w-2.5 h-2.5 text-gray-500" />
-                    <span>90m Coil</span>
+                    <span>{item.customizations?.coilLength || item.product?.wireConfig?.coilLength || 90}m Coil</span>
                   </span>
                 )}
               </div>

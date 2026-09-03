@@ -608,7 +608,7 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                                                 </Badge>
                                                             ) : (
                                                                 <Badge variant="outline" className="text-xs px-2 py-0.5 bg-white text-gray-600 border-gray-300">
-                                                                    Standard Pack / Coil
+                                                                    {(item.customizations as any)?.coilLength ? `Full ${(item.customizations as any).coilLength}m Coil` : "Standard Pack / Coil"}
                                                                 </Badge>
                                                             )}
                                                         </div>
@@ -637,7 +637,7 @@ function OrderDetailsModal({ orderId, open, onClose }: OrderDetailsModalProps) {
                                                         <Scissors className="w-4 h-4 text-amber-700 shrink-0" />
                                                         <div>
                                                             <span className="font-bold">Warehouse Action: </span>
-                                                            <span>Cut <strong>1 continuous length of {meters} meters</strong> from the <strong>{color || 'specified'}</strong> coil. Do not pack 14 individual pieces.</span>
+                                                            <span>Cut <strong>1 continuous length of {meters} meters</strong> from the <strong>{color || 'specified'}</strong> coil. Do not pack {meters} individual pieces.</span>
                                                         </div>
                                                     </div>
                                                 )}

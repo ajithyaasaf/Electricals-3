@@ -40,6 +40,11 @@ const CART_CONFIG = {
   }
 };
 
+// Helper to get max allowable quantity for an item (99 for standard items, 10,000 for custom-cut wire meters)
+function getMaxQuantityForItem(customizations?: any): number {
+  return customizations?.format === 'meter' ? 10000 : CART_CONFIG.maxQuantityPerItem;
+}
+
 import { cache, CacheTTL, CacheKeys } from "../lib/cache";
 
 // Helper function to enrich guest cart items in parallel with caching
@@ -307,8 +312,9 @@ export function registerCartRoutes(app: Express) {
         return res.status(400).json({ message: "Product or service ID required" });
       }
 
-      if (quantity > CART_CONFIG.maxQuantityPerItem) {
-        return res.status(400).json({ message: `Maximum quantity per item is ${CART_CONFIG.maxQuantityPerItem}` });
+      const maxAllowedQuantity = getMaxQuantityForItem(customizations);
+      if (quantity > maxAllowedQuantity) {
+        return res.status(400).json({ message: `Maximum quantity per item is ${maxAllowedQuantity}` });
       }
 
       // Get product/service details for pricing
@@ -402,9 +408,10 @@ export function registerCartRoutes(app: Express) {
         }
 
         // Validate quantity
-        if (updates.quantity && updates.quantity > CART_CONFIG.maxQuantityPerItem) {
+        const maxAllowed = getMaxQuantityForItem(updates.customizations || cartItem.customizations);
+        if (updates.quantity && updates.quantity > maxAllowed) {
           return res.status(400).json({
-            message: `Maximum quantity per item is ${CART_CONFIG.maxQuantityPerItem}`
+            message: `Maximum quantity per item is ${maxAllowed}`
           });
         }
 
@@ -460,9 +467,10 @@ export function registerCartRoutes(app: Express) {
         }
 
         // Validate quantity
-        if (updates.quantity && updates.quantity > CART_CONFIG.maxQuantityPerItem) {
+        const maxAllowed = getMaxQuantityForItem(updates.customizations || cartItem.customizations);
+        if (updates.quantity && updates.quantity > maxAllowed) {
           return res.status(400).json({
-            message: `Maximum quantity per item is ${CART_CONFIG.maxQuantityPerItem}`
+            message: `Maximum quantity per item is ${maxAllowed}`
           });
         }
 
@@ -787,8 +795,9 @@ export function registerCartRoutes(app: Express) {
           if (!item.quantity || item.quantity <= 0) {
             validationErrors.push('Invalid quantity');
           }
-          if (item.quantity > CART_CONFIG.maxQuantityPerItem) {
-            validationErrors.push(`Quantity exceeds maximum (${CART_CONFIG.maxQuantityPerItem})`);
+          const maxAllowed = getMaxQuantityForItem(item.customizations);
+          if (item.quantity > maxAllowed) {
+            validationErrors.push(`Quantity exceeds maximum (${maxAllowed})`);
           }
 
           if (item.productId) {
@@ -802,6 +811,10 @@ export function registerCartRoutes(app: Express) {
             }
             if (!product) {
               validationErrors.push('Product not found');
+            } else if (item.customizations?.format === 'meter') {
+              if (product.stock < 1) {
+                validationErrors.push('Insufficient wire stock to cut from');
+              }
             } else if (product.stock < item.quantity) {
               validationErrors.push('Insufficient stock');
             }
@@ -819,7 +832,7 @@ export function registerCartRoutes(app: Express) {
               valid: true,
               item: {
                 ...item,
-                quantity: Math.min(parseInt(item.quantity), CART_CONFIG.maxQuantityPerItem),
+                quantity: Math.min(parseInt(item.quantity), maxAllowed),
                 lastUpdated: item.lastUpdated || Date.now(),
                 schemaVersion: item.schemaVersion || schemaVersion || '1.0.0'
               }
@@ -864,11 +877,12 @@ export function registerCartRoutes(app: Express) {
       const addResults = await Promise.all(
         mergedItems.map(async (mergedItem) => {
           try {
+            const maxAllowed = getMaxQuantityForItem(mergedItem.customizations);
             await storage.addToCart(
               userId,
               mergedItem.productId,
               mergedItem.serviceId,
-              Math.min(mergedItem.quantity, CART_CONFIG.maxQuantityPerItem),
+              Math.min(mergedItem.quantity, maxAllowed),
               mergedItem.customizations
             );
             return true;
@@ -995,11 +1009,12 @@ export function registerCartRoutes(app: Express) {
           switch (operation.type) {
             case 'add':
               if (operation.productId || operation.serviceId) {
+                const maxAllowed = getMaxQuantityForItem(operation.customizations);
                 await storage.addToCart(
                   userId,
                   operation.productId,
                   operation.serviceId,
-                  Math.min(operation.quantity || 1, CART_CONFIG.maxQuantityPerItem),
+                  Math.min(operation.quantity || 1, maxAllowed),
                   operation.customizations
                 );
                 results.push({ type: 'add', success: true, item: operation });

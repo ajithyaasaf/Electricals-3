@@ -109,6 +109,10 @@ const productSchema = z.object({
   // Wire & Cable selling options
   wireConfig: z.object({
     allowMeterCut: z.boolean().default(true),
+    coilLength: z.preprocess(
+      (val) => (val === "" || val === undefined || val === null ? 90 : Number(val)),
+      z.number().int().min(1, "Coil length must be at least 1 meter").default(90)
+    ),
     availableColors: z.array(z.string()).default(["Red", "Yellow", "Blue", "Black", "Green", "White"]),
     customMeterPrice: z.string().optional(),
     colorImages: z.record(z.string(), z.string()).optional().default({}),
@@ -1007,7 +1011,7 @@ function ProductsSection({
                                     Allow Customers to Buy by the Meter
                                   </FormLabel>
                                   <p className="text-xs text-gray-500">
-                                    When enabled, buyers can purchase custom cut wire lengths (5m+) or full 90m coils. Turn off if this cable is only sold as full bundles.
+                                    When enabled, buyers can purchase custom cut wire lengths (5m+) or full coils. Turn off if this cable is only sold as full bundles.
                                   </p>
                                 </div>
                                 <FormControl>
@@ -1016,6 +1020,43 @@ function ProductsSection({
                                     onCheckedChange={field.onChange}
                                   />
                                 </FormControl>
+                              </FormItem>
+                            )}
+                          />
+
+                          {/* 1.1 Standard Full Coil Length */}
+                          <FormField
+                            control={productForm.control}
+                            name="wireConfig.coilLength"
+                            render={({ field }) => (
+                              <FormItem className="bg-white p-3.5 rounded-lg border border-amber-200/80 shadow-xs">
+                                <FormLabel className="text-sm font-semibold text-gray-900 flex items-center justify-between">
+                                  <span>Standard Full Coil / Pack Length (Meters)</span>
+                                  <Badge variant="outline" className="bg-amber-50 text-amber-800 border-amber-300 text-[10px]">
+                                    Default: 90m
+                                  </Badge>
+                                </FormLabel>
+                                <FormControl>
+                                  <Input
+                                    type="number"
+                                    min="1"
+                                    step="1"
+                                    value={field.value === 0 || field.value === "" ? "" : field.value ?? ""}
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      field.onChange(val === "" ? "" : parseInt(val, 10));
+                                    }}
+                                    onBlur={() => {
+                                      if (field.value === "" || field.value === undefined || field.value === null) {
+                                        field.onChange(90);
+                                      }
+                                    }}
+                                  />
+                                </FormControl>
+                                <p className="text-xs text-gray-500">
+                                  Enter factory roll/coil length in meters (e.g. 90m for house wires, 180m for project coils, 100m for submersible, 45m for mini rolls).
+                                </p>
+                                <FormMessage />
                               </FormItem>
                             )}
                           />
@@ -1124,7 +1165,7 @@ function ProductsSection({
                                   />
                                 </FormControl>
                                 <p className="text-xs text-gray-500">
-                                  Leave blank to auto-calculate from coil price: ₹{((parseFloat(productForm.watch("price") || "0") / 90) * 1.15).toFixed(2)}/meter (standard 15% cutting margin).
+                                  Leave blank to auto-calculate from coil price: ₹{((parseFloat(productForm.watch("price") || "0") / Math.max(1, Number(productForm.watch("wireConfig.coilLength")) || 90)) * 1.15).toFixed(2)}/meter (standard 15% cutting margin based on {Math.max(1, Number(productForm.watch("wireConfig.coilLength")) || 90)}m coil).
                                 </p>
                                 <FormMessage />
                               </FormItem>
@@ -1673,6 +1714,7 @@ function AdminDashboard() {
       specifications: [],
       wireConfig: {
         allowMeterCut: true,
+        coilLength: 90,
         availableColors: ["Red", "Yellow", "Blue", "Black", "Green", "White"],
         customMeterPrice: "",
         colorImages: {},
@@ -1693,6 +1735,7 @@ function AdminDashboard() {
         wireConfig: data.wireConfig
           ? {
               allowMeterCut: data.wireConfig.allowMeterCut !== false,
+              coilLength: Math.max(1, Number(data.wireConfig.coilLength) || 90),
               availableColors: data.wireConfig.availableColors || [],
               customMeterPrice:
                 data.wireConfig.customMeterPrice && parseFloat(data.wireConfig.customMeterPrice) > 0
@@ -1846,6 +1889,7 @@ function AdminDashboard() {
         : [],
       wireConfig: {
         allowMeterCut: product.wireConfig?.allowMeterCut !== false,
+        coilLength: product.wireConfig?.coilLength || 90,
         availableColors: product.wireConfig?.availableColors !== undefined
           ? product.wireConfig.availableColors
           : ["Red", "Yellow", "Blue", "Black", "Green", "White"],

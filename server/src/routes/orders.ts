@@ -194,14 +194,17 @@ export function registerOrderRoutes(app: Express) {
               displayName = `${product.name}${colorLabel} (Cut: ${item.quantity}m)`;
               finalUnitPrice = item.customizations?.pricePerMeter || getWirePerMeterPrice(product);
             } else if (item.customizations?.color) {
-              displayName = `${product.name} - ${item.customizations.color} (Full 90m Coil)`;
+              const coilLength = item.customizations?.coilLength || product.wireConfig?.coilLength || 90;
+              displayName = `${product.name} - ${item.customizations.color} (Full ${coilLength}m Coil)`;
             }
+
+            const colorImg = item.customizations?.color && product.wireConfig?.colorImages?.[item.customizations.color];
 
             return {
               productId: item.productId,
               productName: displayName,
               productSku: product.sku,
-              productImageUrl: product.imageUrls?.[0],
+              productImageUrl: colorImg || product.imageUrls?.[0],
               unitPrice: finalUnitPrice,
               quantity: item.quantity,
               customizations: item.customizations || undefined,

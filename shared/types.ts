@@ -44,6 +44,7 @@ export type CreateCategory = z.infer<typeof CreateCategorySchema>;
 // Wire and Cable selling configuration
 export const WireConfigSchema = z.object({
   allowMeterCut: z.boolean().default(true),
+  coilLength: z.number().int().min(1).default(90),
   availableColors: z.array(z.string()).default([]),
   customMeterPrice: z.number().optional().nullable(),
   colorImages: z.record(z.string(), z.string()).optional().default({}),

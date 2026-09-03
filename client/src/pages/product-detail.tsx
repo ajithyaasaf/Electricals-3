@@ -216,6 +216,8 @@ export default function ProductDetail() {
 
   const isWire = isWireProduct(product);
   const allowMeterCut = isWire && (product?.wireConfig?.allowMeterCut !== false);
+  const coilLength = Math.max(1, Number(product?.wireConfig?.coilLength) || 90);
+  const maxCutMeters = Math.max(5, coilLength - 1);
 
   const availableColors = useMemo(() => {
     if (!isWire || !product) return [];
@@ -299,6 +301,7 @@ export default function ProductDetail() {
               color: colorLabel,
               format: 'meter',
               lengthInMeters: cutMeters,
+              coilLength: coilLength,
               pricePerMeter: perMeterPrice,
               isCutWire: true,
             },
@@ -318,12 +321,13 @@ export default function ProductDetail() {
             {
               color: colorLabel,
               format: 'coil',
+              coilLength: coilLength,
               isCutWire: false,
             },
             {
               ...product,
               imageUrls: effectiveImageUrls,
-              name: `${product?.name}${colorSuffix} (Full 90m Coil)`,
+              name: `${product?.name}${colorSuffix} (Full ${coilLength}m Coil)`,
             }
           );
         }
@@ -353,10 +357,20 @@ export default function ProductDetail() {
         });
       }
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      let message = "Failed to add item to cart.";
+      if (error?.message) {
+        try {
+          const jsonPart = error.message.replace(/^\d+:\s*/, '');
+          const parsed = JSON.parse(jsonPart);
+          if (parsed.message) message = parsed.message;
+        } catch {
+          message = error.message;
+        }
+      }
       toast({
         title: "Error",
-        description: "Failed to add item to cart.",
+        description: message,
         variant: "destructive",
       });
     },
@@ -680,9 +694,9 @@ export default function ProductDetail() {
                         >
                           <div className="flex items-center gap-1.5 mb-0.5">
                             <Package className={`w-4 h-4 ${purchaseFormat === "coil" ? "text-copper-600" : "text-gray-500"}`} />
-                            <span className="font-bold text-sm text-gray-900">Full 90m Coil</span>
+                            <span className="font-bold text-sm text-gray-900">Full {coilLength}m Coil</span>
                           </div>
-                          <p className="text-[11px] text-gray-500">Factory sealed 90 meters</p>
+                          <p className="text-[11px] text-gray-500">Factory sealed {coilLength} meters</p>
                           <p className="text-sm font-bold text-copper-700 mt-1">
                             {formatPrice(price)} <span className="text-[11px] font-normal text-gray-500">/ coil</span>
                           </p>
@@ -722,7 +736,7 @@ export default function ProductDetail() {
 
                   {/* Quick Presets */}
                   <div className="flex items-center gap-2">
-                    {[10, 20, 25, 50].map((preset) => (
+                    {[10, 20, 25, 50, 100].filter(preset => preset < coilLength).map((preset) => (
                       <button
                         key={preset}
                         type="button"
@@ -752,18 +766,20 @@ export default function ProductDetail() {
                         <input
                           type="number"
                           min="5"
+                          max={maxCutMeters}
                           step="1"
                           value={cutMeters}
-                          onChange={(e) => setCutMeters(Math.max(1, parseInt(e.target.value) || 5))}
-                          onBlur={() => setCutMeters(Math.max(5, cutMeters))}
+                          onChange={(e) => setCutMeters(Math.min(maxCutMeters, Math.max(1, parseInt(e.target.value) || 5)))}
+                          onBlur={() => setCutMeters(Math.min(maxCutMeters, Math.max(5, cutMeters)))}
                           className="w-16 text-center border-none focus:ring-0 font-bold text-gray-900"
                         />
                         <span className="text-xs text-gray-500 font-medium pr-2">m</span>
                       </div>
                       <button
                         type="button"
-                        onClick={() => setCutMeters(cutMeters + 5)}
-                        className="p-3 hover:bg-gray-50 transition-colors"
+                        onClick={() => setCutMeters(Math.min(maxCutMeters, cutMeters + 5))}
+                        disabled={cutMeters >= maxCutMeters}
+                        className="p-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
                       >
                         <Plus className="w-4 h-4 text-gray-600" />
                       </button>
@@ -777,11 +793,11 @@ export default function ProductDetail() {
                     </div>
                   </div>
 
-                  {cutMeters >= 90 && (
+                  {cutMeters >= coilLength && (
                     <div className="flex items-start gap-2 text-xs text-amber-800 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
                       <Info className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                       <p>
-                        <strong>Tip:</strong> A full factory-sealed 90m coil is {formatPrice(price)} — cheaper per meter than custom cutting!
+                        <strong>Tip:</strong> A full factory-sealed {coilLength}m coil is {formatPrice(price)} — cheaper per meter than custom cutting!
                       </p>
                     </div>
                   )}
@@ -790,7 +806,7 @@ export default function ProductDetail() {
                 /* Standard Quantity Selector */
                 <div>
                   <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    {isWire ? "Coil Quantity (90m rolls)" : "Quantity"}
+                    {isWire ? `Coil Quantity (${coilLength}m rolls)` : "Quantity"}
                   </label>
                   <div className="flex items-center gap-4">
                     <div className="flex items-center bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">

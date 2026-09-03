@@ -500,7 +500,7 @@ export default function OrderDetail() {
                                             {item.customizations.format === 'coil' && (
                                                 <span className="inline-flex items-center gap-1 text-[10px] font-medium text-gray-600 bg-gray-50 px-1.5 py-0.5 rounded">
                                                     <Package className="w-3 h-3 text-gray-500" />
-                                                    <span>90m Full Coil</span>
+                                                    <span>{item.customizations?.coilLength || 90}m Full Coil</span>
                                                 </span>
                                             )}
                                         </div>

@@ -140,12 +140,12 @@ export function CartItem({
                 {item.customizations.format === 'coil' && (
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-gray-700 bg-gray-50 px-2 py-0.5 rounded-full border border-gray-200">
                     <Package className="w-3 h-3 text-gray-500" />
-                    <span>Full 90m Coil</span>
+                    <span>Full {item.customizations.coilLength || item.product?.wireConfig?.coilLength || 90}m Coil</span>
                   </span>
                 )}
                 {/* Fallback for other generic customizations */}
                 {Object.entries(item.customizations)
-                  .filter(([k]) => !['color', 'format', 'lengthInMeters', 'pricePerMeter', 'isCutWire'].includes(k))
+                  .filter(([k]) => !['color', 'format', 'lengthInMeters', 'coilLength', 'pricePerMeter', 'isCutWire'].includes(k))
                   .map(([key, value]) => (
                     <Badge key={key} variant="outline" className="text-[10px] text-gray-600 bg-gray-50 px-1.5 py-0">
                       {key}: {String(value)}
