@@ -105,7 +105,7 @@ export function registerUploadRoutes(app: Express) {
 
                 // Upload to configured provider
                 uploadedMetadata = await imageService.uploadImage(req.file.buffer, {
-                    folder: 'electrical-products',
+                    folder: req.body.folder || process.env.CLOUDINARY_UPLOAD_FOLDER || 'copperbear/products',
                 });
 
                 console.log('[Upload] Image uploaded successfully:', uploadedMetadata.providerImageId);
@@ -183,7 +183,7 @@ export function registerUploadRoutes(app: Express) {
                 // Upload all images in parallel
                 const uploadPromises = req.files.map((file: Express.Multer.File) =>
                     imageService.uploadImage(file.buffer, {
-                        folder: 'electrical-products',
+                        folder: req.body.folder || process.env.CLOUDINARY_UPLOAD_FOLDER || 'copperbear/products',
                     }).catch((err: Error) => {
                         console.error(`[Upload] Failed to upload ${file.originalname}:`, err);
                         return null; // Return null for failed uploads
