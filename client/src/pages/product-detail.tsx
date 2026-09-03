@@ -1241,19 +1241,7 @@ export default function ProductDetail() {
         )
       }
 
-      {/* Clean Purchase Notification */}
-      <div className="fixed bottom-4 left-4 z-40">
-        <div className="bg-white border border-gray-200 rounded p-3 shadow-sm max-w-sm">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <p className="text-sm text-gray-600">
-              <span className="font-medium">Someone from Mumbai</span> purchased this item
-            </p>
-          </div>
-        </div>
-      </div>
-
       <Footer />
-    </div >
+    </div>
   );
 }
