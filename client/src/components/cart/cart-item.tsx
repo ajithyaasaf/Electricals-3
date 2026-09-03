@@ -83,17 +83,23 @@ export function CartItem({
         <div className="flex items-start gap-3 min-w-0 flex-1">
           {/* Image */}
           <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-50 border border-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-            {productOrService.imageUrls?.[0] ? (
-              <img 
-                src={productOrService.imageUrls[0]}
-                alt={productOrService.name}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
-                No Image
-              </div>
-            )}
+            {(() => {
+              const itemColor = item.customizations?.color;
+              const colorImage = itemColor && item.product?.wireConfig?.colorImages?.[itemColor];
+              const displayImageUrl = colorImage || productOrService.imageUrls?.[0];
+
+              return displayImageUrl ? (
+                <img 
+                  src={displayImageUrl}
+                  alt={productOrService.name}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                  No Image
+                </div>
+              );
+            })()}
           </div>
 
           {/* Details */}

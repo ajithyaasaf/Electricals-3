@@ -214,10 +214,6 @@ export default function ProductDetail() {
     setImageZoom({ x: 50, y: 50, scale: 1 });
   };
 
-  const images = (product?.imageUrls && product.imageUrls.length > 0)
-    ? product.imageUrls 
-    : ["/api/placeholder/800/800"];
-
   const isWire = isWireProduct(product);
   const allowMeterCut = isWire && (product?.wireConfig?.allowMeterCut !== false);
 
@@ -248,6 +244,32 @@ export default function ProductDetail() {
     }
   }, [allowMeterCut, purchaseFormat]);
 
+  // Resolve color-specific image variant if available
+  const colorSpecificImage = useMemo(() => {
+    if (!isWire || !wireColor || !product?.wireConfig?.colorImages) return null;
+    return product.wireConfig.colorImages[wireColor] || null;
+  }, [isWire, wireColor, product]);
+
+  const baseImages = useMemo(() => {
+    return (product?.imageUrls && product.imageUrls.length > 0)
+      ? product.imageUrls
+      : ["/api/placeholder/800/800"];
+  }, [product?.imageUrls]);
+
+  const images = useMemo(() => {
+    if (colorSpecificImage) {
+      return [colorSpecificImage, ...baseImages.filter((img) => img !== colorSpecificImage)];
+    }
+    return baseImages;
+  }, [colorSpecificImage, baseImages]);
+
+  // Auto-switch to the color image when the customer selects a wire color
+  useEffect(() => {
+    if (colorSpecificImage) {
+      setSelectedImageIndex(0);
+    }
+  }, [colorSpecificImage]);
+
   const perMeterPrice = getWirePerMeterPrice(product);
 
   const nextImage = () => {
@@ -263,6 +285,10 @@ export default function ProductDetail() {
       if (isWire) {
         const colorLabel = availableColors.length > 0 ? wireColor : undefined;
         const colorSuffix = colorLabel ? ` - ${colorLabel}` : '';
+        const effectiveImage = (colorLabel && product?.wireConfig?.colorImages?.[colorLabel]) || product?.imageUrls?.[0];
+        const effectiveImageUrls = effectiveImage
+          ? [effectiveImage, ...(product?.imageUrls || []).filter(u => u !== effectiveImage)]
+          : product?.imageUrls;
 
         if (purchaseFormat === 'meter' && allowMeterCut) {
           await addItem(
@@ -278,6 +304,7 @@ export default function ProductDetail() {
             },
             {
               ...product,
+              imageUrls: effectiveImageUrls,
               price: perMeterPrice,
               originalPrice: perMeterPrice,
               name: `${product?.name}${colorSuffix} (${cutMeters}m Cut)`,
@@ -295,6 +322,7 @@ export default function ProductDetail() {
             },
             {
               ...product,
+              imageUrls: effectiveImageUrls,
               name: `${product?.name}${colorSuffix} (Full 90m Coil)`,
             }
           );

@@ -26,6 +26,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ImageUpload } from "@/components/admin/image-upload";
 import { Switch } from "@/components/ui/switch";
 import { CategoriesManagement } from "@/components/admin/categories-management";
+import { WireColorImagesManager } from "@/components/admin/wire-color-images-manager";
 import { ELECTRICAL_CATEGORIES } from "@shared/data/categories";
 import { WIRE_COLORS } from "@shared/data/products";
 import type { Category } from "@shared/types";
@@ -110,6 +111,7 @@ const productSchema = z.object({
     allowMeterCut: z.boolean().default(true),
     availableColors: z.array(z.string()).default(["Red", "Yellow", "Blue", "Black", "Green", "White"]),
     customMeterPrice: z.string().optional(),
+    colorImages: z.record(z.string(), z.string()).optional().default({}),
   }).optional(),
 });
 
@@ -1091,6 +1093,17 @@ function ProductsSection({
                             )}
                           </div>
 
+                          {/* 2.1 Per-Color Photos (Optional) */}
+                          {currentColors.length > 0 && (
+                            <WireColorImagesManager
+                              colors={currentColors}
+                              colorImages={productForm.watch("wireConfig.colorImages") || {}}
+                              onChange={(images) =>
+                                productForm.setValue("wireConfig.colorImages", images, { shouldDirty: true })
+                              }
+                            />
+                          )}
+
                           {/* 3. Custom Per-Meter Price (Optional) */}
                           <FormField
                             control={productForm.control}
@@ -1662,6 +1675,7 @@ function AdminDashboard() {
         allowMeterCut: true,
         availableColors: ["Red", "Yellow", "Blue", "Black", "Green", "White"],
         customMeterPrice: "",
+        colorImages: {},
       },
     },
   });
@@ -1684,6 +1698,7 @@ function AdminDashboard() {
                 data.wireConfig.customMeterPrice && parseFloat(data.wireConfig.customMeterPrice) > 0
                   ? Math.round(parseFloat(data.wireConfig.customMeterPrice) * 100)
                   : null,
+              colorImages: data.wireConfig.colorImages || {},
             }
           : undefined,
       };
@@ -1837,6 +1852,7 @@ function AdminDashboard() {
         customMeterPrice: product.wireConfig?.customMeterPrice
           ? (product.wireConfig.customMeterPrice / 100).toString()
           : "",
+        colorImages: product.wireConfig?.colorImages || {},
       },
     });
     setProductDialogOpen(true);

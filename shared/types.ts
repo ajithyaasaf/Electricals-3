@@ -46,6 +46,7 @@ export const WireConfigSchema = z.object({
   allowMeterCut: z.boolean().default(true),
   availableColors: z.array(z.string()).default([]),
   customMeterPrice: z.number().optional().nullable(),
+  colorImages: z.record(z.string(), z.string()).optional().default({}),
 });
 
 export type WireConfig = z.infer<typeof WireConfigSchema>;

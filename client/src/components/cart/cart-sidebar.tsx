@@ -47,7 +47,9 @@ export function CartSidebar({ children, className, open = false, onOpenChange }:
   const QuickCartItem = ({ item }: { item: any }) => {
     const productOrService = item.product || item.service || (item.name ? item : null);
     const itemName = productOrService?.name || item.name || (item.customizations?.format === 'meter' ? 'Custom Cut Wire' : 'Electrical Product');
-    const itemImage = productOrService?.imageUrls?.[0] || item.imageUrls?.[0] || item.image;
+    const itemColor = item.customizations?.color;
+    const colorImage = itemColor && item.product?.wireConfig?.colorImages?.[itemColor];
+    const itemImage = colorImage || productOrService?.imageUrls?.[0] || item.imageUrls?.[0] || item.image;
     const originalPrice = item.originalPrice || productOrService?.originalPrice || item.unitPrice || 0;
     const hasDiscount = originalPrice > item.unitPrice;
     const discountPercent = hasDiscount
