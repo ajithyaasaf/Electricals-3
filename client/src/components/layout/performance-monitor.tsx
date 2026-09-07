@@ -23,7 +23,7 @@ export function PerformanceMonitor() {
     });
 
     // Prefetch next likely pages
-    const prefetchUrls = ['/products', '/services', '/account'];
+    const prefetchUrls = ['/products', '/cart', '/account'];
     prefetchUrls.forEach(url => {
       const link = document.createElement('link');
       link.rel = 'prefetch';

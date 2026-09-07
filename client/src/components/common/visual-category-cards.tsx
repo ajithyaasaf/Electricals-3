@@ -44,7 +44,7 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
             {featuredCategories.map((category) => (
               <SmartLink
                 key={category.slug}
-                href={category.slug === "services" ? "/services" : `/products?category=${category.slug}`}
+                href={`/products?category=${category.slug}`}
                 className="group block"
               >
                 <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full group-hover:scale-[1.02]">
@@ -106,7 +106,7 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
               {regularCategories.map((category) => (
                 <SmartLink
                   key={category.slug}
-                  href={category.slug === "services" ? "/services" : `/products?category=${category.slug}`}
+                  href={`/products?category=${category.slug}`}
                   className="group block flex-shrink-0 w-32 sm:w-auto"
                 >
                   <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group-hover:scale-[1.02]">
