@@ -89,7 +89,7 @@ export function HeroSection() {
                     >
                       <SmartLink href="/products?category=wires-cables" className="flex items-center gap-2">
                         <Scissors className="w-4 h-4 text-yellow-400" />
-                        <span>Custom Cut Wires (5m+)</span>
+                        <span>Custom Cut Wires</span>
                       </SmartLink>
                     </Button>
                   </div>
@@ -120,7 +120,7 @@ export function HeroSection() {
                     Wires & Cables
                   </h3>
                   <p className="text-gray-300 text-xs sm:text-sm line-clamp-2 mb-4">
-                    Finolex & Kundan FR cables. Order exact meter cuts (5m+) or 90m coils.
+                    Finolex & Kundan FR cables. Order exact meter cuts or 90m coils.
                   </p>
                 </div>
                 <Button
