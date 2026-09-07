@@ -34,7 +34,13 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
 
         {/* Featured Categories - Large Cards */}
         {featuredCategories.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className={`grid gap-4 sm:gap-6 mb-6 sm:mb-8 ${
+            featuredCategories.length === 1
+              ? "grid-cols-1 max-w-md mx-auto"
+              : featuredCategories.length === 2
+                ? "grid-cols-1 md:grid-cols-2"
+                : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+          }`}>
             {featuredCategories.map((category) => (
               <SmartLink
                 key={category.slug}
@@ -43,7 +49,7 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
               >
                 <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden h-full group-hover:scale-[1.02]">
                   {/* Category Image */}
-                  <div className="relative h-40 sm:h-48 overflow-hidden">
+                  <div className="relative h-44 sm:h-52 overflow-hidden bg-gray-100">
                     <LazyImage
                       src={category.image}
                       alt={category.name}
@@ -54,14 +60,14 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
                     
                     {/* Category Badge */}
                     <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
-                      <span className="bg-white bg-opacity-95 backdrop-blur-sm px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-medium text-gray-900 shadow-sm">
-                        {category.itemCount}+ Items
+                      <span className="bg-white/95 backdrop-blur-sm px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold text-gray-900 shadow-sm">
+                        {category.itemCount} {category.itemCount === 1 ? "Product" : "Products"}
                       </span>
                     </div>
 
                     {/* Popular Badge for Featured */}
                     <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
-                      <span className="bg-yellow-400 text-black px-2 py-1 rounded-full text-xs font-medium shadow-sm">
+                      <span className="bg-yellow-400 text-black px-2.5 py-1 rounded-full text-xs font-semibold shadow-sm">
                         Popular
                       </span>
                     </div>
@@ -82,11 +88,11 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div className="text-copper-600 font-medium text-xs sm:text-sm group-hover:text-copper-700 transition-colors">
+                      <div className="text-copper-600 font-semibold text-xs sm:text-sm group-hover:text-copper-700 transition-colors">
                         Shop Now →
                       </div>
-                      <div className="text-xs text-gray-500 bg-gray-50 px-2 py-1 rounded">
-                        {category.itemCount}+ products
+                      <div className="text-xs text-gray-600 bg-gray-100 font-medium px-2.5 py-1 rounded-md">
+                        {category.itemCount} {category.itemCount === 1 ? "product" : "products"}
                       </div>  
                     </div>
                   </div>
@@ -129,8 +135,8 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
                       <h4 className="text-xs sm:text-sm font-semibold text-gray-900 mb-1 group-hover:text-copper-600 transition-colors line-clamp-2">
                         {category.name}
                       </h4>
-                      <p className="text-xs text-gray-500">
-                        {category.itemCount}+ items
+                      <p className="text-xs text-gray-500 font-medium">
+                        {category.itemCount} {category.itemCount === 1 ? "product" : "products"}
                       </p>
                     </div>
                   </div>

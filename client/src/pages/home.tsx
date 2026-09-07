@@ -27,13 +27,6 @@ import { formatPrice } from "@/lib/currency";
 import { useSEO } from "@/hooks/use-seo";
 import { useUserInterest } from "@/hooks/use-user-interest";
 
-import circuitBreakersImg from "@assets/generated_images/Circuit_breakers_electrical_panel_ed1b7697.png";
-import wiringCablesImg from "@assets/generated_images/Electrical_copper_wire_coils_aeb7f45b.png";
-import toolsImg from "@assets/generated_images/Professional_electrical_tools_collection_b4db75d8.png";
-import lightingImg from "@assets/generated_images/LED_street_light_fixture_4dde50e8.png";
-import wireCoilImg from "@assets/generated_images/Finolex_2.5sqmm_wire_coil_072a94ff.png";
-import pipesFittingsImg from "@assets/generated_images/Electrical_material_samples_bb4fe5fd.png";
-
 export default function Home() {
   const { user, isAuthenticated } = useFirebaseAuth();
   const { topCategory, hasHistory } = useUserInterest();
@@ -80,29 +73,25 @@ export default function Home() {
   // Dynamic categories from database
   const { data: dbCategories = [] } = useCategories();
 
-  // Visual category cards data matching active store categories
+  // Visual category cards data matching active store categories with live products
   const visualCategories = useMemo(() => {
-    const defaultMeta: Record<string, { image: string; description: string; count: number }> = {
-      "wires-cables": { image: wiringCablesImg, description: "Flame retardant PVC insulated cables, Finolex & Kundan copper conductors", count: 180 },
-      "switch-sockets": { image: wireCoilImg, description: "Modular switches, electrical sockets, plug points, and switching solutions", count: 150 },
-      "electric-accessories": { image: toolsImg, description: "Extension cords, plug adapters, electrical connectors, and testing accessories", count: 320 },
-      "electrical-pipes-fittings": { image: pipesFittingsImg, description: "PVC conduits, electrical pipes, junction boxes, and cable management fittings", count: 95 },
-      "distribution-box": { image: circuitBreakersImg, description: "MCB boxes, distribution boards, consumer units, and electrical panels", count: 85 },
-      "led-bulb-fittings": { image: lightingImg, description: "LED bulbs, emergency lights, flood lights, street lights, and LED fittings", count: 200 },
-    };
+    // Only show categories that have live products (productCount > 0)
+    // Categories with 0 products remain hidden until products are added to them in Admin
+    const activeCategories = dbCategories.filter((cat) => (cat.productCount ?? 0) > 0);
 
-    const categoriesList = dbCategories.length > 0 ? dbCategories : CATEGORIES;
-    const fallbackImgs = [wiringCablesImg, wireCoilImg, toolsImg, pipesFittingsImg, circuitBreakersImg, lightingImg];
+    // Prioritize active categories by inventory size
+    const sorted = [...activeCategories].sort(
+      (a, b) => (b.productCount ?? 0) - (a.productCount ?? 0)
+    );
 
-    return categoriesList.map((cat, idx) => {
-      const meta = defaultMeta[cat.slug];
+    return sorted.map((cat) => {
       return {
         name: cat.name,
         slug: cat.slug,
-        image: meta?.image || cat.imageUrl || fallbackImgs[idx % fallbackImgs.length],
-        description: cat.description || meta?.description || "High performance electrical supplies",
-        itemCount: meta?.count || 50,
-        featured: idx < 3,
+        image: cat.imageUrl || "/api/placeholder/400/200",
+        description: cat.description || "High performance electrical supplies",
+        itemCount: cat.productCount || 0,
+        featured: true, // Show active categories prominently
       };
     });
   }, [dbCategories]);

@@ -32,6 +32,7 @@ export interface CategoryItem {
   slug: string;
   description?: string;
   imageUrl?: string;
+  productCount?: number;
   parentId?: string;
 }
 

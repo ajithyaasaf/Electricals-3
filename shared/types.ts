@@ -27,6 +27,7 @@ export const CategorySchema = z.object({
   slug: z.string(),
   description: z.string().optional(),
   imageUrl: z.string().optional(),
+  productCount: z.number().optional(),
   parentId: z.string().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),

@@ -5,16 +5,45 @@ import { CreateCategorySchema } from "@shared/types";
 import { cache, CacheTTL } from "../lib/cache";
 
 export function registerCategoryRoutes(app: Express) {
-  // Get all categories (cached 2 mins)
+  // Get all categories with real product counts and dynamic images (cached 2 mins)
   app.get("/api/categories", async (req, res) => {
     try {
       const cacheKey = "categories:all";
       const cached = cache.get<any[]>(cacheKey);
       if (cached) return res.json(cached);
 
-      const categories = await storage.getAllCategories();
-      cache.set(cacheKey, categories, CacheTTL.CATEGORIES);
-      res.json(categories);
+      const [categories, products] = await Promise.all([
+        storage.getAllCategories(),
+        storage.getAllProducts(),
+      ]);
+
+      // Calculate real product count and top product image for each category
+      const enrichedCategories = categories.map((cat) => {
+        const catProducts = products.filter(
+          (p) => p.categoryId === cat.id || p.categoryId === cat.slug || p.category === cat.slug
+        );
+        const count = catProducts.length;
+
+        // Find real product image from this category (prioritizing Cloudinary product photos)
+        const productWithImage = catProducts.find(
+          (p) => p.imageUrls && p.imageUrls.length > 0 && p.imageUrls[0]
+        );
+        const realProductImage = productWithImage?.imageUrls?.[0];
+
+        // If category has a custom uploaded image (not generic stock placeholder from initial seed), use it;
+        // otherwise, use the real product photo from Cloudinary
+        const isDefaultPlaceholder = !cat.imageUrl || cat.imageUrl.includes("images.unsplash.com");
+        const effectiveImage = isDefaultPlaceholder ? (realProductImage || cat.imageUrl) : cat.imageUrl;
+
+        return {
+          ...cat,
+          productCount: count,
+          imageUrl: effectiveImage,
+        };
+      });
+
+      cache.set(cacheKey, enrichedCategories, CacheTTL.CATEGORIES);
+      res.json(enrichedCategories);
     } catch (error) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ message: "Failed to fetch categories" });
