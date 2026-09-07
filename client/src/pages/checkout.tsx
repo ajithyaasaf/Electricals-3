@@ -215,6 +215,7 @@ export default function Checkout() {
     const selected = addresses.find(a => a.id === addressId);
     if (selected) {
       setSelectedAddressId(addressId);
+      const cleanZip = (selected.zipCode || "").replace(/\D/g, "").slice(0, 6);
       setFormData(prev => ({
         ...prev,
         shippingAddress: {
@@ -224,12 +225,24 @@ export default function Checkout() {
           email: selected.email || prev.shippingAddress.email || user?.email || "",
           phone: selected.phone || "",
           street: selected.street,
-          city: selected.city,
-          state: selected.state,
-          zipCode: selected.zipCode,
+          city: selected.city || "Madurai",
+          state: selected.state || "Tamil Nadu",
+          zipCode: cleanZip,
         },
         saveAddress: false // Don't save an existing address again
       }));
+
+      // Immediately validate selected address pincode serviceability
+      if (cleanZip.length === 6) {
+        const result = checkServiceability(cleanZip);
+        setPincodeServiceability({
+          isServiceable: result.isServiceable,
+          message: result.message,
+          checked: true,
+        });
+      } else {
+        setPincodeServiceability({ isServiceable: false, message: '', checked: false });
+      }
     }
   };
 
@@ -357,6 +370,16 @@ export default function Checkout() {
         return;
       }
 
+      if (errorCode === "DELIVERY_NOT_SERVICEABLE" || errorMessage.includes("Delivery not available")) {
+        toast({
+          title: "Delivery Not Available",
+          description: error?.details || "We currently only deliver within Madurai (Pincode 625xxx). Please verify your delivery address.",
+          variant: "destructive",
+        });
+        setCurrentStep(1);
+        return;
+      }
+
       toast({
         title: "Error",
         description: errorMessage,
@@ -412,11 +435,23 @@ export default function Checkout() {
 
   // Handle pincode change with real-time serviceability validation
   const handlePincodeChange = (pincode: string) => {
-    updateFormData("shippingAddress", "zipCode", pincode);
+    // Strip non-digits and limit to 6 digits (handles copy-paste with spaces/hyphens)
+    const cleanPincode = (pincode || "").replace(/\D/g, "").slice(0, 6);
+    updateFormData("shippingAddress", "zipCode", cleanPincode);
+
+    // Auto-populate City & State for Madurai (625xxx)
+    if (cleanPincode.startsWith("625")) {
+      if (!formData.shippingAddress.city || formData.shippingAddress.city.trim() === "") {
+        updateFormData("shippingAddress", "city", "Madurai");
+      }
+      if (!formData.shippingAddress.state || formData.shippingAddress.state.trim() === "") {
+        updateFormData("shippingAddress", "state", "Tamil Nadu");
+      }
+    }
 
     // Only validate if we have a complete 6-digit pincode
-    if (pincode.length === 6) {
-      const result = checkServiceability(pincode);
+    if (cleanPincode.length === 6) {
+      const result = checkServiceability(cleanPincode);
       setPincodeServiceability({
         isServiceable: result.isServiceable,
         message: result.message,
@@ -430,10 +465,10 @@ export default function Checkout() {
           description: result.message,
           variant: "destructive",
         });
-      } else if (result.estimatedDelivery) {
+      } else {
         toast({
-          title: "Delivery Available!",
-          description: `${result.message}\nEstimated delivery: ${result.estimatedDelivery}`,
+          title: "Delivery Available",
+          description: result.estimatedDelivery ? `Estimated delivery: ${result.estimatedDelivery}` : "Fast delivery available in Madurai",
         });
       }
     } else {
@@ -470,18 +505,26 @@ export default function Checkout() {
     switch (step) {
       case 1: // Shipping
         const shippingAddr = formData.shippingAddress;
+        const cleanZip = (shippingAddr.zipCode || "").replace(/\D/g, "");
 
-        // Also check pincode serviceability
-        if (shippingAddr.zipCode && shippingAddr.zipCode.length === 6) {
-          const serviceabilityCheck = checkServiceability(shippingAddr.zipCode);
-          if (!serviceabilityCheck.isServiceable) {
-            toast({
-              title: "Delivery Not Available",
-              description: serviceabilityCheck.message,
-              variant: "destructive",
-            });
-            return false;
-          }
+        if (cleanZip.length !== 6) {
+          toast({
+            title: "Invalid PIN Code",
+            description: "Please enter a valid 6-digit PIN code.",
+            variant: "destructive",
+          });
+          return false;
+        }
+
+        // Check pincode serviceability
+        const serviceabilityCheck = checkServiceability(cleanZip);
+        if (!serviceabilityCheck.isServiceable) {
+          toast({
+            title: "Delivery Not Available",
+            description: serviceabilityCheck.message,
+            variant: "destructive",
+          });
+          return false;
         }
 
         const missing = getMissingFields(1);
@@ -504,10 +547,12 @@ export default function Checkout() {
     if (!street?.trim()) errors.street = "Street address is required";
     if (!city?.trim()) errors.city = "City is required";
     if (!state?.trim()) errors.state = "State selection is required";
-    if (!zipCode?.trim() || zipCode.length < 6) errors.zipCode = "6-digit PIN code is required";
 
-    if (zipCode && zipCode.length === 6) {
-      const serviceabilityCheck = checkServiceability(zipCode);
+    const cleanZip = (zipCode || "").replace(/\D/g, "");
+    if (!cleanZip || cleanZip.length !== 6) {
+      errors.zipCode = "6-digit PIN code is required";
+    } else {
+      const serviceabilityCheck = checkServiceability(cleanZip);
       if (!serviceabilityCheck.isServiceable) {
         errors.zipCode = serviceabilityCheck.message;
       }
@@ -652,10 +697,21 @@ export default function Checkout() {
 
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex items-center mb-8">
-          <Button variant="ghost" asChild className="mr-4">
-            <Link href="/cart">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mr-4 text-gray-700 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-gray-800"
+            onClick={() => {
+              if (currentStep > 1) {
+                setCurrentStep(prev => prev - 1);
+              } else {
+                setLocation("/cart");
+              }
+            }}
+            title={currentStep > 1 ? "Go to previous step" : "Return to Cart"}
+            data-testid="button-checkout-back"
+          >
+            <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Checkout</h1>
         </div>
@@ -893,14 +949,17 @@ export default function Checkout() {
                         <Label htmlFor="zipCode">Pin code *</Label>
                         <Input
                           id="zipCode"
+                          type="text"
+                          inputMode="numeric"
+                          pattern="[0-9]*"
                           value={formData.shippingAddress.zipCode}
                           onChange={(e) => {
                             handlePincodeChange(e.target.value);
                             if (formErrors.zipCode) setFormErrors(prev => ({ ...prev, zipCode: "" }));
                           }}
                           data-testid="input-zipcode"
-                          maxLength={6}
-                          placeholder="625xxx"
+                          maxLength={10}
+                          placeholder="625001"
                           className={
                             formErrors.zipCode
                               ? "border-red-500 focus:ring-red-500 bg-red-50/20"

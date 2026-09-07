@@ -57,6 +57,10 @@ export function registerAddressRoutes(app: Express) {
 
             cache.invalidateByPrefix(`addresses:${req.user.uid}`);
 
+            if (req.body.zipCode) {
+                req.body.zipCode = req.body.zipCode.toString().replace(/\D/g, "").slice(0, 6);
+            }
+
             const addressData = CreateAddressSchema.parse({
                 ...req.body,
                 userId: req.user.uid
@@ -95,6 +99,10 @@ export function registerAddressRoutes(app: Express) {
 
             if (existingAddress.userId !== req.user.uid) {
                 return res.status(403).json({ message: "Forbidden" });
+            }
+
+            if (req.body.zipCode) {
+                req.body.zipCode = req.body.zipCode.toString().replace(/\D/g, "").slice(0, 6);
             }
 
             const updateData = CreateAddressSchema.parse({

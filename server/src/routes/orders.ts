@@ -149,15 +149,18 @@ export function registerOrderRoutes(app: Express) {
       // ═══════════════════════════════════════════════════════════════════
       // DELIVERY ZONE GATEKEEPER - Madurai Only (Phase 1)
       // ═══════════════════════════════════════════════════════════════════
-      const pincode = shippingAddress.zipCode;
-      if (!isServiceable(pincode)) {
+      const cleanPincode = (shippingAddress.zipCode || "").replace(/\D/g, "");
+      if (!isServiceable(cleanPincode)) {
         return res.status(400).json({
           message: "Delivery not available in your area",
-          details: getServiceabilityMessage(pincode),
+          details: getServiceabilityMessage(cleanPincode || shippingAddress.zipCode),
           code: "DELIVERY_NOT_SERVICEABLE",
-          pincode,
+          pincode: shippingAddress.zipCode,
         });
       }
+
+      // Store normalized 6-digit pincode in the saved order record
+      shippingAddress.zipCode = cleanPincode;
 
       // Get user info for denormalization
       const user = await storage.getUserById(userId);

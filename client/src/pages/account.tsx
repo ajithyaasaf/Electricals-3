@@ -53,6 +53,7 @@ import {
 import { ORDER_STATUSES, BOOKING_STATUSES } from "@/lib/constants";
 import type { OrderWithItems, BookingWithService } from "@/lib/types";
 import { Address } from "@shared/types";
+import { checkServiceability } from "@shared/delivery-zones";
 import { StateSelector } from "@/components/common/state-selector";
 
 export default function Account() {
@@ -202,8 +203,8 @@ export default function Account() {
     lastName: "",
     email: "",
     street: "",
-    city: "",
-    state: "",
+    city: "Madurai",
+    state: "Tamil Nadu",
     zipCode: "",
     country: "India",
     phone: "",
@@ -310,10 +311,37 @@ export default function Account() {
   };
 
   const handleSaveAddress = () => {
+    const cleanZip = (addressForm.zipCode || "").replace(/\D/g, "");
+    if (cleanZip.length !== 6) {
+      toast({
+        title: "Invalid Pincode",
+        description: "Please enter a valid 6-digit PIN code.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const check = checkServiceability(cleanZip);
+    if (!check.isServiceable) {
+      toast({
+        title: "Delivery Not Available",
+        description: check.message,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const payload = {
+      ...addressForm,
+      zipCode: cleanZip,
+      city: addressForm.city?.trim() || "Madurai",
+      state: addressForm.state?.trim() || "Tamil Nadu",
+    };
+
     if (editingAddressId) {
-      updateAddressMutation.mutate({ id: editingAddressId, ...addressForm });
+      updateAddressMutation.mutate({ id: editingAddressId, ...payload });
     } else {
-      addAddressMutation.mutate(addressForm);
+      addAddressMutation.mutate(payload);
     }
   };
 
@@ -716,7 +744,7 @@ export default function Account() {
                         <div className="space-y-2">
                           <Label>City</Label>
                           <Input
-                            placeholder="Mumbai"
+                            placeholder="Madurai"
                             value={addressForm.city}
                             onChange={(e) => setAddressForm({ ...addressForm, city: e.target.value })}
                           />
@@ -733,9 +761,23 @@ export default function Account() {
                         <div className="space-y-2">
                           <Label>Pincode</Label>
                           <Input
-                            placeholder="400001"
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={10}
+                            placeholder="625001"
                             value={addressForm.zipCode}
-                            onChange={(e) => setAddressForm({ ...addressForm, zipCode: e.target.value })}
+                            onChange={(e) => {
+                              const clean = e.target.value.replace(/\D/g, "").slice(0, 6);
+                              setAddressForm(prev => ({
+                                ...prev,
+                                zipCode: clean,
+                                ...(clean.startsWith("625") ? {
+                                  city: prev.city || "Madurai",
+                                  state: prev.state || "Tamil Nadu"
+                                } : {})
+                              }));
+                            }}
                           />
                         </div>
                         <div className="flex items-center space-x-2 pt-8">

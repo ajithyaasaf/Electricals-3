@@ -53,15 +53,19 @@ export const ZONE_MADURAI: DeliveryZone = {
     name: 'Madurai',
     displayName: 'Madurai, Tamil Nadu',
     pincodeRanges: ['625'], // Can expand: ['625', '624'] for rural areas
-    isServiceable: (pincode: string) => {
-        const cleaned = pincode.trim().replace(/\s/g, '');
-        // Accept 625xxx pincodes
-        return cleaned.startsWith('625');
+    isServiceable: (pincode: string | number) => {
+        const cleaned = String(pincode ?? '').replace(/\D/g, '');
+        if (cleaned.length !== 6 || !cleaned.startsWith('625')) {
+            return false;
+        }
+        // Validate against non-existent Indian Post Office numbers (625000 is invalid in India Post)
+        const suffix = parseInt(cleaned.slice(3), 10);
+        return suffix >= 1 && suffix <= 799;
     },
     estimatedDays: { min: 1, max: 2 },
     message: {
         available: '✓ Delivery available in Madurai (1-2 days)',
-        unavailable: 'Sorry, we currently only deliver within Madurai (Pincode 625xxx). Expanding soon!',
+        unavailable: 'Sorry, we currently only deliver within Madurai (Pincode 625xxx). Expanding across Tamil Nadu soon!',
     },
     priority: 1,
 };
@@ -77,7 +81,7 @@ export const ZONE_TAMIL_NADU: DeliveryZone = {
   displayName: 'Tamil Nadu',
   pincodeRanges: ['60', '61', '62', '63', '64'], // TN pincode prefixes
   isServiceable: (pincode: string) => {
-    const cleaned = pincode.trim().replace(/\s/g, '');
+    const cleaned = (pincode || '').replace(/\D/g, '');
     const prefix = cleaned.substring(0, 2);
     return ['60', '61', '62', '63', '64'].includes(prefix);
   },
@@ -127,9 +131,9 @@ export const ACTIVE_ZONES: DeliveryZone[] = [
  * @param pincode - 6-digit Indian pincode
  * @returns ServiceabilityResult with zone info and messaging
  */
-export function checkServiceability(pincode: string): ServiceabilityResult {
-    // Validate pincode format
-    const cleaned = pincode.trim().replace(/\s/g, '');
+export function checkServiceability(pincode: string | number | null | undefined): ServiceabilityResult {
+    // Strip all non-digits (spaces, hyphens, etc.)
+    const cleaned = String(pincode ?? '').replace(/\D/g, '');
 
     if (!cleaned) {
         return {
@@ -138,7 +142,7 @@ export function checkServiceability(pincode: string): ServiceabilityResult {
         };
     }
 
-    if (!/^\d{6}$/.test(cleaned)) {
+    if (cleaned.length !== 6) {
         return {
             isServiceable: false,
             message: 'Pincode must be exactly 6 digits',
@@ -184,8 +188,10 @@ export interface DynamicDeliveryEstimate {
  * - Mon-Sat (8 AM - 5 PM IST): ⚡ Delivery within 60 to 90 Minutes
  * - Evenings, Nights & Sundays: 📦 Within 1 Day Delivery
  */
-export function getDynamicDeliveryEstimate(pincode?: string): DynamicDeliveryEstimate {
-    if (pincode && pincode.trim().length === 6 && !pincode.trim().startsWith('625')) {
+export function getDynamicDeliveryEstimate(pincode?: string | number | null): DynamicDeliveryEstimate {
+    const cleaned = pincode != null ? String(pincode).replace(/\D/g, '') : '';
+    const suffix = cleaned.length === 6 ? parseInt(cleaned.slice(3), 10) : 0;
+    if (cleaned && (cleaned.length !== 6 || !cleaned.startsWith('625') || suffix < 1 || suffix > 799)) {
         return {
             isExpress: false,
             deliveryText: 'Delivery not available in your area yet',
@@ -228,7 +234,7 @@ export function getDynamicDeliveryEstimate(pincode?: string): DynamicDeliveryEst
  * @param pincode - 6-digit Indian pincode
  * @returns DeliveryZone or null if not serviceable
  */
-export function getDeliveryZone(pincode: string): DeliveryZone | null {
+export function getDeliveryZone(pincode: string | number | null | undefined): DeliveryZone | null {
     const result = checkServiceability(pincode);
     return result.zone || null;
 }
@@ -239,7 +245,7 @@ export function getDeliveryZone(pincode: string): DeliveryZone | null {
  * @param pincode - 6-digit Indian pincode
  * @returns true if serviceable, false otherwise
  */
-export function isServiceable(pincode: string): boolean {
+export function isServiceable(pincode: string | number | null | undefined): boolean {
     return checkServiceability(pincode).isServiceable;
 }
 
@@ -249,7 +255,7 @@ export function isServiceable(pincode: string): boolean {
  * @param pincode - 6-digit Indian pincode
  * @returns Formatted message for UI display
  */
-export function getServiceabilityMessage(pincode: string): string {
+export function getServiceabilityMessage(pincode: string | number | null | undefined): string {
     return checkServiceability(pincode).message;
 }
 
