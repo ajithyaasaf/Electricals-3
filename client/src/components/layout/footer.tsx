@@ -25,12 +25,12 @@ export function Footer() {
     { name: "All Products", href: "/products" },
   ];
 
-  const serviceLinks = [
-    { name: "Electrical Installation", href: "/services?category=installation-services" },
-    { name: "Repair & Maintenance", href: "/services?category=repair-maintenance" },
-    { name: "Electrical Consulting", href: "/services?category=electrical-consulting" },
-    { name: "Safety Inspections", href: "/services" },
-    { name: "Book Service", href: "/services" },
+  const quickLinks = [
+    { name: "Today's Deals", href: "/products?featured=true" },
+    { name: "Wires & Cables", href: "/products?category=wires-cables" },
+    { name: "LED Bulbs & Fittings", href: "/products?category=led-bulb-fittings" },
+    { name: "Order Tracking", href: "/account?tab=orders" },
+    { name: "My Wishlist", href: "/wishlist" },
   ];
 
   const supportLinks = [
@@ -105,15 +105,15 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Services */}
+          {/* Quick Links */}
           <div>
-            <h5 className="text-lg font-semibold mb-4">Services</h5>
+            <h5 className="text-lg font-semibold mb-4">Quick Links</h5>
             <ul className="space-y-2 text-sm">
-              {serviceLinks.map((link) => (
+              {quickLinks.map((link) => (
                 <li key={link.name}>
-                  <span className="text-gray-400 cursor-default">
+                  <SmartLink href={link.href} className="text-gray-400 hover:text-white transition-colors">
                     {link.name}
-                  </span>
+                  </SmartLink>
                 </li>
               ))}
             </ul>

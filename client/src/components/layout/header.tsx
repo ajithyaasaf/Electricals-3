@@ -426,9 +426,6 @@ export function Header() {
                   <DropdownMenuItem asChild>
                     <Link href="/account?tab=orders" className="w-full cursor-pointer">Orders</Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/account?tab=bookings" className="w-full cursor-pointer">Service Bookings</Link>
-                  </DropdownMenuItem>
                   {!!user?.email && (user.email.startsWith('admin@') || user.email === 'admin@gmail.com' || user.email === 'admin@godiva.com' || user.email === 'admin@copperbear.com') && (
                     <>
                       <DropdownMenuSeparator />

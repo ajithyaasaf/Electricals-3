@@ -98,9 +98,9 @@ export default function Wishlist() {
                   Browse Products
                 </Button>
               </Link>
-              <Link href="/services">
+              <Link href="/products?featured=true">
                 <Button variant="outline">
-                  Browse Services
+                  Today's Deals
                 </Button>
               </Link>
             </div>

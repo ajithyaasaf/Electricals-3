@@ -207,7 +207,7 @@ export default function Landing() {
             Ready to Get Started?
           </h2>
           <p className="text-xl text-teal-100 mb-8 max-w-2xl mx-auto">
-            Sign in to access our full catalog, get personalized recommendations, and book professional services.
+            Sign in to access our full catalog, get personalized recommendations, and order electrical supplies with fast delivery.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
@@ -223,7 +223,7 @@ export default function Landing() {
               variant="outline" 
               className="border-white text-white bg-transparent hover:bg-white hover:text-teal-700 font-medium"
             >
-              <Link href="/services">Book a Service</Link>
+              <Link href="/products">Explore Catalog</Link>
             </Button>
           </div>
         </div>

@@ -40,10 +40,10 @@ export function EmptyCart({ savedItemsCount = 0, className }: EmptyCartProps) {
             </Button>
           </Link>
 
-          <Link href="/services">
+          <Link href="/products?featured=true">
             <Button variant="outline" size="lg" className="border-teal-200 text-teal-700 hover:bg-teal-50">
               <span className="flex items-center gap-2">
-                Browse Services
+                Today's Deals
                 <ArrowRight className="w-4 h-4" />
               </span>
             </Button>
