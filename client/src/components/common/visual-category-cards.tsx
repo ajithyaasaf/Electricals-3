@@ -57,13 +57,6 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
                       fallback="/api/placeholder/400/200"
                     />
                     <div className="absolute inset-0 bg-black bg-opacity-20 group-hover:bg-opacity-10 transition-all duration-300" />
-                    
-                    {/* Category Badge */}
-                    <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
-                      <span className="bg-white/95 backdrop-blur-sm px-2.5 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold text-gray-900 shadow-sm">
-                        {category.itemCount} {category.itemCount === 1 ? "Product" : "Products"}
-                      </span>
-                    </div>
 
                     {/* Popular Badge for Featured */}
                     <div className="absolute top-3 right-3 sm:top-4 sm:right-4">
@@ -87,13 +80,11 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
                       <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 group-hover:text-copper-600 group-hover:translate-x-1 transition-all duration-200 flex-shrink-0 ml-3 sm:ml-4" />
                     </div>
 
-                    <div className="flex items-center justify-between">
-                      <div className="text-copper-600 font-semibold text-xs sm:text-sm group-hover:text-copper-700 transition-colors">
-                        Shop Now →
+                    <div className="flex items-center justify-between pt-1">
+                      <div className="text-copper-600 font-semibold text-xs sm:text-sm group-hover:text-copper-700 transition-colors flex items-center gap-1">
+                        <span>Explore Collection</span>
+                        <span>→</span>
                       </div>
-                      <div className="text-xs text-gray-600 bg-gray-100 font-medium px-2.5 py-1 rounded-md">
-                        {category.itemCount} {category.itemCount === 1 ? "product" : "products"}
-                      </div>  
                     </div>
                   </div>
                 </div>
@@ -135,9 +126,6 @@ export function VisualCategoryCards({ categories }: VisualCategoryCardsProps) {
                       <h4 className="text-xs sm:text-sm font-semibold text-gray-900 mb-1 group-hover:text-copper-600 transition-colors line-clamp-2">
                         {category.name}
                       </h4>
-                      <p className="text-xs text-gray-500 font-medium">
-                        {category.itemCount} {category.itemCount === 1 ? "product" : "products"}
-                      </p>
                     </div>
                   </div>
                 </SmartLink>
