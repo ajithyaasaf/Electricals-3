@@ -580,7 +580,7 @@ export default function ProductDetail() {
               </h1>
 
               <div className="flex items-center gap-4 text-sm">
-                {rating > 0 && (
+                {rating > 0 ? (
                   <div className="flex items-center gap-1 group cursor-pointer hover:bg-gray-50 px-2 py-1 -ml-2 rounded-lg transition-colors">
                     <div className="flex text-amber-400">
                       {[...Array(5)].map((_, i) => (
@@ -590,6 +590,15 @@ export default function ProductDetail() {
                     <span className="font-medium text-gray-700 underline decoration-gray-300 underline-offset-4 group-hover:decoration-copper-400">
                       {reviewCount} reviews
                     </span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1 px-2 py-1 -ml-2">
+                    <div className="flex text-gray-300">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 text-gray-200 fill-gray-100" />
+                      ))}
+                    </div>
+                    <span className="text-xs text-gray-400">No reviews yet</span>
                   </div>
                 )}
                 {product.sku && <span className="text-gray-400">|</span>}

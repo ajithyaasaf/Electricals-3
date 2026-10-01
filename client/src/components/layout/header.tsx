@@ -65,9 +65,32 @@ export function Header() {
   // Use cart count from cart context
   const cartCount = totalQuantity || 0;
 
+  // Canonical category ordering requested: Wires & Cables first, Switch & Sockets, etc.
+  const PREFERRED_CATEGORY_ORDER: Record<string, number> = {
+    'wires-cables': 1,
+    'switch-sockets': 2,
+    'electric-accessories': 3,
+    'electrical-pipes-fittings': 4,
+    'distribution-box': 5,
+    'led-bulb-fittings': 6,
+  };
+
   const { data: dbCategories = [] } = useCategories();
   const dynamicCategories = useMemo(() => {
-    return dbCategories.length > 0 ? dbCategories : CATEGORIES;
+    const list = dbCategories.length > 0 ? dbCategories : CATEGORIES;
+    return [...list]
+      .sort((a, b) => {
+        const orderA = PREFERRED_CATEGORY_ORDER[a.slug] ?? 99;
+        const orderB = PREFERRED_CATEGORY_ORDER[b.slug] ?? 99;
+        return orderA - orderB;
+      })
+      .map((cat) => {
+        // UI display label for navbar menu: display "Mcb's/Db" while preserving underlying slug & data
+        if (cat.slug === "distribution-box" || cat.name?.toLowerCase() === "distribution box") {
+          return { ...cat, name: "Mcb's/Db" };
+        }
+        return cat;
+      });
   }, [dbCategories]);
 
   // Amazon-style hierarchical navigation for electrical products

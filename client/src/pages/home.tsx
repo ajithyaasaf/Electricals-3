@@ -26,6 +26,9 @@ import { formatPrice } from "@/lib/currency";
 import { useSEO } from "@/hooks/use-seo";
 import { useUserInterest } from "@/hooks/use-user-interest";
 
+// Feature toggle: Set to true whenever you wish to re-enable the 3-section Hero banner
+const SHOW_HERO_SECTION = false;
+
 export default function Home() {
   const { user, isAuthenticated } = useFirebaseAuth();
   const { topCategory, hasHistory } = useUserInterest();
@@ -118,8 +121,8 @@ export default function Home() {
         />
       </div>
 
-      {/* Original Hero Section */}
-      <HeroSection />
+      {/* 3-Section Hero Component (India's Premier Electrical Megastore, Wires & Cables, Inverter Bulbs) - Hidden for now */}
+      {SHOW_HERO_SECTION && <HeroSection />}
 
       {/* Recently Viewed - Only show for returning users */}
       <RecentlyViewed />

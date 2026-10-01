@@ -42,6 +42,22 @@ export function registerCategoryRoutes(app: Express) {
         };
       });
 
+      // Canonical category ordering: Wires and Cables first, Switch and Sockets, etc.
+      const PREFERRED_CATEGORY_ORDER: Record<string, number> = {
+        'wires-cables': 1,
+        'switch-sockets': 2,
+        'electric-accessories': 3,
+        'electrical-pipes-fittings': 4,
+        'distribution-box': 5,
+        'led-bulb-fittings': 6,
+      };
+
+      enrichedCategories.sort((a, b) => {
+        const orderA = PREFERRED_CATEGORY_ORDER[a.slug] ?? 99;
+        const orderB = PREFERRED_CATEGORY_ORDER[b.slug] ?? 99;
+        return orderA - orderB;
+      });
+
       cache.set(cacheKey, enrichedCategories, CacheTTL.CATEGORIES);
       res.json(enrichedCategories);
     } catch (error) {
