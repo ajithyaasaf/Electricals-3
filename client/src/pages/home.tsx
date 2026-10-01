@@ -26,8 +26,9 @@ import { formatPrice } from "@/lib/currency";
 import { useSEO } from "@/hooks/use-seo";
 import { useUserInterest } from "@/hooks/use-user-interest";
 
-// Feature toggle: Set to true whenever you wish to re-enable the 3-section Hero banner
+// Feature toggles: Set to true whenever you wish to re-enable
 const SHOW_HERO_SECTION = false;
+const SHOW_DEALS_BANNER = false;
 
 export default function Home() {
   const { user, isAuthenticated } = useFirebaseAuth();
@@ -127,15 +128,14 @@ export default function Home() {
       {/* Recently Viewed - Only show for returning users */}
       <RecentlyViewed />
 
-      {/* Deals Banner - Smart Personalized / Curated Default */}
-      <DealsBanner
-        products={activeDeals}
-        isPersonalized={isPersonalized}
-        personalizedCategory={topCategory}
-      />
-
-      {/* Visual Category Cards - Amazon Style */}
-      <VisualCategoryCards categories={visualCategories} />
+      {/* Deals Banner - Smart Personalized / Curated Default - Hidden for now, toggle to true to re-enable */}
+      {SHOW_DEALS_BANNER && (
+        <DealsBanner
+          products={activeDeals}
+          isPersonalized={isPersonalized}
+          personalizedCategory={topCategory}
+        />
+      )}
 
       {/* Best Sellers - Horizontal Scrolling */}
       <HorizontalProductSection
@@ -170,6 +170,10 @@ export default function Home() {
         realtimePath="siteContent/whyChooseSection"
         className="bg-gray-50"
       />
+
+      {/* Visual Category Cards - Shop by Department (Amazon Style) - Positioned above footer */}
+      <VisualCategoryCards categories={visualCategories} />
+
       <Footer />
     </div>
   );

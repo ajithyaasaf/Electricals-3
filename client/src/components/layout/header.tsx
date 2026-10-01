@@ -85,9 +85,9 @@ export function Header() {
         return orderA - orderB;
       })
       .map((cat) => {
-        // UI display label for navbar menu: display "Mcb's/Db" while preserving underlying slug & data
+        // UI display label for navbar menu: display "Mcb's/DB Box" while preserving underlying slug & data
         if (cat.slug === "distribution-box" || cat.name?.toLowerCase() === "distribution box") {
-          return { ...cat, name: "Mcb's/Db" };
+          return { ...cat, name: "Mcb's/DB Box" };
         }
         return cat;
       });
